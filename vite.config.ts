@@ -25,12 +25,12 @@ export default defineConfig({
         // start_url, so ever changing start_url would register as a second,
         // separate app rather than an update of this one.
         id: "/",
-        name: "Finance24",
-        short_name: "Finance24",
-        description: "Personal finance tracker",
+        name: "IAPP",
+        short_name: "IAPP",
+        description: "Personal life system",
         lang: "en",
         dir: "ltr",
-        categories: ["finance", "productivity"],
+        categories: ["productivity", "lifestyle", "finance"],
         // Matches --bg (light) and the <meta name="theme-color"> in
         // index.html. It was #16A34A, so an installed app launched with a
         // green status bar sitting directly above a near-white header.

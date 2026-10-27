@@ -27,7 +27,7 @@ export function AppLayout() {
       <main className={s.main}>
         <header className={s.mheader}>
           <div className={s.mheaderBrand}>
-            <span className={s.mheaderTitle}>Finance24</span>
+            <span className={s.mheaderTitle}>IAPP</span>
             <span className={s.mheaderDate}>{formatHeaderDate(new Date())}</span>
           </div>
           <div className={s.mheaderActions}>

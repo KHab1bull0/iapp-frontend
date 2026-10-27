@@ -58,7 +58,7 @@ export function AuthPage() {
         <div className={s.logoMark}>
           <Wallet size={18} />
         </div>
-        <span className={s.authBrandName}>Finance24</span>
+        <span className={s.authBrandName}>IAPP</span>
       </div>
 
       <div className={s.authCard}>
