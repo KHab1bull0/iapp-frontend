@@ -1,4 +1,4 @@
-import { ArrowLeftRight, LayoutDashboard, Plus, Settings2, Wallet } from 'lucide-react'
+import { ArrowLeftRight, ChartColumn, Plus, Settings2, Wallet } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
 import { MobileFilterProvider } from './MobileFilterContext'
 import { FinanceHeaderAction } from './FinanceHeaderAction'
@@ -16,7 +16,7 @@ export const finance: ModuleManifest = {
   icon: Wallet,
   basePath: '/finance',
   pages: [
-    { label: 'Overview', path: '/finance', icon: LayoutDashboard, end: true },
+    { label: 'Statistics', path: '/finance', icon: ChartColumn, end: true },
     { label: 'Transactions', path: '/finance/transactions', icon: ArrowLeftRight },
     { label: 'Settings', path: '/finance/settings', icon: Settings2 },
   ],

@@ -42,7 +42,7 @@ export function DashboardPage() {
     <div className={s.page}>
       <header className={`${s.pageHead} ${s.desktopOnly}`}>
         <div>
-          <h1 className={s.h1}>Dashboard</h1>
+          <h1 className={s.h1}>Statistics</h1>
           <div className={s.pageSub}>{today}</div>
         </div>
         <input
@@ -66,18 +66,19 @@ export function DashboardPage() {
         />
       </div>
 
+      {/* Balance gets the full width; income and expense share the row below. */}
       <section className={s.statGrid}>
         {isLoading ? (
           <>
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-            <StatCardSkeleton />
+            <StatCardSkeleton size="lg" />
+            <StatCardSkeleton size="sm" />
+            <StatCardSkeleton size="sm" />
           </>
         ) : (
           <>
-            <StatCard title="Total Balance" value={data!.totalBalance} icon={Wallet}       tone="brand"   period={periodLabel} />
-            <StatCard title="Total Income"  value={data!.totalIncome}  icon={TrendingUp}   tone="success" period={periodLabel} />
-            <StatCard title="Total Expense" value={data!.totalExpense} icon={TrendingDown} tone="danger"  period={periodLabel} />
+            <StatCard size="lg" title="Balance" value={data!.totalBalance} icon={Wallet}       tone="brand"   period={periodLabel} />
+            <StatCard size="sm" title="Income"  value={data!.totalIncome}  icon={TrendingUp}   tone="success" period={periodLabel} />
+            <StatCard size="sm" title="Expense" value={data!.totalExpense} icon={TrendingDown} tone="danger"  period={periodLabel} />
           </>
         )}
       </section>

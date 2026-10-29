@@ -57,11 +57,13 @@
 
 .statGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
 
-  @include bp-tablet { grid-template-columns: 1fr 1fr; }
-  @media (max-width: 640px) { grid-template-columns: 1fr; }
+  @include bp-mobile { gap: 12px; }
+
+  // Balance spans the row; income and expense take half each, on every width.
+  > :first-child { grid-column: 1 / -1; }
 }
 
 .chartGrid {

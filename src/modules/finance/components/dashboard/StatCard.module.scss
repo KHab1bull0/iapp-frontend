@@ -85,3 +85,34 @@
   color: var(--fg-muted);
   margin-top: 8px;
 }
+
+// Income and expense: half-width cards under the balance, so everything
+// shrinks to keep a long figure on one line at 50% of a phone screen.
+.small {
+  padding: 14px 16px;
+
+  .statHead { margin-bottom: 8px; }
+  .labelTiny { font-size: 10px; }
+
+  .statIcon {
+    width: 28px;
+    height: 28px;
+    border-radius: $radius-sm;
+  }
+
+  .statNum {
+    font-size: 20px;
+
+    @include bp-mobile { font-size: 16px; }
+  }
+
+  .statCurrency {
+    font-size: 11px;
+    margin-left: 4px;
+  }
+
+  .statDelta {
+    font-size: 11px;
+    margin-top: 4px;
+  }
+}

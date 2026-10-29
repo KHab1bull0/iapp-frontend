@@ -31,15 +31,13 @@
 }
 
 .donutWrap {
+  // Donut and legend stay side by side on every width so the card stays short.
   display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: 24px;
+  grid-template-columns: 128px 1fr;
+  gap: 20px;
   align-items: center;
 
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    justify-items: center;
-  }
+  @include bp-mobile { gap: 14px; }
 }
 
 .donutLegend {
@@ -48,8 +46,9 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12px;
+  min-width: 0;
 
   li {
     display: grid;
@@ -66,7 +65,19 @@
   flex-shrink: 0;
 }
 
-.donutName { color: var(--fg); }
+.donutName {
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Not a legend row: no dot, aligned with the names.
+.donutLegend .donutMore {
+  display: block;
+  padding-left: 22px;
+  color: var(--fg-muted);
+}
 
 .donutPct {
   color: var(--fg-muted);

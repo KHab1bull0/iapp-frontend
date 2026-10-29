@@ -3,6 +3,11 @@ import type { CategoryBreakdown } from '@/modules/finance/api/stats'
 import { formatAmount, CURRENCY } from '@/core/lib/format'
 import s from './CategoryDonutChart.module.scss'
 
+// Kept small so the card reads wide rather than tall.
+const DONUT = 128
+/** Largest categories shown; the rest collapse into "+N more" (the tooltip still has them). */
+const LEGEND_MAX = 5
+
 interface PiePayload { name: string; value: number; payload: CategoryBreakdown }
 interface CustomTooltipProps { active?: boolean; payload?: PiePayload[] }
 
@@ -40,7 +45,7 @@ export function CategoryDonutChart({ data }: Props) {
         </div>
       ) : (
         <div className={s.donutWrap}>
-          <ResponsiveContainer width={180} height={180}>
+          <ResponsiveContainer width={DONUT} height={DONUT}>
             <PieChart>
               <Pie
                 data={expenseData}
@@ -48,8 +53,8 @@ export function CategoryDonutChart({ data }: Props) {
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                innerRadius={52}
-                outerRadius={80}
+                innerRadius={40}
+                outerRadius={60}
                 paddingAngle={2}
                 strokeWidth={0}
               >
@@ -62,13 +67,16 @@ export function CategoryDonutChart({ data }: Props) {
           </ResponsiveContainer>
 
           <ul className={s.donutLegend}>
-            {expenseData.map((d) => (
+            {expenseData.slice(0, LEGEND_MAX).map((d) => (
               <li key={d.categoryId}>
                 <span className={s.donutDot} style={{ background: d.color }} />
                 <span className={s.donutName}>{d.icon} {d.name}</span>
                 <span className={s.donutPct}>{d.percentage}%</span>
               </li>
             ))}
+            {expenseData.length > LEGEND_MAX && (
+              <li className={s.donutMore}>+{expenseData.length - LEGEND_MAX} more</li>
+            )}
           </ul>
         </div>
       )}
@@ -83,7 +91,7 @@ export function CategoryDonutChartSkeleton() {
         <div style={{ height: 16, width: 160, background: 'var(--border)', borderRadius: 4 }} />
       </div>
       <div className={s.donutWrap}>
-        <div style={{ width: 180, height: 180, borderRadius: '50%', background: 'conic-gradient(var(--border) 0deg, var(--border) 360deg)', opacity: 0.4 }} />
+        <div style={{ width: DONUT, height: DONUT, borderRadius: '50%', background: 'conic-gradient(var(--border) 0deg, var(--border) 360deg)', opacity: 0.4 }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} style={{ display: 'grid', gridTemplateColumns: '12px 1fr auto', gap: 10, alignItems: 'center' }}>

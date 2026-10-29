@@ -42,6 +42,13 @@ describe('AppLayout driven by the registry', () => {
     ])
   })
 
+  test("finance's first page is called Statistics", () => {
+    const { container } = renderShell('/finance')
+    const aside = container.querySelector('aside')!
+    expect(within(aside).getByRole('link', { name: 'Statistics' }).getAttribute('href')).toBe('/finance')
+    expect(within(aside).queryByText('Overview')).toBeNull()
+  })
+
   test('bottom nav has Home, Finance and Settings', () => {
     renderShell('/finance')
     const navs = screen.getAllByRole('navigation')

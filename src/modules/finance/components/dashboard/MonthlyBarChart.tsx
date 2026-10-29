@@ -5,6 +5,9 @@ import type { MonthPoint } from '@/modules/finance/api/stats'
 import { formatAmount, formatAxis, formatMonthShort, CURRENCY } from '@/core/lib/format'
 import s from './MonthlyBarChart.module.scss'
 
+// Short enough that the card reads wide rather than tall.
+const CHART_HEIGHT = 150
+
 // Recharts renders these into SVG fill attributes, so they have to be literal
 // colours rather than var(--success)/var(--danger). Declared once and shared
 // with the legend so the two can't drift apart.
@@ -51,7 +54,7 @@ export function MonthlyBarChart({ data }: Props) {
           <div className={s.emptySub}>Add transactions to see the chart</div>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={210}>
+        <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
           <BarChart data={chartData} barCategoryGap="30%" barGap={4}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
             <XAxis
@@ -85,7 +88,7 @@ export function MonthlyBarChartSkeleton() {
       <div className={s.cardHead}>
         <div style={{ height: 16, width: 120, background: 'var(--border)', borderRadius: 4 }} />
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height: 210, paddingTop: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height: CHART_HEIGHT, paddingTop: 16 }}>
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
             <div style={{ flex: 1, background: 'var(--border)', borderRadius: '4px 4px 0 0', opacity: 0.5 + i * 0.1 }} />
