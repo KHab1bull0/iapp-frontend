@@ -1,0 +1,7 @@
+@use '@/core/styles/mixins' as *;
+
+.failed {
+  @include card-base;
+  color: var(--fg-muted);
+  font-size: 14px;
+}
