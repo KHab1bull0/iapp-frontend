@@ -93,21 +93,20 @@
   }
 }
 
+// Skeleton rows for Finance → Settings; same shape as CategoryList's rows.
 .catGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
 }
 
 .catCard {
   display: grid;
-  grid-template-columns: 40px 1fr 28px;
+  grid-template-columns: 36px 1fr 28px;
   gap: 12px;
   align-items: center;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--bg-elev);
+  padding: 10px 0;
+
+  & + & { border-top: 1px solid var(--border); }
 }
 
 .settingsRow {

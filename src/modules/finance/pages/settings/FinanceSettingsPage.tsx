@@ -15,7 +15,7 @@ function CategoriesSkeleton() {
     <div className={s.catGrid}>
       {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className={s.catCard} style={{ opacity: 0.5 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--border)' }} />
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--border)' }} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <div style={{ height: 14, width: 80, background: 'var(--border)', borderRadius: 4 }} />
             <div style={{ height: 11, width: 50, background: 'var(--border)', borderRadius: 4 }} />

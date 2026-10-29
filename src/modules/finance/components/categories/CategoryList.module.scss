@@ -2,26 +2,25 @@
 @use '@/core/styles/mixins' as *;
 
 .catGrid {
-  display: grid;
-  // 220px overflowed inside the settings card on 320px screens.
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 10px;
+  // A plain list inside the settings card: rows split by hairlines rather
+  // than a grid of bordered cards, which drew a card inside a card.
+  display: flex;
+  flex-direction: column;
 }
 
 .catCard {
   display: grid;
-  grid-template-columns: 40px 1fr 28px 28px;
+  grid-template-columns: 36px 1fr 28px 28px;
   gap: 12px;
   align-items: center;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--bg-elev);
+  padding: 10px 0;
+
+  & + & { border-top: 1px solid var(--border); }
 }
 
 .catEmoji {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: $radius-md;
   display: inline-flex;
   align-items: center;
@@ -51,7 +50,7 @@
 
 .catEdit,
 .catDel {
-  // Grow the hit area to 44x44 without disturbing the card grid — the 12px
+  // Grow the hit area to 44x44 without disturbing the row grid — the 12px
   // column gap absorbs the bleed on each side.
   @include touch-target(8px);
   width: 28px;
