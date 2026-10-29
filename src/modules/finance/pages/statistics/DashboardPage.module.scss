@@ -27,16 +27,6 @@
   @include bp-tablet { display: none !important; }
 }
 
-.mobileOnly {
-  display: none;
-  @include bp-tablet { display: flex; }
-}
-
-.monthBar {
-  justify-content: flex-end;
-  margin-bottom: 4px;
-}
-
 .h1 {
   font-size: var(--fs-h1);
   line-height: var(--lh-h1);

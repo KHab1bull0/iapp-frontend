@@ -1,19 +1,20 @@
 import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react'
 import type { Category } from '@/modules/finance/api/categories'
-import type { TransactionFilters } from '@/modules/finance/api/transactions'
 import { advancedFilterCount } from './filterCount'
+import { PeriodFilter } from './PeriodFilter'
+import type { TransactionFilterState } from './period'
 import s from './TransactionToolbar.module.scss'
 
 interface Props {
-  filters: TransactionFilters
-  onChange: (f: TransactionFilters) => void
+  filters: TransactionFilterState
+  onChange: (f: TransactionFilterState) => void
   categories: Category[]
   onOpenFilters: () => void
 }
 
 /**
- * The phone's filter row at the top of Transactions: the two filters used most
- * (search and category) inline, everything else behind the Filters button.
+ * The phone's filters at the top of Transactions: search, category and period
+ * inline, the type behind the Filters button.
  */
 export function TransactionToolbar({ filters, onChange, categories, onOpenFilters }: Props) {
   const more = advancedFilterCount(filters)
@@ -62,6 +63,8 @@ export function TransactionToolbar({ filters, onChange, categories, onOpenFilter
           {more > 0 && <span className={s.badge}>{more}</span>}
         </button>
       </div>
+
+      <PeriodFilter filters={filters} onChange={onChange} />
     </div>
   )
 }

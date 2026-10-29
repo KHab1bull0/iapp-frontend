@@ -38,6 +38,18 @@ export function DashboardPage() {
   // Every figure below is scoped to `month` by the backend, so label it as such.
   const periodLabel = formatMonthLong(month)
 
+  // Every figure on the page follows this month, so it sits on the headline card.
+  const monthPicker = (
+    <input
+      type="month"
+      className={s.monthPicker}
+      value={month}
+      max={currentMonth()}
+      onChange={(e) => setMonth(e.target.value || currentMonth())}
+      aria-label="Select month"
+    />
+  )
+
   return (
     <div className={s.page}>
       <header className={`${s.pageHead} ${s.desktopOnly}`}>
@@ -45,26 +57,7 @@ export function DashboardPage() {
           <h1 className={s.h1}>Statistics</h1>
           <div className={s.pageSub}>{today}</div>
         </div>
-        <input
-          type="month"
-          className={s.monthPicker}
-          value={month}
-          max={currentMonth()}
-          onChange={(e) => setMonth(e.target.value || currentMonth())}
-          aria-label="Select month"
-        />
       </header>
-
-      <div className={`${s.mobileOnly} ${s.monthBar}`}>
-        <input
-          type="month"
-          className={s.monthPicker}
-          value={month}
-          max={currentMonth()}
-          onChange={(e) => setMonth(e.target.value || currentMonth())}
-          aria-label="Select month"
-        />
-      </div>
 
       {/* Balance gets the full width; income and expense share the row below. */}
       <section className={s.statGrid}>
@@ -76,7 +69,7 @@ export function DashboardPage() {
           </>
         ) : (
           <>
-            <StatCard size="lg" title="Balance" value={data!.totalBalance} icon={Wallet}       tone="brand"   period={periodLabel} />
+            <StatCard size="lg" title="Balance" value={data!.totalBalance} icon={Wallet}       tone="brand"   period={periodLabel} action={monthPicker} />
             <StatCard size="sm" title="Income"  value={data!.totalIncome}  icon={TrendingUp}   tone="success" period={periodLabel} />
             <StatCard size="sm" title="Expense" value={data!.totalExpense} icon={TrendingDown} tone="danger"  period={periodLabel} />
           </>

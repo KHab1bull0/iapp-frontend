@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import clsx from 'clsx'
 import type { LucideIcon } from 'lucide-react'
 import { formatAmount, CURRENCY } from '@/core/lib/format'
@@ -13,6 +14,8 @@ interface StatCardProps {
   period: string
   /** 'lg' is the headline figure; 'sm' sits two to a row under it. */
   size?: 'lg' | 'sm'
+  /** A control shown left of the icon (the balance card's month picker). */
+  action?: ReactNode
 }
 
 const toneIconClass: Record<string, string> = {
@@ -27,14 +30,17 @@ const toneNumClass: Record<string, string> = {
   danger:  s.toneDangerNum,
 }
 
-export function StatCard({ title, value, icon: Icon, tone, period, size = 'lg' }: StatCardProps) {
+export function StatCard({ title, value, icon: Icon, tone, period, size = 'lg', action }: StatCardProps) {
   return (
-    <div className={clsx(s.card, s.statCard, size === 'sm' && s.small)}>
+    <div className={clsx(s.card, s.statCard, size === 'sm' && s.small)} data-stat={title}>
       <div className={s.statHead}>
         <span className={s.labelTiny}>{title}</span>
-        <span className={clsx(s.statIcon, toneIconClass[tone])}>
-          <Icon size={size === 'sm' ? 15 : 18} />
-        </span>
+        <div className={s.statHeadEnd}>
+          {action}
+          <span className={clsx(s.statIcon, toneIconClass[tone])}>
+            <Icon size={size === 'sm' ? 15 : 18} />
+          </span>
+        </div>
       </div>
       <div className={clsx(s.statNum, toneNumClass[tone])}>
         {value < 0 ? '−' : ''}{formatAmount(Math.abs(value))}

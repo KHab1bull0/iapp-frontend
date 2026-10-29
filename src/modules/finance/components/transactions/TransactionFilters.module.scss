@@ -34,6 +34,13 @@
   }
 }
 
+.filterPeriod {
+  // Range's From–To pickers open under the segments; keep the bar's other
+  // controls aligned to the top row.
+  align-self: flex-start;
+  min-width: 280px;
+}
+
 .filterGrow {
   flex: 1;
   min-width: 200px;

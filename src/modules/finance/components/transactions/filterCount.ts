@@ -1,6 +1,6 @@
-import type { TransactionFilters } from '@/modules/finance/api/transactions'
+import type { TransactionFilterState } from './period'
 
-/** Filters set in the full sheet that the toolbar doesn't show: type and dates. */
-export function advancedFilterCount(filters: TransactionFilters): number {
-  return [filters.type, filters.startDate, filters.endDate].filter(Boolean).length
+/** Filters set in the full sheet that the toolbar doesn't show: the type. */
+export function advancedFilterCount(filters: TransactionFilterState): number {
+  return filters.type ? 1 : 0
 }

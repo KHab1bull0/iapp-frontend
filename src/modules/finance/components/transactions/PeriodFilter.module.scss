@@ -1,0 +1,63 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.period {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.segments {
+  display: flex;
+  padding: 3px;
+  border-radius: $radius-md;
+  background: var(--slate-100);
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+.segment {
+  flex: 1;
+  height: 32px;
+  padding: 0 10px;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: var(--fg-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background $t-fast, color $t-fast;
+
+  &.active {
+    background: var(--bg-elev);
+    color: var(--fg-strong);
+    box-shadow: 0 1px 2px rgba(15, 17, 23, 0.08);
+  }
+}
+
+.range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  background: var(--bg-elev);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 13px;
+
+  // iOS zooms the page into any field under 16px when it takes focus.
+  @supports (-webkit-touch-callout: none) { font-size: 16px; }
+}
+
+.dash { color: var(--fg-muted); }

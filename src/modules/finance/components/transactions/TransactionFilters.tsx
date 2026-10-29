@@ -1,12 +1,13 @@
 import clsx from 'clsx'
 import { Search, ChevronDown } from 'lucide-react'
 import type { Category } from '@/modules/finance/api/categories'
-import type { TransactionFilters } from '@/modules/finance/api/transactions'
+import { PeriodFilter } from './PeriodFilter'
+import type { TransactionFilterState } from './period'
 import s from './TransactionFilters.module.scss'
 
 interface Props {
-  filters: TransactionFilters
-  onChange: (f: TransactionFilters) => void
+  filters: TransactionFilterState
+  onChange: (f: TransactionFilterState) => void
   categories: Category[]
 }
 
@@ -29,6 +30,10 @@ export function TransactionFilters({ filters, onChange, categories }: Props) {
             {label}
           </button>
         ))}
+      </div>
+
+      <div className={s.filterPeriod}>
+        <PeriodFilter filters={filters} onChange={onChange} />
       </div>
 
       <div className={s.filterGrow}>

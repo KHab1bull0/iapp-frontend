@@ -3,14 +3,15 @@ import clsx from 'clsx'
 import { createPortal } from 'react-dom'
 import { X, Search, ChevronDown } from 'lucide-react'
 import type { Category } from '@/modules/finance/api/categories'
-import type { TransactionFilters } from '@/modules/finance/api/transactions'
+import { PeriodFilter } from './PeriodFilter'
+import { DEFAULT_FILTERS, type TransactionFilterState } from './period'
 import s from './FilterDrawer.module.scss'
 
 interface Props {
   open: boolean
   onClose: () => void
-  filters: TransactionFilters
-  onApply: (f: TransactionFilters) => void
+  filters: TransactionFilterState
+  onApply: (f: TransactionFilterState) => void
   categories: Category[]
 }
 
@@ -21,7 +22,7 @@ const TYPE_OPTIONS = [
 ]
 
 export function FilterDrawer({ open, onClose, filters, onApply, categories }: Props) {
-  const [draft, setDraft] = useState<TransactionFilters>(filters)
+  const [draft, setDraft] = useState<TransactionFilterState>(filters)
 
   // Sync draft to current filters each time the drawer opens
   useEffect(() => { if (open) setDraft(filters) }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -43,7 +44,7 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
   }
 
   function handleReset() {
-    setDraft({})
+    setDraft(DEFAULT_FILTERS)
   }
 
   return createPortal(
@@ -83,6 +84,11 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className={s.field}>
+            <span className={s.fieldLabel}>Period</span>
+            <PeriodFilter filters={draft} onChange={setDraft} />
           </div>
 
           <div className={s.field}>

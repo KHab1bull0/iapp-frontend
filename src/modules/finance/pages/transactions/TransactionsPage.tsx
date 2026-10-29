@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { Plus, RefreshCw } from 'lucide-react'
-import { fetchTransactions, type TransactionFilters, type PaginatedTransactions } from '@/modules/finance/api/transactions'
+import { fetchTransactions, type PaginatedTransactions } from '@/modules/finance/api/transactions'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
@@ -10,6 +10,11 @@ import { AddTransactionDialog } from '@/modules/finance/components/transactions/
 import { TransactionFilters as FiltersBar } from '@/modules/finance/components/transactions/TransactionFilters'
 import { FilterDrawer } from '@/modules/finance/components/transactions/FilterDrawer'
 import { TransactionToolbar } from '@/modules/finance/components/transactions/TransactionToolbar'
+import {
+  DEFAULT_FILTERS,
+  toQuery,
+  type TransactionFilterState,
+} from '@/modules/finance/components/transactions/period'
 import { TransactionList } from '@/modules/finance/components/transactions/TransactionList'
 import s from './TransactionsPage.module.scss'
 
@@ -44,7 +49,7 @@ function ListSkeleton() {
 export function TransactionsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [filters, setFilters] = useState<TransactionFilters>({})
+  const [filters, setFilters] = useState<TransactionFilterState>(DEFAULT_FILTERS)
   const navigate = useNavigate()
   const isMobile = useIsMobile()
 
@@ -56,7 +61,7 @@ export function TransactionsPage() {
 
   // Search waits for typing to pause; the other filters apply at once.
   const search = useDebouncedValue(filters.search, 300)
-  const query: TransactionFilters = { ...filters, search }
+  const query = toQuery({ ...filters, search })
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -116,7 +121,7 @@ export function TransactionsPage() {
           hasMore={!!hasNextPage}
           isFetchingMore={isFetchingNextPage}
           onLoadMore={fetchNextPage}
-          isFiltered={Object.values(filters).some(Boolean)}
+          isFiltered={Object.values(query).some(Boolean)}
         />
       )}
 

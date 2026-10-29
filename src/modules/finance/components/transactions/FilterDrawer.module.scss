@@ -53,11 +53,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 20px;
+  padding: 2px 16px;
 }
 
 .drawerTitle {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--fg-strong);
 }
@@ -80,10 +80,10 @@
 }
 
 .drawerBody {
-  padding: 8px 20px 12px;
+  padding: 4px 16px 10px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 12px;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
@@ -93,19 +93,20 @@
 .drawerFooter {
   flex-shrink: 0;
   display: flex;
-  gap: 12px;
-  padding: 14px 20px;
+  gap: 8px;
+  padding: 10px 16px;
   border-top: 1px solid var(--border);
 }
 
 .field {
   @include field-base;
+  gap: 4px;
 }
 
 .fieldLabel {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--fg);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fg-muted);
 }
 
 .tabs {
@@ -114,6 +115,10 @@
 
 .tab {
   @include tab-base;
+  // Compact, but still a comfortable tap target.
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: 12px;
 
   &.active {
     background: var(--bg-elev);
@@ -126,10 +131,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  // 44px: this drawer is touch-only, and the height used to be forced with an
-  // inline style that contradicted the class.
-  height: 44px;
-  padding: 0 14px;
+  // 40px: compact, still above the 36px a thumb can hit reliably. The height
+  // used to be forced with an inline style that contradicted the class.
+  height: 40px;
+  padding: 0 12px;
   border-radius: $radius-md;
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -149,7 +154,7 @@
   border: none;
   outline: none;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--fg-strong);
 
   &::placeholder { color: var(--fg-muted); }
@@ -161,13 +166,13 @@
 
 .input {
   flex: 1;
-  height: 44px;
+  height: 40px;
   padding: 0 12px;
   background: transparent;
   border: none;
   outline: none;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--fg-strong);
 
   &::placeholder { color: var(--fg-muted); }
@@ -193,13 +198,13 @@
 
 .btnSecondary {
   @include btn-secondary;
-  @include btn-size-lg;
+  @include btn-size-md;
   flex: 1;
 }
 
 .btnPrimary {
   @include btn-primary;
-  @include btn-size-lg;
+  @include btn-size-md;
   flex: 1;
 }
 
