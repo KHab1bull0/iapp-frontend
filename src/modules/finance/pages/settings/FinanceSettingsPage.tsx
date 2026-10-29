@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import clsx from 'clsx'
 import { useQuery } from '@tanstack/react-query'
-import { Plus } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ChevronLeft, Plus } from 'lucide-react'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { AddCategoryDialog } from '@/modules/finance/components/categories/AddCategoryDialog'
 import { CategoryList } from '@/modules/finance/components/categories/CategoryList'
@@ -39,6 +40,10 @@ export function FinanceSettingsPage() {
 
   return (
     <div className={s.page}>
+      {/* Opened from Settings → Modules, so that is where back leads. */}
+      <Link to="/settings" className={s.backLink}>
+        <ChevronLeft size={18} /> Settings
+      </Link>
       <header className={s.pageHead}>
         <div>
           <h1 className={s.h1}>Finance settings</h1>

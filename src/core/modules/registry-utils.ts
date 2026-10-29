@@ -26,6 +26,17 @@ export function activeModule(modules: ModuleManifest[], pathname: string): Modul
   return modules.find((m) => pathname === m.basePath || pathname.startsWith(`${m.basePath}/`))
 }
 
+/**
+ * Whether pathname is one of the module's menu pages. A module can keep routes
+ * out of its menu (finance's settings, reached from Settings); those show no
+ * module tabs.
+ */
+export function isModulePage(module: ModuleManifest, pathname: string): boolean {
+  return module.pages.some(({ path, end }) =>
+    end ? pathname === path : pathname === path || pathname.startsWith(`${path}/`),
+  )
+}
+
 export function bottomNavItems(modules: ModuleManifest[]): BottomNavItem[] {
   const shown =
     modules.length <= MAX_BOTTOM_NAV_MODULES ? modules : modules.slice(0, MAX_BOTTOM_NAV_MODULES - 1)

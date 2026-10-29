@@ -8,7 +8,7 @@ import { ModuleTabs } from './ModuleTabs'
 import { useTheme } from '@/core/contexts/ThemeContext'
 import { Dialog, DialogContent, DialogTitle } from '@/core/components/ui/dialog'
 import { ChunkErrorBoundary } from '@/core/components/ChunkErrorBoundary'
-import { activeModule, fabBehavior } from '@/core/modules/registry-utils'
+import { activeModule, fabBehavior, isModulePage } from '@/core/modules/registry-utils'
 import type { ModuleManifest } from '@/core/modules/types'
 import { formatHeaderDate } from '@/core/lib/format'
 import s from './AppLayout.module.scss'
@@ -55,7 +55,9 @@ export function AppLayout({ modules }: AppLayoutProps) {
         </header>
 
         <div className={s.scroll}>
-          {active && active.pages.length > 1 && <ModuleTabs module={active} />}
+          {active && active.pages.length > 1 && isModulePage(active, pathname) && (
+            <ModuleTabs module={active} />
+          )}
           <ChunkErrorBoundary key={pathname}>
             <Suspense fallback={null}>
               <Outlet />

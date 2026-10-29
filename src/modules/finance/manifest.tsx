@@ -1,4 +1,4 @@
-import { ArrowLeftRight, ChartColumn, Plus, Settings2, Wallet } from 'lucide-react'
+import { ArrowLeftRight, ChartColumn, Plus, Wallet } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
 import { MobileFilterProvider } from './MobileFilterContext'
 import { FinanceHeaderAction } from './FinanceHeaderAction'
@@ -18,11 +18,11 @@ export const finance: ModuleManifest = {
   pages: [
     { label: 'Statistics', path: '/finance', icon: ChartColumn, end: true },
     { label: 'Transactions', path: '/finance/transactions', icon: ArrowLeftRight },
-    { label: 'Settings', path: '/finance/settings', icon: Settings2 },
   ],
   routes: [
     { index: true, element: <DashboardPage /> },
     { path: 'transactions', element: <TransactionsPage /> },
+    // Not in the menu: opened from Settings → Modules → Finance.
     { path: 'settings', element: <FinanceSettingsPage /> },
   ],
   // Touch-only full-screen add/edit; desktop opens the dialog instead.

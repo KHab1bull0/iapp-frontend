@@ -5,6 +5,7 @@ import {
   activeModule,
   bottomNavItems,
   fabBehavior,
+  isModulePage,
   legacyRedirect,
   validateRegistry,
 } from './registry-utils'
@@ -48,6 +49,26 @@ describe('activeModule', () => {
     expect(activeModule(m, '/finance/transactions/x/edit')?.id).toBe('finance')
     expect(activeModule(m, '/financex')).toBeUndefined()
     expect(activeModule(m, '/')).toBeUndefined()
+  })
+})
+
+describe('isModulePage', () => {
+  const m: ModuleManifest = {
+    ...fake('finance'),
+    pages: [
+      { label: 'Statistics', path: '/finance', icon: Box, end: true },
+      { label: 'Transactions', path: '/finance/transactions', icon: Box },
+    ],
+  }
+
+  test('true on a listed page and below a non-end page', () => {
+    expect(isModulePage(m, '/finance')).toBe(true)
+    expect(isModulePage(m, '/finance/transactions')).toBe(true)
+    expect(isModulePage(m, '/finance/transactions/x')).toBe(true)
+  })
+
+  test('false on a route the module keeps out of its menu', () => {
+    expect(isModulePage(m, '/finance/settings')).toBe(false)
   })
 })
 

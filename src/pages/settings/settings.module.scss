@@ -326,6 +326,19 @@
   }
 }
 
+// Back to Settings from a module's settings page, which lives outside the
+// settings shell and so has no side list to return through.
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: -6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: none;
+}
+
 // ── Mobile hub (/settings) ─────────────────────────────────────────────────
 
 .hub {

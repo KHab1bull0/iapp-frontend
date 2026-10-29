@@ -36,7 +36,6 @@ describe('AppLayout driven by the registry', () => {
       '/',
       '/finance',
       '/finance/transactions',
-      '/finance/settings',
       '/settings',
       '/settings/profile', // the user block
     ])
@@ -59,6 +58,11 @@ describe('AppLayout driven by the registry', () => {
   test('module tabs show inside finance and not elsewhere', () => {
     renderShell('/finance/transactions')
     expect(screen.getByRole('navigation', { name: 'Finance pages' })).toBeTruthy()
+  })
+
+  test("finance settings is reached from Settings, so it shows no finance tabs", () => {
+    renderShell('/finance/settings')
+    expect(screen.queryByRole('navigation', { name: 'Finance pages' })).toBeNull()
   })
 
   test('no module tabs on settings', () => {
