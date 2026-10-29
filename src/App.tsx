@@ -10,6 +10,7 @@ import { AppLayout } from '@/core/layout/AppLayout'
 import type { ModuleManifest } from '@/core/modules/types'
 import { MODULES } from '@/modules/registry'
 import { AuthPage } from '@/pages/auth'
+import { HomePage } from '@/pages/home'
 import { SettingsPage } from '@/pages/settings'
 import { MenuPage } from '@/pages/menu'
 
@@ -45,7 +46,7 @@ function buildRoutes(modules: ModuleManifest[]): RouteObject[] {
         {
           element: <AppLayout modules={modules} />,
           children: [
-            { index: true, element: <Navigate to="/finance" replace /> },
+            { index: true, element: <HomePage /> },
             ...modules.map((m) => ({ path: m.basePath, children: m.routes })),
             { path: 'settings', element: <SettingsPage /> },
             { path: 'menu', element: <MenuPage /> },

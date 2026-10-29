@@ -1,0 +1,108 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.card {
+  @include card-base;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--fg);
+  text-decoration: none;
+
+  &:hover { box-shadow: var(--shadow-md, var(--shadow-sm)); }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  background: var(--hover-bg);
+  color: var(--primary);
+}
+
+.title {
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.period {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.balanceLabel,
+.flowLabel {
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.balance {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--fg-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.currency {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+
+.flows {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.income { color: var(--success); font-weight: 600; }
+.expense { color: var(--danger); font-weight: 600; }
+
+.skeleton,
+.skeletonSm {
+  display: inline-block;
+  height: 24px;
+  width: 140px;
+  border-radius: 4px;
+  background: var(--border);
+}
+
+.skeletonSm { height: 16px; width: 80px; }
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--fg-muted);
+}
+
+.retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: $radius-sm;
+  background: transparent;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}

@@ -3,6 +3,7 @@ import type { ModuleManifest } from '@/core/modules/types'
 import { MobileFilterProvider } from './MobileFilterContext'
 import { FinanceHeaderAction } from './FinanceHeaderAction'
 import { FinanceSettingsSection } from './FinanceSettingsSection'
+import { FinanceHomeCard } from './FinanceHomeCard'
 import { DashboardPage, TransactionFormPage, TransactionsPage } from './pages/lazy'
 
 export const finance: ModuleManifest = {
@@ -28,5 +29,6 @@ export const finance: ModuleManifest = {
   quickAdd: [
     { id: 'add-transaction', label: 'Add transaction', icon: Plus, to: '/finance/transactions/new' },
   ],
+  homeCard: FinanceHomeCard,
   settingsSection: FinanceSettingsSection,
 }

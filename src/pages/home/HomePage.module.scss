@@ -1,0 +1,36 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.page {
+  padding: 32px;
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  @include bp-tablet { padding: 24px 16px; }
+}
+
+.h1 {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--fg-strong);
+  margin: 0;
+}
+
+.pageSub {
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin-top: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  @include bp-mobile { grid-template-columns: 1fr; }
+}
