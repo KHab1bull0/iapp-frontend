@@ -1,0 +1,212 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: var(--bg-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms;
+
+  &.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: var(--bg-elev);
+  border-radius: 0 0 20px 20px;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(15, 17, 23, 0.14);
+  transform: translateY(-100%);
+  transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  max-height: 85dvh;
+  padding-top: env(safe-area-inset-top);
+
+  &.open { transform: translateY(0); }
+}
+
+// Rendered last, so it sits at the *bottom* edge of this top-anchored drawer.
+// The old `margin: 0 auto 12px` left it glued to the footer's border.
+.drawerHandle {
+  flex-shrink: 0;
+  width: 36px;
+  height: 4px;
+  background: var(--border-strong);
+  border-radius: $radius-pill;
+  margin: 10px auto 12px;
+}
+
+.drawerHead {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+}
+
+.drawerTitle {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.iconBtn {
+  @include touch-target(4px);
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-md;
+  background: transparent;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg);
+  cursor: pointer;
+  transition: background $t-fast;
+
+  &:hover { background: var(--icon-btn-hover); }
+}
+
+.drawerBody {
+  padding: 8px 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.drawerFooter {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.field {
+  @include field-base;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.tabs {
+  @include tabs-base;
+}
+
+.tab {
+  @include tab-base;
+
+  &.active {
+    background: var(--bg-elev);
+    color: var(--fg-strong);
+    box-shadow: 0 1px 2px rgba(15, 17, 23, 0.08);
+  }
+}
+
+.filterSearch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  // 44px: this drawer is touch-only, and the height used to be forced with an
+  // inline style that contradicted the class.
+  height: 44px;
+  padding: 0 14px;
+  border-radius: $radius-md;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--fg-muted);
+  transition: border-color $t-fast, box-shadow $t-fast;
+
+  &:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--ring-soft);
+    color: var(--fg-strong);
+  }
+}
+
+.filterInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--fg-strong);
+
+  &::placeholder { color: var(--fg-muted); }
+}
+
+.inputWrap {
+  @include input-wrap-base;
+}
+
+.input {
+  flex: 1;
+  height: 44px;
+  padding: 0 12px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--fg-strong);
+
+  &::placeholder { color: var(--fg-muted); }
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 36px;
+  cursor: pointer;
+  background: transparent;
+  width: 100%;
+}
+
+.selectChev {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+}
+
+.btnSecondary {
+  @include btn-secondary;
+  @include btn-size-lg;
+  flex: 1;
+}
+
+.btnPrimary {
+  @include btn-primary;
+  @include btn-size-lg;
+  flex: 1;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .input,
+  .filterInput,
+  .select {
+    font-size: 16px;
+  }
+}

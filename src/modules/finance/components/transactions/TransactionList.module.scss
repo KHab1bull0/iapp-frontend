@@ -1,0 +1,185 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.card {
+  @include card-base;
+}
+
+.emptyCard {
+  @include card-base;
+  @include empty-base;
+}
+
+.emptyGlyph {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--slate-100);
+  color: var(--fg-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.emptySub {
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+.dayGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dayHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0 6px;
+}
+
+.dayLabel {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+}
+
+.dayTotal {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+
+  &.amtIn  { color: var(--success); }
+  &.amtOut { color: var(--danger); }
+}
+
+.txList {
+  padding: 0;
+  overflow: hidden;
+}
+
+.txRow {
+  display: grid;
+  grid-template-columns: 44px 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 12px 14px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background $t-fast;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: var(--row-hover); }
+
+  &:hover .txDel,
+  &:hover .txEdit { opacity: 1; }
+
+  // Tighter on phones so the note still has room once the action buttons are
+  // grown to a real touch target.
+  @include bp-mobile {
+    gap: 10px;
+    padding: 12px 10px 12px 14px;
+
+    .txDel,
+    .txEdit { opacity: 1; }
+  }
+}
+
+.txActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.txCat {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.txMeta { min-width: 0; }
+
+// Without truncation a long note wrapped and blew out the row height, pushing
+// the amount and actions around.
+.txTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.txSub {
+  font-size: 12px;
+  color: var(--fg-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.txAmt {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+
+  &.amtIn  { color: var(--success); }
+  &.amtOut { color: var(--danger); }
+
+  @include bp-mobile { font-size: 13px; }
+}
+
+.txDel,
+.txEdit {
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-sm;
+  background: transparent;
+  border: none;
+  color: var(--fg-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity $t-fast, background $t-fast;
+
+  // 32px is well under the 44px minimum touch target. The 12px .txActions gap
+  // means the grown hit areas sit flush without overlapping.
+  @include touch-target(6px);
+
+  @include bp-mobile { opacity: 1; }
+}
+
+.txDel:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.txEdit:hover {
+  background: var(--bg-elev);
+  color: var(--fg-strong);
+}
+
+.btnSecondary {
+  @include btn-secondary;
+  @include btn-size-sm;
+}

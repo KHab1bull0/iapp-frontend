@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './styles/index.css'
-import { installUpdateCheck } from './lib/pwa'
+import './core/styles/index.css'
+import { installUpdateCheck } from './core/lib/pwa'
 import App from './App.tsx'
 
 installUpdateCheck()

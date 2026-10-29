@@ -1,0 +1,129 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.recent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// .recent is a flex column with gap: 12px — a margin here doubled the spacing.
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.h3 {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 600;
+  color: var(--fg-strong);
+  margin: 0;
+}
+
+.link {
+  @include touch-target(10px);
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0;
+
+  &:hover { text-decoration: underline; }
+}
+
+.card {
+  @include card-base;
+}
+
+.recentList {
+  padding: 0;
+  overflow: hidden;
+}
+
+// No :hover here. These rows are not interactive (there is no transaction
+// detail view), and a hover highlight advertised a click that does nothing.
+.txRow {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child { border-bottom: none; }
+}
+
+.txCat {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.txMeta { min-width: 0; }
+
+.txTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.txSub {
+  font-size: 12px;
+  color: var(--fg-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.txAmt {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+
+  &.amtIn  { color: var(--success); }
+  &.amtOut { color: var(--danger); }
+}
+
+.empty {
+  @include empty-base;
+}
+
+.emptyGlyph {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--slate-100);
+  color: var(--fg-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.emptySub {
+  font-size: 13px;
+  color: var(--fg-muted);
+}

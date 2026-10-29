@@ -1,0 +1,135 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.page {
+  padding: 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  @include bp-tablet { padding: 24px; }
+  @include bp-mobile { padding: 16px; gap: 20px; }
+}
+
+.pageHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  > div { min-width: 0; }
+}
+
+.desktopOnly {
+  @include bp-tablet { display: none !important; }
+}
+
+.mobileOnly {
+  display: none;
+  @include bp-tablet { display: flex; }
+}
+
+.monthBar {
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+.h1 {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--fg-strong);
+  white-space: nowrap;
+  margin: 0;
+
+  @include bp-mobile { font-size: 22px; line-height: 28px; }
+}
+
+.pageSub {
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin-top: 4px;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  @include bp-tablet { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.chartGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @include bp-tablet { grid-template-columns: 1fr; }
+}
+
+.card {
+  @include card-base;
+}
+
+.empty {
+  @include empty-base;
+}
+
+.emptyGlyph {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--slate-100);
+  color: var(--fg-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.emptySub {
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+.btnSecondary {
+  @include btn-secondary;
+  @include btn-size-sm;
+}
+
+.monthPicker {
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-elev);
+  color: var(--fg-strong);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--ring-soft);
+  }
+
+  :global(.theme-dark) & {
+    background: var(--slate-800);
+    color-scheme: dark;
+  }
+}

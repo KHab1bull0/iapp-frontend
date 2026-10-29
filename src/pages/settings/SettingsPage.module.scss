@@ -1,5 +1,5 @@
-@use '../../styles/variables' as *;
-@use '../../styles/mixins' as *;
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
 
 .page {
   padding: 32px;

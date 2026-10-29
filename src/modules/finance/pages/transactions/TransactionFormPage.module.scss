@@ -1,0 +1,97 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+// Direct child of #root (this route is not nested in AppLayout). Same contract
+// as .app: min-height plus ordinary document scroll, so nothing depends on a
+// viewport height being exactly right.
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  // Sticky so the back button stays reachable down a long form. Safe area is
+  // added to the height rather than taken out of it.
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--mobile-header-h);
+  padding: 0 16px;
+  padding-top: var(--safe-top);
+  padding-left: max(16px, var(--safe-left));
+  padding-right: max(16px, var(--safe-right));
+}
+
+.backBtn {
+  @include touch-target(4px); // 36px visual -> 44px hit area
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: $radius-md;
+  background: transparent;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg);
+  cursor: pointer;
+  transition: background $t-fast;
+
+  &:hover { background: var(--icon-btn-hover); }
+}
+
+.h1 {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg-strong);
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// The document scrolls, so this is just the content column.
+.body {
+  flex: 1;
+  padding: 20px 16px;
+  padding-bottom: calc(24px + var(--safe-bottom));
+  padding-left: max(16px, var(--safe-left));
+  padding-right: max(16px, var(--safe-right));
+}
+
+.inner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.state {
+  @include empty-base;
+}
+
+.stateTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.stateSub {
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+.btnSecondary {
+  @include btn-secondary;
+  @include btn-size-sm;
+  margin-top: 8px;
+}

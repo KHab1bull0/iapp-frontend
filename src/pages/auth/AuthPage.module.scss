@@ -1,5 +1,5 @@
-@use '../../styles/variables' as *;
-@use '../../styles/mixins' as *;
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
 
 // min-height, not height: the page scrolls with the document now that #root no
 // longer locks a viewport height, so the form stays reachable with the
