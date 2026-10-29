@@ -7,6 +7,7 @@ import { BottomNav } from './BottomNav'
 import { ModuleTabs } from './ModuleTabs'
 import { useTheme } from '@/core/contexts/ThemeContext'
 import { Dialog, DialogContent, DialogTitle } from '@/core/components/ui/dialog'
+import { ChunkErrorBoundary } from '@/core/components/ChunkErrorBoundary'
 import { activeModule, fabBehavior } from '@/core/modules/registry-utils'
 import type { ModuleManifest } from '@/core/modules/types'
 import { formatHeaderDate } from '@/core/lib/format'
@@ -55,9 +56,11 @@ export function AppLayout({ modules }: AppLayoutProps) {
 
         <div className={s.scroll}>
           {active && active.pages.length > 1 && <ModuleTabs module={active} />}
-          <Suspense fallback={null}>
-            <Outlet />
-          </Suspense>
+          <ChunkErrorBoundary key={pathname}>
+            <Suspense fallback={null}>
+              <Outlet />
+            </Suspense>
+          </ChunkErrorBoundary>
         </div>
 
         {/* The FAB is itself tablet-and-below only, so it always routes. */}

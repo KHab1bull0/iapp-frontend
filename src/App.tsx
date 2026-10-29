@@ -1,18 +1,11 @@
-import { Suspense, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Navigate, Outlet, useRoutes, type RouteObject } from 'react-router-dom'
+import { BrowserRouter, useRoutes } from 'react-router-dom'
 import { AuthProvider } from '@/core/contexts/AuthContext'
 import { ThemeProvider } from '@/core/contexts/ThemeContext'
-import { ProtectedRoute } from '@/core/components/ProtectedRoute'
-import { LegacyRedirect } from '@/core/components/LegacyRedirect'
 import { ToastHost } from '@/core/components/ui/toast'
-import { AppLayout } from '@/core/layout/AppLayout'
-import type { ModuleManifest } from '@/core/modules/types'
 import { MODULES } from '@/modules/registry'
-import { AuthPage } from '@/pages/auth'
-import { HomePage } from '@/pages/home'
-import { SettingsPage } from '@/pages/settings'
-import { MenuPage } from '@/pages/menu'
+import { buildRoutes } from '@/routes'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,42 +15,6 @@ const queryClient = new QueryClient({
     },
   },
 })
-
-function buildRoutes(modules: ModuleManifest[]): RouteObject[] {
-  return [
-    { path: '/auth', element: <AuthPage /> },
-    {
-      element: <ProtectedRoute />,
-      children: [
-        // Full-screen tasks (a module's add/edit pages) sit OUTSIDE AppLayout:
-        // they carry neither the mobile header nor the bottom nav, bring their
-        // own back button and own the whole viewport.
-        ...modules
-          .filter((m) => m.fullscreenRoutes)
-          .map((m) => ({
-            path: m.basePath,
-            element: (
-              <Suspense fallback={null}>
-                <Outlet />
-              </Suspense>
-            ),
-            children: m.fullscreenRoutes,
-          })),
-        {
-          element: <AppLayout modules={modules} />,
-          children: [
-            { index: true, element: <HomePage /> },
-            ...modules.map((m) => ({ path: m.basePath, children: m.routes })),
-            { path: 'settings', element: <SettingsPage /> },
-            { path: 'menu', element: <MenuPage /> },
-          ],
-        },
-        { path: 'transactions/*', element: <LegacyRedirect /> },
-      ],
-    },
-    { path: '*', element: <Navigate to="/" replace /> },
-  ]
-}
 
 const routes = buildRoutes(MODULES)
 

@@ -8,7 +8,7 @@ import s from './FinanceHomeCard.module.scss'
 /** This month's balance, income and expense on the home page. */
 export function FinanceHomeCard() {
   const month = currentMonth()
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isError, refetch } = useQuery({
     queryKey: financeSummaryKey(month),
     queryFn: () => fetchFinanceSummary(month),
   })
@@ -36,23 +36,24 @@ export function FinanceHomeCard() {
           </button>
         </div>
       ) : (
+        // Skeletons until data arrives, including a query paused while offline.
         <>
           <div className={s.balanceLabel}>Balance</div>
           <div className={s.balance}>
-            {isLoading ? <span className={s.skeleton} /> : <span>{formatAmount(data!.totalBalance)}</span>}
+            {data ? <span>{formatAmount(data.totalBalance)}</span> : <span className={s.skeleton} />}
             <span className={s.currency}>{CURRENCY}</span>
           </div>
           <div className={s.flows}>
             <div>
               <div className={s.flowLabel}>Income</div>
               <div className={s.income}>
-                {isLoading ? <span className={s.skeletonSm} /> : `+${formatAmount(data!.totalIncome)}`}
+                {data ? `+${formatAmount(data.totalIncome)}` : <span className={s.skeletonSm} />}
               </div>
             </div>
             <div>
               <div className={s.flowLabel}>Expense</div>
               <div className={s.expense}>
-                {isLoading ? <span className={s.skeletonSm} /> : `−${formatAmount(data!.totalExpense)}`}
+                {data ? `−${formatAmount(data.totalExpense)}` : <span className={s.skeletonSm} />}
               </div>
             </div>
           </div>

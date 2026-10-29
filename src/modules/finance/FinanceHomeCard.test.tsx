@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { currentMonth, formatAmount } from '@/core/lib/format'
 import { financeSummaryKey } from './api/summary'
@@ -32,5 +32,22 @@ describe('FinanceHomeCard', () => {
     expect(screen.getByText(`+${amount(1000000)}`)).toBeTruthy()
     expect(screen.getByText(`−${amount(250000)}`)).toBeTruthy()
     expect(screen.getByRole('link').getAttribute('href')).toBe('/finance')
+  })
+
+  test('opened offline, the card waits instead of crashing', () => {
+    // A paused query (no network) is pending but not fetching, so isLoading is false.
+    onlineManager.setOnline(false)
+    try {
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <MemoryRouter>
+            <FinanceHomeCard />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+      expect(screen.getByText('Balance')).toBeTruthy()
+    } finally {
+      onlineManager.setOnline(true)
+    }
   })
 })
