@@ -50,7 +50,7 @@ export function TransactionsPage() {
 
   // Touch layouts get a full page; desktop keeps the dialog.
   function openAdd() {
-    if (isMobile) navigate('/transactions/new')
+    if (isMobile) navigate('/finance/transactions/new')
     else setDialogOpen(true)
   }
 

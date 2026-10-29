@@ -6,7 +6,7 @@
 
   @include bp-tablet {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    // Column count is set inline from the number of items.
 
     // THE fix for the dead band underneath this bar.
     //

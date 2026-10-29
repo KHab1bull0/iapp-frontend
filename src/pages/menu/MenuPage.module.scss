@@ -1,0 +1,44 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.page {
+  padding: 32px;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @include bp-tablet { padding: 16px; }
+}
+
+.h1 {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  font-weight: 700;
+  color: var(--fg-strong);
+}
+
+.list {
+  @include card-base;
+  padding: 4px;
+  list-style: none;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  border-radius: $radius-md;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+
+  &:hover { background: var(--row-hover); }
+}
+
+.name { flex: 1; }
+.chevron { color: var(--fg-muted); }

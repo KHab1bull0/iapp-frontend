@@ -112,6 +112,28 @@
   &.active { background: var(--hover-bg); color: var(--primary); }
 }
 
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 12px;
+
+  .collapsed & {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+}
+
+.navGroupLabel {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
 .sidebarBottom {
   display: flex;
   flex-direction: column;

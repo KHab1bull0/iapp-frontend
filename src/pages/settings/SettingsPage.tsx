@@ -1,14 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
-import { useQuery } from '@tanstack/react-query'
-import { LogOut, Plus, Sun, Moon } from 'lucide-react'
-import { fetchCategories } from '@/modules/finance/api/categories'
+import { LogOut, Sun, Moon } from 'lucide-react'
 import { changePassword } from '@/core/api/auth'
 import { useAuth } from '@/core/contexts/AuthContext'
 import { useTheme } from '@/core/contexts/ThemeContext'
-import { AddCategoryDialog } from '@/modules/finance/components/categories/AddCategoryDialog'
-import { CategoryList } from '@/modules/finance/components/categories/CategoryList'
 import { toast } from '@/core/components/ui/toast'
+import { MODULES } from '@/modules/registry'
 import s from './SettingsPage.module.scss'
 
 interface ApiError {
@@ -21,8 +18,6 @@ function extractMessage(err: unknown): string {
   return msg ?? 'Something went wrong'
 }
 
-type CatTab = 'expense' | 'income'
-
 function formatBuild(iso: string): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return 'unknown'
@@ -32,28 +27,9 @@ function formatBuild(iso: string): string {
   })
 }
 
-function CategoriesSkeleton() {
-  return (
-    <div className={s.catGrid}>
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className={s.catCard} style={{ opacity: 0.5 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--border)' }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ height: 14, width: 80, background: 'var(--border)', borderRadius: 4 }} />
-            <div style={{ height: 11, width: 50, background: 'var(--border)', borderRadius: 4 }} />
-          </div>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--border)' }} />
-        </div>
-      ))}
-    </div>
-  )
-}
-
 export function SettingsPage() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [catTab, setCatTab] = useState<CatTab>('expense')
   const [currentPw, setCurrentPw] = useState('')
   const [newPw, setNewPw] = useState('')
   const [confirmPw, setConfirmPw] = useState('')
@@ -106,11 +82,6 @@ export function SettingsPage() {
     }
   }
 
-  const { data: categories, isLoading } = useQuery({
-    queryKey: ['categories'],
-    queryFn: fetchCategories,
-  })
-
   const initial = user?.username?.[0]?.toUpperCase() ?? 'U'
 
   return (
@@ -118,38 +89,12 @@ export function SettingsPage() {
       <header className={s.pageHead}>
         <div>
           <h1 className={s.h1}>Settings</h1>
-          <div className={s.pageSub}>Categories &amp; account</div>
+          <div className={s.pageSub}>Modules &amp; account</div>
         </div>
       </header>
 
-      {/* Categories */}
-      <div className={clsx(s.card, s.settingsCard)}>
-        <div className={s.cardHead}>
-          <h2 className={s.h3}>Categories</h2>
-          <button className={s.btnSecondary} onClick={() => setDialogOpen(true)}>
-            <Plus size={14} /> New category
-          </button>
-        </div>
-        <div className={s.tabs}>
-          <button
-            className={clsx(s.tab, catTab === 'expense' && s.active)}
-            onClick={() => setCatTab('expense')}
-          >
-            Expenses
-          </button>
-          <button
-            className={clsx(s.tab, catTab === 'income' && s.active)}
-            onClick={() => setCatTab('income')}
-          >
-            Income
-          </button>
-        </div>
-        {isLoading ? (
-          <CategoriesSkeleton />
-        ) : (
-          <CategoryList categories={categories ?? []} type={catTab} />
-        )}
-      </div>
+      {/* Module sections (Finance → Categories, …) */}
+      {MODULES.map(({ id, settingsSection: Section }) => Section && <Section key={id} />)}
 
       {/* Appearance */}
       <div className={clsx(s.card, s.settingsCard)}>
@@ -280,7 +225,6 @@ export function SettingsPage() {
         </div>
       </div>
 
-      <AddCategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   )
 }

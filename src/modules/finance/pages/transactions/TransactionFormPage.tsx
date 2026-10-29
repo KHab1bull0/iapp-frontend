@@ -26,7 +26,7 @@ export function TransactionFormPage() {
   const isEdit = Boolean(id)
 
   useEffect(() => {
-    if (!isMobile) navigate('/transactions', { replace: true })
+    if (!isMobile) navigate('/finance/transactions', { replace: true })
   }, [isMobile, navigate])
 
   const { data: transaction, isLoading, isError } = useQuery({
@@ -35,7 +35,7 @@ export function TransactionFormPage() {
     enabled: isEdit,
   })
 
-  const close = () => navigate('/transactions')
+  const close = () => navigate('/finance/transactions')
 
   return (
     <div className={s.page}>

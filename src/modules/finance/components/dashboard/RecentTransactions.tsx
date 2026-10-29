@@ -15,7 +15,7 @@ export function RecentTransactions({ transactions }: Props) {
     <section className={s.recent}>
       <div className={s.cardHead}>
         <h2 className={s.h3}>Recent transactions</h2>
-        <button className={s.link} onClick={() => navigate('/transactions')}>View all</button>
+        <button className={s.link} onClick={() => navigate('/finance/transactions')}>View all</button>
       </div>
       <div className={clsx(s.card, s.recentList)}>
         {transactions.length === 0 ? (

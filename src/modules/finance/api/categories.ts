@@ -16,22 +16,22 @@ export interface CreateCategoryDto {
 }
 
 export const fetchCategories = async (): Promise<Category[]> => {
-  const { data } = await api.get<Category[]>('/categories')
+  const { data } = await api.get<Category[]>('/finance/categories')
   return data
 }
 
 export type UpdateCategoryDto = Partial<CreateCategoryDto>
 
 export const createCategory = async (dto: CreateCategoryDto): Promise<Category> => {
-  const { data } = await api.post<Category>('/categories', dto)
+  const { data } = await api.post<Category>('/finance/categories', dto)
   return data
 }
 
 export const updateCategory = async (id: string, dto: UpdateCategoryDto): Promise<Category> => {
-  const { data } = await api.patch<Category>(`/categories/${id}`, dto)
+  const { data } = await api.patch<Category>(`/finance/categories/${id}`, dto)
   return data
 }
 
 export const deleteCategory = async (id: string): Promise<void> => {
-  await api.delete(`/categories/${id}`)
+  await api.delete(`/finance/categories/${id}`)
 }

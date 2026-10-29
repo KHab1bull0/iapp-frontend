@@ -165,3 +165,28 @@
     &:active { transform: scale(0.96); }
   }
 }
+
+// Shown by the FAB when several modules offer something to add.
+.quickAddList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quickAddItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  border: none;
+  border-radius: $radius-md;
+  background: transparent;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover { background: var(--row-hover); }
+}

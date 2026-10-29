@@ -43,7 +43,7 @@ export const fetchTransactions = async (
   page = 1,
   limit = 20,
 ): Promise<PaginatedTransactions> => {
-  const { data } = await api.get<PaginatedTransactions>('/transactions', {
+  const { data } = await api.get<PaginatedTransactions>('/finance/transactions', {
     params: { ...filters, page, limit },
   })
   return data
@@ -51,12 +51,12 @@ export const fetchTransactions = async (
 
 /** Used by the edit page, which may be opened from a URL with no row in hand. */
 export const fetchTransaction = async (id: string): Promise<Transaction> => {
-  const { data } = await api.get<Transaction>(`/transactions/${id}`)
+  const { data } = await api.get<Transaction>(`/finance/transactions/${id}`)
   return data
 }
 
 export const createTransaction = async (dto: CreateTransactionDto): Promise<Transaction> => {
-  const { data } = await api.post<Transaction>('/transactions', dto)
+  const { data } = await api.post<Transaction>('/finance/transactions', dto)
   return data
 }
 
@@ -64,10 +64,10 @@ export const updateTransaction = async (
   id: string,
   dto: UpdateTransactionDto,
 ): Promise<Transaction> => {
-  const { data } = await api.patch<Transaction>(`/transactions/${id}`, dto)
+  const { data } = await api.patch<Transaction>(`/finance/transactions/${id}`, dto)
   return data
 }
 
 export const deleteTransaction = async (id: string): Promise<void> => {
-  await api.delete(`/transactions/${id}`)
+  await api.delete(`/finance/transactions/${id}`)
 }

@@ -125,7 +125,7 @@ export function TransactionList({
 
   // Touch layouts get a full page; desktop keeps the dialog.
   function openEdit(tx: Transaction) {
-    if (isMobile) navigate(`/transactions/${tx.id}/edit`)
+    if (isMobile) navigate(`/finance/transactions/${tx.id}/edit`)
     else setEditing(tx)
   }
 

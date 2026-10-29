@@ -1,22 +1,40 @@
 import clsx from 'clsx'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ArrowLeftRight, Settings, Wallet, PanelLeft, Sun, Moon, LogOut } from 'lucide-react'
+import { House, Settings, LayoutGrid, PanelLeft, Sun, Moon, LogOut, type LucideIcon } from 'lucide-react'
 import { useAuth } from '@/core/contexts/AuthContext'
 import { useTheme } from '@/core/contexts/ThemeContext'
+import type { ModuleManifest } from '@/core/modules/types'
 import s from './Sidebar.module.scss'
 
-const NAV_ITEMS = [
-  { to: '/',             icon: LayoutDashboard, label: 'Dashboard'    },
-  { to: '/transactions', icon: ArrowLeftRight,  label: 'Transactions' },
-  { to: '/settings',     icon: Settings,        label: 'Settings'     },
-]
-
 interface SidebarProps {
+  modules: ModuleManifest[]
   collapsed: boolean
   onToggle: () => void
 }
 
-export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+interface NavItemProps {
+  to: string
+  icon: LucideIcon
+  label: string
+  end?: boolean
+  collapsed: boolean
+}
+
+function NavItem({ to, icon: Icon, label, end, collapsed }: NavItemProps) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) => clsx(s.navItem, isActive && s.active)}
+      title={collapsed ? label : undefined}
+    >
+      <Icon size={18} />
+      {!collapsed && <span>{label}</span>}
+    </NavLink>
+  )
+}
+
+export function Sidebar({ modules, collapsed, onToggle }: SidebarProps) {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const initial = user?.username?.[0]?.toUpperCase() ?? 'U'
@@ -26,7 +44,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <div className={s.sidebarTop}>
         <div className={s.logo}>
           <div className={s.logoMark}>
-            <Wallet size={18} />
+            <LayoutGrid size={18} />
           </div>
           {!collapsed && <span className={s.logoWord}>IAPP</span>}
         </div>
@@ -38,18 +56,25 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       </div>
 
       <nav className={s.nav}>
-        {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/'}
-            className={({ isActive }) => clsx(s.navItem, isActive && s.active)}
-            title={collapsed ? label : undefined}
-          >
-            <Icon size={18} />
-            {!collapsed && <span>{label}</span>}
-          </NavLink>
+        <NavItem to="/" end icon={House} label="Home" collapsed={collapsed} />
+
+        {modules.map((m) => (
+          <div key={m.id} className={s.navGroup}>
+            {!collapsed && <div className={s.navGroupLabel}>{m.name}</div>}
+            {m.pages.map((p) => (
+              <NavItem
+                key={p.path}
+                to={p.path}
+                end={p.end}
+                icon={p.icon}
+                label={p.label}
+                collapsed={collapsed}
+              />
+            ))}
+          </div>
         ))}
+
+        <NavItem to="/settings" icon={Settings} label="Settings" collapsed={collapsed} />
       </nav>
 
       <div className={s.sidebarBottom}>

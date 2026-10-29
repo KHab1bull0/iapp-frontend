@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
-import { Wallet } from 'lucide-react'
+import { LayoutGrid } from 'lucide-react'
 import api from '@/core/api/axios'
 import { useAuth } from '@/core/contexts/AuthContext'
 import s from './AuthPage.module.scss'
@@ -56,7 +56,7 @@ export function AuthPage() {
     <div className={s.authPage}>
       <div className={s.authBrand}>
         <div className={s.logoMark}>
-          <Wallet size={18} />
+          <LayoutGrid size={18} />
         </div>
         <span className={s.authBrandName}>IAPP</span>
       </div>

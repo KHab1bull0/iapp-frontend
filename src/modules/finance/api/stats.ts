@@ -35,7 +35,7 @@ export interface DashboardStats {
 }
 
 export async function fetchDashboard(month?: string): Promise<DashboardStats> {
-  const { data } = await api.get<DashboardStats>('/stats/dashboard', {
+  const { data } = await api.get<DashboardStats>('/finance/stats/dashboard', {
     params: { month },
   })
   return data

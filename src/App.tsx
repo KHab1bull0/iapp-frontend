@@ -1,15 +1,17 @@
+import { Suspense, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Navigate, Outlet, useRoutes, type RouteObject } from 'react-router-dom'
 import { AuthProvider } from '@/core/contexts/AuthContext'
 import { ThemeProvider } from '@/core/contexts/ThemeContext'
-import { MobileFilterProvider } from '@/modules/finance/MobileFilterContext'
 import { ProtectedRoute } from '@/core/components/ProtectedRoute'
+import { LegacyRedirect } from '@/core/components/LegacyRedirect'
 import { ToastHost } from '@/core/components/ui/toast'
 import { AppLayout } from '@/core/layout/AppLayout'
+import type { ModuleManifest } from '@/core/modules/types'
+import { MODULES } from '@/modules/registry'
 import { AuthPage } from '@/pages/auth'
-import { DashboardPage } from '@/modules/finance/pages/overview'
-import { TransactionsPage, TransactionFormPage } from '@/modules/finance/pages/transactions'
 import { SettingsPage } from '@/pages/settings'
+import { MenuPage } from '@/pages/menu'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,43 +22,73 @@ const queryClient = new QueryClient({
   },
 })
 
+function buildRoutes(modules: ModuleManifest[]): RouteObject[] {
+  return [
+    { path: '/auth', element: <AuthPage /> },
+    {
+      element: <ProtectedRoute />,
+      children: [
+        // Full-screen tasks (a module's add/edit pages) sit OUTSIDE AppLayout:
+        // they carry neither the mobile header nor the bottom nav, bring their
+        // own back button and own the whole viewport.
+        ...modules
+          .filter((m) => m.fullscreenRoutes)
+          .map((m) => ({
+            path: m.basePath,
+            element: (
+              <Suspense fallback={null}>
+                <Outlet />
+              </Suspense>
+            ),
+            children: m.fullscreenRoutes,
+          })),
+        {
+          element: <AppLayout modules={modules} />,
+          children: [
+            { index: true, element: <Navigate to="/finance" replace /> },
+            ...modules.map((m) => ({ path: m.basePath, children: m.routes })),
+            { path: 'settings', element: <SettingsPage /> },
+            { path: 'menu', element: <MenuPage /> },
+          ],
+        },
+        { path: 'transactions/*', element: <LegacyRedirect /> },
+      ],
+    },
+    { path: '*', element: <Navigate to="/" replace /> },
+  ]
+}
+
+const routes = buildRoutes(MODULES)
+
+function AppRoutes() {
+  return useRoutes(routes)
+}
+
+/** Wraps children in every module's provider, first module outermost. */
+function ModuleProviders({ children }: { children: ReactNode }) {
+  return MODULES.reduceRight<ReactNode>((inner, { id, provider: Provider }) => {
+    return Provider ? <Provider key={id}>{inner}</Provider> : inner
+  }, children)
+}
+
 export default function App() {
   return (
     <ThemeProvider>
-      <MobileFilterProvider>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<AuthPage />} />
-              <Route element={<ProtectedRoute />}>
-                {/*
-                  Add/edit sits OUTSIDE AppLayout: it is a full-screen task, so
-                  it carries neither the mobile header nor the bottom nav. It
-                  brings its own back button and owns the whole viewport.
-                  Touch-only — desktop opens the dialog and redirects here.
-                */}
-                <Route path="transactions/new" element={<TransactionFormPage />} />
-                <Route path="transactions/:id/edit" element={<TransactionFormPage />} />
+        <ModuleProviders>
+          <AuthProvider>
+            <BrowserRouter>
+              <AppRoutes />
 
-                <Route element={<AppLayout />}>
-                  <Route index element={<DashboardPage />} />
-                  <Route path="transactions" element={<TransactionsPage />} />
-                  <Route path="settings" element={<SettingsPage />} />
-                </Route>
-              </Route>
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-
-            {/*
-              Global, not per-layout: the add/edit page lives outside AppLayout
-              and still toasts on save.
-            */}
-            <ToastHost />
-          </BrowserRouter>
-        </AuthProvider>
+              {/*
+                Global, not per-layout: full-screen module pages live outside
+                AppLayout and still toast on save.
+              */}
+              <ToastHost />
+            </BrowserRouter>
+          </AuthProvider>
+        </ModuleProviders>
       </QueryClientProvider>
-      </MobileFilterProvider>
     </ThemeProvider>
   )
 }
