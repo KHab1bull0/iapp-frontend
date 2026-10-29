@@ -1,4 +1,4 @@
-import { useAuth } from '@/core/contexts/AuthContext'
+import { useProfile } from '@/core/hooks/useProfile'
 import { ModuleCardBoundary } from '@/core/components/ModuleCardBoundary'
 import { formatFullDate } from '@/core/lib/format'
 import { MODULES } from '@/modules/registry'
@@ -12,7 +12,7 @@ function greeting(hour: number): string {
 
 /** Today across every module: each one contributes its own card. */
 export function HomePage() {
-  const { user } = useAuth()
+  const { displayName } = useProfile()
   const now = new Date()
 
   return (
@@ -20,7 +20,7 @@ export function HomePage() {
       <header>
         <h1 className={s.h1}>
           {greeting(now.getHours())}
-          {user ? `, ${user.username}` : ''}
+          {displayName ? `, ${displayName}` : ''}
         </h1>
         <div className={s.pageSub}>{formatFullDate(now)}</div>
       </header>

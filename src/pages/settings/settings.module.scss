@@ -1,0 +1,481 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.page {
+  padding: 32px;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  @include bp-tablet { padding: 24px; }
+  @include bp-mobile { padding: 16px; gap: 20px; }
+}
+
+.pageHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  > div { min-width: 0; }
+}
+
+.h1 {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--fg-strong);
+  white-space: nowrap;
+  margin: 0;
+
+  @include bp-mobile { font-size: 22px; line-height: 28px; }
+}
+
+.pageSub {
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin-top: 4px;
+}
+
+.card {
+  @include card-base;
+}
+
+.settingsCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// No margin-bottom: .settingsCard is a flex column with gap: 16px, so a margin
+// here stacked on top of the gap and produced 34px of dead space.
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.h3 {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 600;
+  color: var(--fg-strong);
+  margin: 0;
+}
+
+.btnSecondary {
+  @include btn-secondary;
+  @include btn-size-sm;
+}
+
+.btnDestructive {
+  @include btn-destructive;
+  @include btn-size-sm;
+}
+
+.tabs {
+  @include tabs-base;
+}
+
+.tab {
+  @include tab-base;
+
+  &.active {
+    background: var(--bg-elev);
+    color: var(--fg-strong);
+    box-shadow: 0 1px 2px rgba(15, 17, 23, 0.08);
+  }
+}
+
+.catGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.catCard {
+  display: grid;
+  grid-template-columns: 40px 1fr 28px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-elev);
+}
+
+.settingsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.rowTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.rowSub {
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin-top: 2px;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-pill;
+  background: var(--avatar-bg);
+  color: var(--avatar-fg);
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.themeSegment {
+  display: inline-flex;
+  background: var(--slate-100);
+  border-radius: $radius-md;
+  padding: 4px;
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+.pwForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+  @include field-base;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.inputWrap {
+  @include input-wrap-base;
+}
+
+.input {
+  flex: 1;
+  height: 40px;
+  padding: 0 12px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--fg-strong);
+
+  &::placeholder { color: var(--fg-muted); }
+}
+
+.formError {
+  font-size: 13px;
+  color: var(--danger);
+  padding: 10px 12px;
+  background: var(--danger-soft);
+  border-radius: $radius-sm;
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  min-height: 36px;
+  border-radius: $radius-sm;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: background $t-fast, color $t-fast;
+
+  &.active {
+    background: var(--bg-elev);
+    color: var(--fg-strong);
+    box-shadow: 0 1px 2px rgba(15, 17, 23, 0.08);
+  }
+}
+
+// Settings was the only form left without the iOS anti-zoom rule, so focusing a
+// password field zoomed the whole page in.
+@supports (-webkit-touch-callout: none) {
+  .input { font-size: 16px; }
+}
+
+// ── Settings shell ─────────────────────────────────────────────────────────
+// Desktop: a section list on the left, the open page on the right.
+// Mobile: /settings is the list itself; each page has a back link to it.
+
+.layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 32px;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 32px;
+
+  @include bp-tablet {
+    display: block;
+    padding: 0;
+  }
+}
+
+.sideNav {
+  position: sticky;
+  top: 32px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @include bp-tablet { display: none; }
+}
+
+.sideNavTitle {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  font-weight: 700;
+  color: var(--fg-strong);
+  margin: 0;
+}
+
+.sideGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.groupTitle {
+  padding: 0 12px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.sideItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: $radius-md;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg);
+  text-decoration: none;
+  transition: background $t-fast, color $t-fast;
+
+  &:hover { background: var(--row-hover); }
+  &.active { background: var(--hover-bg); color: var(--primary); }
+}
+
+.sideFooter {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+// A settings page inside the shell drops .page's own padding and width.
+.layout .page {
+  padding: 0;
+  max-width: none;
+
+  @include bp-tablet { padding: 16px; }
+}
+
+.back {
+  display: none;
+
+  @include bp-tablet {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: -6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--primary);
+    text-decoration: none;
+  }
+}
+
+// ── Mobile hub (/settings) ─────────────────────────────────────────────────
+
+.hub {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+}
+
+.profileCard {
+  @include card-base;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.profileName {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.hubGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.listRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  color: var(--fg);
+  text-decoration: none;
+
+  & + & { border-top: 1px solid var(--border); }
+  &:active { background: var(--row-hover); }
+}
+
+.iconTile {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-sm;
+  background: var(--hover-bg);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.rowText {
+  flex: 1;
+  min-width: 0;
+}
+
+.chevron {
+  color: var(--fg-muted);
+  flex-shrink: 0;
+}
+
+.hubFooter {
+  text-align: center;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+// ── Profile ────────────────────────────────────────────────────────────────
+
+.hero {
+  @include card-base;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatarLg {
+  width: 64px;
+  height: 64px;
+  border-radius: $radius-pill;
+  background: var(--avatar-bg);
+  color: var(--avatar-fg);
+  font-size: 24px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.heroName {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--fg-strong);
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.inputReadOnly {
+  color: var(--fg-muted);
+  cursor: default;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btnPrimary {
+  @include btn-base;
+  @include btn-size-md;
+  @include btn-primary;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: $radius-pill;
+  background: var(--slate-100);
+  color: var(--fg-muted);
+  font-size: 11px;
+  font-weight: 600;
+  vertical-align: middle;
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+.select {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  background: var(--bg-elev);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 14px;
+
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}

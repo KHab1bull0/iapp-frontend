@@ -36,7 +36,9 @@ describe('AppLayout driven by the registry', () => {
       '/',
       '/finance',
       '/finance/transactions',
+      '/finance/settings',
       '/settings',
+      '/settings/profile', // the user block
     ])
   })
 

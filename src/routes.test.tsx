@@ -41,4 +41,17 @@ describe('buildRoutes', () => {
     }
     expect(elementTypes('/notes', [notes])).toContain(AppLayout)
   })
+
+  test('finance settings and every settings page render inside the shell', () => {
+    for (const path of [
+      '/finance/settings',
+      '/settings',
+      '/settings/profile',
+      '/settings/security',
+      '/settings/preferences',
+      '/settings/about',
+    ]) {
+      expect(elementTypes(path, [finance]), path).toContain(AppLayout)
+    }
+  })
 })

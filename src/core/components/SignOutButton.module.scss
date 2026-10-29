@@ -1,0 +1,32 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+// ── Sign out ───────────────────────────────────────────────────────────────
+// Its own control, outside every group, so it is never tapped by accident
+// while scrolling a list.
+
+.signOut {
+  @include btn-base;
+  @include btn-size-lg;
+  width: 100%;
+  justify-content: center;
+  gap: 8px;
+  background: var(--bg-elev);
+  color: var(--danger);
+  border: 1px solid var(--border);
+
+  &:hover { background: var(--danger-soft); border-color: var(--danger); }
+}
+
+.signOutCompact {
+  @include btn-base;
+  @include btn-size-sm;
+  width: 100%;
+  justify-content: flex-start;
+  gap: 8px;
+  background: transparent;
+  color: var(--danger);
+  border: none;
+
+  &:hover { background: var(--danger-soft); }
+}

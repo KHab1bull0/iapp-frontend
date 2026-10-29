@@ -5,8 +5,8 @@ import { Plus } from 'lucide-react'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { AddCategoryDialog } from '@/modules/finance/components/categories/AddCategoryDialog'
 import { CategoryList } from '@/modules/finance/components/categories/CategoryList'
-// Shell styles, so the section looks like every other Settings card.
-import s from '@/pages/settings/SettingsPage.module.scss'
+// Shell styles, so the page looks like the app's other settings pages.
+import s from '@/pages/settings/settings.module.scss'
 
 type CatTab = 'expense' | 'income'
 
@@ -27,8 +27,8 @@ function CategoriesSkeleton() {
   )
 }
 
-/** Finance's block in Settings: managing income and expense categories. */
-export function FinanceSettingsSection() {
+/** Finance → Settings: the module's own preferences, starting with categories. */
+export function FinanceSettingsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [catTab, setCatTab] = useState<CatTab>('expense')
 
@@ -38,7 +38,14 @@ export function FinanceSettingsSection() {
   })
 
   return (
-    <>
+    <div className={s.page}>
+      <header className={s.pageHead}>
+        <div>
+          <h1 className={s.h1}>Finance settings</h1>
+          <div className={s.pageSub}>Categories for your income and expenses</div>
+        </div>
+      </header>
+
       <div className={clsx(s.card, s.settingsCard)}>
         <div className={s.cardHead}>
           <h2 className={s.h3}>Categories</h2>
@@ -68,6 +75,6 @@ export function FinanceSettingsSection() {
       </div>
 
       <AddCategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-    </>
+    </div>
   )
 }

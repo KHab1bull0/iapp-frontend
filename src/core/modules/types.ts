@@ -43,7 +43,8 @@ export interface ModuleManifest {
   headerAction?: ComponentType<{ fallback: ReactNode }>
   homeCard?: ComponentType
   quickAdd?: QuickAddAction[]
-  settingsSection?: ComponentType
+  /** The module's own settings page, listed under Modules in Settings. */
+  settingsPath?: string
 }
 
 export type BottomNavItem =

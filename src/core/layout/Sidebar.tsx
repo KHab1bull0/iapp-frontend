@@ -1,8 +1,10 @@
 import clsx from 'clsx'
-import { NavLink } from 'react-router-dom'
-import { House, Settings, LayoutGrid, PanelLeft, Sun, Moon, LogOut, type LucideIcon } from 'lucide-react'
+import { Link, NavLink } from 'react-router-dom'
+import { House, Settings, LayoutGrid, PanelLeft, Sun, Moon, type LucideIcon } from 'lucide-react'
 import { useAuth } from '@/core/contexts/AuthContext'
 import { useTheme } from '@/core/contexts/ThemeContext'
+import { useProfile } from '@/core/hooks/useProfile'
+import { SignOutButton } from '@/core/components/SignOutButton'
 import type { ModuleManifest } from '@/core/modules/types'
 import s from './Sidebar.module.scss'
 
@@ -35,9 +37,10 @@ function NavItem({ to, icon: Icon, label, end, collapsed }: NavItemProps) {
 }
 
 export function Sidebar({ modules, collapsed, onToggle }: SidebarProps) {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
+  const { displayName } = useProfile()
   const { theme, toggleTheme } = useTheme()
-  const initial = user?.username?.[0]?.toUpperCase() ?? 'U'
+  const initial = displayName[0]?.toUpperCase() ?? 'U'
 
   return (
     <aside className={clsx(s.sidebar, collapsed && s.collapsed)}>
@@ -82,17 +85,17 @@ export function Sidebar({ modules, collapsed, onToggle }: SidebarProps) {
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           {!collapsed && <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>}
         </button>
-        <div className={s.user}>
+        <Link to="/settings/profile" className={s.user} title={collapsed ? displayName : undefined}>
           <div className={s.avatar}>{initial}</div>
           {!collapsed && (
             <div className={s.userMeta}>
-              <div className={s.userName}>{user?.username}</div>
-              <button className={s.signOutBtn} onClick={logout}>
-                <LogOut size={11} /> Sign out
-              </button>
+              <div className={s.userName}>{displayName}</div>
+              <div className={s.userHandle}>@{user?.username}</div>
             </div>
           )}
-        </div>
+        </Link>
+        {/* Apart from the navigation, and confirmed before it acts. */}
+        {!collapsed && <SignOutButton variant="compact" />}
         {collapsed && (
           <button className={s.collapseBtnCentered} onClick={onToggle} aria-label="Expand sidebar">
             <PanelLeft size={16} style={{ transform: 'rotate(180deg)' }} />

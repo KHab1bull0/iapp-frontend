@@ -7,7 +7,14 @@ import { AppLayout } from '@/core/layout/AppLayout'
 import type { ModuleManifest } from '@/core/modules/types'
 import { AuthPage } from '@/pages/auth'
 import { HomePage } from '@/pages/home'
-import { SettingsPage } from '@/pages/settings'
+import {
+  AboutPage,
+  PreferencesPage,
+  ProfilePage,
+  SecurityPage,
+  SettingsIndex,
+  SettingsLayout,
+} from '@/pages/settings'
 import { MenuPage } from '@/pages/menu'
 
 export function buildRoutes(modules: ModuleManifest[]): RouteObject[] {
@@ -40,7 +47,17 @@ export function buildRoutes(modules: ModuleManifest[]): RouteObject[] {
           children: [
             { index: true, element: <HomePage /> },
             ...modules.map((m) => ({ path: m.basePath, children: m.routes })),
-            { path: 'settings', element: <SettingsPage /> },
+            {
+              path: 'settings',
+              element: <SettingsLayout modules={modules} />,
+              children: [
+                { index: true, element: <SettingsIndex /> },
+                { path: 'profile', element: <ProfilePage /> },
+                { path: 'security', element: <SecurityPage /> },
+                { path: 'preferences', element: <PreferencesPage /> },
+                { path: 'about', element: <AboutPage /> },
+              ],
+            },
             { path: 'menu', element: <MenuPage /> },
           ],
         },

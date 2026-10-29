@@ -1,1 +1,6 @@
-export { SettingsPage } from './SettingsPage'
+export { SettingsLayout } from './SettingsLayout'
+export { SettingsIndex } from './SettingsIndex'
+export { ProfilePage } from './ProfilePage'
+export { SecurityPage } from './SecurityPage'
+export { PreferencesPage } from './PreferencesPage'
+export { AboutPage } from './AboutPage'

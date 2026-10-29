@@ -11,3 +11,6 @@ export const TransactionsPage = lazy(() =>
 export const TransactionFormPage = lazy(() =>
   import('./transactions').then((m) => ({ default: m.TransactionFormPage })),
 )
+export const FinanceSettingsPage = lazy(() =>
+  import('./settings').then((m) => ({ default: m.FinanceSettingsPage })),
+)
