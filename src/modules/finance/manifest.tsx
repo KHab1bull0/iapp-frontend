@@ -1,4 +1,4 @@
-import { ArrowLeftRight, ChartColumn, Plus, Wallet } from 'lucide-react'
+import { ArrowLeftRight, ChartColumn, Wallet } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
 import { MobileFilterProvider } from './MobileFilterContext'
 import { FinanceHeaderAction } from './FinanceHeaderAction'
@@ -32,9 +32,6 @@ export const finance: ModuleManifest = {
   ],
   provider: MobileFilterProvider,
   headerAction: FinanceHeaderAction,
-  quickAdd: [
-    { id: 'add-transaction', label: 'Add transaction', icon: Plus, to: '/finance/transactions/new' },
-  ],
   homeCard: FinanceHomeCard,
   settingsPath: '/finance/settings',
 }

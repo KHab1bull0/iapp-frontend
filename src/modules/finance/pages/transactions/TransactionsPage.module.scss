@@ -9,8 +9,42 @@
   flex-direction: column;
   gap: 24px;
 
+  // Room under the last row for the floating add button.
+  padding-bottom: 104px;
+
   @include bp-tablet { padding: 24px; }
   @include bp-mobile { padding: 16px; gap: 20px; }
+}
+
+// Floating add button. On phones it sits above the bottom nav (the shell's
+// .scroll already reserves --fab-clearance); on desktop, bottom-right.
+.fab {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 40;
+  width: 56px;
+  height: 56px;
+  border-radius: $radius-pill;
+  border: none;
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 8px 22px rgba(22, 163, 74, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform $t-fast, background $t-fast;
+
+  &:hover { background: var(--primary-hover); }
+  &:active { transform: scale(0.96); }
+
+  @include bp-tablet {
+    width: 52px;
+    height: 52px;
+    right: calc(20px + var(--safe-right));
+    bottom: calc(var(--bottom-nav-h) + 16px);
+  }
 }
 
 .pageHead {

@@ -61,6 +61,7 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
         aria-label="Filters"
         inert={!open}
       >
+        <div className={s.drawerHandle} />
         <div className={s.drawerHead}>
           <span className={s.drawerTitle}>Filters</span>
           <button className={s.iconBtn} onClick={onClose} aria-label="Close filters">
@@ -132,7 +133,6 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
             <Search size={15} /> Search
           </button>
         </div>
-        <div className={s.drawerHandle} />
       </div>
     </>,
     document.body,

@@ -17,35 +17,35 @@
 }
 
 .drawer {
+  // A bottom sheet: it rises from the bottom edge, where the thumb already is.
   position: fixed;
-  top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
   z-index: 9999;
   background: var(--bg-elev);
-  border-radius: 0 0 20px 20px;
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 8px 32px rgba(15, 17, 23, 0.14);
-  transform: translateY(-100%);
+  border-radius: 20px 20px 0 0;
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -8px 32px rgba(15, 17, 23, 0.14);
+  transform: translateY(100%);
   transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
   overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   max-height: 85dvh;
-  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 
   &.open { transform: translateY(0); }
 }
 
-// Rendered last, so it sits at the *bottom* edge of this top-anchored drawer.
-// The old `margin: 0 auto 12px` left it glued to the footer's border.
+// The grab handle at the top edge of the sheet.
 .drawerHandle {
   flex-shrink: 0;
   width: 36px;
   height: 4px;
   background: var(--border-strong);
   border-radius: $radius-pill;
-  margin: 10px auto 12px;
+  margin: 10px auto 2px;
 }
 
 .drawerHead {

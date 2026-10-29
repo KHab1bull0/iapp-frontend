@@ -70,8 +70,10 @@ describe('AppLayout driven by the registry', () => {
     expect(screen.queryByRole('navigation', { name: 'Finance pages' })).toBeNull()
   })
 
-  test('the FAB goes straight to adding a transaction', () => {
+  test('the shell shows no add button: finance keeps its own on the transactions page', () => {
     renderShell('/')
-    expect(screen.getByRole('button', { name: 'Add transaction' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Add transaction' })).toBeNull()
+    renderShell('/finance')
+    expect(screen.queryByRole('button', { name: 'Add transaction' })).toBeNull()
   })
 })

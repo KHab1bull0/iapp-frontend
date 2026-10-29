@@ -83,18 +83,6 @@ export function TransactionsPage() {
 
   return (
     <div className={s.page}>
-      <header className={s.pageHead}>
-        <div>
-          <h1 className={s.h1}>Transactions</h1>
-          <div className={s.pageSub}>
-            {transactions.length > 0 ? `${transactions.length} records` : 'Track your income & expenses'}
-          </div>
-        </div>
-        <button className={s.btnPrimary} onClick={openAdd}>
-          <Plus size={14} /> Add
-        </button>
-      </header>
-
       <div className={s.desktopOnly}>
         <FiltersBar filters={filters} onChange={setFilters} categories={categories} />
       </div>
@@ -127,6 +115,12 @@ export function TransactionsPage() {
       )}
 
       <AddTransactionDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+
+      {/* The only way to add: this page's own floating button, on every width.
+          Phones get the full-screen form, desktop the dialog. */}
+      <button className={s.fab} onClick={openAdd} aria-label="Add transaction">
+        <Plus size={22} />
+      </button>
     </div>
   )
 }
