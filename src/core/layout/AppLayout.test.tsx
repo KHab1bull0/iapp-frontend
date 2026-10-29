@@ -5,22 +5,19 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ThemeProvider } from '@/core/contexts/ThemeContext'
 import { AuthProvider } from '@/core/contexts/AuthContext'
 import { finance } from '@/modules/finance/manifest'
-import { MobileFilterProvider } from '@/modules/finance/MobileFilterContext'
 import { AppLayout } from './AppLayout'
 
 function renderShell(path: string) {
   return render(
     <ThemeProvider>
       <QueryClientProvider client={new QueryClient()}>
-        <MobileFilterProvider>
-          <AuthProvider>
-            <MemoryRouter initialEntries={[path]}>
-              <Routes>
-                <Route path="*" element={<AppLayout modules={[finance]} />} />
-              </Routes>
-            </MemoryRouter>
-          </AuthProvider>
-        </MobileFilterProvider>
+        <AuthProvider>
+          <MemoryRouter initialEntries={[path]}>
+            <Routes>
+              <Route path="*" element={<AppLayout modules={[finance]} />} />
+            </Routes>
+          </MemoryRouter>
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>,
   )
@@ -63,6 +60,11 @@ describe('AppLayout driven by the registry', () => {
   test("finance settings is reached from Settings, so it shows no finance tabs", () => {
     renderShell('/finance/settings')
     expect(screen.queryByRole('navigation', { name: 'Finance pages' })).toBeNull()
+  })
+
+  test('there is no top header bar', () => {
+    renderShell('/finance')
+    expect(screen.queryByRole('banner')).toBeNull()
   })
 
   test('no module tabs on settings', () => {

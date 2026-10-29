@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { Plus, RefreshCw } from 'lucide-react'
 import { fetchTransactions, type TransactionFilters, type PaginatedTransactions } from '@/modules/finance/api/transactions'
 import { fetchCategories } from '@/modules/finance/api/categories'
-import { useMobileFilter } from '@/modules/finance/MobileFilterContext'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
+import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
 import { AddTransactionDialog } from '@/modules/finance/components/transactions/AddTransactionDialog'
 import { TransactionFilters as FiltersBar } from '@/modules/finance/components/transactions/TransactionFilters'
 import { FilterDrawer } from '@/modules/finance/components/transactions/FilterDrawer'
+import { TransactionToolbar } from '@/modules/finance/components/transactions/TransactionToolbar'
 import { TransactionList } from '@/modules/finance/components/transactions/TransactionList'
 import s from './TransactionsPage.module.scss'
 
@@ -44,7 +45,6 @@ export function TransactionsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [filters, setFilters] = useState<TransactionFilters>({})
-  const { setFilterOpen } = useMobileFilter()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
 
@@ -54,10 +54,9 @@ export function TransactionsPage() {
     else setDialogOpen(true)
   }
 
-  useEffect(() => {
-    setFilterOpen(() => setDrawerOpen(true))
-    return () => setFilterOpen(null)
-  }, [setFilterOpen])
+  // Search waits for typing to pause; the other filters apply at once.
+  const search = useDebouncedValue(filters.search, 300)
+  const query: TransactionFilters = { ...filters, search }
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -73,8 +72,8 @@ export function TransactionsPage() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedTransactions>({
-    queryKey: ['transactions', filters],
-    queryFn: ({ pageParam }) => fetchTransactions(filters, pageParam as number, 20),
+    queryKey: ['transactions', query],
+    queryFn: ({ pageParam }) => fetchTransactions(query, pageParam as number, 20),
     getNextPageParam: (last) => last.hasMore ? last.page + 1 : undefined,
     initialPageParam: 1,
   })
@@ -86,6 +85,13 @@ export function TransactionsPage() {
       <div className={s.desktopOnly}>
         <FiltersBar filters={filters} onChange={setFilters} categories={categories} />
       </div>
+
+      <TransactionToolbar
+        filters={filters}
+        onChange={setFilters}
+        categories={categories}
+        onOpenFilters={() => setDrawerOpen(true)}
+      />
 
       <FilterDrawer
         open={drawerOpen}

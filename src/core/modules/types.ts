@@ -39,8 +39,6 @@ export interface ModuleManifest {
   fullscreenRoutes?: RouteObject[]
   /** Wraps the whole app, for state shared between this module's pages and the shell. */
   provider?: ComponentType<{ children: ReactNode }>
-  /** Mobile header button while this module is active; renders `fallback` when it has nothing to show. */
-  headerAction?: ComponentType<{ fallback: ReactNode }>
   homeCard?: ComponentType
   quickAdd?: QuickAddAction[]
   /** The module's own settings page, listed under Modules in Settings. */

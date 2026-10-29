@@ -72,17 +72,6 @@ export function formatFullDate(d: Date): string {
   return fullDayFmt.format(d)
 }
 
-// No year — this one goes in the cramped mobile header.
-const headerDayFmt = new Intl.DateTimeFormat(LOCALE, {
-  weekday: 'long',
-  month: 'long',
-  day: 'numeric',
-})
-
-export function formatHeaderDate(d: Date): string {
-  return headerDayFmt.format(d)
-}
-
 /** "2026-07" -> "iyul" */
 export function formatMonthShort(yyyyMM: string): string {
   const [y, m] = yyyyMM.split('-')

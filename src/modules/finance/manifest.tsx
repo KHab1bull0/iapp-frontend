@@ -1,7 +1,5 @@
 import { ArrowLeftRight, ChartColumn, Wallet } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
-import { MobileFilterProvider } from './MobileFilterContext'
-import { FinanceHeaderAction } from './FinanceHeaderAction'
 import { FinanceHomeCard } from './FinanceHomeCard'
 import {
   DashboardPage,
@@ -30,8 +28,6 @@ export const finance: ModuleManifest = {
     { path: 'transactions/new', element: <TransactionFormPage /> },
     { path: 'transactions/:id/edit', element: <TransactionFormPage /> },
   ],
-  provider: MobileFilterProvider,
-  headerAction: FinanceHeaderAction,
   homeCard: FinanceHomeCard,
   settingsPath: '/finance/settings',
 }
