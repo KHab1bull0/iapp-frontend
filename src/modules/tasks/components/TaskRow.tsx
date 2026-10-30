@@ -9,7 +9,7 @@ interface Props {
   today: string
   /** Ticked: done today (Today page) or finished (a completed one-off). */
   done?: boolean
-  /** Omit for a check that only shows state (finished one-offs). */
+  /** Omit where tasks can't be ticked (All tasks): no check is shown. */
   onToggle?: (task: Task) => void
   /** While its completion is being saved, so a second tap can't complete it twice. */
   busy?: boolean
@@ -25,7 +25,7 @@ export function TaskRow({ task, today, done = false, onToggle, busy = false, onO
 
   return (
     <div className={clsx(s.row, done && s.done)}>
-      {onToggle ? (
+      {onToggle && (
         <button
           className={clsx(s.check, done && s.checked)}
           onClick={() => onToggle(task)}
@@ -34,10 +34,6 @@ export function TaskRow({ task, today, done = false, onToggle, busy = false, onO
         >
           {done && <Check size={14} strokeWidth={3} />}
         </button>
-      ) : (
-        <span className={clsx(s.check, done && s.checked)} aria-hidden="true">
-          {done && <Check size={14} strokeWidth={3} />}
-        </span>
       )}
 
       <button className={s.body} onClick={() => onOpen(task)}>

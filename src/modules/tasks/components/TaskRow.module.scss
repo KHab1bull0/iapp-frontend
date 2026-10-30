@@ -26,7 +26,6 @@
 
   &:hover { border-color: var(--primary); }
   &:disabled { opacity: 0.5; cursor: progress; }
-  &:not(button) { cursor: default; }
 
   &.checked {
     border-color: var(--primary);

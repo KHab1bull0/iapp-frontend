@@ -12,6 +12,7 @@ import {
   type Task,
 } from '@/modules/tasks/api/tasks'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
+import { byTime } from '@/modules/tasks/lib/repeat'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
 import s from '../TasksPages.module.scss'
 
@@ -60,7 +61,8 @@ export function TodayPage() {
   })
 
   const overdue = data?.overdue ?? []
-  const dueToday = data?.today ?? []
+  // Anything with a time goes first, by the clock.
+  const dueToday = byTime(data?.today ?? [])
   const done = data?.doneToday ?? []
 
   return (

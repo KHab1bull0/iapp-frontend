@@ -85,3 +85,9 @@ export function groupByDue(tasks: Task[], today: string): TaskGroup[] {
     (g) => g.tasks.length > 0,
   )
 }
+
+/** Tasks with a time first, earliest at the top; untimed ones after, in their order. */
+export function byTime(tasks: Task[]): Task[] {
+  const timed = tasks.filter((t) => t.dueTime).sort((a, b) => a.dueTime!.localeCompare(b.dueTime!))
+  return [...timed, ...tasks.filter((t) => !t.dueTime)]
+}

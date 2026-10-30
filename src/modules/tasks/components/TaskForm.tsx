@@ -153,6 +153,10 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
         </label>
       </div>
 
+      {!dueDate && (
+        <span className={s.hint}>Without a date it stays in All tasks and won't come up in Today.</span>
+      )}
+
       <div className={s.field}>
         <span className={s.label}>Repeat</span>
         <div className={s.segments} role="radiogroup" aria-label="Repeat">

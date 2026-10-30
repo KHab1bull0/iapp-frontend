@@ -88,4 +88,16 @@ describe('TodayPage', () => {
     fireEvent.click(tick)
     expect(api.completeTask).toHaveBeenCalledTimes(1)
   })
+
+  test('tasks with a time come first, earliest at the top', async () => {
+    api.fetchToday.mockResolvedValue({
+      overdue: [],
+      today: [t('u'), t('b', { dueTime: '09:30' }), t('e', { dueTime: '07:00' })],
+      doneToday: [],
+    })
+    renderPage()
+    await screen.findByText('U')
+    const titles = screen.getAllByRole('button', { name: /^Complete / }).map((b) => b.getAttribute('aria-label'))
+    expect(titles).toEqual(['Complete E', 'Complete B', 'Complete U'])
+  })
 })
