@@ -84,6 +84,16 @@ export function formatMonthLong(yyyyMM: string): string {
   return monthYearFmt.format(new Date(+y, +m - 1))
 }
 
+/** Local calendar date as YYYY-MM-DD (not UTC, which runs a day behind in the morning here). */
+export function ymd(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/** Today on this device, as YYYY-MM-DD. */
+export function todayYmd(): string {
+  return ymd(new Date())
+}
+
 /** Current month as "YYYY-MM". */
 export function currentMonth(): string {
   const d = new Date()

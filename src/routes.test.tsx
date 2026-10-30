@@ -6,6 +6,7 @@ import { AppLayout } from '@/core/layout/AppLayout'
 import { LegacyRedirect } from '@/core/components/LegacyRedirect'
 import type { ModuleManifest } from '@/core/modules/types'
 import { finance } from '@/modules/finance/manifest'
+import { tasks } from '@/modules/tasks/manifest'
 import { buildRoutes } from './routes'
 
 const elementTypes = (path: string, modules: ModuleManifest[]) =>
@@ -53,5 +54,12 @@ describe('buildRoutes', () => {
     ]) {
       expect(elementTypes(path, [finance]), path).toContain(AppLayout)
     }
+  })
+
+  test('tasks: Today and All tasks in the shell, the form full-screen', () => {
+    expect(elementTypes('/tasks', [finance, tasks])).toContain(AppLayout)
+    expect(elementTypes('/tasks/all', [finance, tasks])).toContain(AppLayout)
+    expect(elementTypes('/tasks/new', [finance, tasks])).not.toContain(AppLayout)
+    expect(elementTypes('/tasks/abc/edit', [finance, tasks])).not.toContain(AppLayout)
   })
 })

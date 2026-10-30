@@ -1,0 +1,77 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+
+  & + & { border-top: 1px solid var(--border); }
+}
+
+.check {
+  @include touch-target(10px);
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border-strong);
+  border-radius: $radius-pill;
+  background: transparent;
+  color: white;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background $t-fast, border-color $t-fast;
+
+  &:hover { border-color: var(--primary); }
+
+  &.checked {
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  .done & {
+    color: var(--fg-muted);
+    text-decoration: line-through;
+  }
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.overdue { color: var(--danger); font-weight: 500; }
+
+.repeat {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}

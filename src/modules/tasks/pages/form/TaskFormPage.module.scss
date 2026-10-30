@@ -1,0 +1,57 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+// Same full-screen shell as finance's TransactionFormPage.
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.head {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--mobile-header-h);
+  padding: 0 16px;
+  padding-top: var(--safe-top);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.backBtn {
+  @include touch-target(4px);
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: $radius-md;
+  background: transparent;
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.body {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 16px calc(24px + var(--safe-bottom));
+}
+
+.state {
+  @include empty-base;
+  color: var(--fg-muted);
+}

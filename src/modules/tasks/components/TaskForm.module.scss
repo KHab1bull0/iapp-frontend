@@ -1,0 +1,145 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  background: var(--bg-elev);
+  color: var(--fg-strong);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color $t-fast, box-shadow $t-fast;
+
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--ring-soft);
+  }
+
+  &::placeholder { color: var(--fg-muted); }
+
+  // iOS zooms the page into any field under 16px when it takes focus.
+  @supports (-webkit-touch-callout: none) { font-size: 16px; }
+}
+
+.textarea {
+  height: auto;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.segments {
+  display: flex;
+  padding: 3px;
+  border-radius: $radius-md;
+  background: var(--slate-100);
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+.segment {
+  flex: 1;
+  height: 34px;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: var(--fg-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &.active {
+    background: var(--bg-elev);
+    color: var(--fg-strong);
+    box-shadow: 0 1px 2px rgba(15, 17, 23, 0.08);
+  }
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.day {
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  background: var(--bg-elev);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &.active {
+    border-color: var(--primary);
+    background: var(--hover-bg);
+    color: var(--primary);
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.btnDanger {
+  @include btn-base;
+  @include btn-size-md;
+  margin-right: auto;
+  background: transparent;
+  color: var(--danger);
+  border-color: transparent;
+
+  &:hover { background: var(--danger-soft); }
+}
+
+.btnSecondary {
+  @include btn-secondary;
+  @include btn-size-md;
+}
+
+.btnPrimary {
+  @include btn-primary;
+  @include btn-size-md;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}

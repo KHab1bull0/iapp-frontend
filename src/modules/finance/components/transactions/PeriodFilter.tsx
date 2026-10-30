@@ -1,5 +1,6 @@
 import clsx from 'clsx'
-import { ymd, type Period, type TransactionFilterState } from './period'
+import { ymd } from '@/core/lib/format'
+import type { Period, TransactionFilterState } from './period'
 import s from './PeriodFilter.module.scss'
 
 const OPTIONS: { value: Period; label: string }[] = [

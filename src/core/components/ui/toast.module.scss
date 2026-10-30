@@ -50,6 +50,21 @@
   font-weight: 500;
 }
 
+.toastAction {
+  margin-left: 4px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover { background: var(--hover-bg); }
+}
+
 @keyframes toastIn {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }

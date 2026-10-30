@@ -1,0 +1,116 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+// Shared by Today and All tasks.
+.page {
+  padding: 32px;
+  padding-bottom: 104px; // room for the floating add button
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @include bp-tablet { padding: 16px; }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+
+  &.danger { color: var(--danger); }
+}
+
+.count {
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.list {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.toggle {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 4px;
+  border: none;
+  background: transparent;
+  color: var(--fg-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.empty {
+  @include empty-base;
+}
+
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.emptySub {
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+.btnSecondary {
+  @include btn-secondary;
+  @include btn-size-sm;
+}
+
+// Floating add button: above the bottom nav on phones, bottom-right on desktop.
+.fab {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 40;
+  width: 56px;
+  height: 56px;
+  border-radius: $radius-pill;
+  border: none;
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 8px 22px rgba(22, 163, 74, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform $t-fast, background $t-fast;
+
+  &:hover { background: var(--primary-hover); }
+  &:active { transform: scale(0.96); }
+
+  @include bp-tablet {
+    width: 52px;
+    height: 52px;
+    right: calc(20px + var(--safe-right));
+    bottom: calc(var(--bottom-nav-h) + 16px);
+  }
+}

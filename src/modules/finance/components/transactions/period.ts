@@ -1,3 +1,4 @@
+import { ymd } from '@/core/lib/format'
 import type { TransactionFilters } from '@/modules/finance/api/transactions'
 
 export type Period = 'week' | 'month' | 'all' | 'range'
@@ -9,11 +10,6 @@ export interface TransactionFilterState extends TransactionFilters {
 
 /** Transactions opens on the last week. */
 export const DEFAULT_FILTERS: TransactionFilterState = { period: 'week' }
-
-/** Local calendar date as YYYY-MM-DD (not UTC, which runs a day behind in the morning here). */
-export function ymd(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
 
 function daysBefore(today: Date, n: number): Date {
   return new Date(today.getFullYear(), today.getMonth(), today.getDate() - n)
