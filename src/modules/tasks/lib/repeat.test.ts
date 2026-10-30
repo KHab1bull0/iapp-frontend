@@ -14,6 +14,7 @@ const task = (over: Partial<Task>): Task => ({
   repeatUnit: null,
   repeatEvery: null,
   repeatWeekdays: null,
+  repeatMonthDay: null,
   completedAt: null,
   createdAt: '',
   updatedAt: '',
@@ -40,6 +41,12 @@ describe('describeRepeat', () => {
     expect(
       describeRepeat(task({ repeatMode: 'schedule', repeatUnit: 'month', repeatEvery: 3, dueDate: '2026-11-01' })),
     ).toBe('Every 3 months on the 1st')
+    // The intended day, not February's clamped one.
+    expect(
+      describeRepeat(
+        task({ repeatMode: 'schedule', repeatUnit: 'month', repeatEvery: 1, dueDate: '2026-02-28', repeatMonthDay: 31 }),
+      ),
+    ).toBe('Every month on the 31st')
   })
 
   test('after done', () => {

@@ -24,6 +24,7 @@ const t = (id: string, over: Partial<Task> = {}): Task => ({
   repeatUnit: null,
   repeatEvery: null,
   repeatWeekdays: null,
+  repeatMonthDay: null,
   completedAt: null,
   createdAt: '',
   updatedAt: '',
@@ -59,13 +60,15 @@ describe('TodayPage', () => {
     expect(screen.getByText('A')).toBeTruthy()
     expect(screen.getByText('Every day')).toBeTruthy()
     expect(screen.getByText('09:30')).toBeTruthy()
-    expect(screen.getByRole('button', { name: /Done today \(1\)/ })).toBeTruthy()
+    // Done is its own group, always shown, not folded away.
+    expect(screen.getByRole('heading', { name: 'Done' })).toBeTruthy()
+    expect(screen.getByText('C')).toBeTruthy()
   })
 
   test('ticking a task completes it for today, and Undo puts it back', async () => {
     renderPage()
     fireEvent.click(await screen.findByRole('button', { name: 'Complete B' }))
-    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('b', todayYmd()))
+    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('b', todayYmd(), todayYmd()))
     fireEvent.click(await screen.findByRole('button', { name: 'Undo' }))
     await waitFor(() => expect(api.undoCompletion).toHaveBeenCalledWith('c1'))
   })
@@ -74,5 +77,15 @@ describe('TodayPage', () => {
     api.fetchToday.mockResolvedValue({ overdue: [], today: [], doneToday: [] })
     renderPage()
     expect(await screen.findByText('Nothing due today')).toBeTruthy()
+  })
+
+  test('a task can be ticked only once while the request is in flight', async () => {
+    api.completeTask.mockReturnValue(new Promise(() => {}))
+    renderPage()
+    const tick = (await screen.findByRole('button', { name: 'Complete B' })) as HTMLButtonElement
+    fireEvent.click(tick)
+    await waitFor(() => expect(tick.disabled).toBe(true))
+    fireEvent.click(tick)
+    expect(api.completeTask).toHaveBeenCalledTimes(1)
   })
 })

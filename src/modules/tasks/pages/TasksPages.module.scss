@@ -50,20 +50,6 @@
   overflow: hidden;
 }
 
-.toggle {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 4px;
-  border: none;
-  background: transparent;
-  color: var(--fg-muted);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-}
 
 .empty {
   @include empty-base;

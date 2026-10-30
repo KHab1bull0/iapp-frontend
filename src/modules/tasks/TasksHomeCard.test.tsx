@@ -8,7 +8,7 @@ import { TasksHomeCard } from './TasksHomeCard'
 
 const t = (id: string, title: string): Task => ({
   id, title, note: null, dueDate: todayYmd(), dueTime: null, repeatMode: 'none', repeatUnit: null,
-  repeatEvery: null, repeatWeekdays: null, completedAt: null, createdAt: '', updatedAt: '',
+  repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null, createdAt: '', updatedAt: '',
 })
 
 describe('TasksHomeCard', () => {

@@ -36,9 +36,8 @@ export function describeRepeat(task: Task): string {
   }
 
   const every = repeatEvery === 1 ? `Every ${repeatUnit}` : `Every ${plural(repeatEvery, repeatUnit)}`
-  if (repeatUnit === 'month' && task.dueDate) {
-    return `${every} on the ${ordinal(Number(task.dueDate.slice(8, 10)))}`
-  }
+  const monthDay = task.repeatMonthDay ?? (task.dueDate ? Number(task.dueDate.slice(8, 10)) : null)
+  if (repeatUnit === 'month' && monthDay) return `${every} on the ${ordinal(monthDay)}`
   return every
 }
 

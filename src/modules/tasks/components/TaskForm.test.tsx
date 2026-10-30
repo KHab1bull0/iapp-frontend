@@ -48,13 +48,17 @@ describe('TaskForm', () => {
     )
   })
 
-  test('a weekly schedule needs at least one weekday', async () => {
+  test('a weekly schedule starts with the date\'s weekday and needs at least one', async () => {
     renderForm()
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Gym' } })
+    fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2026-11-02' } }) // a Monday
     fireEvent.click(screen.getByRole('radio', { name: 'Schedule' }))
     fireEvent.change(screen.getByLabelText('Unit'), { target: { value: 'week' } })
-    expect(save().disabled).toBe(true)
     const days = screen.getByRole('group', { name: 'Weekdays' })
+    const mon = within(days).getByRole('checkbox', { name: 'Mon' })
+    expect(mon.getAttribute('aria-checked')).toBe('true')
+    fireEvent.click(mon)
+    expect(save().disabled).toBe(true)
     fireEvent.click(within(days).getByRole('checkbox', { name: 'Mon' }))
     fireEvent.click(within(days).getByRole('checkbox', { name: 'Thu' }))
     expect(save().disabled).toBe(false)
@@ -74,7 +78,7 @@ describe('TaskForm', () => {
         <TaskForm
           task={{
             id: 't1', title: 'Old', note: null, dueDate: null, dueTime: null, repeatMode: 'none',
-            repeatUnit: null, repeatEvery: null, repeatWeekdays: null, completedAt: null,
+            repeatUnit: null, repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null,
             createdAt: '', updatedAt: '',
           }}
           onSaved={onSaved}

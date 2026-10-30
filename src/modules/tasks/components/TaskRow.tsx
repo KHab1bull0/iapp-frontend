@@ -9,26 +9,36 @@ interface Props {
   today: string
   /** Ticked: done today (Today page) or finished (a completed one-off). */
   done?: boolean
-  onToggle: (task: Task) => void
+  /** Omit for a check that only shows state (finished one-offs). */
+  onToggle?: (task: Task) => void
+  /** While its completion is being saved, so a second tap can't complete it twice. */
+  busy?: boolean
   onOpen: (task: Task) => void
   /** Show "Tomorrow", "3 days overdue"… (All tasks); Today's own sections say it already. */
   showDue?: boolean
 }
 
-export function TaskRow({ task, today, done = false, onToggle, onOpen, showDue = false }: Props) {
+export function TaskRow({ task, today, done = false, onToggle, busy = false, onOpen, showDue = false }: Props) {
   const repeat = describeRepeat(task)
   const due = showDue || (task.dueDate !== null && task.dueDate < today) ? dueLabel(task.dueDate, today) : ''
   const overdue = !done && task.dueDate !== null && task.dueDate < today
 
   return (
     <div className={clsx(s.row, done && s.done)}>
-      <button
-        className={clsx(s.check, done && s.checked)}
-        onClick={() => onToggle(task)}
-        aria-label={done ? `Undo ${task.title}` : `Complete ${task.title}`}
-      >
-        {done && <Check size={14} strokeWidth={3} />}
-      </button>
+      {onToggle ? (
+        <button
+          className={clsx(s.check, done && s.checked)}
+          onClick={() => onToggle(task)}
+          disabled={busy}
+          aria-label={done ? `Undo ${task.title}` : `Complete ${task.title}`}
+        >
+          {done && <Check size={14} strokeWidth={3} />}
+        </button>
+      ) : (
+        <span className={clsx(s.check, done && s.checked)} aria-hidden="true">
+          {done && <Check size={14} strokeWidth={3} />}
+        </span>
+      )}
 
       <button className={s.body} onClick={() => onOpen(task)}>
         <span className={s.title}>{task.title}</span>

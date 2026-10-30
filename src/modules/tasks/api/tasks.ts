@@ -16,6 +16,8 @@ export interface Task {
   repeatEvery: number | null
   /** 0 = Sunday … 6 = Saturday; schedule + week only. */
   repeatWeekdays: number[] | null
+  /** schedule + month only: the day of month it returns to (the due date may be clamped). */
+  repeatMonthDay: number | null
   completedAt: string | null
   createdAt: string
   updatedAt: string
@@ -85,8 +87,19 @@ export async function deleteTask(id: string): Promise<void> {
   await api.delete(`/tasks/items/${id}`)
 }
 
-export async function completeTask(id: string, today: string): Promise<{ task: Task; completionId: string }> {
-  const { data } = await api.post<{ task: Task; completionId: string }>(`/tasks/items/${id}/complete`, { today })
+/**
+ * `expectedDueDate` is the due date on screen; the server refuses (409) if the
+ * task has moved on since, so a repeat tap can't skip an occurrence.
+ */
+export async function completeTask(
+  id: string,
+  today: string,
+  expectedDueDate: string | null,
+): Promise<{ task: Task; completionId: string }> {
+  const { data } = await api.post<{ task: Task; completionId: string }>(`/tasks/items/${id}/complete`, {
+    today,
+    expectedDueDate,
+  })
   return data
 }
 

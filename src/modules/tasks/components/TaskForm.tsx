@@ -79,6 +79,9 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
   const remove = useMutation({
     mutationFn: () => deleteTask(task!.id),
     onSuccess: async () => {
+      // Drop the deleted task's own query first, or refreshing it 404s and the
+      // edit page flashes "not found" before closing.
+      qc.removeQueries({ queryKey: tasksKeys.one(task!.id) })
       await qc.invalidateQueries({ queryKey: tasksKeys.all })
       toast('Task deleted', 'success')
       onSaved()
@@ -89,6 +92,23 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
   function submit(e: FormEvent) {
     e.preventDefault()
     if (valid && !save.isPending) save.mutate()
+  }
+
+  // Switching to a weekly schedule starts from the chosen date's weekday.
+  function chooseUnit(next: RepeatUnit) {
+    setUnit(next)
+    if (mode === 'schedule' && next === 'week' && weekdays.length === 0 && dueDate) {
+      const [y, m, d] = dueDate.split('-').map(Number)
+      setWeekdays([new Date(y, m - 1, d).getDay()])
+    }
+  }
+
+  function chooseMode(next: RepeatMode) {
+    setMode(next)
+    if (next === 'schedule' && unit === 'week' && weekdays.length === 0 && dueDate) {
+      const [y, m, d] = dueDate.split('-').map(Number)
+      setWeekdays([new Date(y, m - 1, d).getDay()])
+    }
   }
 
   function toggleDay(d: number) {
@@ -143,7 +163,7 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
               role="radio"
               aria-checked={mode === m.value}
               className={clsx(s.segment, mode === m.value && s.active)}
-              onClick={() => setMode(m.value)}
+              onClick={() => chooseMode(m.value)}
             >
               {m.label}
             </button>
@@ -172,7 +192,7 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
             <select
               className={s.input}
               value={unit}
-              onChange={(e) => setUnit(e.target.value as RepeatUnit)}
+              onChange={(e) => chooseUnit(e.target.value as RepeatUnit)}
               aria-label="Unit"
             >
               <option value="day">{everyN === 1 ? 'day' : 'days'}</option>

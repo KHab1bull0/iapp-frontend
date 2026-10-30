@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import clsx from 'clsx'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, ChevronRight, Plus, RefreshCw } from 'lucide-react'
-import { todayYmd } from '@/core/lib/format'
+import { Plus, RefreshCw } from 'lucide-react'
+import { useToday } from '@/core/hooks/useToday'
 import { toast } from '@/core/components/ui/toast'
 import {
   completeTask,
@@ -15,12 +15,13 @@ import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
 import s from '../TasksPages.module.scss'
 
-/** Tasks → Today: what is due now, overdue first, like a review queue. */
+/** Tasks → Today: what is due now, overdue first, like a review queue; then what's done. */
 export function TodayPage() {
-  const today = todayYmd()
+  const today = useToday()
   const qc = useQueryClient()
   const editor = useTaskEditor()
-  const [showDone, setShowDone] = useState(false)
+  // Tasks whose completion is being saved; their tick is disabled meanwhile.
+  const [pending, setPending] = useState<Set<string>>(new Set())
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.today(today),
@@ -36,7 +37,14 @@ export function TodayPage() {
   })
 
   const complete = useMutation({
-    mutationFn: (task: Task) => completeTask(task.id, today),
+    mutationFn: (task: Task) => completeTask(task.id, today, task.dueDate),
+    onMutate: (task) => setPending((p) => new Set(p).add(task.id)),
+    onSettled: (_r, _e, task) =>
+      setPending((p) => {
+        const next = new Set(p)
+        next.delete(task.id)
+        return next
+      }),
     onSuccess: async ({ completionId }, task) => {
       await refresh()
       toast(`“${task.title}” done`, 'success', {
@@ -44,7 +52,11 @@ export function TodayPage() {
         onClick: () => undo.mutate(completionId),
       })
     },
-    onError: () => toast('Could not complete the task', 'error'),
+    onError: async () => {
+      // Usually a stale copy (done elsewhere already): show the real state.
+      await refresh()
+      toast('Could not complete the task', 'error')
+    },
   })
 
   const overdue = data?.overdue ?? []
@@ -70,7 +82,14 @@ export function TodayPage() {
               </div>
               <div className={s.list}>
                 {overdue.map((t) => (
-                  <TaskRow key={t.id} task={t} today={today} onToggle={complete.mutate} onOpen={editor.openEdit} />
+                  <TaskRow
+                    key={t.id}
+                    task={t}
+                    today={today}
+                    busy={pending.has(t.id)}
+                    onToggle={complete.mutate}
+                    onOpen={editor.openEdit}
+                  />
                 ))}
               </div>
             </section>
@@ -84,7 +103,14 @@ export function TodayPage() {
               </div>
               <div className={s.list}>
                 {dueToday.map((t) => (
-                  <TaskRow key={t.id} task={t} today={today} onToggle={complete.mutate} onOpen={editor.openEdit} />
+                  <TaskRow
+                    key={t.id}
+                    task={t}
+                    today={today}
+                    busy={pending.has(t.id)}
+                    onToggle={complete.mutate}
+                    onOpen={editor.openEdit}
+                  />
                 ))}
               </div>
             </section>
@@ -99,28 +125,22 @@ export function TodayPage() {
 
           {done.length > 0 && (
             <section className={s.section}>
-              <button
-                className={s.toggle}
-                onClick={() => setShowDone((v) => !v)}
-                aria-expanded={showDone}
-              >
-                {showDone ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
-                Done today ({done.length})
-              </button>
-              {showDone && (
-                <div className={s.list}>
-                  {done.map(({ completionId, task }) => (
-                    <TaskRow
-                      key={completionId}
-                      task={task}
-                      today={today}
-                      done
-                      onToggle={() => undo.mutate(completionId)}
-                      onOpen={editor.openEdit}
-                    />
-                  ))}
-                </div>
-              )}
+              <div className={s.sectionHead}>
+                <h2 className={s.sectionTitle}>Done</h2>
+                <span className={s.count}>{done.length}</span>
+              </div>
+              <div className={s.list}>
+                {done.map(({ completionId, task }) => (
+                  <TaskRow
+                    key={completionId}
+                    task={task}
+                    today={today}
+                    done
+                    onToggle={() => undo.mutate(completionId)}
+                    onOpen={editor.openEdit}
+                  />
+                ))}
+              </div>
             </section>
           )}
         </>

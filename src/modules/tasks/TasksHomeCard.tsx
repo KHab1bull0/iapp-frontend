@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ListChecks } from 'lucide-react'
-import { todayYmd } from '@/core/lib/format'
+import { useToday } from '@/core/hooks/useToday'
 import { fetchToday, tasksKeys } from './api/tasks'
 import s from './TasksHomeCard.module.scss'
 
@@ -9,7 +9,7 @@ const PREVIEW = 3
 
 /** Home: how much is due today, and the first few things, overdue first. */
 export function TasksHomeCard() {
-  const today = todayYmd()
+  const today = useToday()
   // Same key as the Today page, so the two share one request and stay in step.
   const { data, isError } = useQuery({
     queryKey: tasksKeys.today(today),
