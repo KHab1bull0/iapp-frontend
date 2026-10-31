@@ -17,7 +17,7 @@ export function EnglishHomeCard() {
   const n = data?.length ?? 0
 
   return (
-    <Link to="/english/review" className={s.card}>
+    <Link to="/english" className={s.card}>
       <div className={s.head}>
         <span className={s.icon}>
           <Languages size={16} />

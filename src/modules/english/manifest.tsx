@@ -17,12 +17,13 @@ export const english: ModuleManifest = {
   icon: Languages,
   basePath: '/english',
   pages: [
-    { label: 'Vocabulary', path: '/english', icon: BookOpen, end: true },
-    { label: 'Review', path: '/english/review', icon: Layers },
+    // Review first: opening English goes straight to today's stack.
+    { label: 'Review', path: '/english', icon: Layers, end: true },
+    { label: 'Vocabulary', path: '/english/vocabulary', icon: BookOpen },
   ],
   routes: [
-    { index: true, element: <VocabularyPage /> },
-    { path: 'review', element: <ReviewPage /> },
+    { index: true, element: <ReviewPage /> },
+    { path: 'vocabulary', element: <VocabularyPage /> },
     // Not in the menu: opened from Settings → Modules → English. Nested like
     // the app's Settings: a section list, then one page per section.
     {

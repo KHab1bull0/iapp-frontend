@@ -19,6 +19,6 @@ describe('EnglishHomeCard', () => {
       </QueryClientProvider>,
     )
     expect(screen.getByText('3 words to memorise')).toBeTruthy()
-    expect(screen.getByRole('link').getAttribute('href')).toBe('/english/review')
+    expect(screen.getByRole('link').getAttribute('href')).toBe('/english')
   })
 })

@@ -68,7 +68,7 @@ describe('buildRoutes', () => {
     const all = [finance, tasks, english]
     for (const p of [
       '/english',
-      '/english/review',
+      '/english/vocabulary',
       '/english/settings',
       '/english/settings/levels',
       '/english/settings/categories',
@@ -77,5 +77,12 @@ describe('buildRoutes', () => {
     }
     expect(elementTypes('/english/new', all)).not.toContain(AppLayout)
     expect(elementTypes('/english/abc/edit', all)).not.toContain(AppLayout)
+  })
+
+  test('english opens on Review, with Vocabulary second', () => {
+    expect(english.pages.map((p) => [p.label, p.path])).toEqual([
+      ['Review', '/english'],
+      ['Vocabulary', '/english/vocabulary'],
+    ])
   })
 })

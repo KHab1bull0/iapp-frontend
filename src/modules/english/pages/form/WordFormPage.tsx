@@ -14,10 +14,10 @@ export function WordFormPage() {
   const isMobile = useIsMobile()
   const isEdit = Boolean(id)
 
-  const close = () => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/english'))
+  const close = () => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/english/vocabulary'))
 
   useEffect(() => {
-    if (!isMobile) navigate('/english', { replace: true })
+    if (!isMobile) navigate('/english/vocabulary', { replace: true })
   }, [isMobile, navigate])
 
   const { data: word, isLoading, isError } = useQuery({
