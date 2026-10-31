@@ -85,6 +85,9 @@ describe('WordForm', () => {
     const level = (await screen.findByLabelText('Level')) as HTMLSelectElement
     await waitFor(() => expect(level.options.length).toBe(2))
     expect(level.value).toBe(NEW.id)
+    // Level and date sit side by side in one row.
+    const row = (el: HTMLElement) => el.closest('label')!.parentElement
+    expect(row(level)).toBe(row(screen.getByLabelText('Memorise on')))
     fireEvent.change(level, { target: { value: L3.id } })
     const inThree = new Date()
     inThree.setDate(inThree.getDate() + 3)

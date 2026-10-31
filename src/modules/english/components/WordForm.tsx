@@ -63,6 +63,25 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
     }
   }
 
+  const categoryPicker = categories.length > 0 && (
+    <label className={s.field}>
+      <span className={s.label}>Category</span>
+      <select
+        className={s.input}
+        value={categoryId}
+        onChange={(e) => setCategoryId(e.target.value)}
+        aria-label="Category"
+      >
+        <option value="">None</option>
+        {categories.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+
   const valid = text.trim() && translation.trim() && reviewOn
 
   const save = useMutation({
@@ -146,25 +165,24 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
         />
       </label>
 
-      {word && levels.length > 0 && (
-        <label className={s.field}>
-          <span className={s.label}>Level</span>
-          <select
-            className={s.input}
-            value={levelId}
-            onChange={(e) => chooseLevel(e.target.value)}
-            aria-label="Level"
-          >
-            {levels.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name} {l.locked ? '' : `· ${l.intervalDays} day${l.intervalDays === 1 ? '' : 's'}`}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-
       <div className={s.row}>
+        {word && levels.length > 0 && (
+          <label className={s.field}>
+            <span className={s.label}>Level</span>
+            <select
+              className={s.input}
+              value={levelId}
+              onChange={(e) => chooseLevel(e.target.value)}
+              aria-label="Level"
+            >
+              {levels.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name} {l.locked ? '' : `· ${l.intervalDays} day${l.intervalDays === 1 ? '' : 's'}`}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className={s.field}>
           <span className={s.label}>Memorise on</span>
           <input
@@ -175,25 +193,10 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
             aria-label="Memorise on"
           />
         </label>
-        {categories.length > 0 && (
-          <label className={s.field}>
-            <span className={s.label}>Category</span>
-            <select
-              className={s.input}
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              aria-label="Category"
-            >
-              <option value="">None</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+        {/* A new word has no level picker, so its category shares this row. */}
+        {!word && categoryPicker}
       </div>
+      {word && categoryPicker}
       <span className={s.hint}>
         {reviewOn ? 'It joins the review stack on this day.' : 'Pick a day to memorise it.'}
       </span>
