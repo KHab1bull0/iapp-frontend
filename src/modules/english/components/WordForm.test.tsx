@@ -55,4 +55,11 @@ describe('WordForm', () => {
       expect(api.createWord).toHaveBeenCalledWith(expect.objectContaining({ categoryId: 'c1' })),
     )
   })
+
+  test('a cleared date says why Save is off', async () => {
+    api.fetchCategories.mockResolvedValue([])
+    renderForm()
+    fireEvent.change(screen.getByLabelText('Memorise on'), { target: { value: '' } })
+    expect(screen.getByText('Pick a day to memorise it.')).toBeTruthy()
+  })
 })

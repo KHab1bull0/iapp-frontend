@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { RefreshCw } from 'lucide-react'
 import { useToday } from '@/core/hooks/useToday'
@@ -14,7 +15,8 @@ import r from './ReviewPage.module.scss'
 export function ReviewPage() {
   const today = useToday()
   const qc = useQueryClient()
-  const [revealed, setRevealed] = useState(false)
+  // Which card's answer is showing; a new card always starts hidden.
+  const [revealedId, setRevealedId] = useState<string | null>(null)
 
   const { data: stack = [], isLoading, isError, refetch } = useQuery({
     queryKey: englishKeys.review(today),
@@ -25,10 +27,12 @@ export function ReviewPage() {
   const answer = useMutation({
     mutationFn: ({ word, result }: { word: Word; result: 'remembered' | 'forgot' }) =>
       answerWord(word.id, result, today),
-    onSuccess: async () => {
-      setRevealed(false)
-      await qc.invalidateQueries({ queryKey: englishKeys.all })
+    // Take the card off the stack straight away, so the next one shows at once
+    // (and hidden) instead of the answered one coming back while the request runs.
+    onMutate: ({ word }) => {
+      qc.setQueryData<Word[]>(englishKeys.review(today), (stack) => stack?.filter((w) => w.id !== word.id))
     },
+    onSuccess: () => qc.invalidateQueries({ queryKey: englishKeys.all }),
     onError: async () => {
       await refetch()
       toast('Could not save the answer', 'error')
@@ -36,7 +40,10 @@ export function ReviewPage() {
   })
 
   const current = stack[0]
+  const revealed = current !== undefined && revealedId === current.id
   const level = current && levels.find((l) => l.id === current.levelId)
+  // Only the starting level: "remembered" has nowhere to move a word to.
+  const noLevels = levels.length === 1
 
   if (isError) {
     return (
@@ -66,6 +73,11 @@ export function ReviewPage() {
 
   return (
     <div className={s.page}>
+      {noLevels && (
+        <Link to="/english/settings" className={r.hint}>
+          Add review levels in English settings, so remembered words leave the stack for a while.
+        </Link>
+      )}
       <div className={r.progress}>{stack.length} to go</div>
 
       <div className={r.card}>
@@ -78,7 +90,7 @@ export function ReviewPage() {
             {current.note && <div className={r.note}>{current.note}</div>}
           </div>
         ) : (
-          <button className={r.show} onClick={() => setRevealed(true)}>
+          <button className={r.show} onClick={() => setRevealedId(current.id)}>
             Show
           </button>
         )}

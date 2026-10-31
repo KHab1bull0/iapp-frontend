@@ -155,7 +155,9 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
           </label>
         )}
       </div>
-      <span className={s.hint}>It joins the review stack on this day.</span>
+      <span className={s.hint}>
+        {reviewOn ? 'It joins the review stack on this day.' : 'Pick a day to memorise it.'}
+      </span>
 
       <div className={s.actions}>
         {word && (

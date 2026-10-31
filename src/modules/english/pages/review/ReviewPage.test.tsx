@@ -54,4 +54,22 @@ describe('ReviewPage', () => {
     renderPage()
     expect(await screen.findByText('Nothing to memorise today')).toBeTruthy()
   })
+
+  test('after answering, the word leaves at once and the next card starts hidden', async () => {
+    api.answerWord.mockReturnValue(new Promise(() => {}))
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Remembered' }))
+    expect(await screen.findByText('river')).toBeTruthy()
+    expect(screen.queryByText('apple')).toBeNull()
+    expect(screen.queryByText('river-uz')).toBeNull()
+    expect(screen.getByText('1 to go')).toBeTruthy()
+  })
+
+  test('with only the starting level, it says to add levels', async () => {
+    api.fetchLevels.mockResolvedValue([NEW])
+    renderPage()
+    const link = await screen.findByRole('link', { name: /Add review levels/ })
+    expect(link.getAttribute('href')).toBe('/english/settings')
+  })
 })

@@ -69,6 +69,13 @@ function LevelRow({ level }: { level: Level }) {
   const [interval, setInterval] = useState(String(level.intervalDays))
   const refresh = () => qc.invalidateQueries({ queryKey: englishKeys.all })
 
+  // Cancel drops what was typed, so reopening shows the saved values.
+  const cancel = () => {
+    setName(level.name)
+    setInterval(String(level.intervalDays))
+    setEditing(false)
+  }
+
   const save = useMutation({
     mutationFn: () =>
       updateLevel(level.id, level.locked ? { name: name.trim() } : { name: name.trim(), intervalDays: Number(interval) }),
@@ -105,7 +112,7 @@ function LevelRow({ level }: { level: Level }) {
           />
         )}
         <button type="submit" className={e.btnPrimary} disabled={save.isPending}>Save</button>
-        <button type="button" className={e.btnGhost} onClick={() => setEditing(false)}>Cancel</button>
+        <button type="button" className={e.btnGhost} onClick={cancel}>Cancel</button>
       </form>
     )
   }
@@ -159,7 +166,16 @@ function CategoryRow({ category }: { category: Category }) {
       >
         <input className={e.input} value={name} onChange={(ev) => setName(ev.target.value)} maxLength={50} aria-label={`Name of ${category.name}`} />
         <button type="submit" className={e.btnPrimary} disabled={save.isPending}>Save</button>
-        <button type="button" className={e.btnGhost} onClick={() => setEditing(false)}>Cancel</button>
+        <button
+          type="button"
+          className={e.btnGhost}
+          onClick={() => {
+            setName(category.name)
+            setEditing(false)
+          }}
+        >
+          Cancel
+        </button>
       </form>
     )
   }

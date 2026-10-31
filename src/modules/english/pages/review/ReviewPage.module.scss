@@ -1,6 +1,16 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
+.hint {
+  padding: 10px 14px;
+  border-radius: $radius-md;
+  background: var(--hover-bg);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
 .progress {
   align-self: center;
   font-size: 13px;
