@@ -6,6 +6,7 @@ import { fetchTasks, tasksKeys } from '@/modules/tasks/api/tasks'
 import { groupByDue } from '@/modules/tasks/lib/repeat'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
+import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
 
 /**
@@ -14,6 +15,7 @@ import s from '../TasksPages.module.scss'
  */
 export function AllTasksPage() {
   const today = useToday()
+  const t = useTasksT()
   const editor = useTaskEditor()
 
   const { data: tasks = [], isLoading, isError, refetch } = useQuery({
@@ -21,21 +23,21 @@ export function AllTasksPage() {
     queryFn: () => fetchTasks('active'),
   })
 
-  const groups = groupByDue(tasks, today)
+  const groups = groupByDue(tasks, today, t)
 
   return (
     <div className={s.page}>
       {isError ? (
         <div className={s.empty}>
-          <div className={s.emptyTitle}>Failed to load tasks</div>
+          <div className={s.emptyTitle}>{t.loadFailed}</div>
           <button className={s.btnSecondary} onClick={() => refetch()}>
-            <RefreshCw size={14} /> Retry
+            <RefreshCw size={14} /> {t.retry}
           </button>
         </div>
       ) : isLoading ? null : groups.length === 0 ? (
         <div className={s.empty}>
-          <div className={s.emptyTitle}>No tasks yet</div>
-          <div className={s.emptySub}>Add one with the + button: once, on a schedule, or after done.</div>
+          <div className={s.emptyTitle}>{t.noTasks}</div>
+          <div className={s.emptySub}>{t.noTasksSub}</div>
         </div>
       ) : (
         groups.map((g) => (
@@ -45,10 +47,10 @@ export function AllTasksPage() {
               <span className={s.count}>{g.tasks.length}</span>
             </div>
             <div className={s.list}>
-              {g.tasks.map((t) => (
+              {g.tasks.map((task) => (
                 <TaskRow
-                  key={t.id}
-                  task={t}
+                  key={task.id}
+                  task={task}
                   today={today}
                   showDue={g.key !== 'today' && g.key !== 'none'}
                   onOpen={editor.openEdit}
@@ -60,7 +62,7 @@ export function AllTasksPage() {
       )}
 
       {editor.dialog}
-      <button className={s.fab} onClick={editor.openNew} aria-label="Add task">
+      <button className={s.fab} onClick={editor.openNew} aria-label={t.add}>
         <Plus size={22} />
       </button>
     </div>

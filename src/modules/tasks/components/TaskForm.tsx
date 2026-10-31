@@ -18,7 +18,7 @@ import {
   type Task,
   type TaskInput,
 } from '@/modules/tasks/api/tasks'
-import { WEEKDAY_SHORT } from '@/modules/tasks/lib/repeat'
+import { useTasksT } from '@/modules/tasks/i18n'
 import s from './TaskForm.module.scss'
 
 interface Props {
@@ -27,16 +27,13 @@ interface Props {
   onCancel: () => void
 }
 
-const MODES: { value: RepeatMode; label: string; hint: string }[] = [
-  { value: 'none', label: 'Once', hint: 'A one-off task' },
-  { value: 'schedule', label: 'Schedule', hint: 'On fixed days, like a calendar. Missed days are not queued.' },
-  { value: 'after_done', label: 'After done', hint: 'Counted from the day you last did it.' },
-]
+const MODES: RepeatMode[] = ['none', 'schedule', 'after_done']
 
 // Monday first, as people plan their week.
 const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0]
 
 export function TaskForm({ task, onSaved, onCancel }: Props) {
+  const t = useTasksT()
   const qc = useQueryClient()
   const [title, setTitle] = useState(task?.title ?? '')
   const [note, setNote] = useState(task?.note ?? '')
@@ -70,10 +67,10 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: tasksKeys.all })
-      toast(task ? 'Task updated' : 'Task added', 'success')
+      toast(task ? t.form.updated : t.form.added, 'success')
       onSaved()
     },
-    onError: () => toast('Could not save the task', 'error'),
+    onError: () => toast(t.form.saveFailed, 'error'),
   })
 
   const remove = useMutation({
@@ -83,10 +80,10 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
       // edit page flashes "not found" before closing.
       qc.removeQueries({ queryKey: tasksKeys.one(task!.id) })
       await qc.invalidateQueries({ queryKey: tasksKeys.all })
-      toast('Task deleted', 'success')
+      toast(t.form.deleted, 'success')
       onSaved()
     },
-    onError: () => toast('Could not delete the task', 'error'),
+    onError: () => toast(t.form.deleteFailed, 'error'),
   })
 
   function submit(e: FormEvent) {
@@ -118,68 +115,68 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
   return (
     <form className={s.form} onSubmit={submit}>
       <label className={s.field}>
-        <span className={s.label}>Title</span>
+        <span className={s.label}>{t.form.title}</span>
         <input
           className={s.input}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={200}
-          placeholder="What needs doing?"
-          aria-label="Title"
+          placeholder={t.form.titlePlaceholder}
+          aria-label={t.form.title}
           autoFocus={!task}
         />
       </label>
 
       <div className={s.row}>
         <label className={s.field}>
-          <span className={s.label}>{mode === 'none' ? 'Date' : 'Next date'}</span>
+          <span className={s.label}>{mode === 'none' ? t.form.date : t.form.nextDate}</span>
           <input
             type="date"
             className={s.input}
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            aria-label="Date"
+            aria-label={t.form.date}
           />
         </label>
         <label className={s.field}>
-          <span className={s.label}>Time</span>
+          <span className={s.label}>{t.form.time}</span>
           <input
             type="time"
             className={s.input}
             value={dueTime}
             onChange={(e) => setDueTime(e.target.value)}
-            aria-label="Time"
+            aria-label={t.form.time}
           />
         </label>
       </div>
 
       {!dueDate && (
-        <span className={s.hint}>Without a date it stays in All tasks and won't come up in Today.</span>
+        <span className={s.hint}>{t.form.noDateHint}</span>
       )}
 
       <div className={s.field}>
-        <span className={s.label}>Repeat</span>
-        <div className={s.segments} role="radiogroup" aria-label="Repeat">
+        <span className={s.label}>{t.form.repeat}</span>
+        <div className={s.segments} role="radiogroup" aria-label={t.form.repeat}>
           {MODES.map((m) => (
             <button
-              key={m.value}
+              key={m}
               type="button"
               role="radio"
-              aria-checked={mode === m.value}
-              className={clsx(s.segment, mode === m.value && s.active)}
-              onClick={() => chooseMode(m.value)}
+              aria-checked={mode === m}
+              className={clsx(s.segment, mode === m && s.active)}
+              onClick={() => chooseMode(m)}
             >
-              {m.label}
+              {t.form.modes[m].label}
             </button>
           ))}
         </div>
-        <span className={s.hint}>{MODES.find((m) => m.value === mode)!.hint}</span>
+        <span className={s.hint}>{t.form.modes[mode].hint}</span>
       </div>
 
       {mode !== 'none' && (
         <div className={s.row}>
           <label className={s.field}>
-            <span className={s.label}>Every</span>
+            <span className={s.label}>{t.form.every}</span>
             <input
               type="number"
               inputMode="numeric"
@@ -188,20 +185,20 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
               className={s.input}
               value={every}
               onChange={(e) => setEvery(e.target.value)}
-              aria-label="Every"
+              aria-label={t.form.every}
             />
           </label>
           <label className={s.field}>
-            <span className={s.label}>Unit</span>
+            <span className={s.label}>{t.form.unit}</span>
             <select
               className={s.input}
               value={unit}
               onChange={(e) => chooseUnit(e.target.value as RepeatUnit)}
-              aria-label="Unit"
+              aria-label={t.form.unit}
             >
-              <option value="day">{everyN === 1 ? 'day' : 'days'}</option>
-              <option value="week">{everyN === 1 ? 'week' : 'weeks'}</option>
-              <option value="month">{everyN === 1 ? 'month' : 'months'}</option>
+              <option value="day">{t.form.unitLabel('day', everyN)}</option>
+              <option value="week">{t.form.unitLabel('week', everyN)}</option>
+              <option value="month">{t.form.unitLabel('month', everyN)}</option>
             </select>
           </label>
         </div>
@@ -209,8 +206,8 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
 
       {weekly && (
         <div className={s.field}>
-          <span className={s.label}>On</span>
-          <div className={s.days} role="group" aria-label="Weekdays">
+          <span className={s.label}>{t.form.on}</span>
+          <div className={s.days} role="group" aria-label={t.form.weekdays}>
             {WEEK_ORDER.map((d) => (
               <button
                 key={d}
@@ -220,7 +217,7 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
                 className={clsx(s.day, weekdays.includes(d) && s.active)}
                 onClick={() => toggleDay(d)}
               >
-                {WEEKDAY_SHORT[d]}
+                {t.repeat.weekdays[d]}
               </button>
             ))}
           </div>
@@ -228,15 +225,15 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
       )}
 
       <label className={s.field}>
-        <span className={s.label}>Note</span>
+        <span className={s.label}>{t.form.note}</span>
         <textarea
           className={clsx(s.input, s.textarea)}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           maxLength={1000}
           rows={2}
-          placeholder="Optional"
-          aria-label="Note"
+          placeholder={t.form.optional}
+          aria-label={t.form.note}
         />
       </label>
 
@@ -245,33 +242,33 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button type="button" className={s.btnDanger}>
-                Delete
+                {t.form.delete}
               </button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete “{task.title}”?</AlertDialogTitle>
+                <AlertDialogTitle>{t.form.deleteTitle(task.title)}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  The task and its history are removed. This can't be undone.
+                  {t.form.deleteDesc}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t.form.cancel}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => remove.mutate()}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
-                  Delete
+                  {t.form.delete}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         )}
         <button type="button" className={s.btnSecondary} onClick={onCancel}>
-          Cancel
+          {t.form.cancel}
         </button>
         <button type="submit" className={s.btnPrimary} disabled={!valid || save.isPending}>
-          {save.isPending ? 'Saving…' : 'Save'}
+          {save.isPending ? t.form.saving : t.form.save}
         </button>
       </div>
     </form>

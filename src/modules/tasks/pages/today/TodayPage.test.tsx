@@ -100,4 +100,13 @@ describe('TodayPage', () => {
     const titles = screen.getAllByRole('button', { name: /^Complete / }).map((b) => b.getAttribute('aria-label'))
     expect(titles).toEqual(['Complete E', 'Complete B', 'Complete U'])
   })
+
+  test('reads Uzbek when Uzbek is chosen', async () => {
+    localStorage.setItem('iapp-lang', 'uz')
+    renderPage()
+    expect(await screen.findByRole('heading', { name: 'Kechikkan' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Bugun' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Bajarilgan' })).toBeTruthy()
+    expect(screen.getByText('Har kuni')).toBeTruthy()
+  })
 })

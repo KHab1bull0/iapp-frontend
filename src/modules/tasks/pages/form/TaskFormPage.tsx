@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { fetchTask, tasksKeys } from '@/modules/tasks/api/tasks'
 import { TaskForm } from '@/modules/tasks/components/TaskForm'
+import { useTasksT } from '@/modules/tasks/i18n'
 import s from './TaskFormPage.module.scss'
 
 /**
@@ -12,6 +13,7 @@ import s from './TaskFormPage.module.scss'
  * pull you away half-way. Desktop uses TaskDialog instead.
  */
 export function TaskFormPage() {
+  const t = useTasksT()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
@@ -33,14 +35,14 @@ export function TaskFormPage() {
   return (
     <div className={s.page}>
       <header className={s.head}>
-        <button className={s.backBtn} onClick={close} aria-label="Back">
+        <button className={s.backBtn} onClick={close} aria-label={t.back}>
           <ArrowLeft size={20} />
         </button>
-        <h1 className={s.h1}>{isEdit ? 'Edit task' : 'New task'}</h1>
+        <h1 className={s.h1}>{isEdit ? t.editTask : t.newTask}</h1>
       </header>
       <div className={s.body}>
         {isEdit && isLoading ? null : isEdit && (isError || !task) ? (
-          <div className={s.state}>Task not found. It may have been deleted.</div>
+          <div className={s.state}>{t.notFound}</div>
         ) : (
           <TaskForm task={task ?? null} onSaved={close} onCancel={close} />
         )}

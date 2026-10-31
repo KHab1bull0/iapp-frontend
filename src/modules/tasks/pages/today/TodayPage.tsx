@@ -14,11 +14,13 @@ import {
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { byTime } from '@/modules/tasks/lib/repeat'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
+import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
 
 /** Tasks → Today: what is due now, overdue first, like a review queue; then what's done. */
 export function TodayPage() {
   const today = useToday()
+  const m = useTasksT()
   const qc = useQueryClient()
   const editor = useTaskEditor()
   // Tasks whose completion is being saved; their tick is disabled meanwhile.
@@ -34,7 +36,7 @@ export function TodayPage() {
   const undo = useMutation({
     mutationFn: (completionId: string) => undoCompletion(completionId),
     onSuccess: refresh,
-    onError: () => toast('Could not undo', 'error'),
+    onError: () => toast(m.undoFailed, 'error'),
   })
 
   const complete = useMutation({
@@ -48,15 +50,15 @@ export function TodayPage() {
       }),
     onSuccess: async ({ completionId }, task) => {
       await refresh()
-      toast(`“${task.title}” done`, 'success', {
-        label: 'Undo',
+      toast(m.doneToast(task.title), 'success', {
+        label: m.undo,
         onClick: () => undo.mutate(completionId),
       })
     },
     onError: async () => {
       // Usually a stale copy (done elsewhere already): show the real state.
       await refresh()
-      toast('Could not complete the task', 'error')
+      toast(m.completeFailed, 'error')
     },
   })
 
@@ -69,9 +71,9 @@ export function TodayPage() {
     <div className={s.page}>
       {isError ? (
         <div className={s.empty}>
-          <div className={s.emptyTitle}>Failed to load tasks</div>
+          <div className={s.emptyTitle}>{m.loadFailed}</div>
           <button className={s.btnSecondary} onClick={() => refetch()}>
-            <RefreshCw size={14} /> Retry
+            <RefreshCw size={14} /> {m.retry}
           </button>
         </div>
       ) : isLoading ? null : (
@@ -79,7 +81,7 @@ export function TodayPage() {
           {overdue.length > 0 && (
             <section className={s.section}>
               <div className={s.sectionHead}>
-                <h2 className={clsx(s.sectionTitle, s.danger)}>Overdue</h2>
+                <h2 className={clsx(s.sectionTitle, s.danger)}>{m.overdue}</h2>
                 <span className={s.count}>{overdue.length}</span>
               </div>
               <div className={s.list}>
@@ -100,7 +102,7 @@ export function TodayPage() {
           {dueToday.length > 0 && (
             <section className={s.section}>
               <div className={s.sectionHead}>
-                <h2 className={s.sectionTitle}>Today</h2>
+                <h2 className={s.sectionTitle}>{m.today}</h2>
                 <span className={s.count}>{dueToday.length}</span>
               </div>
               <div className={s.list}>
@@ -120,15 +122,15 @@ export function TodayPage() {
 
           {overdue.length === 0 && dueToday.length === 0 && (
             <div className={s.empty}>
-              <div className={s.emptyTitle}>Nothing due today</div>
-              <div className={s.emptySub}>Plan what's next in All tasks.</div>
+              <div className={s.emptyTitle}>{m.nothingToday}</div>
+              <div className={s.emptySub}>{m.nothingTodaySub}</div>
             </div>
           )}
 
           {done.length > 0 && (
             <section className={s.section}>
               <div className={s.sectionHead}>
-                <h2 className={s.sectionTitle}>Done</h2>
+                <h2 className={s.sectionTitle}>{m.done}</h2>
                 <span className={s.count}>{done.length}</span>
               </div>
               <div className={s.list}>
@@ -149,7 +151,7 @@ export function TodayPage() {
       )}
 
       {editor.dialog}
-      <button className={s.fab} onClick={editor.openNew} aria-label="Add task">
+      <button className={s.fab} onClick={editor.openNew} aria-label={m.add}>
         <Plus size={22} />
       </button>
     </div>

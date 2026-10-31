@@ -2,6 +2,8 @@ import clsx from 'clsx'
 import { Check, Repeat } from 'lucide-react'
 import type { Task } from '@/modules/tasks/api/tasks'
 import { describeRepeat, dueLabel } from '@/modules/tasks/lib/repeat'
+import { useLang } from '@/core/i18n'
+import { useTasksT } from '@/modules/tasks/i18n'
 import s from './TaskRow.module.scss'
 
 interface Props {
@@ -19,8 +21,11 @@ interface Props {
 }
 
 export function TaskRow({ task, today, done = false, onToggle, busy = false, onOpen, showDue = false }: Props) {
-  const repeat = describeRepeat(task)
-  const due = showDue || (task.dueDate !== null && task.dueDate < today) ? dueLabel(task.dueDate, today) : ''
+  const t = useTasksT()
+  const { lang } = useLang()
+  const repeat = describeRepeat(task, t)
+  const due =
+    showDue || (task.dueDate !== null && task.dueDate < today) ? dueLabel(task.dueDate, today, t, lang) : ''
   const overdue = !done && task.dueDate !== null && task.dueDate < today
 
   return (
@@ -30,7 +35,7 @@ export function TaskRow({ task, today, done = false, onToggle, busy = false, onO
           className={clsx(s.check, done && s.checked)}
           onClick={() => onToggle(task)}
           disabled={busy}
-          aria-label={done ? `Undo ${task.title}` : `Complete ${task.title}`}
+          aria-label={done ? t.undoLabel(task.title) : t.completeLabel(task.title)}
         >
           {done && <Check size={14} strokeWidth={3} />}
         </button>
