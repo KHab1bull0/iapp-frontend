@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { todayYmd } from '@/core/lib/format'
-import { category } from '@/modules/english/test-data'
+import { todayYmd, ymd } from '@/core/lib/format'
+import { L3, NEW, category, word } from '@/modules/english/test-data'
 import { WordForm } from './WordForm'
 
 const api = vi.hoisted(() => ({
@@ -10,6 +10,7 @@ const api = vi.hoisted(() => ({
   updateWord: vi.fn(),
   deleteWord: vi.fn(),
   fetchCategories: vi.fn(),
+  fetchLevels: vi.fn(),
 }))
 vi.mock('@/modules/english/api/english', async (orig) => ({ ...(await orig<object>()), ...api }))
 
@@ -22,7 +23,11 @@ function renderForm() {
 }
 
 describe('WordForm', () => {
-  beforeEach(() => api.createWord.mockResolvedValue({ id: 'n' }))
+  beforeEach(() => {
+    api.createWord.mockResolvedValue({ id: 'n' })
+    api.updateWord.mockResolvedValue({ id: 'w1' })
+    api.fetchLevels.mockResolvedValue([NEW, L3])
+  })
 
   test('a new word is due today unless another day is picked, and has no category picker without categories', async () => {
     api.fetchCategories.mockResolvedValue([])
@@ -61,5 +66,35 @@ describe('WordForm', () => {
     renderForm()
     fireEvent.change(screen.getByLabelText('Memorise on'), { target: { value: '' } })
     expect(screen.getByText('Pick a day to memorise it.')).toBeTruthy()
+  })
+
+  test('a new word has no level picker: it starts at New', async () => {
+    api.fetchCategories.mockResolvedValue([])
+    renderForm()
+    await waitFor(() => expect(api.fetchCategories).toHaveBeenCalled())
+    expect(screen.queryByLabelText('Level')).toBeNull()
+  })
+
+  test('editing can move a word to another level, which reschedules it', async () => {
+    api.fetchCategories.mockResolvedValue([])
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <WordForm word={word('w1', { levelId: NEW.id })} onSaved={() => {}} onCancel={() => {}} />
+      </QueryClientProvider>,
+    )
+    const level = (await screen.findByLabelText('Level')) as HTMLSelectElement
+    await waitFor(() => expect(level.options.length).toBe(2))
+    expect(level.value).toBe(NEW.id)
+    fireEvent.change(level, { target: { value: L3.id } })
+    const inThree = new Date()
+    inThree.setDate(inThree.getDate() + 3)
+    expect((screen.getByLabelText('Memorise on') as HTMLInputElement).value).toBe(ymd(inThree))
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() =>
+      expect(api.updateWord).toHaveBeenCalledWith(
+        'w1',
+        expect.objectContaining({ levelId: L3.id, reviewOn: ymd(inThree) }),
+      ),
+    )
   })
 })

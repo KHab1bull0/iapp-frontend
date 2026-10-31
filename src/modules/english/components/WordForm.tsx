@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { todayYmd } from '@/core/lib/format'
+import { todayYmd, ymd } from '@/core/lib/format'
 import { toast } from '@/core/components/ui/toast'
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -13,6 +13,7 @@ import {
   deleteWord,
   englishKeys,
   fetchCategories,
+  fetchLevels,
   updateWord,
   type Word,
   type WordInput,
@@ -36,12 +37,31 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
   const [note, setNote] = useState(word?.note ?? '')
   const [categoryId, setCategoryId] = useState(word?.categoryId ?? '')
   const [reviewOn, setReviewOn] = useState(word?.reviewOn ?? todayYmd())
+  const [levelId, setLevelId] = useState(word?.levelId ?? '')
 
   // The picker only appears once there is a category to pick.
   const { data: categories = [] } = useQuery({
     queryKey: englishKeys.categories,
     queryFn: fetchCategories,
   })
+
+  // Editing only: a new word always starts at New.
+  const { data: levels = [] } = useQuery({
+    queryKey: englishKeys.levels,
+    queryFn: fetchLevels,
+    enabled: Boolean(word),
+  })
+
+  // Moving a word to a level reschedules it as review would: today + that level's days.
+  function chooseLevel(id: string) {
+    setLevelId(id)
+    const level = levels.find((l) => l.id === id)
+    if (level) {
+      const d = new Date()
+      d.setDate(d.getDate() + level.intervalDays)
+      setReviewOn(ymd(d))
+    }
+  }
 
   const valid = text.trim() && translation.trim() && reviewOn
 
@@ -53,6 +73,7 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
         note: note.trim() || null,
         categoryId: categoryId || null,
         reviewOn,
+        ...(word && levelId ? { levelId } : {}),
       }
       return word ? updateWord(word.id, input) : createWord(input)
     },
@@ -124,6 +145,24 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
           aria-label="Note"
         />
       </label>
+
+      {word && levels.length > 0 && (
+        <label className={s.field}>
+          <span className={s.label}>Level</span>
+          <select
+            className={s.input}
+            value={levelId}
+            onChange={(e) => chooseLevel(e.target.value)}
+            aria-label="Level"
+          >
+            {levels.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name} {l.locked ? '' : `· ${l.intervalDays} day${l.intervalDays === 1 ? '' : 's'}`}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       <div className={s.row}>
         <label className={s.field}>
