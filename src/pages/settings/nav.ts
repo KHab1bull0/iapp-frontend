@@ -14,9 +14,10 @@ export interface SettingsNavGroup {
 }
 
 /**
- * Settings is grouped the way most apps do it: who you are (Account), how the
- * app behaves on this device (App), then each module's own settings. Sign out
- * is deliberately not an item here; it sits apart, below every group.
+ * Settings is grouped: each module's own settings first (what is changed
+ * most), then who you are (Account) and how the app behaves on this device
+ * (App). Sign out is deliberately not an item here; it sits apart, below
+ * every group.
  */
 export function settingsNav(modules: ModuleManifest[]): SettingsNavGroup[] {
   const moduleItems = modules
@@ -29,6 +30,7 @@ export function settingsNav(modules: ModuleManifest[]): SettingsNavGroup[] {
     }))
 
   return [
+    ...(moduleItems.length ? [{ title: 'Modules', items: moduleItems }] : []),
     {
       title: 'Account',
       items: [
@@ -43,6 +45,5 @@ export function settingsNav(modules: ModuleManifest[]): SettingsNavGroup[] {
         { label: 'About', description: 'Version and updates', to: '/settings/about', icon: Info },
       ],
     },
-    ...(moduleItems.length ? [{ title: 'Modules', items: moduleItems }] : []),
   ]
 }

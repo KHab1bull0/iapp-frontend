@@ -8,10 +8,11 @@ describe('settingsNav', () => {
       title: g.title,
       items: g.items.map((i) => `${i.label} ${i.to}`),
     }))
+    // Modules first, then the rest in their usual order.
     expect(groups).toEqual([
+      { title: 'Modules', items: ['Finance /finance/settings'] },
       { title: 'Account', items: ['Profile /settings/profile', 'Security /settings/security'] },
       { title: 'App', items: ['Preferences /settings/preferences', 'About /settings/about'] },
-      { title: 'Modules', items: ['Finance /finance/settings'] },
     ])
   })
 
