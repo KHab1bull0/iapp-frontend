@@ -12,12 +12,15 @@ import {
 } from '@/modules/english/api/english'
 import { reviewLabel } from '@/modules/english/lib/review'
 import { useWordEditor } from '@/modules/english/useWordEditor'
+import { useEnglishT, useLevelName } from '@/modules/english/i18n'
 import s from '../EnglishPages.module.scss'
 import v from './VocabularyPage.module.scss'
 
 /** English → Vocabulary: every word, with its level and the day it comes up. */
 export function VocabularyPage() {
   const today = useToday()
+  const t = useEnglishT()
+  const levelLabel = useLevelName()
   const editor = useWordEditor()
   const [filters, setFilters] = useState<WordFilters>({})
   const search = useDebouncedValue(filters.search, 300)
@@ -30,7 +33,10 @@ export function VocabularyPage() {
   const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
   const { data: categories = [] } = useQuery({ queryKey: englishKeys.categories, queryFn: fetchCategories })
 
-  const levelName = (id: string) => levels.find((l) => l.id === id)?.name ?? ''
+  const levelName = (id: string) => {
+    const level = levels.find((l) => l.id === id)
+    return level ? levelLabel(level) : ''
+  }
   const categoryName = (id: string | null) => (id ? categories.find((c) => c.id === id)?.name : undefined)
   const filtered = Boolean(query.search || query.categoryId)
 
@@ -42,10 +48,10 @@ export function VocabularyPage() {
           <input
             type="search"
             className={v.searchInput}
-            placeholder="Search words"
+            placeholder={t.vocab.search}
             value={filters.search ?? ''}
             onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value || undefined }))}
-            aria-label="Search words"
+            aria-label={t.vocab.search}
           />
         </div>
         {categories.length > 0 && (
@@ -54,9 +60,9 @@ export function VocabularyPage() {
               className={v.select}
               value={filters.categoryId ?? ''}
               onChange={(e) => setFilters((f) => ({ ...f, categoryId: e.target.value || undefined }))}
-              aria-label="Category filter"
+              aria-label={t.vocab.categoryFilter}
             >
-              <option value="">All categories</option>
+              <option value="">{t.vocab.allCategories}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -69,20 +75,20 @@ export function VocabularyPage() {
 
       {isError ? (
         <div className={s.empty}>
-          <div className={s.emptyTitle}>Failed to load words</div>
+          <div className={s.emptyTitle}>{t.vocab.failed}</div>
           <button className={s.btnSecondary} onClick={() => refetch()}>
-            <RefreshCw size={14} /> Retry
+            <RefreshCw size={14} /> {t.retry}
           </button>
         </div>
       ) : isLoading ? null : words.length === 0 ? (
         <div className={s.empty}>
-          <div className={s.emptyTitle}>{filtered ? 'No words match' : 'No words yet'}</div>
-          {!filtered && <div className={s.emptySub}>Add your first word with the + button.</div>}
+          <div className={s.emptyTitle}>{filtered ? t.vocab.noMatch : t.vocab.empty}</div>
+          {!filtered && <div className={s.emptySub}>{t.vocab.emptySub}</div>}
         </div>
       ) : (
         <section className={s.section}>
           <div className={s.sectionHead}>
-            <h2 className={s.sectionTitle}>Words</h2>
+            <h2 className={s.sectionTitle}>{t.vocab.words}</h2>
             <span className={s.count}>{words.length}</span>
           </div>
           <div className={s.list}>
@@ -98,7 +104,7 @@ export function VocabularyPage() {
                   <span className={v.meta}>
                     <span className={v.badge}>{levelName(w.levelId)}</span>
                     {category && <span>{category}</span>}
-                    <span className={due ? v.due : undefined}>{reviewLabel(w.reviewOn, today)}</span>
+                    <span className={due ? v.due : undefined}>{reviewLabel(w.reviewOn, today, t)}</span>
                   </span>
                 </button>
               )
@@ -108,7 +114,7 @@ export function VocabularyPage() {
       )}
 
       {editor.dialog}
-      <button className={s.fab} onClick={editor.openNew} aria-label="Add word">
+      <button className={s.fab} onClick={editor.openNew} aria-label={t.vocab.add}>
         <Plus size={22} />
       </button>
     </div>

@@ -5,6 +5,7 @@ import { RefreshCw } from 'lucide-react'
 import { useToday } from '@/core/hooks/useToday'
 import { toast } from '@/core/components/ui/toast'
 import { answerWord, englishKeys, fetchLevels, fetchReview, type Word } from '@/modules/english/api/english'
+import { useEnglishT, useLevelName } from '@/modules/english/i18n'
 import s from '../EnglishPages.module.scss'
 import r from './ReviewPage.module.scss'
 
@@ -14,6 +15,8 @@ import r from './ReviewPage.module.scss'
  */
 export function ReviewPage() {
   const today = useToday()
+  const t = useEnglishT()
+  const levelLabel = useLevelName()
   const qc = useQueryClient()
   // Which card's answer is showing; a new card always starts hidden.
   const [revealedId, setRevealedId] = useState<string | null>(null)
@@ -35,7 +38,7 @@ export function ReviewPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: englishKeys.all }),
     onError: async () => {
       await refetch()
-      toast('Could not save the answer', 'error')
+      toast(t.review.saveFailed, 'error')
     },
   })
 
@@ -49,9 +52,9 @@ export function ReviewPage() {
     return (
       <div className={s.page}>
         <div className={s.empty}>
-          <div className={s.emptyTitle}>Failed to load the stack</div>
+          <div className={s.emptyTitle}>{t.review.failed}</div>
           <button className={s.btnSecondary} onClick={() => refetch()}>
-            <RefreshCw size={14} /> Retry
+            <RefreshCw size={14} /> {t.retry}
           </button>
         </div>
       </div>
@@ -64,8 +67,8 @@ export function ReviewPage() {
     return (
       <div className={s.page}>
         <div className={s.empty}>
-          <div className={s.emptyTitle}>Nothing to memorise today</div>
-          <div className={s.emptySub}>Words join the stack on their day.</div>
+          <div className={s.emptyTitle}>{t.nothingToday}</div>
+          <div className={s.emptySub}>{t.review.emptySub}</div>
         </div>
       </div>
     )
@@ -75,13 +78,13 @@ export function ReviewPage() {
     <div className={s.page}>
       {noLevels && (
         <Link to="/english/settings" className={r.hint}>
-          Add review levels in English settings, so remembered words leave the stack for a while.
+          {t.review.addLevels}
         </Link>
       )}
-      <div className={r.progress}>{stack.length} to go</div>
+      <div className={r.progress}>{t.review.toGo(stack.length)}</div>
 
       <div className={r.card}>
-        {level && <span className={r.level}>{level.name}</span>}
+        {level && <span className={r.level}>{levelLabel(level)}</span>}
         <div className={r.word}>{current.word}</div>
 
         {revealed ? (
@@ -91,7 +94,7 @@ export function ReviewPage() {
           </div>
         ) : (
           <button className={r.show} onClick={() => setRevealedId(current.id)}>
-            Show
+            {t.review.show}
           </button>
         )}
       </div>
@@ -103,14 +106,14 @@ export function ReviewPage() {
             disabled={answer.isPending}
             onClick={() => answer.mutate({ word: current, result: 'forgot' })}
           >
-            Forgot
+            {t.review.forgot}
           </button>
           <button
             className={r.remembered}
             disabled={answer.isPending}
             onClick={() => answer.mutate({ word: current, result: 'remembered' })}
           >
-            Remembered
+            {t.review.remembered}
           </button>
         </div>
       )}

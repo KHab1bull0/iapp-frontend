@@ -28,8 +28,8 @@ export default defineConfig({
         id: "/",
         name: "IAPP",
         short_name: "IAPP",
-        description: "Personal life system",
-        lang: "en",
+        description: "Shaxsiy hayot tizimi",
+        lang: "uz",
         dir: "ltr",
         categories: ["productivity", "lifestyle", "finance"],
         // Matches --bg (light) and the <meta name="theme-color"> in

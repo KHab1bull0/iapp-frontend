@@ -18,6 +18,7 @@ import {
   type Word,
   type WordInput,
 } from '@/modules/english/api/english'
+import { useEnglishT, useLevelName } from '@/modules/english/i18n'
 import s from './WordForm.module.scss'
 
 interface Props {
@@ -31,6 +32,8 @@ interface ApiError {
 }
 
 export function WordForm({ word, onSaved, onCancel }: Props) {
+  const t = useEnglishT()
+  const levelLabel = useLevelName()
   const qc = useQueryClient()
   const [text, setText] = useState(word?.word ?? '')
   const [translation, setTranslation] = useState(word?.translation ?? '')
@@ -62,14 +65,14 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
 
   const categoryPicker = categories.length > 0 && (
     <label className={s.field}>
-      <span className={s.label}>Category</span>
+      <span className={s.label}>{t.word.category}</span>
       <select
         className={s.input}
         value={categoryId}
         onChange={(e) => setCategoryId(e.target.value)}
-        aria-label="Category"
+        aria-label={t.word.category}
       >
-        <option value="">None</option>
+        <option value="">{t.word.none}</option>
         {categories.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}
@@ -95,12 +98,12 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: englishKeys.all })
-      toast(word ? 'Word updated' : 'Word added', 'success')
+      toast(word ? t.word.updated : t.word.added, 'success')
       onSaved()
     },
     onError: (err) => {
       const e = err as ApiError
-      toast(e.response?.status === 409 ? 'That word is already in your vocabulary' : 'Could not save the word', 'error')
+      toast(e.response?.status === 409 ? t.word.exists : t.word.saveFailed, 'error')
     },
   })
 
@@ -109,10 +112,10 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
     onSuccess: async () => {
       qc.removeQueries({ queryKey: englishKeys.word(word!.id) })
       await qc.invalidateQueries({ queryKey: englishKeys.all })
-      toast('Word deleted', 'success')
+      toast(t.word.deleted, 'success')
       onSaved()
     },
-    onError: () => toast('Could not delete the word', 'error'),
+    onError: () => toast(t.word.deleteFailed, 'error'),
   })
 
   function submit(e: FormEvent) {
@@ -124,76 +127,76 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
     <form className={s.form} onSubmit={submit}>
       <div className={s.row}>
         <label className={s.field}>
-          <span className={s.label}>Word</span>
+          <span className={s.label}>{t.word.word}</span>
           <input
             className={s.input}
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={100}
-            placeholder="English"
-            aria-label="Word"
+            placeholder={t.word.wordPlaceholder}
+            aria-label={t.word.word}
             autoFocus={!word}
             autoCapitalize="none"
           />
         </label>
         <label className={s.field}>
-          <span className={s.label}>Translation</span>
+          <span className={s.label}>{t.word.translation}</span>
           <input
             className={s.input}
             value={translation}
             onChange={(e) => setTranslation(e.target.value)}
             maxLength={200}
-            placeholder="Tarjimasi"
-            aria-label="Translation"
+            placeholder={t.word.translationPlaceholder}
+            aria-label={t.word.translation}
           />
         </label>
       </div>
 
       <label className={s.field}>
-        <span className={s.label}>Meaning / note</span>
+        <span className={s.label}>{t.word.note}</span>
         <textarea
           className={clsx(s.input, s.textarea)}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           maxLength={1000}
           rows={2}
-          placeholder="Optional: meaning, an example sentence…"
-          aria-label="Note"
+          placeholder={t.word.notePlaceholder}
+          aria-label={t.word.note}
         />
       </label>
 
       <div className={s.row}>
         {levels.length > 0 && (
           <label className={s.field}>
-            <span className={s.label}>Level</span>
+            <span className={s.label}>{t.word.level}</span>
             <select
               className={s.input}
               value={shownLevelId}
               onChange={(e) => chooseLevel(e.target.value)}
-              aria-label="Level"
+              aria-label={t.word.level}
             >
               {levels.map((l) => (
                 <option key={l.id} value={l.id}>
-                  {l.name} {l.locked ? '' : `· ${l.intervalDays} day${l.intervalDays === 1 ? '' : 's'}`}
+                  {levelLabel(l)} {l.locked ? '' : `· ${t.days(l.intervalDays)}`}
                 </option>
               ))}
             </select>
           </label>
         )}
         <label className={s.field}>
-          <span className={s.label}>Memorise on</span>
+          <span className={s.label}>{t.word.memoriseOn}</span>
           <input
             type="date"
             className={s.input}
             value={reviewOn}
             onChange={(e) => setReviewOn(e.target.value)}
-            aria-label="Memorise on"
+            aria-label={t.word.memoriseOn}
           />
         </label>
       </div>
       {categoryPicker}
       <span className={s.hint}>
-        {reviewOn ? 'It joins the review stack on this day.' : 'Pick a day to memorise it.'}
+        {reviewOn ? t.word.joinsHint : t.word.pickDay}
       </span>
 
       <div className={s.actions}>
@@ -201,31 +204,31 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button type="button" className={s.btnDanger}>
-                Delete
+                {t.delete}
               </button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete “{word.word}”?</AlertDialogTitle>
-                <AlertDialogDescription>It is removed from your vocabulary.</AlertDialogDescription>
+                <AlertDialogTitle>{t.deleteTitle(word.word)}</AlertDialogTitle>
+                <AlertDialogDescription>{t.word.deleteDesc}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => remove.mutate()}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
-                  Delete
+                  {t.delete}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         )}
         <button type="button" className={s.btnSecondary} onClick={onCancel}>
-          Cancel
+          {t.cancel}
         </button>
         <button type="submit" className={s.btnPrimary} disabled={!valid || save.isPending}>
-          {save.isPending ? 'Saving…' : 'Save'}
+          {save.isPending ? t.saving : t.save}
         </button>
       </div>
     </form>

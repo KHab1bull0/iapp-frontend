@@ -1,22 +1,24 @@
 import { Link, Navigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
-import { SECTIONS } from './sections'
+import { useEnglishT } from '@/modules/english/i18n'
+import { settingsSections } from './sections'
 import st from '@/pages/settings/settings.module.scss'
 
 /** /english/settings: the list of sections on a phone; desktop opens the first one. */
 export function EnglishSettingsIndex() {
   const isMobile = useIsMobile()
+  const t = useEnglishT().settings
   if (!isMobile) return <Navigate to="/english/settings/levels" replace />
 
   return (
     <div className={st.hub}>
       <Link to="/settings" className={st.backLink}>
-        <ChevronLeft size={18} /> Settings
+        <ChevronLeft size={18} /> {t.appSettings}
       </Link>
-      <h1 className={st.h1}>English settings</h1>
+      <h1 className={st.h1}>{t.title}</h1>
       <div className={st.list}>
-        {SECTIONS.map(({ to, label, description, icon: Icon }) => (
+        {settingsSections(t).map(({ to, label, description, icon: Icon }) => (
           <Link key={to} to={to} className={st.listRow}>
             <span className={st.iconTile}>
               <Icon size={17} />

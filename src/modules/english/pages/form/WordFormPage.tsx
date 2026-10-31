@@ -5,10 +5,12 @@ import { ArrowLeft } from 'lucide-react'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { englishKeys, fetchWord } from '@/modules/english/api/english'
 import { WordForm } from '@/modules/english/components/WordForm'
+import { useEnglishT } from '@/modules/english/i18n'
 import s from './WordFormPage.module.scss'
 
 /** Full-screen add/edit on touch layouts; desktop uses WordDialog. */
 export function WordFormPage() {
+  const t = useEnglishT()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
@@ -29,14 +31,14 @@ export function WordFormPage() {
   return (
     <div className={s.page}>
       <header className={s.head}>
-        <button className={s.backBtn} onClick={close} aria-label="Back">
+        <button className={s.backBtn} onClick={close} aria-label={t.word.back}>
           <ArrowLeft size={20} />
         </button>
-        <h1 className={s.h1}>{isEdit ? 'Edit word' : 'New word'}</h1>
+        <h1 className={s.h1}>{isEdit ? t.word.editTitle : t.word.newTitle}</h1>
       </header>
       <div className={s.body}>
         {isEdit && isLoading ? null : isEdit && (isError || !word) ? (
-          <div className={s.state}>Word not found. It may have been deleted.</div>
+          <div className={s.state}>{t.word.notFound}</div>
         ) : (
           <WordForm word={word ?? null} onSaved={close} onCancel={close} />
         )}

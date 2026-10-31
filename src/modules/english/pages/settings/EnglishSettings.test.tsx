@@ -92,4 +92,13 @@ describe('English settings', () => {
     fireEvent.click(within(cats).getByRole('button', { name: 'Add category' }))
     await waitFor(() => expect(api.createCategory).toHaveBeenCalledWith({ name: 'Food' }))
   })
+
+  test('speaks Uzbek and shows the seeded level as Yangi', async () => {
+    localStorage.setItem('iapp-lang', 'uz')
+    renderAt('/english/settings/levels')
+    const levels = await screen.findByRole('region', { name: 'Darajalar' })
+    expect(await within(levels).findByText('Yangi')).toBeTruthy()
+    expect(within(levels).getByText('3 kun')).toBeTruthy()
+    expect(within(levels).getByRole('button', { name: "Daraja qo'shish" })).toBeTruthy()
+  })
 })

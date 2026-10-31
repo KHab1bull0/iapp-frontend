@@ -1,3 +1,5 @@
+import type { EnglishMessages } from '@/modules/english/i18n'
+
 const DAY_MS = 86_400_000
 
 function daysBetween(from: string, to: string): number {
@@ -9,10 +11,10 @@ function daysBetween(from: string, to: string): number {
 }
 
 /** "Due today", "Due 2 days ago", "Tomorrow", "In 5 days". */
-export function reviewLabel(reviewOn: string, today: string): string {
+export function reviewLabel(reviewOn: string, today: string, t: EnglishMessages): string {
   const diff = daysBetween(today, reviewOn)
-  if (diff === 0) return 'Due today'
-  if (diff < 0) return `Due ${-diff} day${diff === -1 ? '' : 's'} ago`
-  if (diff === 1) return 'Tomorrow'
-  return `In ${diff} days`
+  if (diff === 0) return t.vocab.dueToday
+  if (diff < 0) return t.vocab.dueAgo(-diff)
+  if (diff === 1) return t.vocab.tomorrow
+  return t.vocab.inDays(diff)
 }

@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
 import { toast } from '@/core/components/ui/toast'
+import { useLang } from '@/core/i18n'
+import { apiErrorText } from '@/core/i18n/errors'
 import {
   createLevel,
   deleteLevel,
@@ -10,41 +12,44 @@ import {
   updateLevel,
   type Level,
 } from '@/modules/english/api/english'
+import { useEnglishT, useLevelName } from '@/modules/english/i18n'
 import { ConfirmDelete } from './ConfirmDelete'
 import { EnglishSettingsSubpage } from './EnglishSettingsSubpage'
-import { apiMessage as message } from './errors'
 import s from '../EnglishPages.module.scss'
 import e from './EnglishSettings.module.scss'
 
-const days = (n: number) => `${n} day${n === 1 ? '' : 's'}`
-
 function LevelRow({ level }: { level: Level }) {
   const qc = useQueryClient()
+  const { lang } = useLang()
+  const t = useEnglishT()
+  const label = useLevelName()(level)
   const [editing, setEditing] = useState(false)
-  const [name, setName] = useState(level.name)
+  const [name, setName] = useState(label)
   const [interval, setInterval] = useState(String(level.intervalDays))
   const refresh = () => qc.invalidateQueries({ queryKey: englishKeys.all })
 
   // Cancel drops what was typed, so reopening shows the saved values.
   const cancel = () => {
-    setName(level.name)
+    setName(label)
     setInterval(String(level.intervalDays))
     setEditing(false)
   }
 
+  // An untouched name keeps what is stored, so the seeded "New" stays translatable.
+  const savedName = () => (name.trim() === label ? level.name : name.trim())
   const save = useMutation({
     mutationFn: () =>
-      updateLevel(level.id, level.locked ? { name: name.trim() } : { name: name.trim(), intervalDays: Number(interval) }),
+      updateLevel(level.id, level.locked ? { name: savedName() } : { name: savedName(), intervalDays: Number(interval) }),
     onSuccess: async () => {
       setEditing(false)
       await refresh()
     },
-    onError: (err) => toast(message(err, 'Could not save the level'), 'error'),
+    onError: (err) => toast(apiErrorText(err, lang, t.settings.levelSaveFailed), 'error'),
   })
   const remove = useMutation({
     mutationFn: () => deleteLevel(level.id),
     onSuccess: refresh,
-    onError: (err) => toast(message(err, 'Could not delete the level'), 'error'),
+    onError: (err) => toast(apiErrorText(err, lang, t.settings.levelDeleteFailed), 'error'),
   })
 
   if (editing) {
@@ -56,7 +61,7 @@ function LevelRow({ level }: { level: Level }) {
           if (name.trim()) save.mutate()
         }}
       >
-        <input className={e.input} value={name} onChange={(ev) => setName(ev.target.value)} maxLength={50} aria-label={`Name of ${level.name}`} />
+        <input className={e.input} value={name} onChange={(ev) => setName(ev.target.value)} maxLength={50} aria-label={t.settings.nameOf(label)} />
         {!level.locked && (
           <input
             className={e.daysInput}
@@ -64,26 +69,26 @@ function LevelRow({ level }: { level: Level }) {
             min={1}
             value={interval}
             onChange={(ev) => setInterval(ev.target.value)}
-            aria-label={`Days of ${level.name}`}
+            aria-label={t.settings.daysOf(label)}
           />
         )}
-        <button type="submit" className={e.btnPrimary} disabled={save.isPending}>Save</button>
-        <button type="button" className={e.btnGhost} onClick={cancel}>Cancel</button>
+        <button type="submit" className={e.btnPrimary} disabled={save.isPending}>{t.save}</button>
+        <button type="button" className={e.btnGhost} onClick={cancel}>{t.cancel}</button>
       </form>
     )
   }
 
   return (
     <div className={e.row}>
-      <span className={e.name}>{level.name}</span>
-      <span className={e.sub}>{level.locked ? 'Start · due at once' : days(level.intervalDays)}</span>
-      <button className={e.iconBtn} onClick={() => setEditing(true)} aria-label={`Edit ${level.name}`}>
+      <span className={e.name}>{label}</span>
+      <span className={e.sub}>{level.locked ? t.settings.start : t.days(level.intervalDays)}</span>
+      <button className={e.iconBtn} onClick={() => setEditing(true)} aria-label={t.edit(label)}>
         <Pencil size={14} />
       </button>
       {!level.locked && (
         <ConfirmDelete
-          label={level.name}
-          description="Its words go back to the starting level."
+          label={label}
+          description={t.settings.levelDeleteDesc}
           onConfirm={() => remove.mutate()}
         />
       )}
@@ -94,6 +99,8 @@ function LevelRow({ level }: { level: Level }) {
 /** English settings → Levels: how long a remembered word stays away at each step. */
 export function LevelsPage() {
   const qc = useQueryClient()
+  const { lang } = useLang()
+  const t = useEnglishT()
   const refresh = () => qc.invalidateQueries({ queryKey: englishKeys.all })
   const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
   const [levelName, setLevelName] = useState('')
@@ -106,21 +113,18 @@ export function LevelsPage() {
       setLevelDays('')
       await refresh()
     },
-    onError: (err) => toast(message(err, 'Could not add the level'), 'error'),
+    onError: (err) => toast(apiErrorText(err, lang, t.settings.levelAddFailed), 'error'),
   })
 
   const levelValid = levelName.trim() && Number.isInteger(Number(levelDays)) && Number(levelDays) >= 1
 
   return (
-    <EnglishSettingsSubpage title="Levels" description="Review steps and their days">
-      <section className={s.section} aria-label="Levels">
+    <EnglishSettingsSubpage title={t.settings.levels} description={t.settings.levelsDesc}>
+      <section className={s.section} aria-label={t.settings.levels}>
         <div className={s.sectionHead}>
-          <h2 className={s.sectionTitle}>Levels</h2>
+          <h2 className={s.sectionTitle}>{t.settings.levels}</h2>
         </div>
-        <p className={e.help}>
-          A remembered word moves up one level and comes back after that level's days. A forgotten
-          one goes back to the start.
-        </p>
+        <p className={e.help}>{t.settings.levelsHelp}</p>
         <div className={s.list}>
           {levels.map((l) => (
             <LevelRow key={l.id} level={l} />
@@ -132,10 +136,10 @@ export function LevelsPage() {
               if (levelValid) addLevel.mutate()
             }}
           >
-            <input className={e.input} placeholder="New level" value={levelName} onChange={(ev) => setLevelName(ev.target.value)} maxLength={50} aria-label="Level name" />
-            <input className={e.daysInput} type="number" min={1} placeholder="Days" value={levelDays} onChange={(ev) => setLevelDays(ev.target.value)} aria-label="Days" />
+            <input className={e.input} placeholder={t.settings.newLevel} value={levelName} onChange={(ev) => setLevelName(ev.target.value)} maxLength={50} aria-label={t.settings.levelName} />
+            <input className={e.daysInput} type="number" min={1} placeholder={t.settings.daysField} value={levelDays} onChange={(ev) => setLevelDays(ev.target.value)} aria-label={t.settings.daysField} />
             <button type="submit" className={e.btnPrimary} disabled={!levelValid || addLevel.isPending}>
-              Add level
+              {t.settings.addLevel}
             </button>
           </form>
         </div>

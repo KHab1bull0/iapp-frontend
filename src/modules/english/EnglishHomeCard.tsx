@@ -3,10 +3,12 @@ import { useQuery } from '@tanstack/react-query'
 import { Languages } from 'lucide-react'
 import { useToday } from '@/core/hooks/useToday'
 import { englishKeys, fetchReview } from './api/english'
+import { useEnglishT } from './i18n'
 import s from './EnglishHomeCard.module.scss'
 
 /** Home: how many words wait in today's review stack. */
 export function EnglishHomeCard() {
+  const t = useEnglishT()
   const today = useToday()
   // Same key as the Review page, so the two share one request.
   const { data, isError } = useQuery({
@@ -22,18 +24,16 @@ export function EnglishHomeCard() {
         <span className={s.icon}>
           <Languages size={16} />
         </span>
-        <span className={s.title}>English</span>
+        <span className={s.title}>{t.title}</span>
       </div>
       {isError ? (
-        <div className={s.sub}>Couldn't load the review stack</div>
+        <div className={s.sub}>{t.home.failed}</div>
       ) : !data ? (
         <span className={s.skeleton} />
       ) : n === 0 ? (
-        <div className={s.sub}>Nothing to memorise today</div>
+        <div className={s.sub}>{t.nothingToday}</div>
       ) : (
-        <div className={s.count}>
-          {n} word{n === 1 ? '' : 's'} to memorise
-        </div>
+        <div className={s.count}>{t.home.count(n)}</div>
       )}
     </Link>
   )

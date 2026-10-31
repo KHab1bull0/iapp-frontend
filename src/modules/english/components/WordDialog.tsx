@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/core/components/ui/dialog'
 import type { Word } from '@/modules/english/api/english'
+import { useEnglishT } from '@/modules/english/i18n'
 import { WordForm } from './WordForm'
 
 /** Desktop container for WordForm; touch layouts route to WordFormPage. */
@@ -12,11 +13,12 @@ export function WordDialog({
   onOpenChange: (open: boolean) => void
   word?: Word | null
 }) {
+  const t = useEnglishT()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{word ? 'Edit word' : 'New word'}</DialogTitle>
+          <DialogTitle>{word ? t.word.editTitle : t.word.newTitle}</DialogTitle>
         </DialogHeader>
         <WordForm
           key={`${word?.id ?? 'new'}-${String(open)}`}
