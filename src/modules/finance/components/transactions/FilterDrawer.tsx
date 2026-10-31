@@ -5,6 +5,7 @@ import { X, Search, ChevronDown } from 'lucide-react'
 import type { Category } from '@/modules/finance/api/categories'
 import { PeriodFilter } from './PeriodFilter'
 import { DEFAULT_FILTERS, type TransactionFilterState } from './period'
+import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './FilterDrawer.module.scss'
 
 interface Props {
@@ -15,13 +16,11 @@ interface Props {
   categories: Category[]
 }
 
-const TYPE_OPTIONS = [
-  { value: '' as const,        label: 'All'     },
-  { value: 'income' as const,  label: 'Income'  },
-  { value: 'expense' as const, label: 'Expense' },
-]
+const TYPE_OPTIONS = [{ value: '' as const }, { value: 'income' as const }, { value: 'expense' as const }]
 
 export function FilterDrawer({ open, onClose, filters, onApply, categories }: Props) {
+  const t = useFinanceT()
+  const catName = useCategoryName()
   const [draft, setDraft] = useState<TransactionFilterState>(filters)
 
   // Sync draft to current filters each time the drawer opens
@@ -59,45 +58,45 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
         className={clsx(s.drawer, open && s.open)}
         role="dialog"
         aria-modal="true"
-        aria-label="Filters"
+        aria-label={t.filters.title}
         inert={!open}
       >
         <div className={s.drawerHandle} />
         <div className={s.drawerHead}>
-          <span className={s.drawerTitle}>Filters</span>
-          <button className={s.iconBtn} onClick={onClose} aria-label="Close filters">
+          <span className={s.drawerTitle}>{t.filters.title}</span>
+          <button className={s.iconBtn} onClick={onClose} aria-label={t.filters.close}>
             <X size={18} />
           </button>
         </div>
 
         <div className={s.drawerBody}>
           <div className={s.field}>
-            <span className={s.fieldLabel}>Type</span>
+            <span className={s.fieldLabel}>{t.filters.type}</span>
             <div className={s.tabs}>
-              {TYPE_OPTIONS.map(({ value, label }) => (
+              {TYPE_OPTIONS.map(({ value }) => (
                 <button
                   key={value}
                   className={clsx(s.tab, (draft.type ?? '') === value && s.active)}
                   onClick={() => setDraft((d) => ({ ...d, type: value || undefined }))}
                 >
-                  {label}
+                  {value ? t[value] : t.all}
                 </button>
               ))}
             </div>
           </div>
 
           <div className={s.field}>
-            <span className={s.fieldLabel}>Period</span>
+            <span className={s.fieldLabel}>{t.filters.period}</span>
             <PeriodFilter filters={draft} onChange={setDraft} />
           </div>
 
           <div className={s.field}>
-            <span className={s.fieldLabel}>Search</span>
+            <span className={s.fieldLabel}>{t.filters.search}</span>
             <div className={s.filterSearch}>
               <Search size={15} />
               <input
                 className={s.filterInput}
-                placeholder="Search by note or category"
+                placeholder={t.filters.searchPlaceholder}
                 value={draft.search ?? ''}
                 onChange={(e) => setDraft((d) => ({ ...d, search: e.target.value || undefined }))}
               />
@@ -105,7 +104,7 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
           </div>
 
           <div className={s.field}>
-            <span className={s.fieldLabel}>Category</span>
+            <span className={s.fieldLabel}>{t.category}</span>
             <div className={s.inputWrap} style={{ position: 'relative' }}>
               <select
                 className={clsx(s.input, s.select)}
@@ -117,10 +116,10 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
                   }))
                 }
               >
-                <option value="all">All categories</option>
+                <option value="all">{t.allCategories}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.icon} {c.name}
+                    {c.icon} {catName(c.name)}
                   </option>
                 ))}
               </select>
@@ -133,10 +132,10 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
 
         <div className={s.drawerFooter}>
           <button className={s.btnSecondary} onClick={handleReset}>
-            Reset
+            {t.filters.reset}
           </button>
           <button className={s.btnPrimary} onClick={handleApply}>
-            <Search size={15} /> Search
+            <Search size={15} /> {t.filters.apply}
           </button>
         </div>
       </div>

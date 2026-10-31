@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
 import type { RecentTransaction } from '@/modules/finance/api/stats'
 import { formatSigned, formatShortDay } from '@/core/lib/format'
+import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './RecentTransactions.module.scss'
 
 interface Props {
@@ -10,12 +11,14 @@ interface Props {
 
 export function RecentTransactions({ transactions }: Props) {
   const navigate = useNavigate()
+  const t = useFinanceT()
+  const catName = useCategoryName()
 
   return (
     <section className={s.recent}>
       <div className={s.cardHead}>
-        <h2 className={s.h3}>Recent transactions</h2>
-        <button className={s.link} onClick={() => navigate('/finance/transactions')}>View all</button>
+        <h2 className={s.h3}>{t.stats.recent}</h2>
+        <button className={s.link} onClick={() => navigate('/finance/transactions')}>{t.stats.viewAll}</button>
       </div>
       <div className={clsx(s.card, s.recentList)}>
         {transactions.length === 0 ? (
@@ -23,8 +26,8 @@ export function RecentTransactions({ transactions }: Props) {
             <div className={s.emptyGlyph}>
               <span style={{ fontSize: 24 }}>💸</span>
             </div>
-            <div className={s.emptyTitle}>No transactions yet</div>
-            <div className={s.emptySub}>Add your first income or expense</div>
+            <div className={s.emptyTitle}>{t.stats.noTransactions}</div>
+            <div className={s.emptySub}>{t.stats.noTransactionsSub}</div>
           </div>
         ) : (
           transactions.map((tx) => (
@@ -36,9 +39,9 @@ export function RecentTransactions({ transactions }: Props) {
                 {tx.category.icon}
               </div>
               <div className={s.txMeta}>
-                <div className={s.txTitle}>{tx.note ?? tx.category.name}</div>
+                <div className={s.txTitle}>{tx.note ?? catName(tx.category.name)}</div>
                 <div className={s.txSub}>
-                  {tx.category.name} · {formatShortDay(tx.date)}
+                  {catName(tx.category.name)} · {formatShortDay(tx.date)}
                 </div>
               </div>
               <div className={clsx(s.txAmt, tx.type === 'income' ? s.amtIn : s.amtOut)}>

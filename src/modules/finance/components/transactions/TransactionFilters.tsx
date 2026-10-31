@@ -3,6 +3,7 @@ import { Search, ChevronDown } from 'lucide-react'
 import type { Category } from '@/modules/finance/api/categories'
 import { PeriodFilter } from './PeriodFilter'
 import type { TransactionFilterState } from './period'
+import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionFilters.module.scss'
 
 interface Props {
@@ -11,23 +12,21 @@ interface Props {
   categories: Category[]
 }
 
-const TYPE_OPTIONS = [
-  { value: '' as const,        label: 'All'    },
-  { value: 'income' as const,  label: 'Income'  },
-  { value: 'expense' as const, label: 'Expense' },
-]
+const TYPE_OPTIONS = [{ value: '' as const }, { value: 'income' as const }, { value: 'expense' as const }]
 
 export function TransactionFilters({ filters, onChange, categories }: Props) {
+  const t = useFinanceT()
+  const catName = useCategoryName()
   return (
     <div className={s.filterBar}>
       <div className={s.tabs}>
-        {TYPE_OPTIONS.map(({ value, label }) => (
+        {TYPE_OPTIONS.map(({ value }) => (
           <button
             key={value}
             className={clsx(s.tab, (filters.type ?? '') === value && s.active)}
             onClick={() => onChange({ ...filters, type: value || undefined })}
           >
-            {label}
+            {value ? t[value] : t.all}
           </button>
         ))}
       </div>
@@ -41,7 +40,7 @@ export function TransactionFilters({ filters, onChange, categories }: Props) {
           <Search size={15} />
           <input
             className={s.filterInput}
-            placeholder="Search by note or category"
+            placeholder={t.filters.searchPlaceholder}
             value={filters.search ?? ''}
             onChange={(e) => onChange({ ...filters, search: e.target.value || undefined })}
           />
@@ -54,9 +53,9 @@ export function TransactionFilters({ filters, onChange, categories }: Props) {
           value={filters.categoryId ?? 'all'}
           onChange={(e) => onChange({ ...filters, categoryId: e.target.value === 'all' ? undefined : e.target.value })}
         >
-          <option value="all">All categories</option>
+          <option value="all">{t.allCategories}</option>
           {categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
+            <option key={c.id} value={c.id}>{c.icon} {catName(c.name)}</option>
           ))}
         </select>
         <span className={s.selectChev}><ChevronDown size={15} /></span>

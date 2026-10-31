@@ -1,14 +1,10 @@
 import clsx from 'clsx'
 import { ymd } from '@/core/lib/format'
 import type { Period, TransactionFilterState } from './period'
+import { useFinanceT } from '@/modules/finance/i18n'
 import s from './PeriodFilter.module.scss'
 
-const OPTIONS: { value: Period; label: string }[] = [
-  { value: 'week', label: 'Week' },
-  { value: 'month', label: 'Month' },
-  { value: 'range', label: 'Range' },
-  { value: 'all', label: 'All' },
-]
+const OPTIONS: Period[] = ['week', 'month', 'range', 'all']
 
 interface Props {
   filters: TransactionFilterState
@@ -17,12 +13,13 @@ interface Props {
 
 /** Week / Month / Range / All, with From–To pickers when Range is on. */
 export function PeriodFilter({ filters, onChange }: Props) {
+  const t = useFinanceT()
   const today = ymd(new Date())
 
   return (
     <div className={s.period}>
-      <div className={s.segments} role="radiogroup" aria-label="Period">
-        {OPTIONS.map(({ value, label }) => (
+      <div className={s.segments} role="radiogroup" aria-label={t.filters.period}>
+        {OPTIONS.map((value) => (
           <button
             key={value}
             type="button"
@@ -31,7 +28,7 @@ export function PeriodFilter({ filters, onChange }: Props) {
             className={clsx(s.segment, filters.period === value && s.active)}
             onClick={() => onChange({ ...filters, period: value })}
           >
-            {label}
+            {value === 'all' ? t.all : t.filters[value]}
           </button>
         ))}
       </div>
@@ -44,7 +41,7 @@ export function PeriodFilter({ filters, onChange }: Props) {
             value={filters.startDate ?? ''}
             max={filters.endDate || today}
             onChange={(e) => onChange({ ...filters, startDate: e.target.value || undefined })}
-            aria-label="From"
+            aria-label={t.filters.from}
           />
           <span className={s.dash}>–</span>
           <input
@@ -54,7 +51,7 @@ export function PeriodFilter({ filters, onChange }: Props) {
             min={filters.startDate}
             max={today}
             onChange={(e) => onChange({ ...filters, endDate: e.target.value || undefined })}
-            aria-label="To"
+            aria-label={t.filters.to}
           />
         </div>
       )}

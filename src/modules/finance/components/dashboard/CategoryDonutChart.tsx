@@ -1,6 +1,7 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import type { CategoryBreakdown } from '@/modules/finance/api/stats'
 import { formatAmount, CURRENCY } from '@/core/lib/format'
+import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './CategoryDonutChart.module.scss'
 
 // Kept small so the card reads wide rather than tall.
@@ -12,15 +13,17 @@ interface PiePayload { name: string; value: number; payload: CategoryBreakdown }
 interface CustomTooltipProps { active?: boolean; payload?: PiePayload[] }
 
 function CustomTooltip({ active, payload }: CustomTooltipProps) {
+  const t = useFinanceT()
+  const catName = useCategoryName()
   if (!active || !payload?.length) return null
   const d = payload[0]
   return (
     <div className={s.card} style={{ padding: '10px 14px', fontSize: 13, minWidth: 140 }}>
-      <p style={{ fontWeight: 600, color: 'var(--fg-strong)', marginBottom: 4 }}>{d.name}</p>
+      <p style={{ fontWeight: 600, color: 'var(--fg-strong)', marginBottom: 4 }}>{catName(d.name)}</p>
       <p style={{ color: d.payload.color, fontVariantNumeric: 'tabular-nums' }}>
         {formatAmount(d.value ?? 0)} {CURRENCY}
       </p>
-      <p style={{ color: 'var(--fg-muted)', fontSize: 11 }}>{d.payload.percentage}% of expenses</p>
+      <p style={{ color: 'var(--fg-muted)', fontSize: 11 }}>{t.stats.ofExpenses(d.payload.percentage)}</p>
     </div>
   )
 }
@@ -30,18 +33,20 @@ interface Props {
 }
 
 export function CategoryDonutChart({ data }: Props) {
+  const t = useFinanceT()
+  const catName = useCategoryName()
   const expenseData = data.filter((d) => d.type === 'expense')
 
   return (
     <div className={s.card}>
       <div className={s.cardHead}>
-        <h2 className={s.h3}>Spending by category</h2>
-        <span className={s.labelTiny}>Expenses</span>
+        <h2 className={s.h3}>{t.stats.byCategory}</h2>
+        <span className={s.labelTiny}>{t.expenses}</span>
       </div>
       {expenseData.length === 0 ? (
         <div className={s.empty} style={{ padding: '40px 20px' }}>
-          <div className={s.emptyTitle}>No expense data yet</div>
-          <div className={s.emptySub}>Add expense transactions to see the breakdown</div>
+          <div className={s.emptyTitle}>{t.stats.noExpense}</div>
+          <div className={s.emptySub}>{t.stats.noExpenseSub}</div>
         </div>
       ) : (
         <div className={s.donutWrap}>
@@ -70,12 +75,12 @@ export function CategoryDonutChart({ data }: Props) {
             {expenseData.slice(0, LEGEND_MAX).map((d) => (
               <li key={d.categoryId}>
                 <span className={s.donutDot} style={{ background: d.color }} />
-                <span className={s.donutName}>{d.icon} {d.name}</span>
+                <span className={s.donutName}>{d.icon} {catName(d.name)}</span>
                 <span className={s.donutPct}>{d.percentage}%</span>
               </li>
             ))}
             {expenseData.length > LEGEND_MAX && (
-              <li className={s.donutMore}>+{expenseData.length - LEGEND_MAX} more</li>
+              <li className={s.donutMore}>{t.stats.more(expenseData.length - LEGEND_MAX)}</li>
             )}
           </ul>
         </div>

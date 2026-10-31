@@ -9,10 +9,13 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/core/components/ui/alert-dialog'
 import { AddCategoryDialog } from './AddCategoryDialog'
+import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './CategoryList.module.scss'
 
 function CategoryCard({ cat, onEdit }: { cat: Category; onEdit: (cat: Category) => void }) {
   const qc = useQueryClient()
+  const t = useFinanceT()
+  const catName = useCategoryName()
   const [deleting, setDeleting] = useState(false)
 
   async function handleDelete() {
@@ -21,9 +24,9 @@ function CategoryCard({ cat, onEdit }: { cat: Category; onEdit: (cat: Category) 
       await deleteCategory(cat.id)
       await qc.invalidateQueries({ queryKey: ['categories'] })
       await qc.invalidateQueries({ queryKey: ['dashboard'] })
-      toast(`"${cat.name}" deleted`, 'success')
+      toast(t.categories.deleted(catName(cat.name)), 'success')
     } catch {
-      toast('Failed to delete category', 'error')
+      toast(t.categories.deleteFailed, 'error')
     } finally {
       setDeleting(false)
     }
@@ -40,33 +43,32 @@ function CategoryCard({ cat, onEdit }: { cat: Category; onEdit: (cat: Category) 
       <div className={s.catMeta}>
         {/* The raw hex code used to be printed here — developer detail, no value
             to the user. The emoji chip already carries the colour. */}
-        <div className={s.catName}>{cat.name}</div>
-        <div className={s.catType}>{cat.type === 'income' ? 'Income' : 'Expense'}</div>
+        <div className={s.catName}>{catName(cat.name)}</div>
+        <div className={s.catType}>{t[cat.type]}</div>
       </div>
-      <button className={s.catEdit} onClick={() => onEdit(cat)} aria-label="Edit">
+      <button className={s.catEdit} onClick={() => onEdit(cat)} aria-label={t.edit}>
         <Pencil size={14} />
       </button>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <button className={s.catDel} disabled={deleting} aria-label="Delete">
+          <button className={s.catDel} disabled={deleting} aria-label={t.delete}>
             <Trash2 size={14} />
           </button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete "{cat.name}"?</AlertDialogTitle>
+            <AlertDialogTitle>{t.categories.deleteTitle(catName(cat.name))}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the category. Transactions linked to it will lose their
-              category association.
+              {t.categories.deleteDesc}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -81,6 +83,7 @@ interface Props {
 }
 
 export function CategoryList({ categories, type }: Props) {
+  const t = useFinanceT()
   const filtered = categories.filter((c) => c.type === type)
   const [editing, setEditing] = useState<Category | null>(null)
   const [editOpen, setEditOpen] = useState(false)
@@ -93,7 +96,7 @@ export function CategoryList({ categories, type }: Props) {
   if (filtered.length === 0) {
     return (
       <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>
-        No {type} categories yet
+        {t.categories.empty(t[type].toLowerCase())}
       </div>
     )
   }

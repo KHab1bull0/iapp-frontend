@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/core/components/ui/dialog'
 import type { Transaction } from '@/modules/finance/api/transactions'
+import { useFinanceT } from '@/modules/finance/i18n'
 import { TransactionForm } from './TransactionForm'
 
 /**
@@ -14,13 +15,14 @@ interface Props {
 }
 
 export function AddTransactionDialog({ open, onOpenChange, transaction }: Props) {
+  const t = useFinanceT()
   const isEdit = !!transaction
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit Transaction' : 'Add Transaction'}</DialogTitle>
+          <DialogTitle>{isEdit ? t.tx.editTitle : t.tx.addTitle}</DialogTitle>
         </DialogHeader>
 
         <TransactionForm

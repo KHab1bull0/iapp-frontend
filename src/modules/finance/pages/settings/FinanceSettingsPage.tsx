@@ -7,6 +7,7 @@ import { fetchCategories } from '@/modules/finance/api/categories'
 import { AddCategoryDialog } from '@/modules/finance/components/categories/AddCategoryDialog'
 import { CategoryList } from '@/modules/finance/components/categories/CategoryList'
 // Shell styles, so the page looks like the app's other settings pages.
+import { useFinanceT } from '@/modules/finance/i18n'
 import s from '@/pages/settings/settings.module.scss'
 
 type CatTab = 'expense' | 'income'
@@ -30,6 +31,7 @@ function CategoriesSkeleton() {
 
 /** Finance → Settings: the module's own preferences, starting with categories. */
 export function FinanceSettingsPage() {
+  const t = useFinanceT()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [catTab, setCatTab] = useState<CatTab>('expense')
 
@@ -42,20 +44,20 @@ export function FinanceSettingsPage() {
     <div className={s.page}>
       {/* Opened from Settings → Modules, so that is where back leads. */}
       <Link to="/settings" className={s.backLink}>
-        <ChevronLeft size={18} /> Settings
+        <ChevronLeft size={18} /> {t.settingsLink}
       </Link>
       <header className={s.pageHead}>
         <div>
-          <h1 className={s.h1}>Finance settings</h1>
-          <div className={s.pageSub}>Categories for your income and expenses</div>
+          <h1 className={s.h1}>{t.categories.settingsTitle}</h1>
+          <div className={s.pageSub}>{t.categories.settingsSub}</div>
         </div>
       </header>
 
       <div className={clsx(s.card, s.settingsCard)}>
         <div className={s.cardHead}>
-          <h2 className={s.h3}>Categories</h2>
+          <h2 className={s.h3}>{t.categories.title}</h2>
           <button className={s.btnSecondary} onClick={() => setDialogOpen(true)}>
-            <Plus size={14} /> New category
+            <Plus size={14} /> {t.categories.new}
           </button>
         </div>
         <div className={s.tabs}>
@@ -63,13 +65,13 @@ export function FinanceSettingsPage() {
             className={clsx(s.tab, catTab === 'expense' && s.active)}
             onClick={() => setCatTab('expense')}
           >
-            Expenses
+            {t.expenses}
           </button>
           <button
             className={clsx(s.tab, catTab === 'income' && s.active)}
             onClick={() => setCatTab('income')}
           >
-            Income
+            {t.income}
           </button>
         </div>
         {isLoading ? (

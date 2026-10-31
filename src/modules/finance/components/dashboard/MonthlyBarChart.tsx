@@ -3,6 +3,7 @@ import {
 } from 'recharts'
 import type { MonthPoint } from '@/modules/finance/api/stats'
 import { formatAmount, formatAxis, formatMonthShort, CURRENCY } from '@/core/lib/format'
+import { useFinanceT } from '@/modules/finance/i18n'
 import s from './MonthlyBarChart.module.scss'
 
 // Short enough that the card reads wide rather than tall.
@@ -36,22 +37,23 @@ interface Props {
 }
 
 export function MonthlyBarChart({ data }: Props) {
+  const t = useFinanceT()
   const chartData = data.map((d) => ({ ...d, month: formatMonthShort(d.month) }))
   const hasData = data.some((d) => d.income > 0 || d.expense > 0)
 
   return (
     <div className={s.card}>
       <div className={s.cardHead}>
-        <h2 className={s.h3}>Last 6 months</h2>
+        <h2 className={s.h3}>{t.stats.lastSixMonths}</h2>
         <div className={s.barLegend}>
-          <span><span className={s.dot} style={{ background: INCOME_COLOR }} />Income</span>
-          <span><span className={s.dot} style={{ background: EXPENSE_COLOR }} />Expense</span>
+          <span><span className={s.dot} style={{ background: INCOME_COLOR }} />{t.income}</span>
+          <span><span className={s.dot} style={{ background: EXPENSE_COLOR }} />{t.expense}</span>
         </div>
       </div>
       {!hasData ? (
         <div className={s.empty} style={{ padding: '40px 20px' }}>
-          <div className={s.emptyTitle}>No data yet</div>
-          <div className={s.emptySub}>Add transactions to see the chart</div>
+          <div className={s.emptyTitle}>{t.stats.noData}</div>
+          <div className={s.emptySub}>{t.stats.noDataSub}</div>
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
@@ -73,8 +75,8 @@ export function MonthlyBarChart({ data }: Props) {
               width={48}
             />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--row-hover)', radius: 4 }} />
-            <Bar dataKey="income"  name="Income"  fill={INCOME_COLOR}  radius={[4, 4, 0, 0]} />
-            <Bar dataKey="expense" name="Expense" fill={EXPENSE_COLOR} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="income"  name={t.income}  fill={INCOME_COLOR}  radius={[4, 4, 0, 0]} />
+            <Bar dataKey="expense" name={t.expense} fill={EXPENSE_COLOR} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}

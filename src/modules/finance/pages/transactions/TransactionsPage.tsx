@@ -16,6 +16,7 @@ import {
   type TransactionFilterState,
 } from '@/modules/finance/components/transactions/period'
 import { TransactionList } from '@/modules/finance/components/transactions/TransactionList'
+import { useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionsPage.module.scss'
 
 function ListSkeleton() {
@@ -47,6 +48,7 @@ function ListSkeleton() {
 }
 
 export function TransactionsPage() {
+  const t = useFinanceT()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [filters, setFilters] = useState<TransactionFilterState>(DEFAULT_FILTERS)
@@ -108,9 +110,9 @@ export function TransactionsPage() {
 
       {isError ? (
         <div className={s.emptyCard}>
-          <div className={s.emptyTitle}>Failed to load transactions</div>
+          <div className={s.emptyTitle}>{t.tx.failedList}</div>
           <button className={s.btnSecondary} style={{ marginTop: 8 }} onClick={() => refetch()}>
-            <RefreshCw size={14} /> Retry
+            <RefreshCw size={14} /> {t.retry}
           </button>
         </div>
       ) : isLoading ? (
@@ -129,7 +131,7 @@ export function TransactionsPage() {
 
       {/* The only way to add: this page's own floating button, on every width.
           Phones get the full-screen form, desktop the dialog. */}
-      <button className={s.fab} onClick={openAdd} aria-label="Add transaction">
+      <button className={s.fab} onClick={openAdd} aria-label={t.tx.add}>
         <Plus size={22} />
       </button>
     </div>

@@ -7,9 +7,11 @@ import { StatCard, StatCardSkeleton } from '@/modules/finance/components/dashboa
 import { MonthlyBarChart, MonthlyBarChartSkeleton } from '@/modules/finance/components/dashboard/MonthlyBarChart'
 import { CategoryDonutChart, CategoryDonutChartSkeleton } from '@/modules/finance/components/dashboard/CategoryDonutChart'
 import { RecentTransactions, RecentTransactionsSkeleton } from '@/modules/finance/components/dashboard/RecentTransactions'
+import { useFinanceT } from '@/modules/finance/i18n'
 import s from './DashboardPage.module.scss'
 
 export function DashboardPage() {
+  const t = useFinanceT()
   const [month, setMonth] = useState<string>(currentMonth)
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -24,10 +26,10 @@ export function DashboardPage() {
           <div className={s.emptyGlyph}>
             <span style={{ fontSize: 24 }}>⚠️</span>
           </div>
-          <div className={s.emptyTitle}>Failed to load dashboard</div>
-          <div className={s.emptySub}>Check your connection or try again</div>
+          <div className={s.emptyTitle}>{t.stats.failed}</div>
+          <div className={s.emptySub}>{t.stats.failedSub}</div>
           <button className={s.btnSecondary} style={{ marginTop: 8, gap: 6 }} onClick={() => refetch()}>
-            <RefreshCw size={14} /> Retry
+            <RefreshCw size={14} /> {t.retry}
           </button>
         </div>
       </div>
@@ -46,7 +48,7 @@ export function DashboardPage() {
       value={month}
       max={currentMonth()}
       onChange={(e) => setMonth(e.target.value || currentMonth())}
-      aria-label="Select month"
+      aria-label={t.stats.selectMonth}
     />
   )
 
@@ -54,7 +56,7 @@ export function DashboardPage() {
     <div className={s.page}>
       <header className={`${s.pageHead} ${s.desktopOnly}`}>
         <div>
-          <h1 className={s.h1}>Statistics</h1>
+          <h1 className={s.h1}>{t.stats.title}</h1>
           <div className={s.pageSub}>{today}</div>
         </div>
       </header>
@@ -69,9 +71,9 @@ export function DashboardPage() {
           </>
         ) : (
           <>
-            <StatCard size="lg" title="Balance" value={data!.totalBalance} icon={Wallet}       tone="brand"   period={periodLabel} action={monthPicker} />
-            <StatCard size="sm" title="Income"  value={data!.totalIncome}  icon={TrendingUp}   tone="success" period={periodLabel} />
-            <StatCard size="sm" title="Expense" value={data!.totalExpense} icon={TrendingDown} tone="danger"  period={periodLabel} />
+            <StatCard size="lg" title={t.balance} value={data!.totalBalance} icon={Wallet}       tone="brand"   period={periodLabel} action={monthPicker} />
+            <StatCard size="sm" title={t.income}  value={data!.totalIncome}  icon={TrendingUp}   tone="success" period={periodLabel} />
+            <StatCard size="sm" title={t.expense} value={data!.totalExpense} icon={TrendingDown} tone="danger"  period={periodLabel} />
           </>
         )}
       </section>

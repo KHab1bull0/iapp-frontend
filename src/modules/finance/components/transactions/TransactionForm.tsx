@@ -6,6 +6,7 @@ import { fetchCategories } from '@/modules/finance/api/categories'
 import { createTransaction, updateTransaction, type Transaction } from '@/modules/finance/api/transactions'
 import { CURRENCY } from '@/core/lib/format'
 import { toast } from '@/core/components/ui/toast'
+import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionForm.module.scss'
 
 /**
@@ -47,6 +48,8 @@ function handleAmountInput(
 }
 
 export function TransactionForm({ transaction, onSaved, onCancel, className }: Props) {
+  const t = useFinanceT()
+  const catName = useCategoryName()
   const qc = useQueryClient()
   const isEdit = !!transaction
 
@@ -87,9 +90,9 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
     e.preventDefault()
     setTouched(true)
     const num = parseFloat(amount)
-    if (!num || num <= 0) { setError('Enter a valid amount'); return }
-    if (!categoryId) { setError('Select a category'); return }
-    if (!date) { setError('Select a date'); return }
+    if (!num || num <= 0) { setError(t.tx.invalidAmount); return }
+    if (!categoryId) { setError(t.tx.pickCategory); return }
+    if (!date) { setError(t.tx.pickDate); return }
 
     setLoading(true)
     setError('')
@@ -107,10 +110,10 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
       if (isEdit && transaction) {
         await qc.invalidateQueries({ queryKey: ['transaction', transaction.id] })
       }
-      toast(isEdit ? 'Transaction updated' : 'Transaction added', 'success')
+      toast(isEdit ? t.tx.updated : t.tx.added, 'success')
       onSaved()
     } catch {
-      setError(isEdit ? 'Failed to update transaction' : 'Failed to add transaction')
+      setError(isEdit ? t.tx.updateFailed : t.tx.addFailed)
     } finally {
       setLoading(false)
     }
@@ -126,8 +129,8 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
           onClick={() => { setType('income'); setCategoryId('') }}
         >
           <span className={s.typeIc}><TrendingUp size={18} /></span>
-          <span className={s.typeTitle}>Income</span>
-          <span className={s.typeSub}>Money in</span>
+          <span className={s.typeTitle}>{t.income}</span>
+          <span className={s.typeSub}>{t.tx.moneyIn}</span>
         </button>
         <button
           type="button"
@@ -135,14 +138,14 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
           onClick={() => { setType('expense'); setCategoryId('') }}
         >
           <span className={s.typeIc}><TrendingDown size={18} /></span>
-          <span className={s.typeTitle}>Expense</span>
-          <span className={s.typeSub}>Money out</span>
+          <span className={s.typeTitle}>{t.expense}</span>
+          <span className={s.typeSub}>{t.tx.moneyOut}</span>
         </button>
       </div>
 
       {/* Amount */}
       <div className={s.amountWrap}>
-        <span className={s.amountLabel}>Amount</span>
+        <span className={s.amountLabel}>{t.tx.amount}</span>
         <div className={clsx(
           s.amount,
           type === 'income' ? s.amtIn : s.amtOut,
@@ -161,7 +164,7 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
 
       {/* Category */}
       <label className={s.field}>
-        <span className={s.fieldLabel}>Category</span>
+        <span className={s.fieldLabel}>{t.category}</span>
         <div className={s.inputWrap} style={{ position: 'relative' }}>
           <select
             className={clsx(s.input, s.select)}
@@ -169,9 +172,9 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
             onChange={(e) => setCategoryId(e.target.value)}
             required
           >
-            <option value="">Select…</option>
+            <option value="">{t.tx.selectCategory}</option>
             {filtered.map((c) => (
-              <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
+              <option key={c.id} value={c.id}>{c.icon} {catName(c.name)}</option>
             ))}
           </select>
           <span className={s.selectChev}><ChevronDown size={15} /></span>
@@ -181,7 +184,7 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
       {/* Date + Time grid */}
       <div className={s.formGrid}>
         <label className={s.field}>
-          <span className={s.fieldLabel}>Date</span>
+          <span className={s.fieldLabel}>{t.tx.date}</span>
           <div className={s.inputWrap}>
             <input
               className={s.input}
@@ -194,7 +197,7 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
         </label>
 
         <label className={s.field}>
-          <span className={s.fieldLabel}>Time</span>
+          <span className={s.fieldLabel}>{t.tx.time}</span>
           <div className={s.inputWrap}>
             <input
               className={s.input}
@@ -208,11 +211,11 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
 
       {/* Note */}
       <label className={s.field}>
-        <span className={s.fieldLabel}>Note (optional)</span>
+        <span className={s.fieldLabel}>{t.tx.note}</span>
         <div className={s.inputWrap}>
           <input
             className={s.input}
-            placeholder="e.g. Lunch, Grocery run…"
+            placeholder={t.tx.notePlaceholder}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             maxLength={500}
@@ -224,10 +227,10 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
 
       <div className={s.formActions}>
         <button type="button" className={s.btnSecondary} onClick={onCancel}>
-          Cancel
+          {t.cancel}
         </button>
         <button type="submit" className={s.btnPrimary} disabled={loading}>
-          {loading ? 'Saving…' : isEdit ? 'Save changes' : 'Save'}
+          {loading ? t.saving : isEdit ? t.tx.saveChanges : t.save}
         </button>
       </div>
     </form>

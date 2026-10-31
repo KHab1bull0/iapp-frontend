@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react'
 import { fetchTransaction } from '@/modules/finance/api/transactions'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { TransactionForm } from '@/modules/finance/components/transactions/TransactionForm'
+import { useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionFormPage.module.scss'
 
 /**
@@ -20,6 +21,7 @@ import s from './TransactionFormPage.module.scss'
  * on a route desktop never uses.
  */
 export function TransactionFormPage() {
+  const t = useFinanceT()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
@@ -40,23 +42,23 @@ export function TransactionFormPage() {
   return (
     <div className={s.page}>
       <header className={s.head}>
-        <button className={s.backBtn} onClick={close} aria-label="Back to transactions">
+        <button className={s.backBtn} onClick={close} aria-label={t.tx.back}>
           <ArrowLeft size={20} />
         </button>
-        <h1 className={s.h1}>{isEdit ? 'Edit transaction' : 'Add transaction'}</h1>
+        <h1 className={s.h1}>{isEdit ? t.tx.editTitle : t.tx.addTitle}</h1>
       </header>
 
       <div className={s.body}>
         <div className={s.inner}>
           {isEdit && isLoading ? (
             <div className={s.state}>
-              <div className={s.stateSub}>Loading…</div>
+              <div className={s.stateSub}>{t.loading}</div>
             </div>
           ) : isEdit && (isError || !transaction) ? (
             <div className={s.state}>
-              <div className={s.stateTitle}>Transaction not found</div>
-              <div className={s.stateSub}>It may have been deleted.</div>
-              <button className={s.btnSecondary} onClick={close}>Back to transactions</button>
+              <div className={s.stateTitle}>{t.tx.notFound}</div>
+              <div className={s.stateSub}>{t.tx.notFoundSub}</div>
+              <button className={s.btnSecondary} onClick={close}>{t.tx.back}</button>
             </div>
           ) : (
             <TransactionForm

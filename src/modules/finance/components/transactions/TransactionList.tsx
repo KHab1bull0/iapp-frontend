@@ -13,14 +13,15 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/core/components/ui/alert-dialog'
 import { AddTransactionDialog } from './AddTransactionDialog'
+import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionList.module.scss'
 
-function formatDayLabel(dateStr: string) {
+function formatDayLabel(dateStr: string, words: { today: string; yesterday: string }) {
   const d = parseApiDate(dateStr)
   const today = new Date()
   const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1)
-  if (d.toDateString() === today.toDateString()) return 'Today'
-  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
+  if (d.toDateString() === today.toDateString()) return words.today
+  if (d.toDateString() === yesterday.toDateString()) return words.yesterday
   return formatDay(dateStr)
 }
 
@@ -35,6 +36,8 @@ function groupByDate(transactions: Transaction[]): [string, Transaction[]][] {
 }
 
 function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transaction) => void }) {
+  const t = useFinanceT()
+  const catName = useCategoryName()
   const [deleting, setDeleting] = useState(false)
   const qc = useQueryClient()
 
@@ -44,9 +47,9 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
       await deleteTransaction(tx.id)
       await qc.invalidateQueries({ queryKey: ['transactions'] })
       await qc.invalidateQueries({ queryKey: ['dashboard'] })
-      toast('Transaction deleted', 'success')
+      toast(t.tx.deleted, 'success')
     } catch {
-      toast('Failed to delete', 'error')
+      toast(t.tx.deleteFailed, 'error')
     } finally {
       setDeleting(false)
     }
@@ -61,9 +64,9 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
         {tx.category.icon}
       </div>
       <div className={s.txMeta}>
-        <div className={s.txTitle}>{tx.note ?? tx.category.name}</div>
+        <div className={s.txTitle}>{tx.note ?? catName(tx.category.name)}</div>
         <div className={s.txSub}>
-          {tx.note ? `${tx.category.name} · ` : ''}{tx.time ?? tx.createdAt?.slice(11, 16) ?? tx.date.slice(0, 10)}
+          {tx.note ? `${catName(tx.category.name)} · ` : ''}{tx.time ?? tx.createdAt?.slice(11, 16) ?? tx.date.slice(0, 10)}
         </div>
       </div>
       <div className={clsx(s.txAmt, tx.type === 'income' ? s.amtIn : s.amtOut)}>
@@ -73,31 +76,31 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
         <button
           className={s.txEdit}
           onClick={() => onEdit(tx)}
-          aria-label="Edit"
+          aria-label={t.edit}
         >
           <Pencil size={15} />
         </button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <button className={s.txDel} disabled={deleting} aria-label="Delete">
+            <button className={s.txDel} disabled={deleting} aria-label={t.delete}>
               <Trash2 size={15} />
             </button>
           </AlertDialogTrigger>
           <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
+            <AlertDialogTitle>{t.tx.deleteTitle}</AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently remove {formatSigned(tx.amount, tx.type)} {CURRENCY} ({tx.type}).
-              This cannot be undone.
+              {t.tx.deleteDesc}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
           </AlertDialogContent>
@@ -119,6 +122,7 @@ interface Props {
 export function TransactionList({
   transactions, hasMore, isFetchingMore, onLoadMore, isFiltered,
 }: Props) {
+  const t = useFinanceT()
   const [editing, setEditing] = useState<Transaction | null>(null)
   const navigate = useNavigate()
   const isMobile = useIsMobile()
@@ -136,12 +140,12 @@ export function TransactionList({
           <Wallet size={28} />
         </div>
         <div className={s.emptyTitle}>
-          {isFiltered ? 'No matching transactions' : 'No transactions yet'}
+          {isFiltered ? t.tx.noMatches : t.tx.empty}
         </div>
         <div className={s.emptySub}>
           {isFiltered
-            ? 'Try adjusting or clearing your filters'
-            : 'Add your first income or expense to get started'}
+            ? t.tx.noMatchesSub
+            : t.tx.emptySub}
         </div>
       </div>
     )
@@ -157,7 +161,7 @@ export function TransactionList({
         return (
           <div key={date} className={s.dayGroup}>
             <div className={s.dayHead}>
-              <span className={s.dayLabel}>{formatDayLabel(date)}</span>
+              <span className={s.dayLabel}>{formatDayLabel(date, t)}</span>
               <span className={clsx(s.dayTotal, dayTotal >= 0 ? s.amtIn : s.amtOut)}>
                 {dayTotal >= 0 ? '+' : '−'}{formatAmount(Math.abs(dayTotal))}
               </span>
@@ -176,7 +180,7 @@ export function TransactionList({
             disabled={isFetchingMore}
             className={s.btnSecondary}
           >
-            {isFetchingMore ? 'Loading…' : 'Load more'}
+            {isFetchingMore ? t.loading : t.tx.loadMore}
           </button>
         </div>
       )}

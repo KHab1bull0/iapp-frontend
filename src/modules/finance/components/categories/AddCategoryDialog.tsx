@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import { createCategory, updateCategory, type Category } from '@/modules/finance/api/categories'
 import { toast } from '@/core/components/ui/toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/core/components/ui/dialog'
+import { useFinanceT } from '@/modules/finance/i18n'
 import s from './AddCategoryDialog.module.scss'
 
 const COLOR_PALETTE = [
@@ -20,10 +21,7 @@ const EMOJI_LIST = [
   '💻','🏋️','🏃','💊','🎁','🔖','🌿','🐾',
 ]
 
-const TYPE_TABS = [
-  { value: 'expense' as const, label: 'Expense' },
-  { value: 'income'  as const, label: 'Income'  },
-]
+const TYPE_TABS = ['expense', 'income'] as const
 
 interface Props {
   open: boolean
@@ -35,6 +33,7 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
   const qc = useQueryClient()
   const isEdit = Boolean(category)
 
+  const t = useFinanceT()
   const [type, setType] = useState<'income' | 'expense'>('expense')
   const [name, setName] = useState('')
   const [color, setColor] = useState(COLOR_PALETTE[5])
@@ -57,7 +56,7 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!name.trim()) { setError('Name is required'); return }
+    if (!name.trim()) { setError(t.categories.nameRequired); return }
 
     setLoading(true); setError('')
     try {
@@ -68,11 +67,11 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
       }
       await qc.invalidateQueries({ queryKey: ['categories'] })
       await qc.invalidateQueries({ queryKey: ['dashboard'] })
-      toast(category ? 'Category updated' : 'Category created', 'success')
+      toast(category ? t.categories.updated : t.categories.created, 'success')
       reset()
       onOpenChange(false)
     } catch {
-      setError(category ? 'Failed to update category' : 'Failed to create category')
+      setError(category ? t.categories.updateFailed : t.categories.createFailed)
     } finally {
       setLoading(false)
     }
@@ -83,29 +82,29 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
       {/* className="h-screen" used to force this short form to a full 100vh box. */}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit Category' : 'Add Category'}</DialogTitle>
+          <DialogTitle>{isEdit ? t.categories.editTitle : t.categories.addTitle}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className={s.form}>
           {/* Type */}
           <div className={s.tabs}>
-            {TYPE_TABS.map(({ value, label }) => (
+            {TYPE_TABS.map((value) => (
               <button
                 key={value} type="button" onClick={() => setType(value)}
                 className={clsx(s.tab, type === value && s.active)}
               >
-                {label}
+                {t[value]}
               </button>
             ))}
           </div>
 
           {/* Name */}
           <label className={s.field}>
-            <span className={s.fieldLabel}>Name</span>
+            <span className={s.fieldLabel}>{t.categories.name}</span>
             <div className={s.inputWrap}>
               <input
                 className={s.input}
-                placeholder="e.g. Groceries"
+                placeholder={t.categories.namePlaceholder}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={100}
@@ -116,14 +115,14 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
 
           {/* Colour */}
           <div className={s.field}>
-            <span className={s.fieldLabel}>Color</span>
+            <span className={s.fieldLabel}>{t.categories.color}</span>
             <div className={s.swatchRow}>
               {COLOR_PALETTE.map((c) => (
                 <button
                   key={c}
                   type="button"
                   title={c}
-                  aria-label={`Color ${c}`}
+                  aria-label={t.categories.colorLabel(c)}
                   aria-pressed={color === c}
                   onClick={() => setColor(c)}
                   className={clsx(s.swatch, color === c && s.active)}
@@ -135,14 +134,14 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
 
           {/* Icon */}
           <div className={s.field}>
-            <span className={s.fieldLabel}>Icon</span>
+            <span className={s.fieldLabel}>{t.categories.icon}</span>
             <div className={s.emojiGrid}>
               {EMOJI_LIST.map((e) => (
                 <button
                   key={e}
                   type="button"
                   title={e}
-                  aria-label={`Icon ${e}`}
+                  aria-label={t.categories.iconLabel(e)}
                   aria-pressed={icon === e}
                   onClick={() => setIcon(e)}
                   className={clsx(s.emoji, icon === e && s.active)}
@@ -157,11 +156,11 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
 
           <div className={s.formActions}>
             <button type="button" className={s.btnSecondary} onClick={() => onOpenChange(false)}>
-              Cancel
+              {t.cancel}
             </button>
             <button type="submit" className={s.btnPrimary} disabled={loading}>
               {!isEdit && <Plus size={14} />}
-              {isEdit ? (loading ? 'Saving…' : 'Save') : (loading ? 'Creating…' : 'Create')}
+              {isEdit ? (loading ? t.saving : t.save) : (loading ? t.categories.creating : t.categories.create)}
             </button>
           </div>
         </form>
