@@ -9,6 +9,7 @@ import { finance } from '@/modules/finance/manifest'
 import { tasks } from '@/modules/tasks/manifest'
 import { english } from '@/modules/english/manifest'
 import { buildRoutes } from './routes'
+import { localize } from '@/core/i18n'
 
 const elementTypes = (path: string, modules: ModuleManifest[]) =>
   (matchRoutes(buildRoutes(modules), path) ?? []).map(({ route }) =>
@@ -80,7 +81,7 @@ describe('buildRoutes', () => {
   })
 
   test('english opens on Review, with Vocabulary second', () => {
-    expect(english.pages.map((p) => [p.label, p.path])).toEqual([
+    expect(english.pages.map((p) => [localize(p.label, 'en'), p.path])).toEqual([
       ['Review', '/english'],
       ['Vocabulary', '/english/vocabulary'],
     ])

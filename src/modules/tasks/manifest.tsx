@@ -5,12 +5,12 @@ import { AllTasksPage, TaskFormPage, TodayPage } from './pages/lazy'
 
 export const tasks: ModuleManifest = {
   id: 'tasks',
-  name: 'Tasks',
+  name: { uz: 'Vazifalar', en: 'Tasks' },
   icon: ListChecks,
   basePath: '/tasks',
   pages: [
-    { label: 'Today', path: '/tasks', icon: CalendarCheck, end: true },
-    { label: 'All tasks', path: '/tasks/all', icon: ListTodo },
+    { label: { uz: 'Bugun', en: 'Today' }, path: '/tasks', icon: CalendarCheck, end: true },
+    { label: { uz: 'Barcha vazifalar', en: 'All tasks' }, path: '/tasks/all', icon: ListTodo },
   ],
   routes: [
     { index: true, element: <TodayPage /> },

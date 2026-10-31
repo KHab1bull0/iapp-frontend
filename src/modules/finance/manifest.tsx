@@ -10,12 +10,12 @@ import {
 
 export const finance: ModuleManifest = {
   id: 'finance',
-  name: 'Finance',
+  name: { uz: 'Moliya', en: 'Finance' },
   icon: Wallet,
   basePath: '/finance',
   pages: [
-    { label: 'Statistics', path: '/finance', icon: ChartColumn, end: true },
-    { label: 'Transactions', path: '/finance/transactions', icon: ArrowLeftRight },
+    { label: { uz: 'Statistika', en: 'Statistics' }, path: '/finance', icon: ChartColumn, end: true },
+    { label: { uz: 'Tranzaksiyalar', en: 'Transactions' }, path: '/finance/transactions', icon: ArrowLeftRight },
   ],
   routes: [
     { index: true, element: <DashboardPage /> },

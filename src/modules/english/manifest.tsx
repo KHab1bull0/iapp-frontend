@@ -13,13 +13,13 @@ import {
 
 export const english: ModuleManifest = {
   id: 'english',
-  name: 'English',
+  name: { uz: 'Ingliz tili', en: 'English' },
   icon: Languages,
   basePath: '/english',
   pages: [
     // Review first: opening English goes straight to today's stack.
-    { label: 'Review', path: '/english', icon: Layers, end: true },
-    { label: 'Vocabulary', path: '/english/vocabulary', icon: BookOpen },
+    { label: { uz: 'Takrorlash', en: 'Review' }, path: '/english', icon: Layers, end: true },
+    { label: { uz: "Lug'at", en: 'Vocabulary' }, path: '/english/vocabulary', icon: BookOpen },
   ],
   routes: [
     { index: true, element: <ReviewPage /> },
