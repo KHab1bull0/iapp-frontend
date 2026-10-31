@@ -1,10 +1,11 @@
 import type { ComponentType, ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import type { RouteObject } from 'react-router-dom'
+import type { Text } from '@/core/i18n'
 
 /** A page of a module, shown in its sidebar group and its mobile tabs. */
 export interface ModulePage {
-  label: string
+  label: Text
   /** Absolute, e.g. '/finance/transactions'. */
   path: string
   icon: LucideIcon
@@ -15,7 +16,7 @@ export interface ModulePage {
 /** An entry behind the floating "+" button. */
 export interface QuickAddAction {
   id: string
-  label: string
+  label: Text
   icon: LucideIcon
   to: string
 }
@@ -28,7 +29,8 @@ export interface QuickAddAction {
 export interface ModuleManifest {
   /** Stable: used in URLs, the API prefix and (later) cross-module links. */
   id: string
-  name: string
+  /** Shown in navigation; give both languages. */
+  name: Text
   icon: LucideIcon
   /** Always '/' + id. */
   basePath: string
@@ -53,5 +55,5 @@ export type BottomNavItem =
 
 export type FabBehavior =
   | { kind: 'none' }
-  | { kind: 'direct'; to: string; label: string }
+  | { kind: 'direct'; to: string; label: Text }
   | { kind: 'menu'; actions: QuickAddAction[] }

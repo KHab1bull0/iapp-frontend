@@ -4,20 +4,15 @@ import { useNavigate } from 'react-router-dom'
 import { LayoutGrid } from 'lucide-react'
 import api from '@/core/api/axios'
 import { useAuth } from '@/core/contexts/AuthContext'
+import { useLang, type Lang } from '@/core/i18n'
+import { useCoreT } from '@/core/i18n/useCoreT'
+import { apiErrorText } from '@/core/i18n/errors'
 import s from './AuthPage.module.scss'
 
 type Mode = 'login' | 'register'
 
-interface ApiError {
-  response?: { data?: { message?: string | string[] } }
-}
-
-function extractMessage(err: unknown): string {
-  const e = err as ApiError
-  const msg = e?.response?.data?.message
-  if (Array.isArray(msg)) return msg[0]
-  return msg ?? 'Something went wrong'
-}
+/** Each language named in itself, so it can be found before signing in. */
+const LANGUAGE_NAMES: Record<Lang, string> = { uz: "O'zbekcha", en: 'English' }
 
 export function AuthPage() {
   const [mode, setMode] = useState<Mode>('login')
@@ -27,6 +22,8 @@ export function AuthPage() {
   const [loading, setLoading] = useState(false)
 
   const { login } = useAuth()
+  const { lang, setLang } = useLang()
+  const t = useCoreT()
   const navigate = useNavigate()
 
   async function handleSubmit(e: FormEvent) {
@@ -39,7 +36,7 @@ export function AuthPage() {
       login(data.access_token)
       navigate('/', { replace: true })
     } catch (err) {
-      setError(extractMessage(err))
+      setError(apiErrorText(err, lang))
     } finally {
       setLoading(false)
     }
@@ -54,6 +51,20 @@ export function AuthPage() {
 
   return (
     <div className={s.authPage}>
+      <div className={s.langSwitch} role="radiogroup" aria-label={t.preferences.appLanguage}>
+        {(Object.keys(LANGUAGE_NAMES) as Lang[]).map((value) => (
+          <button
+            key={value}
+            role="radio"
+            lang={value}
+            aria-checked={lang === value}
+            className={clsx(s.langOption, lang === value && s.active)}
+            onClick={() => setLang(value)}
+          >
+            {LANGUAGE_NAMES[value]}
+          </button>
+        ))}
+      </div>
       <div className={s.authBrand}>
         <div className={s.logoMark}>
           <LayoutGrid size={18} />
@@ -62,9 +73,9 @@ export function AuthPage() {
       </div>
 
       <div className={s.authCard}>
-        <h1 className={s.authTitle}>{isLogin ? 'Welcome back' : 'Create account'}</h1>
+        <h1 className={s.authTitle}>{isLogin ? t.auth.welcomeBack : t.auth.createAccount}</h1>
         <p className={s.authSub}>
-          {isLogin ? 'Sign in to your account' : 'Choose a username and password to get started'}
+          {isLogin ? t.auth.signInSub : t.auth.registerSub}
         </p>
 
         <div className={s.tabs}>
@@ -72,23 +83,23 @@ export function AuthPage() {
             className={clsx(s.tab, isLogin && s.active)}
             onClick={() => { setMode('login'); setError('') }}
           >
-            Sign in
+            {t.auth.signIn}
           </button>
           <button
             className={clsx(s.tab, !isLogin && s.active)}
             onClick={() => { setMode('register'); setError('') }}
           >
-            Register
+            {t.auth.register}
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className={s.authForm}>
           <label className={s.field}>
-            <span className={s.fieldLabel}>Username</span>
+            <span className={s.fieldLabel}>{t.auth.username}</span>
             <div className={s.inputWrap}>
               <input
                 className={s.input}
-                placeholder={isLogin ? 'Your username' : 'Pick a username (3–50 chars)'}
+                placeholder={isLogin ? t.auth.usernamePlaceholder : t.auth.newUsernamePlaceholder}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
@@ -99,12 +110,12 @@ export function AuthPage() {
           </label>
 
           <label className={s.field}>
-            <span className={s.fieldLabel}>Password</span>
+            <span className={s.fieldLabel}>{t.auth.password}</span>
             <div className={s.inputWrap}>
               <input
                 className={s.input}
                 type="password"
-                placeholder={isLogin ? 'Your password' : 'At least 4 characters'}
+                placeholder={isLogin ? t.auth.passwordPlaceholder : t.auth.newPasswordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
@@ -117,14 +128,14 @@ export function AuthPage() {
           {error && <div className={s.authError} role="alert">{error}</div>}
 
           <button type="submit" className={s.btnPrimary} disabled={loading}>
-            {loading ? 'Please wait…' : isLogin ? 'Sign in' : 'Create account'}
+            {loading ? t.auth.wait : isLogin ? t.auth.signIn : t.auth.createAccount}
           </button>
         </form>
 
         <p className={s.authSwitch}>
-          {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+          {isLogin ? t.auth.noAccount : t.auth.haveAccount}{' '}
           <button type="button" onClick={switchMode}>
-            {isLogin ? 'Register' : 'Sign in'}
+            {isLogin ? t.auth.register : t.auth.signIn}
           </button>
         </p>
       </div>

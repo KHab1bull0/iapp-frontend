@@ -1,61 +1,75 @@
 import clsx from 'clsx'
 import { Monitor, Moon, Sun, type LucideIcon } from 'lucide-react'
 import { useTheme, type ThemePreference } from '@/core/contexts/ThemeContext'
+import { useLang, type Lang } from '@/core/i18n'
+import { useCoreT } from '@/core/i18n/useCoreT'
 import { SettingsSubpage } from './SettingsSubpage'
 import s from './settings.module.scss'
 
-const THEMES: { value: ThemePreference; label: string; icon: LucideIcon }[] = [
-  { value: 'light', label: 'Light', icon: Sun },
-  { value: 'dark', label: 'Dark', icon: Moon },
-  { value: 'system', label: 'System', icon: Monitor },
-]
+const THEME_ICONS: Record<ThemePreference, LucideIcon> = { light: Sun, dark: Moon, system: Monitor }
+
+/** Each language named in itself, so it can be found whichever one is on screen. */
+const LANGUAGE_NAMES: Record<Lang, string> = { uz: "O'zbekcha", en: 'English' }
 
 export function PreferencesPage() {
   const { preference, setPreference } = useTheme()
+  const { lang, setLang } = useLang()
+  const t = useCoreT()
+  const themes: ThemePreference[] = ['light', 'dark', 'system']
 
   return (
-    <SettingsSubpage title="Preferences" description="How IAPP looks and reads on this device">
+    <SettingsSubpage title={t.settings.preferences} description={t.settings.preferencesSub}>
       <div className={clsx(s.card, s.settingsCard)}>
         <div className={s.cardHead}>
-          <h2 className={s.h3}>Appearance</h2>
+          <h2 className={s.h3}>{t.preferences.appearance}</h2>
         </div>
         <div className={s.settingsRow}>
           <div>
-            <div className={s.rowTitle}>Theme</div>
-            <div className={s.rowSub}>System follows your device's light or dark mode.</div>
+            <div className={s.rowTitle}>{t.preferences.theme}</div>
+            <div className={s.rowSub}>{t.preferences.themeHint}</div>
           </div>
-          <div className={s.themeSegment} role="radiogroup" aria-label="Theme">
-            {THEMES.map(({ value, label, icon: Icon }) => (
-              <button
-                key={value}
-                role="radio"
-                aria-checked={preference === value}
-                className={clsx(s.segment, preference === value && s.active)}
-                onClick={() => setPreference(value)}
-              >
-                <Icon size={14} /> {label}
-              </button>
-            ))}
+          <div className={s.themeSegment} role="radiogroup" aria-label={t.preferences.theme}>
+            {themes.map((value) => {
+              const Icon = THEME_ICONS[value]
+              return (
+                <button
+                  key={value}
+                  role="radio"
+                  aria-checked={preference === value}
+                  className={clsx(s.segment, preference === value && s.active)}
+                  onClick={() => setPreference(value)}
+                >
+                  <Icon size={14} /> {t.preferences[value]}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
 
       <div className={clsx(s.card, s.settingsCard)}>
         <div className={s.cardHead}>
-          <h2 className={s.h3}>
-            Language <span className={s.badge}>Soon</span>
-          </h2>
+          <h2 className={s.h3}>{t.preferences.language}</h2>
         </div>
         <div className={s.settingsRow}>
           <div>
-            <div className={s.rowTitle}>App language</div>
-            <div className={s.rowSub}>IAPP is in English for now. O'zbekcha and Русский are on the way.</div>
+            <div className={s.rowTitle}>{t.preferences.appLanguage}</div>
+            <div className={s.rowSub}>{t.preferences.languageHint}</div>
           </div>
-          <select className={s.select} value="en" disabled aria-label="App language">
-            <option value="en">English</option>
-            <option value="uz">O'zbekcha</option>
-            <option value="ru">Русский</option>
-          </select>
+          <div className={s.themeSegment} role="radiogroup" aria-label={t.preferences.appLanguage}>
+            {(Object.keys(LANGUAGE_NAMES) as Lang[]).map((value) => (
+              <button
+                key={value}
+                role="radio"
+                lang={value}
+                aria-checked={lang === value}
+                className={clsx(s.segment, lang === value && s.active)}
+                onClick={() => setLang(value)}
+              >
+                {LANGUAGE_NAMES[value]}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </SettingsSubpage>

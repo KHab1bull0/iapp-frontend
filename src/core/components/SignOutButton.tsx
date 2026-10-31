@@ -6,6 +6,7 @@ import {
   AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/core/components/ui/alert-dialog'
+import { useCoreT } from '@/core/i18n/useCoreT'
 import s from './SignOutButton.module.scss'
 
 interface Props {
@@ -16,28 +17,29 @@ interface Props {
 /** Signing out always asks first: on a phone it is one stray tap away. */
 export function SignOutButton({ variant = 'block' }: Props) {
   const { logout } = useAuth()
+  const t = useCoreT()
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <button className={clsx(variant === 'block' ? s.signOut : s.signOutCompact)}>
-          <LogOut size={variant === 'block' ? 18 : 15} /> Sign out
+          <LogOut size={variant === 'block' ? 18 : 15} /> {t.signOut.button}
         </button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Sign out of IAPP?</AlertDialogTitle>
+          <AlertDialogTitle>{t.signOut.title}</AlertDialogTitle>
           <AlertDialogDescription>
-            You will need your username and password to sign back in.
+            {t.signOut.description}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={logout}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Sign out
+            {t.signOut.button}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

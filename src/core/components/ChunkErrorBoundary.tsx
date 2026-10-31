@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from 'react'
 import { isChunkLoadError, reloadOnce } from '@/core/lib/chunk-reload'
+import { useCoreT } from '@/core/i18n/useCoreT'
 import s from './ChunkErrorBoundary.module.scss'
 
 interface Props {
@@ -32,14 +33,18 @@ export class ChunkErrorBoundary extends Component<Props, State> {
     if (error === null) return this.props.children
     if (!isChunkLoadError(error)) throw error
 
-    const reload = this.props.reload ?? (() => window.location.reload())
-    return (
-      <div className={s.notice}>
-        <p>A new version of IAPP is available.</p>
-        <button className={s.button} onClick={reload}>
-          Reload
-        </button>
-      </div>
-    )
+    return <ReloadNotice reload={this.props.reload ?? (() => window.location.reload())} />
   }
+}
+
+function ReloadNotice({ reload }: { reload: () => void }) {
+  const t = useCoreT()
+  return (
+    <div className={s.notice}>
+      <p>{t.boundary.newVersion}</p>
+      <button className={s.button} onClick={reload}>
+        {t.boundary.reload}
+      </button>
+    </div>
+  )
 }

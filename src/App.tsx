@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, useRoutes } from 'react-router-dom'
 import { AuthProvider } from '@/core/contexts/AuthContext'
 import { ThemeProvider } from '@/core/contexts/ThemeContext'
+import { LanguageProvider } from '@/core/i18n'
 import { ToastHost } from '@/core/components/ui/toast'
 import { MODULES } from '@/modules/registry'
 import { buildRoutes } from '@/routes'
@@ -31,22 +32,24 @@ function ModuleProviders({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <ModuleProviders>
-          <AuthProvider>
-            <BrowserRouter>
-              <AppRoutes />
+    <LanguageProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <ModuleProviders>
+            <AuthProvider>
+              <BrowserRouter>
+                <AppRoutes />
 
-              {/*
-                Global, not per-layout: full-screen module pages live outside
-                AppLayout and still toast on save.
-              */}
-              <ToastHost />
-            </BrowserRouter>
-          </AuthProvider>
-        </ModuleProviders>
-      </QueryClientProvider>
-    </ThemeProvider>
+                {/*
+                  Global, not per-layout: full-screen module pages live outside
+                  AppLayout and still toast on save.
+                */}
+                <ToastHost />
+              </BrowserRouter>
+            </AuthProvider>
+          </ModuleProviders>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </LanguageProvider>
   )
 }

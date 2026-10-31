@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react'
+import { useCoreT } from '@/core/i18n/useCoreT'
 import s from './ModuleCardBoundary.module.scss'
 
 interface Props {
@@ -24,8 +25,13 @@ export class ModuleCardBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.failed) {
-      return <div className={s.failed}>{this.props.moduleName} couldn't load</div>
+      return <FailedCard moduleName={this.props.moduleName} />
     }
     return this.props.children
   }
+}
+
+function FailedCard({ moduleName }: { moduleName: string }) {
+  const t = useCoreT()
+  return <div className={s.failed}>{t.boundary.cardFailed(moduleName)}</div>
 }

@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogTitle } from '@/core/components/ui/dialog'
 import { ChunkErrorBoundary } from '@/core/components/ChunkErrorBoundary'
 import { activeModule, fabBehavior, isModulePage } from '@/core/modules/registry-utils'
 import type { ModuleManifest } from '@/core/modules/types'
+import { useText } from '@/core/i18n'
+import { useCoreT } from '@/core/i18n/useCoreT'
 import s from './AppLayout.module.scss'
 
 interface AppLayoutProps {
@@ -22,6 +24,8 @@ export function AppLayout({ modules }: AppLayoutProps) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
+  const t = useCoreT()
+  const text = useText()
   const active = activeModule(modules, pathname)
   const fab = fabBehavior(modules)
 
@@ -50,7 +54,7 @@ export function AppLayout({ modules }: AppLayoutProps) {
           <button
             className={s.fab}
             onClick={() => (fab.kind === 'direct' ? navigate(fab.to) : setQuickAddOpen(true))}
-            aria-label={fab.kind === 'direct' ? fab.label : 'Add'}
+            aria-label={fab.kind === 'direct' ? text(fab.label) : t.nav.add}
           >
             <Plus size={22} />
           </button>
@@ -59,7 +63,7 @@ export function AppLayout({ modules }: AppLayoutProps) {
         {fab.kind === 'menu' && (
           <Dialog open={quickAddOpen} onOpenChange={setQuickAddOpen}>
             <DialogContent>
-              <DialogTitle>Add</DialogTitle>
+              <DialogTitle>{t.nav.add}</DialogTitle>
               <div className={s.quickAddList}>
                 {fab.actions.map(({ id, label, icon: Icon, to }) => (
                   <button
@@ -71,7 +75,7 @@ export function AppLayout({ modules }: AppLayoutProps) {
                     }}
                   >
                     <Icon size={18} />
-                    {label}
+                    {text(label)}
                   </button>
                 ))}
               </div>

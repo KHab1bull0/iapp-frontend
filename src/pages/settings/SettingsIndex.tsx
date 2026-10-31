@@ -4,6 +4,7 @@ import { useAuth } from '@/core/contexts/AuthContext'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { useProfile } from '@/core/hooks/useProfile'
 import { SignOutButton } from '@/core/components/SignOutButton'
+import { useCoreT } from '@/core/i18n/useCoreT'
 import type { SettingsOutletContext } from './SettingsLayout'
 import s from './settings.module.scss'
 
@@ -16,12 +17,13 @@ export function SettingsIndex() {
   const { groups } = useOutletContext<SettingsOutletContext>()
   const { user } = useAuth()
   const { displayName } = useProfile()
+  const t = useCoreT()
 
   if (!isMobile) return <Navigate to="/settings/profile" replace />
 
   return (
     <div className={s.hub}>
-      <h1 className={s.h1}>Settings</h1>
+      <h1 className={s.h1}>{t.settings.title}</h1>
 
       <Link to="/settings/profile" className={s.profileCard}>
         <div className={s.avatar}>{(displayName || 'U')[0]}</div>
@@ -56,7 +58,7 @@ export function SettingsIndex() {
 
       <SignOutButton />
 
-      <div className={s.hubFooter}>IAPP · your personal life system</div>
+      <div className={s.hubFooter}>{t.settings.footer}</div>
     </div>
   )
 }

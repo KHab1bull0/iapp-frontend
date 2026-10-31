@@ -6,13 +6,17 @@ import { useAuth } from '@/core/contexts/AuthContext'
 import { profileKey, useProfile } from '@/core/hooks/useProfile'
 import { toast } from '@/core/components/ui/toast'
 import { SettingsSubpage } from './SettingsSubpage'
-import { apiErrorMessage } from './errors'
+import { useLang } from '@/core/i18n'
+import { useCoreT } from '@/core/i18n/useCoreT'
+import { apiErrorText } from '@/core/i18n/errors'
 import s from './settings.module.scss'
 
-const memberSince = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long' })
 
 export function ProfilePage() {
   const { user } = useAuth()
+  const { lang } = useLang()
+  const t = useCoreT()
+  const memberSince = new Intl.DateTimeFormat(lang === 'uz' ? 'uz-UZ' : 'en-GB', { year: 'numeric', month: 'long' })
   const { data: profile, displayName } = useProfile()
   const qc = useQueryClient()
   // null until the user types: the field then shows the saved name.
@@ -25,9 +29,9 @@ export function ProfilePage() {
     onSuccess: (updated) => {
       qc.setQueryData(profileKey(user?.id), updated)
       setDraft(null)
-      toast('Profile updated', 'success')
+      toast(t.profile.updated, 'success')
     },
-    onError: (err) => toast(apiErrorMessage(err), 'error'),
+    onError: (err) => toast(apiErrorText(err, lang), 'error'),
   })
 
   const dirty = !!profile && name.trim() !== saved
@@ -38,25 +42,25 @@ export function ProfilePage() {
   }
 
   return (
-    <SettingsSubpage title="Profile" description="How you appear in IAPP">
+    <SettingsSubpage title={t.settings.profile} description={t.settings.profileSub}>
       <div className={s.hero}>
         <div className={s.avatarLg}>{(displayName || 'U')[0]}</div>
         <div>
           <div className={s.heroName}>{displayName}</div>
           <div className={s.rowSub}>@{user?.username}</div>
           {profile && (
-            <div className={s.hint}>Member since {memberSince.format(new Date(profile.createdAt))}</div>
+            <div className={s.hint}>{t.profile.memberSince(memberSince.format(new Date(profile.createdAt)))}</div>
           )}
         </div>
       </div>
 
       <form className={clsx(s.card, s.settingsCard)} onSubmit={handleSubmit}>
         <div className={s.cardHead}>
-          <h2 className={s.h3}>Personal information</h2>
+          <h2 className={s.h3}>{t.profile.personalInfo}</h2>
         </div>
         <div className={s.pwForm}>
           <label className={s.field}>
-            <span className={s.fieldLabel}>Display name</span>
+            <span className={s.fieldLabel}>{t.profile.displayName}</span>
             <div className={s.inputWrap}>
               <input
                 className={s.input}
@@ -67,26 +71,26 @@ export function ProfilePage() {
                 disabled={!profile}
                 autoComplete="name"
                 placeholder={user?.username}
-                aria-label="Display name"
+                aria-label={t.profile.displayName}
               />
             </div>
-            <span className={s.hint}>Shown across IAPP instead of your username. Leave empty to use the username.</span>
+            <span className={s.hint}>{t.profile.displayNameHint}</span>
           </label>
           <label className={s.field}>
-            <span className={s.fieldLabel}>Username</span>
+            <span className={s.fieldLabel}>{t.profile.username}</span>
             <div className={s.inputWrap}>
               <input
                 className={clsx(s.input, s.inputReadOnly)}
                 value={user?.username ?? ''}
                 readOnly
-                aria-label="Username"
+                aria-label={t.profile.username}
               />
             </div>
-            <span className={s.hint}>Used to sign in. It can't be changed.</span>
+            <span className={s.hint}>{t.profile.usernameHint}</span>
           </label>
           <div className={s.formActions}>
             <button type="submit" className={s.btnPrimary} disabled={!dirty || save.isPending}>
-              {save.isPending ? 'Saving…' : 'Save'}
+              {save.isPending ? t.common.saving : t.common.save}
             </button>
           </div>
         </div>

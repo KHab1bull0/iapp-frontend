@@ -4,6 +4,8 @@ import { House, Settings, LayoutGrid, PanelLeft, Sun, Moon, type LucideIcon } fr
 import { useAuth } from '@/core/contexts/AuthContext'
 import { useTheme } from '@/core/contexts/ThemeContext'
 import { useProfile } from '@/core/hooks/useProfile'
+import { useText } from '@/core/i18n'
+import { useCoreT } from '@/core/i18n/useCoreT'
 import { SignOutButton } from '@/core/components/SignOutButton'
 import type { ModuleManifest } from '@/core/modules/types'
 import s from './Sidebar.module.scss'
@@ -40,6 +42,8 @@ export function Sidebar({ modules, collapsed, onToggle }: SidebarProps) {
   const { user } = useAuth()
   const { displayName } = useProfile()
   const { theme, toggleTheme } = useTheme()
+  const t = useCoreT()
+  const text = useText()
   const initial = displayName[0]?.toUpperCase() ?? 'U'
 
   return (
@@ -52,38 +56,38 @@ export function Sidebar({ modules, collapsed, onToggle }: SidebarProps) {
           {!collapsed && <span className={s.logoWord}>IAPP</span>}
         </div>
         {!collapsed && (
-          <button className={s.collapseBtn} onClick={onToggle} aria-label="Collapse sidebar">
+          <button className={s.collapseBtn} onClick={onToggle} aria-label={t.nav.collapse}>
             <PanelLeft size={16} />
           </button>
         )}
       </div>
 
       <nav className={s.nav}>
-        <NavItem to="/" end icon={House} label="Home" collapsed={collapsed} />
+        <NavItem to="/" end icon={House} label={t.nav.home} collapsed={collapsed} />
 
         {modules.map((m) => (
           <div key={m.id} className={s.navGroup}>
-            {!collapsed && <div className={s.navGroupLabel}>{m.name}</div>}
+            {!collapsed && <div className={s.navGroupLabel}>{text(m.name)}</div>}
             {m.pages.map((p) => (
               <NavItem
                 key={p.path}
                 to={p.path}
                 end={p.end}
                 icon={p.icon}
-                label={p.label}
+                label={text(p.label)}
                 collapsed={collapsed}
               />
             ))}
           </div>
         ))}
 
-        <NavItem to="/settings" icon={Settings} label="Settings" collapsed={collapsed} />
+        <NavItem to="/settings" icon={Settings} label={t.nav.settings} collapsed={collapsed} />
       </nav>
 
       <div className={s.sidebarBottom}>
         <button className={s.themeToggle} onClick={toggleTheme}>
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-          {!collapsed && <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>}
+          {!collapsed && <span>{theme === 'dark' ? t.nav.lightMode : t.nav.darkMode}</span>}
         </button>
         <Link to="/settings/profile" className={s.user} title={collapsed ? displayName : undefined}>
           <div className={s.avatar}>{initial}</div>
@@ -97,7 +101,7 @@ export function Sidebar({ modules, collapsed, onToggle }: SidebarProps) {
         {/* Apart from the navigation, and confirmed before it acts. */}
         {!collapsed && <SignOutButton variant="compact" />}
         {collapsed && (
-          <button className={s.collapseBtnCentered} onClick={onToggle} aria-label="Expand sidebar">
+          <button className={s.collapseBtnCentered} onClick={onToggle} aria-label={t.nav.expand}>
             <PanelLeft size={16} style={{ transform: 'rotate(180deg)' }} />
           </button>
         )}

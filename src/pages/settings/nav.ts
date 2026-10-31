@@ -1,5 +1,7 @@
 import { Info, ShieldCheck, SlidersHorizontal, UserRound, type LucideIcon } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
+import { localize, type Lang } from '@/core/i18n'
+import { coreMessages } from '@/core/i18n/messages'
 
 export interface SettingsNavItem {
   label: string
@@ -19,30 +21,31 @@ export interface SettingsNavGroup {
  * (App). Sign out is deliberately not an item here; it sits apart, below
  * every group.
  */
-export function settingsNav(modules: ModuleManifest[]): SettingsNavGroup[] {
+export function settingsNav(modules: ModuleManifest[], lang: Lang): SettingsNavGroup[] {
+  const t = coreMessages[lang].settings
   const moduleItems = modules
     .filter((m) => m.settingsPath)
     .map((m) => ({
-      label: m.name,
-      description: `${m.name} module settings`,
+      label: localize(m.name, lang),
+      description: t.moduleSettings(localize(m.name, lang)),
       to: m.settingsPath!,
       icon: m.icon,
     }))
 
   return [
-    ...(moduleItems.length ? [{ title: 'Modules', items: moduleItems }] : []),
+    ...(moduleItems.length ? [{ title: t.groups.modules, items: moduleItems }] : []),
     {
-      title: 'Account',
+      title: t.groups.account,
       items: [
-        { label: 'Profile', description: 'Name and account details', to: '/settings/profile', icon: UserRound },
-        { label: 'Security', description: 'Password', to: '/settings/security', icon: ShieldCheck },
+        { label: t.profile, description: t.profileDesc, to: '/settings/profile', icon: UserRound },
+        { label: t.security, description: t.securityDesc, to: '/settings/security', icon: ShieldCheck },
       ],
     },
     {
-      title: 'App',
+      title: t.groups.app,
       items: [
-        { label: 'Preferences', description: 'Theme and language', to: '/settings/preferences', icon: SlidersHorizontal },
-        { label: 'About', description: 'Version and updates', to: '/settings/about', icon: Info },
+        { label: t.preferences, description: t.preferencesDesc, to: '/settings/preferences', icon: SlidersHorizontal },
+        { label: t.about, description: t.aboutDesc, to: '/settings/about', icon: Info },
       ],
     },
   ]

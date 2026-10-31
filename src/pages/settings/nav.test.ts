@@ -4,7 +4,7 @@ import { settingsNav } from './nav'
 
 describe('settingsNav', () => {
   test('groups account, app and module settings', () => {
-    const groups = settingsNav([finance]).map((g) => ({
+    const groups = settingsNav([finance], 'en').map((g) => ({
       title: g.title,
       items: g.items.map((i) => `${i.label} ${i.to}`),
     }))
@@ -19,6 +19,6 @@ describe('settingsNav', () => {
   test('drops the Modules group when no module has settings', () => {
     const { settingsPath: _, ...bare } = finance
     void _
-    expect(settingsNav([bare]).map((g) => g.title)).toEqual(['Account', 'App'])
+    expect(settingsNav([bare], 'en').map((g) => g.title)).toEqual(['Account', 'App'])
   })
 })

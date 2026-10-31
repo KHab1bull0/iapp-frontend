@@ -62,6 +62,14 @@ describe('AppLayout driven by the registry', () => {
     expect(screen.queryByRole('navigation', { name: 'Finance pages' })).toBeNull()
   })
 
+  test('in Uzbek the navigation reads Uzbek', () => {
+    localStorage.setItem('iapp-lang', 'uz')
+    renderShell('/finance')
+    const aside = document.querySelector('aside')!
+    expect(within(aside).getByRole('link', { name: 'Bosh sahifa' })).toBeTruthy()
+    expect(within(aside).getByRole('link', { name: 'Sozlamalar' })).toBeTruthy()
+  })
+
   test('there is no top header bar', () => {
     renderShell('/finance')
     expect(screen.queryByRole('banner')).toBeNull()
