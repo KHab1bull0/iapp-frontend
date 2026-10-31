@@ -65,6 +65,7 @@ const shortDayFmt = () => dateFmt({ month: 'short', day: 'numeric' })
 const monthFmt = () => dateFmt({ month: 'short' })
 const monthYearFmt = () => dateFmt({ month: 'long', year: 'numeric' })
 const fullDayFmt = () => dateFmt({ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+const weekdayFmt = () => dateFmt({ weekday: 'short' })
 const dateYearFmt = () => dateFmt({ day: 'numeric', month: 'short', year: 'numeric' })
 
 /** Parses a "YYYY-MM-DD" API date without letting the runtime shift the timezone. */
@@ -82,6 +83,11 @@ export function formatShortDay(dateStr: string): string {
 
 export function formatFullDate(d: Date): string {
   return fullDayFmt().format(d)
+}
+
+/** "Mon" / "Du" */
+export function formatWeekday(dateStr: string): string {
+  return weekdayFmt().format(parseApiDate(dateStr))
 }
 
 /** "3 Oct 2026" */

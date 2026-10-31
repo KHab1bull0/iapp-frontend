@@ -53,6 +53,7 @@ export const englishKeys = {
   words: (f: WordFilters) => ['english', 'words', f] as const,
   word: (id: string) => ['english', 'word', id] as const,
   review: (day: string) => ['english', 'review', day] as const,
+  stats: (day: string) => ['english', 'stats', day] as const,
 }
 
 export async function fetchLevels(): Promise<Level[]> {
@@ -103,4 +104,30 @@ export async function fetchReview(today: string): Promise<Word[]> {
 }
 export async function answerWord(id: string, result: 'remembered' | 'forgot', today: string): Promise<Word> {
   return (await api.post<Word>(`/english/words/${id}/review`, { result, today })).data
+}
+
+export interface Stats {
+  total: number
+  /** Due today, overdue included. */
+  due: number
+  overdue: number
+  /** Never answered in review yet. */
+  unseen: number
+  addedThisWeek: number
+  reviewedToday: number
+  /** Days in a row with at least one answer, up to today. */
+  streak: number
+  /** Answers in the last 30 days. */
+  accuracy: { remembered: number; forgot: number }
+  levels: (Pick<Level, 'id' | 'name' | 'locked' | 'intervalDays'> & { count: number })[]
+  /** Most words first; `id: null` is the words without a category. */
+  categories: { id: string | null; name: string | null; count: number }[]
+  /** The next 7 days, tomorrow first. */
+  upcoming: { date: string; count: number }[]
+  /** The last 14 days, today last. */
+  activity: { date: string; remembered: number; forgot: number }[]
+}
+
+export async function fetchStats(today: string): Promise<Stats> {
+  return (await api.get<Stats>('/english/stats', { params: { today } })).data
 }

@@ -3,6 +3,7 @@ import { lazy } from 'react'
 export const VocabularyPage = lazy(() =>
   import('./vocabulary').then((m) => ({ default: m.VocabularyPage })),
 )
+export const StatsPage = lazy(() => import('./stats').then((m) => ({ default: m.StatsPage })))
 export const ReviewPage = lazy(() => import('./review').then((m) => ({ default: m.ReviewPage })))
 export const EnglishSettingsLayout = lazy(() =>
   import('./settings').then((m) => ({ default: m.EnglishSettingsLayout })),

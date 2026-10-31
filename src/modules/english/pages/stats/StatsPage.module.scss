@@ -1,0 +1,203 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+
+  @include bp-mobile { grid-template-columns: 1fr 1fr; }
+}
+
+.tile {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.tileLabel {
+  font-size: 12px;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tileValue {
+  margin-top: 4px;
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 700;
+  color: var(--fg-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.tileSub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &.danger { color: var(--danger); }
+}
+
+.card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.muted {
+  margin: 0;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+.legend {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--fg);
+
+  > span { display: inline-flex; align-items: center; gap: 6px; }
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.good { background: var(--success); }
+.bad { background: var(--danger); }
+.accent { background: var(--primary); }
+
+// Horizontal bars
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 9rem) 1fr 2.5rem;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+
+  @include bp-mobile { grid-template-columns: minmax(0, 7rem) 1fr 2rem; }
+}
+
+.rowLabel {
+  color: var(--fg-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowSub { color: var(--fg-muted); }
+
+.track {
+  height: 8px;
+  display: flex;
+}
+
+.bar {
+  min-width: 4px;
+  border-radius: 4px;
+  background: var(--primary);
+}
+
+.rowValue {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-strong);
+  font-weight: 600;
+}
+
+// Columns (last 14 days, next 7 days)
+.columns {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 4px;
+  align-items: end;
+
+  &.wide { grid-template-columns: repeat(7, 1fr); gap: 8px; }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  cursor: default;
+}
+
+.stack {
+  height: 96px;
+  width: 100%;
+  max-width: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px; // a surface gap between the two segments
+  border-bottom: 1px solid var(--border);
+}
+
+.seg {
+  width: 100%;
+  min-height: 3px;
+
+  // Only the top end is rounded; the bottom sits on the baseline.
+  &:first-child { border-radius: 4px 4px 0 0; }
+}
+
+.colValue {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg-strong);
+  font-variant-numeric: tabular-nums;
+  min-height: 16px;
+}
+
+.axis {
+  font-size: 11px;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.column:hover .seg { filter: brightness(1.08); }

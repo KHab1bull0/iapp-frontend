@@ -1,4 +1,4 @@
-import { BookOpen, Languages, Layers } from 'lucide-react'
+import { BarChart3, BookOpen, Languages, Layers } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
 import { EnglishHomeCard } from './EnglishHomeCard'
 import {
@@ -7,6 +7,7 @@ import {
   EnglishSettingsLayout,
   LevelsPage,
   ReviewPage,
+  StatsPage,
   VocabularyPage,
   WordFormPage,
 } from './pages/lazy'
@@ -17,12 +18,14 @@ export const english: ModuleManifest = {
   icon: Languages,
   basePath: '/english',
   pages: [
-    // Review first: opening English goes straight to today's stack.
-    { label: { uz: 'Takrorlash', en: 'Review' }, path: '/english', icon: Layers, end: true },
+    // Statistics first: opening English shows where the vocabulary stands.
+    { label: { uz: 'Statistika', en: 'Statistics' }, path: '/english', icon: BarChart3, end: true },
+    { label: { uz: 'Takrorlash', en: 'Review' }, path: '/english/review', icon: Layers },
     { label: { uz: "Lug'at", en: 'Vocabulary' }, path: '/english/vocabulary', icon: BookOpen },
   ],
   routes: [
-    { index: true, element: <ReviewPage /> },
+    { index: true, element: <StatsPage /> },
+    { path: 'review', element: <ReviewPage /> },
     { path: 'vocabulary', element: <VocabularyPage /> },
     // Not in the menu: opened from Settings → Modules → English. Nested like
     // the app's Settings: a section list, then one page per section.

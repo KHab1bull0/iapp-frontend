@@ -65,10 +65,11 @@ describe('buildRoutes', () => {
     expect(elementTypes('/tasks/abc/edit', [finance, tasks])).not.toContain(AppLayout)
   })
 
-  test('english: Vocabulary, Review and its settings in the shell, the word form full-screen', () => {
+  test('english: Statistics, Review, Vocabulary and its settings in the shell, the word form full-screen', () => {
     const all = [finance, tasks, english]
     for (const p of [
       '/english',
+      '/english/review',
       '/english/vocabulary',
       '/english/settings',
       '/english/settings/levels',
@@ -80,9 +81,10 @@ describe('buildRoutes', () => {
     expect(elementTypes('/english/abc/edit', all)).not.toContain(AppLayout)
   })
 
-  test('english opens on Review, with Vocabulary second', () => {
+  test('english opens on Statistics, then Review and Vocabulary', () => {
     expect(english.pages.map((p) => [localize(p.label, 'en'), p.path])).toEqual([
-      ['Review', '/english'],
+      ['Statistics', '/english'],
+      ['Review', '/english/review'],
       ['Vocabulary', '/english/vocabulary'],
     ])
   })
