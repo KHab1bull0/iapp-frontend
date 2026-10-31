@@ -1,0 +1,1 @@
+export { EnglishSettingsPage } from './EnglishSettingsPage'

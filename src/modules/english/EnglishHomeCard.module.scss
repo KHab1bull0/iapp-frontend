@@ -1,0 +1,87 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.card {
+  @include card-base;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  background: var(--hover-bg);
+  color: var(--primary);
+}
+
+.title {
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.overdue {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.count {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--fg-strong);
+}
+
+.sub {
+  font-size: 14px;
+  color: var(--fg-muted);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--fg);
+
+  li {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin-right: 8px;
+      border-radius: $radius-pill;
+      background: var(--border-strong);
+      vertical-align: middle;
+    }
+  }
+}
+
+.skeleton {
+  display: block;
+  height: 24px;
+  width: 120px;
+  border-radius: 4px;
+  background: var(--border);
+}

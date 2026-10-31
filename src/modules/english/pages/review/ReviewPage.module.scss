@@ -1,0 +1,83 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.progress {
+  align-self: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+
+.card {
+  @include card-base;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.level {
+  padding: 2px 10px;
+  border-radius: $radius-pill;
+  background: var(--hover-bg);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.word {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--fg-strong);
+  overflow-wrap: anywhere;
+}
+
+.answer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.translation {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.note {
+  font-size: 14px;
+  color: var(--fg-muted);
+  white-space: pre-wrap;
+}
+
+.show {
+  @include btn-secondary;
+  @include btn-size-lg;
+  min-width: 160px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.forgot,
+.remembered {
+  @include btn-base;
+  @include btn-size-lg;
+
+  &:disabled { opacity: 0.5; }
+}
+
+.forgot {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.remembered {
+  @include btn-primary;
+}

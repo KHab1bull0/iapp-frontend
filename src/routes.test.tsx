@@ -7,6 +7,7 @@ import { LegacyRedirect } from '@/core/components/LegacyRedirect'
 import type { ModuleManifest } from '@/core/modules/types'
 import { finance } from '@/modules/finance/manifest'
 import { tasks } from '@/modules/tasks/manifest'
+import { english } from '@/modules/english/manifest'
 import { buildRoutes } from './routes'
 
 const elementTypes = (path: string, modules: ModuleManifest[]) =>
@@ -61,5 +62,14 @@ describe('buildRoutes', () => {
     expect(elementTypes('/tasks/all', [finance, tasks])).toContain(AppLayout)
     expect(elementTypes('/tasks/new', [finance, tasks])).not.toContain(AppLayout)
     expect(elementTypes('/tasks/abc/edit', [finance, tasks])).not.toContain(AppLayout)
+  })
+
+  test('english: Vocabulary, Review and its settings in the shell, the word form full-screen', () => {
+    const all = [finance, tasks, english]
+    for (const p of ['/english', '/english/review', '/english/settings']) {
+      expect(elementTypes(p, all), p).toContain(AppLayout)
+    }
+    expect(elementTypes('/english/new', all)).not.toContain(AppLayout)
+    expect(elementTypes('/english/abc/edit', all)).not.toContain(AppLayout)
   })
 })

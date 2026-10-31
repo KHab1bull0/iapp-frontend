@@ -1,0 +1,1 @@
+export { WordFormPage } from './WordFormPage'

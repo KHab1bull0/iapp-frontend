@@ -1,0 +1,107 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: -6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.h1 {
+  margin: 0;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  font-weight: 700;
+  color: var(--fg-strong);
+}
+
+.pageSub,
+.help {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+.help { padding: 0 4px; }
+
+.row,
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+
+  & + & { border-top: 1px solid var(--border); }
+}
+
+.addRow { background: var(--row-hover); }
+
+.name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub {
+  font-size: 12px;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.input,
+.daysInput {
+  height: 36px;
+  min-width: 0;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  background: var(--bg-elev);
+  color: var(--fg-strong);
+  font-family: inherit;
+  font-size: 14px;
+
+  @supports (-webkit-touch-callout: none) { font-size: 16px; }
+}
+
+.input { flex: 1; }
+.daysInput { width: 80px; flex-shrink: 0; }
+
+.iconBtn {
+  @include touch-target(4px);
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: var(--fg-muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+
+  &:hover { background: var(--icon-btn-hover); color: var(--fg-strong); }
+}
+
+.btnPrimary {
+  @include btn-primary;
+  @include btn-size-sm;
+  flex-shrink: 0;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.btnGhost {
+  @include btn-secondary;
+  @include btn-size-sm;
+  flex-shrink: 0;
+}
