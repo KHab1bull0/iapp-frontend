@@ -66,7 +66,13 @@ describe('buildRoutes', () => {
 
   test('english: Vocabulary, Review and its settings in the shell, the word form full-screen', () => {
     const all = [finance, tasks, english]
-    for (const p of ['/english', '/english/review', '/english/settings']) {
+    for (const p of [
+      '/english',
+      '/english/review',
+      '/english/settings',
+      '/english/settings/levels',
+      '/english/settings/categories',
+    ]) {
       expect(elementTypes(p, all), p).toContain(AppLayout)
     }
     expect(elementTypes('/english/new', all)).not.toContain(AppLayout)

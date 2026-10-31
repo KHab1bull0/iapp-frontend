@@ -1,26 +1,8 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
-.back {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: -6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--primary);
-  text-decoration: none;
-}
 
-.h1 {
-  margin: 0;
-  font-size: var(--fs-h1);
-  line-height: var(--lh-h1);
-  font-weight: 700;
-  color: var(--fg-strong);
-}
 
-.pageSub,
 .help {
   margin: 4px 0 0;
   font-size: 13px;
