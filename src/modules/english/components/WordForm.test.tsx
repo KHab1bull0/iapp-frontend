@@ -68,11 +68,23 @@ describe('WordForm', () => {
     expect(screen.getByText('Pick a day to memorise it.')).toBeTruthy()
   })
 
-  test('a new word has no level picker: it starts at New', async () => {
+  test('a new word starts at New, and can be given another level when adding', async () => {
     api.fetchCategories.mockResolvedValue([])
     renderForm()
-    await waitFor(() => expect(api.fetchCategories).toHaveBeenCalled())
-    expect(screen.queryByLabelText('Level')).toBeNull()
+    const level = (await screen.findByLabelText('Level')) as HTMLSelectElement
+    await waitFor(() => expect(level.value).toBe(NEW.id))
+    fireEvent.change(level, { target: { value: L3.id } })
+    const inThree = new Date()
+    inThree.setDate(inThree.getDate() + 3)
+    expect((screen.getByLabelText('Memorise on') as HTMLInputElement).value).toBe(ymd(inThree))
+    fireEvent.change(screen.getByLabelText('Word'), { target: { value: 'harbour' } })
+    fireEvent.change(screen.getByLabelText('Translation'), { target: { value: 'port' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() =>
+      expect(api.createWord).toHaveBeenCalledWith(
+        expect.objectContaining({ levelId: L3.id, reviewOn: ymd(inThree) }),
+      ),
+    )
   })
 
   test('editing can move a word to another level, which reschedules it', async () => {

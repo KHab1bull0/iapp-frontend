@@ -45,12 +45,9 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
     queryFn: fetchCategories,
   })
 
-  // Editing only: a new word always starts at New.
-  const { data: levels = [] } = useQuery({
-    queryKey: englishKeys.levels,
-    queryFn: fetchLevels,
-    enabled: Boolean(word),
-  })
+  const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
+  // A new word starts at New (the locked level) unless another is picked.
+  const shownLevelId = levelId || levels.find((l) => l.locked)?.id || ''
 
   // Moving a word to a level reschedules it as review would: today + that level's days.
   function chooseLevel(id: string) {
@@ -92,7 +89,7 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
         note: note.trim() || null,
         categoryId: categoryId || null,
         reviewOn,
-        ...(word && levelId ? { levelId } : {}),
+        ...(shownLevelId ? { levelId: shownLevelId } : {}),
       }
       return word ? updateWord(word.id, input) : createWord(input)
     },
@@ -166,12 +163,12 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
       </label>
 
       <div className={s.row}>
-        {word && levels.length > 0 && (
+        {levels.length > 0 && (
           <label className={s.field}>
             <span className={s.label}>Level</span>
             <select
               className={s.input}
-              value={levelId}
+              value={shownLevelId}
               onChange={(e) => chooseLevel(e.target.value)}
               aria-label="Level"
             >
@@ -193,10 +190,8 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
             aria-label="Memorise on"
           />
         </label>
-        {/* A new word has no level picker, so its category shares this row. */}
-        {!word && categoryPicker}
       </div>
-      {word && categoryPicker}
+      {categoryPicker}
       <span className={s.hint}>
         {reviewOn ? 'It joins the review stack on this day.' : 'Pick a day to memorise it.'}
       </span>
