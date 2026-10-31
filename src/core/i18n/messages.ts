@@ -37,7 +37,7 @@ export const coreMessages = defineMessages(
     signOut: {
       button: 'Chiqish',
       title: 'IAPPdan chiqilsinmi?',
-      description: 'Qayta kirish uchun login va parolingiz kerak bo‘ladi.',
+      description: "Qayta kirish uchun login va parolingiz kerak bo'ladi.",
     },
     auth: {
       welcomeBack: 'Xush kelibsiz',
@@ -102,7 +102,7 @@ export const coreMessages = defineMessages(
       system: 'Tizim',
       language: 'Til',
       appLanguage: 'Ilova tili',
-      languageHint: 'Barcha matnlar tanlangan tilda ko‘rsatiladi.',
+      languageHint: "Barcha matnlar tanlangan tilda ko'rsatiladi.",
     },
     about: {
       built: (date: string) => `Yig'ilgan: ${date}`,
@@ -112,7 +112,7 @@ export const coreMessages = defineMessages(
       noWorker: "Service worker ro'yxatdan o'tmagan",
       found: 'Yangi versiya topildi — qayta yuklanmoqda…',
       upToDate: "Eng so'nggi versiya o'rnatilgan",
-      failed: 'Yangilanishni tekshirib bo‘lmadi',
+      failed: "Yangilanishni tekshirib bo'lmadi",
       unknown: "noma'lum",
     },
     menu: { title: 'Modullar' },
