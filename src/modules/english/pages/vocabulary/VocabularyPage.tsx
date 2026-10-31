@@ -32,7 +32,7 @@ export function VocabularyPage() {
 
   const levelName = (id: string) => levels.find((l) => l.id === id)?.name ?? ''
   const categoryName = (id: string | null) => (id ? categories.find((c) => c.id === id)?.name : undefined)
-  const filtered = Boolean(query.search || query.levelId || query.categoryId)
+  const filtered = Boolean(query.search || query.categoryId)
 
   return (
     <div className={s.page}>
@@ -48,21 +48,8 @@ export function VocabularyPage() {
             aria-label="Search words"
           />
         </div>
-        <div className={v.filters}>
-          <select
-            className={v.select}
-            value={filters.levelId ?? ''}
-            onChange={(e) => setFilters((f) => ({ ...f, levelId: e.target.value || undefined }))}
-            aria-label="Level"
-          >
-            <option value="">All levels</option>
-            {levels.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
-          {categories.length > 0 && (
+        {categories.length > 0 && (
+          <div className={v.filters}>
             <select
               className={v.select}
               value={filters.categoryId ?? ''}
@@ -76,8 +63,8 @@ export function VocabularyPage() {
                 </option>
               ))}
             </select>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {isError ? (

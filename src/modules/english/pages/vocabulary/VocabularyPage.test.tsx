@@ -26,5 +26,8 @@ describe('VocabularyPage', () => {
     expect(screen.getAllByText('Travel').length).toBeGreaterThan(0)
     expect(screen.getByRole('searchbox', { name: 'Search words' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Add word' })).toBeTruthy()
+    // No filtering by level; search and category only.
+    expect(screen.queryByRole('combobox', { name: 'Level' })).toBeNull()
+    expect(screen.getByRole('combobox', { name: 'Category filter' })).toBeTruthy()
   })
 })
