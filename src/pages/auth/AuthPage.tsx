@@ -7,6 +7,7 @@ import { useAuth } from '@/core/contexts/AuthContext'
 import { useLang, type Lang } from '@/core/i18n'
 import { useCoreT } from '@/core/i18n/useCoreT'
 import { apiErrorText } from '@/core/i18n/errors'
+import { PasswordInput } from '@/core/components/ui/PasswordInput'
 import s from './AuthPage.module.scss'
 
 type Mode = 'login' | 'register'
@@ -112,9 +113,8 @@ export function AuthPage() {
           <label className={s.field}>
             <span className={s.fieldLabel}>{t.auth.password}</span>
             <div className={s.inputWrap}>
-              <input
+              <PasswordInput
                 className={s.input}
-                type="password"
                 placeholder={isLogin ? t.auth.passwordPlaceholder : t.auth.newPasswordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

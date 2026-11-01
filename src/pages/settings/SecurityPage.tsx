@@ -6,6 +6,7 @@ import { SettingsSubpage } from './SettingsSubpage'
 import { useLang } from '@/core/i18n'
 import { useCoreT } from '@/core/i18n/useCoreT'
 import { apiErrorText } from '@/core/i18n/errors'
+import { PasswordInput } from '@/core/components/ui/PasswordInput'
 import s from './settings.module.scss'
 
 export function SecurityPage() {
@@ -43,9 +44,8 @@ export function SecurityPage() {
           <label className={s.field}>
             <span className={s.fieldLabel}>{t.security.current}</span>
             <div className={s.inputWrap}>
-              <input
+              <PasswordInput
                 className={s.input}
-                type="password"
                 value={currentPw}
                 onChange={(e) => setCurrentPw(e.target.value)}
                 autoComplete="current-password"
@@ -57,9 +57,8 @@ export function SecurityPage() {
           <label className={s.field}>
             <span className={s.fieldLabel}>{t.security.next}</span>
             <div className={s.inputWrap}>
-              <input
+              <PasswordInput
                 className={s.input}
-                type="password"
                 value={newPw}
                 onChange={(e) => setNewPw(e.target.value)}
                 autoComplete="new-password"
@@ -72,9 +71,8 @@ export function SecurityPage() {
           <label className={s.field}>
             <span className={s.fieldLabel}>{t.security.confirm}</span>
             <div className={s.inputWrap}>
-              <input
+              <PasswordInput
                 className={s.input}
-                type="password"
                 value={confirmPw}
                 onChange={(e) => setConfirmPw(e.target.value)}
                 autoComplete="new-password"
