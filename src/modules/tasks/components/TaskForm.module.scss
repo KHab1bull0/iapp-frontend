@@ -9,7 +9,8 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  // minmax(0, …): a column may shrink below its field's intrinsic width.
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
 }
 

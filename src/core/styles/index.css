@@ -209,6 +209,30 @@
 @layer base {
   * { box-sizing: border-box; }
 
+  /*
+    Native date/time fields on iOS Safari keep an intrinsic minimum width and
+    ignore width:100%, so two of them side by side ran past the screen edge.
+    Dropping the native appearance lets them shrink to their column; the
+    picker still opens on tap. Their value is also centred by default there.
+  */
+  input[type="date"],
+  input[type="time"] {
+    min-width: 0;
+    max-width: 100%;
+  }
+  @supports (-webkit-touch-callout: none) {
+    input[type="date"],
+    input[type="time"] {
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input[type="date"]::-webkit-date-and-time-value,
+    input[type="time"]::-webkit-date-and-time-value {
+      text-align: left;
+      margin: 0;
+    }
+  }
+
   a, button, input, select, textarea, label, [role="button"] {
     touch-action: manipulation;
   }
