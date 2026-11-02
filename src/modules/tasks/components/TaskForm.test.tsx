@@ -38,7 +38,7 @@ describe('TaskForm', () => {
   test('after done: every N units', async () => {
     renderForm()
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Wash the car' } })
-    fireEvent.click(screen.getByRole('radio', { name: 'After done' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'Interval' }))
     fireEvent.change(screen.getByLabelText('Every'), { target: { value: '10' } })
     fireEvent.click(save())
     await waitFor(() =>
