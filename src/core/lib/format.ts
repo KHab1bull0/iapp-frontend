@@ -62,49 +62,73 @@ export function formatAxis(value: number): string {
 
 const dayFmt = () => dateFmt({ weekday: 'short', month: 'short', day: 'numeric' })
 const shortDayFmt = () => dateFmt({ month: 'short', day: 'numeric' })
-const monthFmt = () => dateFmt({ month: 'short' })
 const monthYearFmt = () => dateFmt({ month: 'long', year: 'numeric' })
 const fullDayFmt = () => dateFmt({ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 const weekdayFmt = () => dateFmt({ weekday: 'short' })
 const dateYearFmt = () => dateFmt({ day: 'numeric', month: 'short', year: 'numeric' })
+
+// Uzbek names are spelled out here: many browsers ship little or no uz-UZ
+// data and print "M06" for a month. English keeps Intl (en-GB).
+const UZ_MONTHS = [
+  'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
+  'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr',
+]
+// Three letters in both languages (en-GB would print "Sept").
+const EN_MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const UZ_MONTHS_SHORT = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek']
+const UZ_WEEKDAYS = ['yakshanba', 'dushanba', 'seshanba', 'chorshanba', 'payshanba', 'juma', 'shanba']
+const UZ_WEEKDAYS_SHORT = ['Ya', 'Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh']
+const capitalise = (w: string) => w.charAt(0).toUpperCase() + w.slice(1)
+/** "3-noy" */
+const uzDayMonth = (d: Date) => `${d.getDate()}-${UZ_MONTHS_SHORT[d.getMonth()].toLowerCase()}`
 
 /** Parses a "YYYY-MM-DD" API date without letting the runtime shift the timezone. */
 export function parseApiDate(dateStr: string): Date {
   return new Date(`${dateStr.slice(0, 10)}T00:00:00`)
 }
 
+/** "Wed 3 Jun" / "Ch, 3-iyn" */
 export function formatDay(dateStr: string): string {
-  return dayFmt().format(parseApiDate(dateStr))
+  const d = parseApiDate(dateStr)
+  if (lang === 'uz') return `${UZ_WEEKDAYS_SHORT[d.getDay()]}, ${uzDayMonth(d)}`
+  return dayFmt().format(d)
 }
 
+/** "3 Jun" / "3-iyn" */
 export function formatShortDay(dateStr: string): string {
-  return shortDayFmt().format(parseApiDate(dateStr))
+  const d = parseApiDate(dateStr)
+  return lang === 'uz' ? uzDayMonth(d) : shortDayFmt().format(d)
 }
 
+/** "Wednesday, 3 June 2026" / "Chorshanba, 3-iyun, 2026" */
 export function formatFullDate(d: Date): string {
+  if (lang === 'uz') {
+    return `${capitalise(UZ_WEEKDAYS[d.getDay()])}, ${d.getDate()}-${UZ_MONTHS[d.getMonth()]}, ${d.getFullYear()}`
+  }
   return fullDayFmt().format(d)
 }
 
 /** "Mon" / "Du" */
 export function formatWeekday(dateStr: string): string {
-  return weekdayFmt().format(parseApiDate(dateStr))
+  const d = parseApiDate(dateStr)
+  return lang === 'uz' ? UZ_WEEKDAYS_SHORT[d.getDay()] : weekdayFmt().format(d)
 }
 
-/** "3 Oct 2026" */
+/** "3 Oct 2026" / "3-okt, 2026" */
 export function formatDate(d: Date): string {
-  return dateYearFmt().format(d)
+  return lang === 'uz' ? `${uzDayMonth(d)}, ${d.getFullYear()}` : dateYearFmt().format(d)
 }
 
-/** "2026-07" -> "iyul" */
+/** "2026-07" -> "Jul" / "Iyl" */
 export function formatMonthShort(yyyyMM: string): string {
-  const [y, m] = yyyyMM.split('-')
-  return monthFmt().format(new Date(+y, +m - 1))
+  const m = yyyyMM.split('-')[1]
+  return (lang === 'uz' ? UZ_MONTHS_SHORT : EN_MONTHS_SHORT)[+m - 1]
 }
 
-/** "2026-07" -> "iyul 2026" */
+/** "2026-07" -> "July 2026" / "Iyul 2026" */
 export function formatMonthLong(yyyyMM: string): string {
   const [y, m] = yyyyMM.split('-')
-  return monthYearFmt().format(new Date(+y, +m - 1))
+  return lang === 'uz' ? `${capitalise(UZ_MONTHS[+m - 1])} ${y}` : monthYearFmt().format(new Date(+y, +m - 1))
 }
 
 /** Local calendar date as YYYY-MM-DD (not UTC, which runs a day behind in the morning here). */

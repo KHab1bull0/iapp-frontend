@@ -2,7 +2,6 @@ import clsx from 'clsx'
 import { Check, Repeat } from 'lucide-react'
 import type { Task } from '@/modules/tasks/api/tasks'
 import { describeRepeat, dueLabel } from '@/modules/tasks/lib/repeat'
-import { useLang } from '@/core/i18n'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from './TaskRow.module.scss'
 
@@ -22,10 +21,9 @@ interface Props {
 
 export function TaskRow({ task, today, done = false, onToggle, busy = false, onOpen, showDue = false }: Props) {
   const t = useTasksT()
-  const { lang } = useLang()
   const repeat = describeRepeat(task, t)
   const due =
-    showDue || (task.dueDate !== null && task.dueDate < today) ? dueLabel(task.dueDate, today, t, lang) : ''
+    showDue || (task.dueDate !== null && task.dueDate < today) ? dueLabel(task.dueDate, today, t) : ''
   const overdue = !done && task.dueDate !== null && task.dueDate < today
 
   return (

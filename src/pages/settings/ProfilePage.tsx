@@ -9,6 +9,7 @@ import { SettingsSubpage } from './SettingsSubpage'
 import { useLang } from '@/core/i18n'
 import { useCoreT } from '@/core/i18n/useCoreT'
 import { apiErrorText } from '@/core/i18n/errors'
+import { formatMonthLong, ymd } from '@/core/lib/format'
 import s from './settings.module.scss'
 
 
@@ -16,7 +17,6 @@ export function ProfilePage() {
   const { user } = useAuth()
   const { lang } = useLang()
   const t = useCoreT()
-  const memberSince = new Intl.DateTimeFormat(lang === 'uz' ? 'uz-UZ' : 'en-GB', { year: 'numeric', month: 'long' })
   const { data: profile, displayName } = useProfile()
   const qc = useQueryClient()
   // null until the user types: the field then shows the saved name.
@@ -49,7 +49,7 @@ export function ProfilePage() {
           <div className={s.heroName}>{displayName}</div>
           <div className={s.rowSub}>@{user?.username}</div>
           {profile && (
-            <div className={s.hint}>{t.profile.memberSince(memberSince.format(new Date(profile.createdAt)))}</div>
+            <div className={s.hint}>{t.profile.memberSince(formatMonthLong(ymd(new Date(profile.createdAt)).slice(0, 7)))}</div>
           )}
         </div>
       </div>

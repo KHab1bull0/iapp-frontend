@@ -62,12 +62,12 @@ describe('describeRepeat', () => {
 
 describe('dueLabel', () => {
   test('relative to today', () => {
-    expect(dueLabel(null, TODAY, en, 'en')).toBe('No date')
-    expect(dueLabel(TODAY, TODAY, en, 'en')).toBe('Today')
-    expect(dueLabel('2026-10-31', TODAY, en, 'en')).toBe('Tomorrow')
-    expect(dueLabel('2026-10-29', TODAY, en, 'en')).toBe('1 day overdue')
-    expect(dueLabel('2026-10-25', TODAY, en, 'en')).toBe('5 days overdue')
-    expect(dueLabel('2026-11-03', TODAY, en, 'en')).toBe('Tue')
+    expect(dueLabel(null, TODAY, en)).toBe('No date')
+    expect(dueLabel(TODAY, TODAY, en)).toBe('Today')
+    expect(dueLabel('2026-10-31', TODAY, en)).toBe('Tomorrow')
+    expect(dueLabel('2026-10-29', TODAY, en)).toBe('1 day overdue')
+    expect(dueLabel('2026-10-25', TODAY, en)).toBe('5 days overdue')
+    expect(dueLabel('2026-11-03', TODAY, en)).toBe('Tue')
   })
 })
 
@@ -107,8 +107,8 @@ describe('in Uzbek', () => {
     expect(describeRepeat(task({ repeatMode: 'after_done', repeatUnit: 'day', repeatEvery: 10 }), uz)).toBe(
       'Bajarilgandan 10 kun keyin',
     )
-    expect(dueLabel('2026-10-25', TODAY, uz, 'uz')).toBe('5 kun kechikdi')
-    expect(dueLabel('2026-10-31', TODAY, uz, 'uz')).toBe('Ertaga')
+    expect(dueLabel('2026-10-25', TODAY, uz)).toBe('5 kun kechikdi')
+    expect(dueLabel('2026-10-31', TODAY, uz)).toBe('Ertaga')
     expect(groupByDue([task({ dueDate: TODAY })], TODAY, uz)[0].label).toBe('Bugun')
   })
 })

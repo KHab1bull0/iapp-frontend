@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from 'vitest'
 import { act, render, screen } from '@testing-library/react'
 import { LanguageProvider, defineMessages, useLang, useMessages, useText } from './index'
-import { formatMonthLong, setFormatLang } from '@/core/lib/format'
+import { formatMonthLong, formatMonthShort, setFormatLang } from '@/core/lib/format'
 
 const messages = defineMessages(
   { hello: 'Salom', count: (n: number) => `${n} ta so'z` },
@@ -53,5 +53,9 @@ describe('i18n', () => {
     expect(formatMonthLong('2026-10')).toMatch(/October/)
     setFormatLang('uz')
     expect(formatMonthLong('2026-10')).toMatch(/oktabr/i)
+    // Spelled out, never the browser's "M09" fallback.
+    expect(['2026-09', '2026-10', '2026-11'].map(formatMonthShort)).toEqual(['Sen', 'Okt', 'Noy'])
+    setFormatLang('en')
+    expect(['2026-09', '2026-10', '2026-11'].map(formatMonthShort)).toEqual(['Sep', 'Oct', 'Nov'])
   })
 })

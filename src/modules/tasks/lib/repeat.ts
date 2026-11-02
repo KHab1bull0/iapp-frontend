@@ -1,4 +1,4 @@
-import type { Lang } from '@/core/i18n'
+import { formatShortDay } from '@/core/lib/format'
 import type { Task } from '@/modules/tasks/api/tasks'
 import type { TasksMessages } from '@/modules/tasks/i18n'
 
@@ -31,7 +31,7 @@ export function describeRepeat(task: Task, t: TasksMessages): string {
 }
 
 /** "Today", "Tomorrow", "3 days overdue", a weekday this week, or the date. */
-export function dueLabel(dueDate: string | null, today: string, t: TasksMessages, lang: Lang): string {
+export function dueLabel(dueDate: string | null, today: string, t: TasksMessages): string {
   if (!dueDate) return t.due.noDate
   const diff = daysBetween(today, dueDate)
   if (diff === 0) return t.due.today
@@ -40,7 +40,7 @@ export function dueLabel(dueDate: string | null, today: string, t: TasksMessages
   const [y, m, d] = dueDate.split('-').map(Number)
   const date = new Date(y, m - 1, d)
   if (diff < 7) return t.repeat.weekdays[date.getDay()]
-  return date.toLocaleDateString(lang === 'uz' ? 'uz-UZ' : 'en-GB', { day: 'numeric', month: 'short' })
+  return formatShortDay(dueDate)
 }
 
 export interface TaskGroup {
