@@ -20,7 +20,7 @@ export const english: ModuleManifest = {
   pages: [
     // Statistics first: opening English shows where the vocabulary stands.
     { label: { uz: 'Statistika', en: 'Statistics' }, path: '/english', icon: BarChart3, end: true },
-    { label: { uz: 'Takrorlash', en: 'Review' }, path: '/english/review', icon: Layers },
+    { label: { uz: 'Yodlash', en: 'Memorise' }, path: '/english/review', icon: Layers },
     { label: { uz: "Lug'at", en: 'Vocabulary' }, path: '/english/vocabulary', icon: BookOpen },
   ],
   routes: [
