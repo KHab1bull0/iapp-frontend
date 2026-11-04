@@ -20,7 +20,7 @@ export default defineConfig({
       devOptions: {
         enabled: false,
       },
-      includeAssets: ["favicon.svg", "apple-touch-icon.png"],
+      includeAssets: ["favicon-48.png", "apple-touch-icon.png"],
       manifest: {
         // Without an explicit id the install identity is derived from
         // start_url, so ever changing start_url would register as a second,
