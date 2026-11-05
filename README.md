@@ -71,3 +71,10 @@ export default defineConfig([
   },
 ])
 ```
+
+## Deploy
+
+A push to `main` builds the Docker image in GitHub Actions and restarts `iapp_front`
+on the production server (`~/iapp` as `administrator`, Docker Compose).
+Since 2026-11-05 production runs on the eskiz.uz server (170.168.6.226);
+the repo secrets `SERVER_HOST`, `SERVER_USERNAME` and `SSH_PRIVATE_KEY` point there.
