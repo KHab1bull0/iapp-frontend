@@ -14,13 +14,19 @@ import { QuickAddProvider } from '@/core/quickAdd/QuickAddProvider'
 import { isDialogOpen, isTyping } from '@/core/lib/dom'
 import s from './AppLayout.module.scss'
 
+const SIDEBAR_KEY = 'iapp-sidebar-collapsed'
+
 interface AppLayoutProps {
   /** Passed in from App so core never imports a module. */
   modules: ModuleManifest[]
 }
 
 export function AppLayout({ modules }: AppLayoutProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  // Remembered on this device: a folded sidebar stays folded.
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem(SIDEBAR_KEY) === '1')
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_KEY, sidebarCollapsed ? '1' : '0')
+  }, [sidebarCollapsed])
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const { pathname } = useLocation()

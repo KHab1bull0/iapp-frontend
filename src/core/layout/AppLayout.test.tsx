@@ -34,9 +34,27 @@ describe('AppLayout driven by the registry', () => {
       '/',
       '/finance',
       '/finance/transactions',
-      '/settings',
-      '/settings/profile', // the user block
+      '/settings', // the user block is the one way to Settings
     ])
+  })
+
+  test('the sidebar has no theme switch or sign-out: both live in Settings', () => {
+    const { container } = renderShell('/finance')
+    const aside = container.querySelector('aside')!
+    expect(within(aside).queryByRole('button', { name: /mode|Sign out/i })).toBeNull()
+  })
+
+  test('folded, the sidebar keeps its toggle (so it can be opened again) and remembers', () => {
+    const { container, unmount } = renderShell('/finance')
+    const aside = () => container.querySelector('aside')!
+    fireEvent.click(within(aside()).getByRole('button', { name: 'Collapse sidebar' }))
+    expect(within(aside()).getByRole('button', { name: 'Expand sidebar' })).toBeTruthy()
+    // Icons keep a name to read out once their labels are gone.
+    expect(within(aside()).getByRole('link', { name: 'Transactions' })).toBeTruthy()
+    unmount()
+    const again = renderShell('/finance')
+    expect(within(again.container.querySelector('aside')!).getByRole('button', { name: 'Expand sidebar' })).toBeTruthy()
+    localStorage.removeItem('iapp-sidebar-collapsed')
   })
 
   test("finance's first page is called Statistics", () => {
@@ -96,7 +114,7 @@ describe('AppLayout driven by the registry', () => {
     renderShell('/finance')
     const aside = document.querySelector('aside')!
     expect(within(aside).getByRole('link', { name: 'Hisobot' })).toBeTruthy()
-    expect(within(aside).getByRole('link', { name: 'Sozlamalar' })).toBeTruthy()
+    expect(within(aside).getByRole('link', { name: /^Sozlamalar/ })).toBeTruthy()
   })
 
   test('module pages get a desktop top bar: module, page title and the module\'s Add', () => {

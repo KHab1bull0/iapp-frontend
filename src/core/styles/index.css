@@ -98,7 +98,7 @@
   --sidebar-w-expanded: 248px;
   /* Content width on desktop; every page and the top bar share it. */
   --page-w: 1120px;
-  --sidebar-w-collapsed: 64px;
+  --sidebar-w-collapsed: 72px;
 
   /*
     MOBILE LAYOUT SIZES — one source of truth.

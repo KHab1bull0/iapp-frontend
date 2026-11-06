@@ -1,44 +1,90 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
+// Desktop navigation. Expanded: icon + label rows in module groups.
+// Collapsed: a 72px rail of 44px icon buttons with tooltips, and the toggle
+// still at the top so it can always be opened again.
+
 .sidebar {
   view-transition-name: sidebar;
-  background: var(--bg-elev);
-  border-right: 1px solid var(--border);
-  padding: 20px 12px 16px;
   display: flex;
   flex-direction: column;
+  gap: 16px;
   height: 100%;
+  padding: 16px 12px;
   overflow: hidden;
+  background: var(--bg-elev);
+  border-right: 1px solid var(--border);
 
   @include bp-tablet { display: none; }
-
-  &.collapsed {
-    .collapseBtn { display: none; }
-    .navItem { justify-content: center; padding: 8px; }
-    .navItem span { display: none; }
-    .logoWord { display: none; }
-    .userMeta { display: none; }
-    .themeToggle span { display: none; }
-    .themeToggle { justify-content: center; }
-    .user { justify-content: center; }
-  }
 }
 
-.sidebarTop {
+// ── Top: logo and the fold toggle ───────────────────────────────────────────
+.top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  padding: 0 8px;
+  gap: 8px;
+  padding: 0 4px;
+
+  .collapsed & {
+    flex-direction: column;
+    padding: 0;
+  }
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.logoMark {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--tile-md);
+  height: var(--tile-md);
+  border-radius: $radius-md;
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+
+.logoWord {
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--fg-strong);
+  white-space: nowrap;
+}
+
+.toggle {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--control-md);
+  height: var(--control-md);
+  border: none;
+  border-radius: $radius-md;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: background $t-fast, color $t-fast;
+
+  &:hover { background: var(--icon-btn-hover); color: var(--fg-strong); }
+}
+
+// ── Add and search ──────────────────────────────────────────────────────────
 .actions {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
 
-  .collapsed & { flex-direction: column; }
+  .collapsed & {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 .addBtn {
@@ -47,11 +93,17 @@
   height: var(--control-md);
   padding: 0 12px;
   justify-content: flex-start;
-  font-size: var(--fs-ui);
   font-weight: 600;
 
   .kbd { margin-left: auto; background: rgba(255, 255, 255, 0.18); color: inherit; border-color: transparent; }
-  .collapsed & { justify-content: center; padding: 0; }
+
+  .collapsed & {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+  }
 }
 
 .searchBtn {
@@ -61,7 +113,11 @@
   gap: 8px;
   color: var(--fg-muted);
 
-  .collapsed & { justify-content: center; }
+  .collapsed & {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
 }
 
 .kbd {
@@ -75,90 +131,17 @@
   color: var(--fg-muted);
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logoMark {
-  width: var(--tile-md);
-  height: var(--tile-md);
-  border-radius: $radius-md;
-  background: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary-fg);
-  flex-shrink: 0;
-}
-
-.logoWord {
-  font-size: var(--fs-title);
-  line-height: var(--lh-title);
-  font-weight: 600;
-  color: var(--fg-strong);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
-.collapseBtn {
-  background: transparent;
-  border: none;
-  color: var(--fg-muted);
-  cursor: pointer;
-  width: var(--control-sm);
-  height: var(--control-sm);
-  border-radius: $radius-sm;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  &:hover {
-    background: var(--icon-btn-hover);
-    color: var(--fg);
-  }
-}
-
-.collapseBtnCentered {
-  @extend .collapseBtn;
-  margin: 4px auto 0;
-}
-
+// ── Navigation ──────────────────────────────────────────────────────────────
 .nav {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  flex: 1;
-  min-height: 0;
   overflow-y: auto;
-}
-
-.navItem {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: var(--control-md);
-  padding: 8px 12px;
-  background: transparent;
-  border: none;
-  color: var(--fg);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: var(--fs-ui);
-  line-height: var(--lh-ui);
-  font-weight: 500;
-  border-radius: $radius-md;
-  text-align: left;
-  width: 100%;
-  transition: background $t-fast, color $t-fast;
-  white-space: nowrap;
-  text-decoration: none;
-
-  &:hover { background: var(--row-hover); }
-  &.active { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
+  overflow-x: hidden;
+  margin: 0 -4px;
+  padding: 0 4px;
 }
 
 .navGroup {
@@ -167,6 +150,7 @@
   gap: 4px;
   margin-top: 12px;
 
+  // Collapsed: groups are told apart by a hairline instead of a label.
   .collapsed & {
     margin-top: 8px;
     padding-top: 8px;
@@ -179,78 +163,37 @@
   padding: 4px 12px;
 }
 
-.sidebarBottom {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-
-.themeToggle {
+.navItem {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
   min-height: var(--control-md);
   padding: 8px 12px;
-  background: transparent;
-  border: none;
   border-radius: $radius-md;
-  cursor: pointer;
-  color: var(--fg-muted);
-  font-family: inherit;
-  font-size: var(--fs-meta);
+  color: var(--fg);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   font-weight: 500;
-  white-space: nowrap;
-  width: 100%;
-
-  &:hover { background: var(--row-hover); color: var(--fg); }
-}
-
-.user {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: $radius-md;
-  color: inherit;
   text-decoration: none;
+  white-space: nowrap;
+  transition: background $t-fast, color $t-fast;
 
   &:hover { background: var(--row-hover); }
+  &.active { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
+
+  .collapsed & {
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    margin: 0 auto;
+  }
 }
 
-.avatar {
-  width: var(--control-sm);
-  height: var(--control-sm);
-  border-radius: $radius-pill;
-  background: var(--avatar-bg);
-  color: var(--avatar-fg);
-  font-weight: 600;
-  font-size: var(--fs-meta);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  text-transform: uppercase;
-}
-
-.userMeta { min-width: 0; }
-
-.userHandle {
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--fg-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.userName {
-  font-size: var(--fs-meta);
-  line-height: var(--lh-meta);
-  font-weight: 600;
-  color: var(--fg-strong);
-  white-space: nowrap;
+.label {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -271,7 +214,7 @@
   .active & { background: var(--primary); color: var(--primary-fg); }
 }
 
-// Collapsed sidebar: just a dot on the icon.
+// Collapsed: a dot on the icon's corner.
 .badgeDot {
   position: absolute;
   top: 8px;
@@ -280,4 +223,74 @@
   height: 8px;
   border-radius: $radius-pill;
   background: var(--primary);
+  box-shadow: 0 0 0 2px var(--bg-elev);
+}
+
+// ── You (and Settings) ──────────────────────────────────────────────────────
+.user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--row-h);
+  padding: 8px;
+  border-top: 1px solid var(--border);
+  border-radius: $radius-md;
+  color: inherit;
+  text-decoration: none;
+  transition: background $t-fast;
+
+  &:hover { background: var(--row-hover); }
+
+  .collapsed & {
+    justify-content: center;
+    padding: 8px 0;
+  }
+}
+
+.userActive { background: var(--primary-soft); }
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--tile-md);
+  height: var(--tile-md);
+  border-radius: $radius-pill;
+  background: var(--avatar-bg);
+  color: var(--avatar-fg);
+  font-size: var(--fs-ui);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.userMeta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.userName,
+.userSub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userName {
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.userSub {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--fg-muted);
+}
+
+.userChevron {
+  flex-shrink: 0;
+  color: var(--fg-subtle);
 }
