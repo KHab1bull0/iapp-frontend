@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { RefreshCw, Search } from 'lucide-react'
+import { BookOpen, Plus, RefreshCw, Search } from 'lucide-react'
+import { EmptyState } from '@/core/components/ui/EmptyState'
+import { useQuickAdd } from '@/core/quickAdd/context'
 import { useToday } from '@/core/hooks/useToday'
 import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
 import {
@@ -22,6 +24,7 @@ export function VocabularyPage() {
   const t = useEnglishT()
   const levelLabel = useLevelName()
   const editor = useWordEditor()
+  const quickAdd = useQuickAdd()
   const [filters, setFilters] = useState<WordFilters>({})
   const search = useDebouncedValue(filters.search, 300)
   const query = { ...filters, search: search?.trim() || undefined }
@@ -74,17 +77,14 @@ export function VocabularyPage() {
       </div>
 
       {isError ? (
-        <div className={s.empty}>
-          <div className={s.emptyTitle}>{t.vocab.failed}</div>
-          <button className={s.btnSecondary} onClick={() => refetch()}>
-            <RefreshCw size={14} /> {t.retry}
-          </button>
-        </div>
+        <EmptyState title={t.vocab.failed} action={{ label: t.retry, icon: RefreshCw, onClick: () => void refetch() }} />
       ) : isLoading ? null : words.length === 0 ? (
-        <div className={s.empty}>
-          <div className={s.emptyTitle}>{filtered ? t.vocab.noMatch : t.vocab.empty}</div>
-          {!filtered && <div className={s.emptySub}>{t.vocab.emptySub}</div>}
-        </div>
+        <EmptyState
+          icon={filtered ? Search : BookOpen}
+          title={filtered ? t.vocab.noMatch : t.vocab.empty}
+          description={filtered ? undefined : t.vocab.emptySub}
+          action={filtered ? undefined : { label: t.vocab.add, icon: Plus, onClick: () => quickAdd.open('english.word') }}
+        />
       ) : (
         <section className={s.section}>
           <div className={s.sectionHead}>

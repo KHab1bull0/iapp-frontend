@@ -10,6 +10,7 @@ const api = vi.hoisted(() => ({
   fetchReview: vi.fn(),
   fetchLevels: vi.fn(),
   answerWord: vi.fn(),
+  fetchStats: vi.fn(),
 }))
 vi.mock('@/modules/english/api/english', async (orig) => ({ ...(await orig<object>()), ...api }))
 
@@ -71,5 +72,27 @@ describe('ReviewPage', () => {
     renderPage()
     const link = await screen.findByRole('link', { name: /Add review levels/ })
     expect(link.getAttribute('href')).toBe('/english/settings')
+  })
+
+  test('Space shows the answer and 2 says remembered', async () => {
+    renderPage()
+    await screen.findByText('apple')
+    fireEvent.keyDown(window, { key: ' ' })
+    expect(screen.getByText('apple-uz')).toBeTruthy()
+    fireEvent.keyDown(window, { key: '2' })
+    await waitFor(() => expect(api.answerWord).toHaveBeenCalledWith('apple', 'remembered', todayYmd()))
+  })
+
+  test('after the last card, a summary says how it went', async () => {
+    api.fetchReview.mockReset()
+    api.fetchReview.mockResolvedValueOnce([word('apple')]).mockResolvedValue([])
+    api.fetchStats.mockResolvedValue({ streak: 3, upcoming: [{ date: '2099-01-01', count: 4 }] })
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Forgot' }))
+    expect(await screen.findByRole('heading', { name: 'Well done!' })).toBeTruthy()
+    expect(screen.getByText('0 remembered, 1 coming back.')).toBeTruthy()
+    expect(await screen.findByText('3-day streak')).toBeTruthy()
+    expect(screen.getByText('4 waiting tomorrow')).toBeTruthy()
   })
 })

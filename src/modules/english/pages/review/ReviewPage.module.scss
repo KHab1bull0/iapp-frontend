@@ -1,72 +1,192 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
+// Review takes the whole screen: bottom bar, tabs and sidebar step aside.
+.focus {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: calc(12px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom))
+    calc(16px + var(--safe-left));
+  background: var(--bg);
+  animation: focusIn $t-slow var(--ease-house);
+}
+
+@keyframes focusIn {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-pill;
+  color: var(--fg-muted);
+
+  &:hover { background: var(--icon-btn-hover); color: var(--fg); }
+}
+
+.bar { flex: 1; }
+
+.toGo {
+  flex-shrink: 0;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .hint {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
   padding: 10px 14px;
   border-radius: $radius-md;
-  background: var(--hover-bg);
+  background: var(--primary-soft);
   color: var(--primary);
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
 }
 
-.progress {
-  align-self: center;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--fg-muted);
+.stage {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  perspective: 1200px;
 }
 
 .card {
-  @include card-base;
-  min-height: 240px;
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  min-height: min(52vh, 420px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 18px;
+  padding: 32px 24px;
   text-align: center;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+
+  &.flipped {
+    cursor: default;
+    animation: flip 360ms var(--ease-house);
+  }
+}
+
+// A quarter turn and back: reads as the card turning over to its answer.
+@keyframes flip {
+  0% { transform: rotateY(0); }
+  50% { transform: rotateY(12deg) scale(0.98); }
+  100% { transform: rotateY(0); }
 }
 
 .level {
-  padding: 2px 10px;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 3px 10px;
   border-radius: $radius-pill;
-  background: var(--hover-bg);
+  background: var(--primary-soft);
   color: var(--primary);
   font-size: 12px;
   font-weight: 600;
 }
 
+.listen {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: $radius-pill;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+
+  &:hover { background: var(--icon-btn-hover); color: var(--primary); }
+}
+
 .word {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   color: var(--fg-strong);
   overflow-wrap: anywhere;
+}
+
+.tapHint {
+  font-size: var(--fs-small);
+  color: var(--fg-muted);
 }
 
 .answer {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--border-strong);
+  width: 100%;
+  animation: answerIn $t-slow var(--ease-house);
+}
+
+@keyframes answerIn {
+  from { opacity: 0; transform: translateY(8px); }
 }
 
 .translation {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--fg);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+  color: var(--primary);
 }
 
 .note {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--fg-muted);
   white-space: pre-wrap;
 }
 
+.bottom {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .show {
   @include btn-secondary;
-  @include btn-size-lg;
-  min-width: 160px;
+  height: 56px;
+  font-size: 17px;
+  font-weight: 600;
+  border-radius: $radius-lg;
 }
 
 .actions {
@@ -78,7 +198,10 @@
 .forgot,
 .remembered {
   @include btn-base;
-  @include btn-size-lg;
+  height: 56px;
+  font-size: 17px;
+  font-weight: 600;
+  border-radius: $radius-lg;
 
   &:disabled { opacity: 0.5; }
 }
@@ -90,4 +213,84 @@
 
 .remembered {
   @include btn-primary;
+  height: 56px;
+  font-size: 17px;
+  font-weight: 600;
+  border-radius: $radius-lg;
+}
+
+.keys {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-caption);
+  color: var(--fg-muted);
+
+  @include bp-tablet { display: none; }
+}
+
+// After the last card.
+.summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: $radius-xl;
+}
+
+.summaryGlyph { font-size: 48px; line-height: 1; }
+
+.summaryTitle {
+  margin: 4px 0 0;
+  font-size: var(--fs-h1);
+  font-weight: 800;
+  color: var(--fg-strong);
+}
+
+.summarySub {
+  margin: 0;
+  font-size: 15px;
+  color: var(--fg-muted);
+}
+
+.summaryFacts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  font-size: var(--fs-small);
+  color: var(--fg);
+}
+
+.streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: $radius-pill;
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.summaryActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.primary {
+  @include btn-primary;
+  @include btn-size-lg;
+  text-decoration: none;
+}
+
+.secondary {
+  @include btn-secondary;
+  @include btn-size-lg;
 }

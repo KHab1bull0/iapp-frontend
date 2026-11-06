@@ -1,23 +1,15 @@
 import clsx from 'clsx'
-import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { RefreshCw } from 'lucide-react'
+import { BookOpen, Plus, RefreshCw } from 'lucide-react'
+import { EmptyState } from '@/core/components/ui/EmptyState'
+import { StatTile } from '@/core/components/ui/StatTile'
+import { useQuickAdd } from '@/core/quickAdd/context'
 import { useToday } from '@/core/hooks/useToday'
 import { formatDay, formatWeekday } from '@/core/lib/format'
 import { englishKeys, fetchStats, type Stats } from '@/modules/english/api/english'
 import { useEnglishT, useLevelName } from '@/modules/english/i18n'
 import s from '../EnglishPages.module.scss'
 import st from './StatsPage.module.scss'
-
-function Tile({ label, value, sub, tone }: { label: string; value: string; sub: string; tone?: 'danger' }) {
-  return (
-    <div className={st.tile}>
-      <div className={st.tileLabel}>{label}</div>
-      <div className={st.tileValue}>{value}</div>
-      <div className={clsx(st.tileSub, tone === 'danger' && st.danger)}>{sub}</div>
-    </div>
-  )
-}
 
 /** Horizontal bars, one row per item; the count is always written beside the bar. */
 function BarRows({ title, rows }: { title: string; rows: { key: string; label: string; sub?: string; count: number }[] }) {
@@ -108,6 +100,7 @@ function Upcoming({ days }: { days: Stats['upcoming'] }) {
 export function StatsPage() {
   const t = useEnglishT()
   const levelName = useLevelName()
+  const quickAdd = useQuickAdd()
   const today = useToday()
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: englishKeys.stats(today),
@@ -117,12 +110,7 @@ export function StatsPage() {
   if (isError) {
     return (
       <div className={s.page}>
-        <div className={s.empty}>
-          <div className={s.emptyTitle}>{t.stats.failed}</div>
-          <button className={s.btnSecondary} onClick={() => refetch()}>
-            <RefreshCw size={14} /> {t.retry}
-          </button>
-        </div>
+        <EmptyState title={t.stats.failed} action={{ label: t.retry, icon: RefreshCw, onClick: () => void refetch() }} />
       </div>
     )
   }
@@ -132,13 +120,13 @@ export function StatsPage() {
   if (data.total === 0) {
     return (
       <div className={s.page}>
-        <div className={s.empty}>
-          <div className={s.emptyTitle}>{t.stats.empty}</div>
-          <div className={s.emptySub}>{t.stats.emptySub}</div>
-          <Link to="/english/vocabulary" className={s.btnSecondary}>
-            {t.stats.openVocabulary}
-          </Link>
-        </div>
+        <EmptyState
+          icon={BookOpen}
+          title={t.stats.empty}
+          description={t.stats.emptySub}
+          action={{ label: t.review.addWord, icon: Plus, onClick: () => quickAdd.open('english.word') }}
+          secondary={{ label: t.stats.openVocabulary, to: '/english/vocabulary' }}
+        />
       </div>
     )
   }
@@ -149,21 +137,21 @@ export function StatsPage() {
   return (
     <div className={s.page}>
       <div className={st.tiles}>
-        <Tile label={t.stats.words} value={String(data.total)} sub={t.stats.addedThisWeek(data.addedThisWeek)} />
-        <Tile
+        <StatTile label={t.stats.words} value={String(data.total)} sub={t.stats.addedThisWeek(data.addedThisWeek)} />
+        <StatTile
           label={t.stats.due}
           value={String(data.due)}
           sub={data.overdue ? t.stats.overdue(data.overdue) : data.due ? t.vocab.dueToday : t.stats.allDone}
-          tone={data.overdue ? 'danger' : undefined}
+          tone={data.overdue ? 'danger' : 'default'}
         />
-        <Tile label={t.stats.reviewedToday} value={String(data.reviewedToday)} sub={t.stats.answers} />
-        <Tile label={t.stats.streak} value={String(data.streak)} sub={t.stats.streakSub(data.streak)} />
-        <Tile
+        <StatTile label={t.stats.reviewedToday} value={String(data.reviewedToday)} sub={t.stats.answers} />
+        <StatTile label={t.stats.streak} value={String(data.streak)} sub={t.stats.streakSub(data.streak)} />
+        <StatTile
           label={t.stats.accuracy}
           value={accuracy}
           sub={answered ? t.stats.accuracySub(answered) : t.stats.noAnswers}
         />
-        <Tile label={t.stats.unseen} value={String(data.unseen)} sub={t.stats.unseenSub} />
+        <StatTile label={t.stats.unseen} value={String(data.unseen)} sub={t.stats.unseenSub} />
       </div>
 
       <BarRows

@@ -20,6 +20,7 @@ import {
 } from '@/modules/english/api/english'
 import { useEnglishT, useLevelName } from '@/modules/english/i18n'
 import s from './WordForm.module.scss'
+import { DateField } from '@/core/components/ui/DateField'
 
 interface Props {
   word: Word | null
@@ -183,16 +184,10 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
             </select>
           </label>
         )}
-        <label className={s.field}>
+        <div className={s.field}>
           <span className={s.label}>{t.word.memoriseOn}</span>
-          <input
-            type="date"
-            className={s.input}
-            value={reviewOn}
-            onChange={(e) => setReviewOn(e.target.value)}
-            aria-label={t.word.memoriseOn}
-          />
-        </label>
+          <DateField label={t.word.memoriseOn} value={reviewOn} onChange={(d) => d && setReviewOn(d)} />
+        </div>
       </div>
       {categoryPicker}
       <span className={s.hint}>

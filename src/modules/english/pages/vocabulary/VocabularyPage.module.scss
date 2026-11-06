@@ -1,10 +1,18 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
+// Search stays in reach while the list scrolls (under the pinned tabs on phones).
 .toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  padding: 8px 0;
+  background: var(--bg);
+
+  @include bp-tablet { top: calc(var(--safe-top) + 60px); }
 }
 
 .search {
@@ -12,10 +20,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 40px;
-  padding: 0 12px;
+  height: 44px;
+  padding: 0 14px;
   border: 1px solid var(--border);
-  border-radius: $radius-md;
+  border-radius: $radius-pill;
   background: var(--bg-elev);
   color: var(--fg-muted);
 
@@ -30,9 +38,7 @@
   background: transparent;
   color: var(--fg-strong);
   font-family: inherit;
-  font-size: 14px;
-
-  @supports (-webkit-touch-callout: none) { font-size: 16px; }
+  font-size: 16px;
 }
 
 .filters {
@@ -44,10 +50,10 @@
 .select {
   flex: 1;
   min-width: 0;
-  height: 40px;
-  padding: 0 10px;
+  height: 44px;
+  padding: 0 14px;
   border: 1px solid var(--border);
-  border-radius: $radius-md;
+  border-radius: $radius-pill;
   background: var(--bg-elev);
   color: var(--fg);
   font-family: inherit;
