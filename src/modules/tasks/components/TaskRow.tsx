@@ -76,6 +76,20 @@ export function TaskRow({ task, today, done = false, onToggle, busy = false, onO
             </span>
           )}
         </button>
+
+        {/* Pointer devices: the swipe's actions as buttons, shown on hover or focus. */}
+        {onTomorrow && !done && (
+          <button
+            type="button"
+            className={s.hoverAction}
+            onClick={() => onTomorrow(task)}
+            title={t.swipe.tomorrow}
+            aria-label={`${task.title}: ${t.swipe.tomorrow}`}
+          >
+            <ArrowRight size={16} aria-hidden />
+            <span>{t.swipe.tomorrow}</span>
+          </button>
+        )}
       </div>
     </div>
   )

@@ -1,14 +1,17 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import clsx from 'clsx'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { BottomNav } from './BottomNav'
 import { ModuleTabs } from './ModuleTabs'
 import { CommandPalette } from './CommandPalette'
+import { DesktopTopBar } from './DesktopTopBar'
+import { ShortcutsDialog } from './ShortcutsDialog'
 import { ChunkErrorBoundary } from '@/core/components/ChunkErrorBoundary'
 import { activeModule, isModulePage } from '@/core/modules/registry-utils'
 import type { ModuleManifest } from '@/core/modules/types'
 import { QuickAddProvider } from '@/core/quickAdd/QuickAddProvider'
+import { isDialogOpen, isTyping } from '@/core/lib/dom'
 import s from './AppLayout.module.scss'
 
 interface AppLayoutProps {
@@ -19,8 +22,34 @@ interface AppLayoutProps {
 export function AppLayout({ modules }: AppLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const { pathname } = useLocation()
   const active = activeModule(modules, pathname)
+  const onModulePage = Boolean(active && isModulePage(active, pathname))
+
+  // "?" lists the shortcuts, "/" jumps to the page's search, "[" folds the sidebar.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (isTyping(e.target) || e.metaKey || e.ctrlKey || e.altKey || isDialogOpen()) return
+      if (e.key === '?') {
+        e.preventDefault()
+        setShortcutsOpen(true)
+      } else if (e.key === '/') {
+        // The visible one: a page can keep a phone and a desktop search side by side.
+        const search = Array.from(document.querySelectorAll<HTMLInputElement>('[data-page-search]')).find(
+          (el) => el.offsetParent !== null,
+        )
+        if (search) {
+          e.preventDefault()
+          search.focus()
+        }
+      } else if (e.key === '[') {
+        setSidebarCollapsed((v) => !v)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <QuickAddProvider modules={modules}>
@@ -34,7 +63,10 @@ export function AppLayout({ modules }: AppLayoutProps) {
 
         <main className={s.main}>
           <div className={s.scroll}>
-            {active && active.pages.length > 1 && isModulePage(active, pathname) && <ModuleTabs module={active} />}
+            {active && onModulePage && (
+              <DesktopTopBar module={active} pathname={pathname} onShortcuts={() => setShortcutsOpen(true)} />
+            )}
+            {active && active.pages.length > 1 && onModulePage && <ModuleTabs module={active} />}
             <ChunkErrorBoundary key={pathname}>
               <Suspense fallback={null}>
                 <Outlet />
@@ -46,6 +78,7 @@ export function AppLayout({ modules }: AppLayoutProps) {
         </main>
       </div>
       <CommandPalette modules={modules} open={paletteOpen} onOpenChange={setPaletteOpen} />
+      <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </QuickAddProvider>
   )
 }

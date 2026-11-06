@@ -2,6 +2,7 @@ import { BarChart3, BookOpen, BookPlus, Languages, Layers } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
 import { EnglishHomeCard } from './EnglishHomeCard'
 import { WordDialog } from './components/WordDialog'
+import { useReviewCount } from './useReviewCount'
 import {
   CategoriesPage,
   EnglishSettingsIndex,
@@ -21,7 +22,7 @@ export const english: ModuleManifest = {
   pages: [
     // Statistics first: opening English shows where the vocabulary stands.
     { label: { uz: 'Statistika', en: 'Statistics' }, path: '/english', icon: BarChart3, end: true },
-    { label: { uz: 'Yodlash', en: 'Memorise' }, path: '/english/review', icon: Layers },
+    { label: { uz: 'Yodlash', en: 'Memorise' }, path: '/english/review', icon: Layers, useBadge: useReviewCount },
     { label: { uz: "Lug'at", en: 'Vocabulary' }, path: '/english/vocabulary', icon: BookOpen },
   ],
   routes: [

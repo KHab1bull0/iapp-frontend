@@ -13,7 +13,7 @@ interface Props {
 export function AddTransactionDialog({ open, onOpenChange, transaction }: Props) {
   const t = useFinanceT()
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={transaction ? t.tx.editTitle : t.tx.addTitle}>
+    <Sheet desktop="panel" open={open} onOpenChange={onOpenChange} title={transaction ? t.tx.editTitle : t.tx.addTitle}>
       <TransactionForm
         // Remount on open so a fresh sheet never shows the previous entry.
         key={`${transaction?.id ?? 'new'}-${String(open)}`}

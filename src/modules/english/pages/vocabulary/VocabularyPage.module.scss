@@ -13,6 +13,8 @@
   background: var(--bg);
 
   @include bp-tablet { top: calc(var(--safe-top) + 60px); }
+  // Under the desktop top bar.
+  @include bp-desktop { top: 72px; }
 }
 
 .search {
@@ -123,3 +125,48 @@
 }
 
 .due { color: var(--primary); font-weight: 600; }
+
+.category:empty { display: none; }
+
+// Header row of the desktop table; phones list without one.
+.head { display: none; }
+
+// ── Desktop: a table with aligned columns ────────────────────────────────
+@include bp-desktop {
+  .head,
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) 140px 160px 130px;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 18px;
+  }
+
+  .head {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .head + .row { border-top: none; }
+
+  // Their children become the table's cells.
+  .main,
+  .meta { display: contents; }
+
+  .translation { font-size: 14px; color: var(--fg); }
+
+  .badge { justify-self: start; }
+
+  .category,
+  .category:empty {
+    display: block;
+    font-size: 14px;
+    color: var(--fg);
+  }
+}

@@ -1,0 +1,43 @@
+@use '@/core/styles/variables' as *;
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+
+  & + & { border-top: 1px solid var(--border); }
+}
+
+.keys {
+  display: flex;
+  gap: 4px;
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.kbd {
+  min-width: 26px;
+  padding: 3px 7px;
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--bg);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--fg-strong);
+}
+
+.what {
+  margin: 0;
+  font-size: 14px;
+  color: var(--fg);
+}

@@ -24,9 +24,17 @@ interface NavItemProps {
   label: string
   end?: boolean
   collapsed: boolean
+  useBadge?: () => number | null
 }
 
-function NavItem({ to, icon: Icon, label, end, collapsed }: NavItemProps) {
+/** What's waiting on a page; nothing when there's nothing. */
+function Badge({ useBadge, collapsed }: { useBadge: () => number | null; collapsed: boolean }) {
+  const n = useBadge()
+  if (!n) return null
+  return <span className={collapsed ? s.badgeDot : s.badge}>{collapsed ? '' : n > 99 ? '99+' : n}</span>
+}
+
+function NavItem({ to, icon: Icon, label, end, collapsed, useBadge }: NavItemProps) {
   return (
     <NavLink
       to={to}
@@ -37,6 +45,7 @@ function NavItem({ to, icon: Icon, label, end, collapsed }: NavItemProps) {
     >
       <Icon size={18} />
       {!collapsed && <span>{label}</span>}
+      {useBadge && <Badge useBadge={useBadge} collapsed={collapsed} />}
     </NavLink>
   )
 }
@@ -98,6 +107,7 @@ export function Sidebar({ modules, collapsed, onToggle, onSearch }: SidebarProps
                 icon={p.icon}
                 label={text(p.label)}
                 collapsed={collapsed}
+                useBadge={p.useBadge}
               />
             ))}
           </div>

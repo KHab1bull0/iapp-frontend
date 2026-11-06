@@ -40,6 +40,8 @@ export function TransactionFilters({ filters, onChange, categories }: Props) {
           <Search size={15} />
           <input
             className={s.filterInput}
+            data-page-search
+            aria-label={t.filters.searchLabel}
             placeholder={t.filters.searchPlaceholder}
             value={filters.search ?? ''}
             onChange={(e) => onChange({ ...filters, search: e.target.value || undefined })}

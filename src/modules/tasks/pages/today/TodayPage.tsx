@@ -8,7 +8,9 @@ import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useToday } from '@/core/hooks/useToday'
 import { formatFullDate, parseApiDate } from '@/core/lib/format'
 import { useQuickAdd } from '@/core/quickAdd/context'
-import { fetchToday, tasksKeys } from '@/modules/tasks/api/tasks'
+import { fetchOverallStats, fetchToday, tasksKeys } from '@/modules/tasks/api/tasks'
+import { Heatmap } from '@/modules/tasks/components/stats/Heatmap'
+import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { QuickAddBar } from '@/modules/tasks/components/QuickAddBar'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { byTime } from '@/modules/tasks/lib/repeat'
@@ -35,6 +37,13 @@ export function TodayPage() {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.today(today),
     queryFn: () => fetchToday(today),
+  })
+  // The side rail's activity, desktop only (shared with the Statistics page).
+  const isMobile = useIsMobile()
+  const { data: stats } = useQuery({
+    queryKey: tasksKeys.overallStats(today),
+    queryFn: () => fetchOverallStats(today),
+    enabled: !isMobile,
   })
 
   const overdue = data?.overdue ?? []
@@ -68,7 +77,8 @@ export function TodayPage() {
           <Skeleton height={180} radius={16} />
         </div>
       ) : (
-        <>
+        <div className={s.layout}>
+          <aside className={s.rail}>
           {all > 0 && (
             <section className={s.summary}>
               <ProgressRing value={done.length} max={all} label={m.progressTitle(done.length, all)} size={56}>
@@ -82,6 +92,18 @@ export function TodayPage() {
               </div>
             </section>
           )}
+          {stats && stats.total > 0 && (
+            <section className={s.railCard} aria-label={m.stats.activity}>
+              <div className={s.railHead}>
+                <h2 className={s.sectionTitle}>{m.stats.activity}</h2>
+                {stats.currentStreak > 0 && <span className={s.streak}>{m.stats.streakValue(stats.currentStreak)}</span>}
+              </div>
+              <Heatmap days={stats.daily.slice(-56)} />
+            </section>
+          )}
+          </aside>
+
+          <div className={s.main}>
 
           {overdue.length > 0 && (
             <section className={s.section}>
@@ -139,10 +161,11 @@ export function TodayPage() {
               )}
             </section>
           )}
-        </>
+          <QuickAddBar today={today} />
+          </div>
+        </div>
       )}
 
-      <QuickAddBar today={today} />
       {editor.dialog}
     </div>
   )

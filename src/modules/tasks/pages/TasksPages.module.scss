@@ -5,7 +5,7 @@
 .page {
   padding: 32px;
   padding-bottom: 24px;
-  max-width: 760px;
+  max-width: var(--page-w);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -117,4 +117,68 @@
   transition: transform $t-base var(--ease-house);
 
   &.open { transform: rotate(180deg); }
+}
+
+// Today on wide screens: the list, and beside it a rail with the day's
+// progress and recent activity.
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (min-width: 1280px) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+    gap: 24px;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (min-width: 1280px) {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: 96px;
+  }
+}
+
+.railCard {
+  display: none;
+
+  @media (min-width: 1280px) {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: $radius-xl;
+  }
+}
+
+.railHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.streak {
+  padding: 2px 10px;
+  border-radius: $radius-pill;
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: 12px;
+  font-weight: 600;
 }

@@ -60,6 +60,7 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
   }
 
   const amount = `${formatSigned(tx.amount, tx.type)} ${CURRENCY}`
+  const time = tx.time ?? tx.createdAt?.slice(11, 16) ?? ''
 
   return (
     <div className={clsx(s.swipeWrap, swipe.dx !== 0 && s.swiping)}>
@@ -81,9 +82,15 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
             <span className={s.txTitle}>{tx.note ?? catName(tx.category.name)}</span>
             <span className={s.txSub}>
               {tx.note ? `${catName(tx.category.name)} · ` : ''}
-              {tx.time ?? tx.createdAt?.slice(11, 16) ?? tx.date.slice(0, 10)}
+              {time}
             </span>
           </span>
+          {/* Desktop table columns; phones fold these into the line above. */}
+          <span className={s.colCategory}>
+            <span className={s.dot} style={{ background: tx.category.color }} aria-hidden />
+            {catName(tx.category.name)}
+          </span>
+          <span className={s.colTime}>{time}</span>
           <span className={clsx(s.txAmt, tx.type === 'income' ? s.amtIn : s.amtOut)}>{formatSigned(tx.amount, tx.type)}</span>
         </button>
         <AlertDialog open={confirming} onOpenChange={setConfirming}>

@@ -122,3 +122,31 @@
   align-items: center;
   gap: 4px;
 }
+
+.hoverAction {
+  display: none;
+
+  @media (hover: hover) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: $radius-sm;
+    background: var(--bg-elev);
+    color: var(--fg-muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity $t-fast, color $t-fast, border-color $t-fast;
+
+    .row:hover &,
+    &:focus-visible { opacity: 1; }
+
+    &:hover { color: var(--fg-strong); border-color: var(--border-strong); }
+  }
+}

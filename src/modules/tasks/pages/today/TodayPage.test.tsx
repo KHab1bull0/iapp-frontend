@@ -11,6 +11,7 @@ const api = vi.hoisted(() => ({
   fetchToday: vi.fn(),
   completeTask: vi.fn(),
   undoCompletion: vi.fn(),
+  fetchOverallStats: vi.fn(),
 }))
 vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()), ...api }))
 
@@ -51,6 +52,7 @@ describe('TodayPage', () => {
     })
     api.completeTask.mockResolvedValue({ task: t('b'), completionId: 'c1' })
     api.undoCompletion.mockResolvedValue(t('b'))
+    api.fetchOverallStats.mockResolvedValue({ total: 0, daily: [], currentStreak: 0 })
   })
 
   test('shows overdue first, then today, with done tasks tucked away', async () => {
@@ -76,7 +78,7 @@ describe('TodayPage', () => {
     renderPage()
     const input = await screen.findByRole('textbox', { name: 'Quick add' })
     fireEvent.change(input, { target: { value: 'Gym tomorrow 7am' } })
-    expect(screen.getByRole('button', { name: /Tomorrow/ })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Tomorrow' })).toBeTruthy()
     expect(screen.getByText('07:00')).toBeTruthy()
   })
 

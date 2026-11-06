@@ -210,3 +210,50 @@
   @include btn-secondary;
   @include btn-size-md;
 }
+
+// ── Desktop: one aligned table ───────────────────────────────────────────
+.colCategory,
+.colTime { display: none; }
+
+@include bp-desktop {
+  .txMain {
+    grid-template-columns: 36px minmax(0, 1fr) 200px 64px 150px;
+    min-height: 52px;
+    gap: 16px;
+    padding: 8px 8px 8px 16px;
+  }
+
+  .txCat { width: 36px; height: 36px; font-size: 17px; }
+
+  // The note alone; category and time get their own columns.
+  .txSub { display: none; }
+  .txTitle { font-weight: 500; }
+
+  .colCategory {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: 14px;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .colTime {
+    display: block;
+    font-size: 13px;
+    color: var(--fg-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .txAmt { text-align: right; }
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-pill;
+}

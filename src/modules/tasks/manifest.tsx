@@ -2,6 +2,7 @@ import { BarChart3, CalendarCheck, CircleCheck, ListChecks, ListTodo } from 'luc
 import type { ModuleManifest } from '@/core/modules/types'
 import { TasksHomeCard } from './TasksHomeCard'
 import { TaskDialog } from './components/TaskDialog'
+import { useDueCount } from './useDueCount'
 import { AllTasksPage, TaskFormPage, TaskStatsPage, TodayPage } from './pages/lazy'
 
 export const tasks: ModuleManifest = {
@@ -10,7 +11,7 @@ export const tasks: ModuleManifest = {
   icon: ListChecks,
   basePath: '/tasks',
   pages: [
-    { label: { uz: 'Bugun', en: 'Today' }, path: '/tasks', icon: CalendarCheck, end: true },
+    { label: { uz: 'Bugun', en: 'Today' }, path: '/tasks', icon: CalendarCheck, end: true, useBadge: useDueCount },
     { label: { uz: 'Barcha vazifalar', en: 'All tasks' }, path: '/tasks/all', icon: ListTodo },
     { label: { uz: 'Statistika', en: 'Statistics' }, path: '/tasks/stats', icon: BarChart3 },
   ],

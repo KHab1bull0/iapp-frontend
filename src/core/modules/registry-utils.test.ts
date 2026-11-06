@@ -5,6 +5,7 @@ import {
   activeModule,
   bottomNavItems,
   quickAddActions,
+  activePage,
   isModulePage,
   legacyRedirect,
   validateRegistry,
@@ -69,6 +70,22 @@ describe('isModulePage', () => {
 
   test('false on a route the module keeps out of its menu', () => {
     expect(isModulePage(m, '/finance/settings')).toBe(false)
+  })
+})
+
+describe('activePage', () => {
+  const m: ModuleManifest = {
+    ...fake('tasks'),
+    pages: [
+      { label: 'Today', path: '/tasks', icon: Box, end: true },
+      { label: 'All', path: '/tasks/all', icon: Box },
+    ],
+  }
+
+  test('finds the page, longest path first', () => {
+    expect(activePage(m, '/tasks')?.label).toBe('Today')
+    expect(activePage(m, '/tasks/all')?.label).toBe('All')
+    expect(activePage(m, '/tasks/other')).toBeUndefined()
   })
 })
 

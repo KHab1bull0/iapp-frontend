@@ -16,7 +16,7 @@ export function TaskDialog({
 }) {
   const t = useTasksT()
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={task ? t.editTask : t.newTask}>
+    <Sheet desktop="panel" open={open} onOpenChange={onOpenChange} title={task ? t.editTask : t.newTask}>
       {task && open && <TaskStatsCard taskId={task.id} />}
       <TaskForm
         // Remount on open so a fresh sheet never shows the previous task.

@@ -6,13 +6,8 @@ import { useCoreT } from '@/core/i18n/useCoreT'
 import { activeModule, quickAddActions } from '@/core/modules/registry-utils'
 import type { ModuleManifest } from '@/core/modules/types'
 import { QuickAddContext } from './context'
+import { isDialogOpen, isTyping } from '@/core/lib/dom'
 import s from './QuickAdd.module.scss'
-
-/** True while typing, so a bare "N" goes into the field instead of opening a sheet. */
-function isTyping(target: EventTarget | null): boolean {
-  const el = target as HTMLElement | null
-  return !!el && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName))
-}
 
 /**
  * Owns "+": the chooser sheet (what to add) and whichever module add sheet is
@@ -47,7 +42,7 @@ export function QuickAddProvider({ modules, children }: { modules: ModuleManifes
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() !== 'n' || e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return
-      if (document.querySelector('[role="dialog"]')) return
+      if (isDialogOpen()) return
       e.preventDefault()
       open()
     }

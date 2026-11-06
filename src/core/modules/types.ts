@@ -11,6 +11,11 @@ export interface ModulePage {
   icon: LucideIcon
   /** Match the path exactly (the module's overview page). */
   end?: boolean
+  /**
+   * A hook giving the count shown beside the page in the sidebar (what's
+   * waiting there), or null for none. Called on every render of the sidebar.
+   */
+  useBadge?: () => number | null
 }
 
 /**

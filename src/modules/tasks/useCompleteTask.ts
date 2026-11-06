@@ -40,8 +40,9 @@ export function useCompleteTask(today: string) {
         next.delete(task.id)
         return next
       }),
-    onSuccess: async ({ completionId }, task) => {
-      await refresh()
+    onSuccess: ({ completionId }, task) => {
+      // Say so at once; the lists catch up in the background.
+      void refresh()
       toast(m.doneToast(task.title), 'success', {
         label: m.undo,
         onClick: () => undo.mutate(completionId),

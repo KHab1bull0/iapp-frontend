@@ -85,9 +85,24 @@ describe('AppLayout driven by the registry', () => {
     expect(within(aside).getByRole('link', { name: 'Sozlamalar' })).toBeTruthy()
   })
 
-  test('there is no top header bar', () => {
-    renderShell('/finance')
+  test('module pages get a desktop top bar: module, page title and the module\'s Add', () => {
+    renderShell('/finance/transactions')
+    const bar = screen.getByRole('banner')
+    expect(within(bar).getByText('Finance')).toBeTruthy()
+    expect(within(bar).getByRole('heading', { name: 'Transactions' })).toBeTruthy()
+    expect(within(bar).getByRole('button', { name: /Transaction/ })).toBeTruthy()
+    expect(within(bar).getByRole('button', { name: 'Keyboard shortcuts' })).toBeTruthy()
+  })
+
+  test('pages outside a module have no top bar (phones never show it: CSS)', () => {
+    renderShell('/settings')
     expect(screen.queryByRole('banner')).toBeNull()
+  })
+
+  test('"?" lists the keyboard shortcuts', () => {
+    renderShell('/finance')
+    fireEvent.keyDown(document.body, { key: '?' })
+    expect(screen.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeTruthy()
   })
 
   test('no module tabs on settings', () => {

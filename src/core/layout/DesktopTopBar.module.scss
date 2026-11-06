@@ -1,0 +1,79 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.bar {
+  display: none;
+
+  @include bp-desktop {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  // Same box as .page below it, so the title lines up with the content.
+  max-width: var(--page-w);
+  height: 72px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.where { min-width: 0; }
+
+.crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.title {
+  margin: 2px 0 0;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--fg-strong);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iconBtn {
+  @include btn-secondary;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: var(--fg-muted);
+}
+
+.add {
+  @include btn-primary;
+  height: 40px;
+  padding: 0 14px;
+  font-weight: 600;
+}
+
+.kbd {
+  margin-left: 4px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  font-family: var(--font-sans);
+  font-size: 11px;
+}

@@ -29,6 +29,7 @@ export function TransactionToolbar({ filters, onChange, categories, onOpenFilter
         <input
           type="search"
           className={s.searchInput}
+          data-page-search
           placeholder={t.filters.searchNotes}
           value={filters.search ?? ''}
           onChange={(e) => onChange({ ...filters, search: e.target.value || undefined })}

@@ -41,6 +41,14 @@ export function isModulePage(module: ModuleManifest, pathname: string): boolean 
   )
 }
 
+/** The module page `pathname` is on (its overview page only on an exact match). */
+export function activePage(module: ModuleManifest, pathname: string) {
+  // Longest path first, so /tasks/all wins over /tasks.
+  return [...module.pages]
+    .sort((a, b) => b.path.length - a.path.length)
+    .find(({ path, end }) => (end ? pathname === path : pathname === path || pathname.startsWith(`${path}/`)))
+}
+
 export function bottomNavItems(modules: ModuleManifest[]): BottomNavItem[] {
   const shown =
     modules.length <= MAX_BOTTOM_NAV_MODULES ? modules : modules.slice(0, MAX_BOTTOM_NAV_MODULES - 1)

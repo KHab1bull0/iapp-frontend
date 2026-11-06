@@ -15,7 +15,7 @@ export function WordDialog({
 }) {
   const t = useEnglishT()
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={word ? t.word.editTitle : t.word.newTitle}>
+    <Sheet desktop="panel" open={open} onOpenChange={onOpenChange} title={word ? t.word.editTitle : t.word.newTitle}>
       <WordForm
         key={`${word?.id ?? 'new'}-${String(open)}`}
         word={word ?? null}

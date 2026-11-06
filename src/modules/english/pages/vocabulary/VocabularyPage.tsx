@@ -51,6 +51,7 @@ export function VocabularyPage() {
           <input
             type="search"
             className={v.searchInput}
+            data-page-search
             placeholder={t.vocab.search}
             value={filters.search ?? ''}
             onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value || undefined }))}
@@ -92,6 +93,13 @@ export function VocabularyPage() {
             <span className={s.count}>{words.length}</span>
           </div>
           <div className={s.list}>
+            <div className={v.head} aria-hidden>
+              <span>{t.word.word}</span>
+              <span>{t.word.translation}</span>
+              <span>{t.word.level}</span>
+              <span>{t.word.category}</span>
+              <span>{t.word.memoriseOn}</span>
+            </div>
             {words.map((w) => {
               const due = w.reviewOn <= today
               const category = categoryName(w.categoryId)
@@ -103,7 +111,8 @@ export function VocabularyPage() {
                   </span>
                   <span className={v.meta}>
                     <span className={v.badge}>{levelName(w.levelId)}</span>
-                    {category && <span>{category}</span>}
+                    {/* Always there, even empty, so the desktop columns stay aligned. */}
+                    <span className={v.category}>{category ?? ''}</span>
                     <span className={due ? v.due : undefined}>{reviewLabel(w.reviewOn, today, t)}</span>
                   </span>
                 </button>
