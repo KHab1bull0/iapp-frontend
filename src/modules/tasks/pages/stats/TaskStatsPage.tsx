@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useToday } from '@/core/hooks/useToday'
+import { CHART, SERIES } from '@/core/lib/chartColors'
 import { formatDate, parseApiDate } from '@/core/lib/format'
 import { fetchOverallStats, REPEAT_KINDS, tasksKeys, type RepeatKind } from '@/modules/tasks/api/tasks'
 import { ProgressChart, type BarSeries } from '@/modules/tasks/components/stats/ProgressChart'
@@ -10,12 +11,11 @@ import st from '@/modules/tasks/components/stats/TaskStats.module.scss'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
 
-// Literal colours: Recharts writes them into SVG attributes.
 const KIND_COLORS: Record<RepeatKind, string> = {
-  once: '#94A3B8',
-  daily: '#3B82F6',
-  weekly: '#F59E0B',
-  monthly: '#EC4899',
+  once: CHART.neutral,
+  daily: SERIES[0],
+  weekly: SERIES[1],
+  monthly: SERIES[2],
 }
 
 /** Tasks → Statistics: every task together, split by how it repeats. */

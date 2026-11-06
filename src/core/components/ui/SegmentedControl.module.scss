@@ -1,0 +1,46 @@
+@use '@/core/styles/variables' as *;
+
+.group {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: $radius-md;
+  background: var(--slate-100);
+  max-width: 100%;
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+
+  &.stretch {
+    display: flex;
+    width: 100%;
+    .segment { flex: 1; }
+  }
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: var(--fg-muted);
+  font-family: inherit;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background $t-fast, color $t-fast, box-shadow $t-fast;
+
+  .md & { height: 36px; padding: 0 14px; font-size: 14px; }
+  .sm & { height: 30px; padding: 0 10px; font-size: 13px; }
+
+  &:hover:not(.active) { color: var(--fg); }
+
+  &.active {
+    background: var(--bg-elev);
+    color: var(--fg-strong);
+    box-shadow: 0 1px 3px rgba(15, 17, 23, 0.1);
+  }
+}

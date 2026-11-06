@@ -41,8 +41,8 @@
   justify-content: center;
   flex-shrink: 0;
 
-  .toastSuccess & { background: var(--success); }
-  .toastError   & { background: var(--danger); }
+  .toastSuccess & { background: var(--success-fill); }
+  .toastError   & { background: var(--danger-fill); }
 }
 
 .toastMsg {

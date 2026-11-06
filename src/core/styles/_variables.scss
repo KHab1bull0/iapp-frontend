@@ -3,8 +3,9 @@
 
 $radius-xs:   6px;
 $radius-sm:   8px;
-$radius-md:   10px;
+$radius-md:   12px;
 $radius-lg:   16px;
+$radius-xl:   24px;
 $radius-pill: 999px;
 
 $space-1:  4px;  $space-2:  8px;  $space-3:  12px;
@@ -15,6 +16,6 @@ $sidebar-w-expanded:  240px;
 $sidebar-w-collapsed: 64px;
 $bottom-nav-h:        64px;
 
-$t-fast: 120ms;
+$t-fast: 150ms;
 $t-base: 200ms;
 $ease-house: cubic-bezier(0.2, 0, 0, 1);

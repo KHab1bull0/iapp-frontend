@@ -1,0 +1,60 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 56px 24px;
+
+  &.compact { padding: 28px 16px; gap: 6px; }
+}
+
+.glyph {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 8px;
+  border-radius: $radius-xl;
+  background: var(--primary-soft);
+  color: var(--primary);
+
+  .compact & { width: 48px; height: 48px; border-radius: $radius-lg; margin-bottom: 4px; }
+}
+
+.title {
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.description {
+  max-width: 34ch;
+  font-size: var(--fs-small);
+  line-height: 20px;
+  color: var(--fg-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.primary {
+  @include btn-primary;
+  @include btn-size-md;
+  text-decoration: none;
+}
+
+.secondary {
+  @include btn-secondary;
+  @include btn-size-md;
+  text-decoration: none;
+}

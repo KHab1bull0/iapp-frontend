@@ -1,0 +1,82 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.grid {
+  display: grid;
+  gap: 10px;
+
+  &.cols2 { grid-template-columns: repeat(2, 1fr); }
+  &.cols3 { grid-template-columns: repeat(3, 1fr); }
+  &.cols4 { grid-template-columns: repeat(4, 1fr); }
+
+  @include bp-small {
+    &.cols3, &.cols4 { grid-template-columns: repeat(2, 1fr); }
+  }
+}
+
+.tile {
+  min-width: 0;
+  padding: 14px 16px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: $radius-lg;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.label {
+  min-width: 0;
+  font-size: var(--fs-small);
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: $radius-sm;
+  background: var(--icon-btn-hover);
+  color: var(--fg-muted);
+
+  &.primary { background: var(--primary-soft); color: var(--primary); }
+  &.success { background: var(--success-soft); color: var(--success); }
+  &.danger { background: var(--danger-soft); color: var(--danger); }
+  &.warning { background: var(--warning-soft); color: var(--warning); }
+}
+
+.value {
+  margin-top: 6px;
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 700;
+  color: var(--fg-strong);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.primaryText { color: var(--primary); }
+.successText { color: var(--success); }
+.dangerText { color: var(--danger); }
+.warningText { color: var(--warning); }
+
+.sub {
+  margin-top: 2px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

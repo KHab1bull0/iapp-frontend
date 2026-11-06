@@ -146,3 +146,25 @@ export function currentMonth(): string {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
+
+/** Weekday initials, Monday first: ["Du", "Se", …] / ["Mon", "Tue", …]. */
+export function weekdayHeaders(): string[] {
+  const order = [1, 2, 3, 4, 5, 6, 0]
+  if (lang === 'uz') return order.map((d) => UZ_WEEKDAYS_SHORT[d])
+  // 2024-01-01 was a Monday.
+  return order.map((_, i) => weekdayFmt().format(new Date(2024, 0, 1 + i)))
+}
+
+/** `ymd` shifted by whole days (no timezone drift). */
+export function addDaysYmd(ymdStr: string, n: number): string {
+  const d = parseApiDate(ymdStr)
+  d.setDate(d.getDate() + n)
+  return ymd(d)
+}
+
+/** "YYYY-MM" shifted by whole months. */
+export function addMonths(yyyyMM: string, n: number): string {
+  const [y, m] = yyyyMM.split('-').map(Number)
+  const d = new Date(y, m - 1 + n, 1)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}

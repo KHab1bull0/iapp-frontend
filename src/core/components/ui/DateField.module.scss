@@ -1,0 +1,62 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.field {
+  @include input-wrap-base;
+  gap: 10px;
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  color: var(--fg-muted);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover { border-color: var(--border-strong); }
+}
+
+.value {
+  flex: 1;
+  min-width: 0;
+  color: var(--fg-strong);
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  .empty & { color: var(--fg-muted); }
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: $radius-pill;
+  background: var(--bg-elev);
+  color: var(--fg);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &.chipOn {
+    background: var(--primary-soft);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+}

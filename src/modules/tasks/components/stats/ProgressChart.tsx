@@ -1,12 +1,11 @@
 import { Area, Bar, CartesianGrid, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { CHART } from '@/core/lib/chartColors'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from './TaskStats.module.scss'
 
-// Recharts writes these into SVG attributes, which can't resolve var(--…),
-// so they are literal colours (the light-theme --primary).
-export const TOTAL_COLOR = '#16A34A'
+export const TOTAL_COLOR = CHART.primary
 /** The per-day +1 bars under one task's line. */
-export const DONE_COLOR = '#86EFAC'
+export const DONE_COLOR = CHART.primarySoft
 
 export interface BarSeries {
   key: string

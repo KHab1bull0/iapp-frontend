@@ -58,7 +58,7 @@
     border-color: var(--success);
     background: var(--success-soft);
 
-    .typeIc { background: var(--success); color: white; }
+    .typeIc { background: var(--success-fill); color: white; }
     .typeTitle { color: var(--green-600); }
   }
 }
@@ -68,7 +68,7 @@
     border-color: var(--danger);
     background: var(--danger-soft);
 
-    .typeIc { background: var(--danger); color: white; }
+    .typeIc { background: var(--danger-fill); color: white; }
     .typeTitle { color: var(--red-600); }
   }
 }

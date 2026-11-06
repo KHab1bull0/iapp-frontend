@@ -7,12 +7,9 @@ import { toast } from '@/core/components/ui/toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/core/components/ui/dialog'
 import { useFinanceT } from '@/modules/finance/i18n'
 import s from './AddCategoryDialog.module.scss'
+import { CATEGORY_SWATCHES } from '@/core/lib/chartColors'
 
-const COLOR_PALETTE = [
-  '#ef4444', '#f97316', '#eab308', '#22c55e',
-  '#14b8a6', '#3b82f6', '#8b5cf6', '#ec4899',
-  '#6b7280', '#0ea5e9', '#f43f5e', '#84cc16',
-]
+const COLOR_PALETTE: readonly string[] = CATEGORY_SWATCHES
 
 const EMOJI_LIST = [
   '💰','💵','💳','🏦','📈','📉','🤑','👛',

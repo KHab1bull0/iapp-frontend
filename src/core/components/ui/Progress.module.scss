@@ -1,0 +1,52 @@
+@use '@/core/styles/variables' as *;
+
+.track {
+  height: 8px;
+  border-radius: $radius-pill;
+  background: var(--slate-100);
+  overflow: hidden;
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width $t-base var(--ease-house);
+
+  &.primary { background: var(--primary); }
+  &.success { background: var(--success-fill); }
+  &.danger { background: var(--danger-fill); }
+  &.warning { background: var(--amber-500); }
+}
+
+.ring {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ringTrack {
+  stroke: var(--slate-100);
+  :global(.theme-dark) & { stroke: var(--slate-800); }
+}
+
+.ringFill {
+  transition: stroke-dashoffset 400ms var(--ease-house);
+
+  &.primary { stroke: var(--primary); }
+  &.success { stroke: var(--success-fill); }
+  &.danger { stroke: var(--danger-fill); }
+  &.warning { stroke: var(--amber-500); }
+}
+
+.ringCenter {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fg-strong);
+  font-variant-numeric: tabular-nums;
+}

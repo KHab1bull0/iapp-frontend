@@ -1,0 +1,85 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.titles { min-width: 0; }
+
+.title {
+  margin: 0;
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--fg-strong);
+
+  @include bp-desktop {
+    font-size: 28px;
+    line-height: 36px;
+  }
+}
+
+.subtitle {
+  margin-top: 2px;
+  font-size: var(--fs-small);
+  color: var(--fg-muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.below {
+  min-width: 0;
+}
+
+// Compact title that slides in on phones once the large one scrolls away.
+.bar {
+  display: none;
+
+  @include bp-tablet {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 35;
+    height: calc(44px + var(--safe-top));
+    padding-top: var(--safe-top);
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: saturate(180%) blur(16px);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
+    transition: opacity $t-base var(--ease-house), transform $t-base var(--ease-house);
+  }
+
+  &.barShown {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.barTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}

@@ -1,0 +1,15 @@
+@use '@/core/styles/variables' as *;
+
+.skeleton {
+  display: block;
+  border-radius: $radius-sm;
+  background: linear-gradient(90deg, var(--border) 0%, var(--icon-btn-hover) 50%, var(--border) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}

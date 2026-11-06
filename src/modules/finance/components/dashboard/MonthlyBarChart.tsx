@@ -4,6 +4,7 @@ import {
 import type { MonthPoint } from '@/modules/finance/api/stats'
 import { formatAmount, formatAxis, formatMonthShort, CURRENCY } from '@/core/lib/format'
 import { useFinanceT } from '@/modules/finance/i18n'
+import { CHART } from '@/core/lib/chartColors'
 import s from './MonthlyBarChart.module.scss'
 
 // Short enough that the card reads wide rather than tall.
@@ -12,8 +13,8 @@ const CHART_HEIGHT = 150
 // Recharts renders these into SVG fill attributes, so they have to be literal
 // colours rather than var(--success)/var(--danger). Declared once and shared
 // with the legend so the two can't drift apart.
-const INCOME_COLOR = '#22C55E'
-const EXPENSE_COLOR = '#EF4444'
+const INCOME_COLOR = CHART.income
+const EXPENSE_COLOR = CHART.expense
 
 interface TooltipEntry { name: string; value: number; color: string }
 interface CustomTooltipProps { active?: boolean; payload?: TooltipEntry[]; label?: string }

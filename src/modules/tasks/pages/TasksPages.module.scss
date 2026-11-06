@@ -82,7 +82,7 @@
   border-radius: $radius-pill;
   border: none;
   background: var(--primary);
-  color: white;
+  color: var(--primary-fg);
   box-shadow: 0 8px 22px rgba(22, 163, 74, 0.45);
   display: flex;
   align-items: center;
