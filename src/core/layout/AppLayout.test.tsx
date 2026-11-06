@@ -81,7 +81,7 @@ describe('AppLayout driven by the registry', () => {
     localStorage.setItem('iapp-lang', 'uz')
     renderShell('/finance')
     const aside = document.querySelector('aside')!
-    expect(within(aside).getByRole('link', { name: 'Bugun' })).toBeTruthy()
+    expect(within(aside).getByRole('link', { name: 'Hisobot' })).toBeTruthy()
     expect(within(aside).getByRole('link', { name: 'Sozlamalar' })).toBeTruthy()
   })
 

@@ -85,7 +85,7 @@ export function Sidebar({ modules, collapsed, onToggle, onSearch }: SidebarProps
       </div>
 
       <nav className={s.nav} aria-label={t.nav.modules}>
-        <NavItem to="/" end icon={House} label={t.nav.today} collapsed={collapsed} />
+        <NavItem to="/" end icon={House} label={t.nav.overview} collapsed={collapsed} />
 
         {modules.map((m) => (
           <div key={m.id} className={s.navGroup}>

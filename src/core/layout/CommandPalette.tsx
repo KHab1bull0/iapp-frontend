@@ -67,9 +67,9 @@ export function CommandPalette({
         </Command.Group>
 
         <Command.Group heading={t.palette.go} className={s.group}>
-          <Command.Item value={t.nav.today} onSelect={() => run(() => navigate('/'))} className={s.item}>
+          <Command.Item value={t.nav.overview} onSelect={() => run(() => navigate('/'))} className={s.item}>
             <House size={18} aria-hidden />
-            {t.nav.today}
+            {t.nav.overview}
           </Command.Item>
           {modules.flatMap((m) =>
             m.pages.map((p) => {

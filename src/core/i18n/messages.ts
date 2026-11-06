@@ -15,7 +15,7 @@ export const coreMessages = defineMessages(
       add: "Qo'shish",
       more: "Ko'proq",
       main: 'Asosiy menyu',
-      today: 'Bugun',
+      overview: 'Hisobot',
       pagesOf: (name: string) => `${name} sahifalari`,
     },
     common: {
@@ -174,7 +174,7 @@ export const coreMessages = defineMessages(
       add: 'Add',
       more: 'More',
       main: 'Main menu',
-      today: 'Today',
+      overview: 'Report',
       pagesOf: (name: string) => `${name} pages`,
     },
     common: {

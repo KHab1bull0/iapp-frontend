@@ -18,7 +18,7 @@ export function BottomNav({ modules }: { modules: ModuleManifest[] }) {
 
   const toLink = (item: Exclude<BottomNavItem, { kind: 'add' }>): Link => {
     switch (item.kind) {
-      case 'home': return { to: '/', icon: House, label: t.nav.today, end: true }
+      case 'home': return { to: '/', icon: House, label: t.nav.overview, end: true }
       case 'menu': return { to: '/menu', icon: Menu, label: t.nav.more, end: true }
       // Not `end`: the module stays highlighted on all of its pages.
       case 'module': return { to: item.module.basePath, icon: item.module.icon, label: text(item.module.name), end: false }
