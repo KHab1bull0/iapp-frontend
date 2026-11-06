@@ -28,7 +28,7 @@ export function BottomNav({ modules }: { modules: ModuleManifest[] }) {
   const items = bottomNavItems(modules)
 
   return (
-    <nav className={s.bottomnav} style={{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }}>
+    <nav className={s.bottomnav} aria-label={t.nav.main} style={{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }}>
       {items.map((item) => {
         if (item.kind === 'add') {
           return (
@@ -41,7 +41,7 @@ export function BottomNav({ modules }: { modules: ModuleManifest[] }) {
         }
         const { to, icon: Icon, label, end } = toLink(item)
         return (
-          <NavLink key={to} to={to} end={end} className={({ isActive }) => clsx(s.bnavItem, isActive && s.active)}>
+          <NavLink key={to} to={to} end={end} viewTransition className={({ isActive }) => clsx(s.bnavItem, isActive && s.active)}>
             <Icon size={22} />
             <span>{label}</span>
           </NavLink>

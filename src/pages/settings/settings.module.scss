@@ -491,3 +491,9 @@
 
   &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
+
+.skeletonText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

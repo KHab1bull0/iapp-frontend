@@ -23,8 +23,14 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
   const catName = useCategoryName()
   const [draft, setDraft] = useState<TransactionFilterState>(filters)
 
-  // Sync draft to current filters each time the drawer opens
-  useEffect(() => { if (open) setDraft(filters) }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Start from the current filters each time the drawer opens. Done while
+  // rendering (React's pattern for state that follows a prop), not in an
+  // effect, which would paint the stale draft first.
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) setDraft(filters)
+  }
 
   // This is a hand-rolled drawer rather than a Radix primitive, so Escape has to
   // be wired up explicitly — it previously did nothing.

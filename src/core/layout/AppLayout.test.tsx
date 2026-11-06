@@ -64,7 +64,7 @@ describe('AppLayout driven by the registry', () => {
     const { container } = renderShell('/finance')
     const aside = container.querySelector('aside')!
     expect(within(aside).getByRole('button', { name: /Add/ })).toBeTruthy()
-    expect(within(aside).getByRole('button', { name: 'Commands' })).toBeTruthy()
+    expect(within(aside).getByRole('button', { name: /^Commands/ })).toBeTruthy()
   })
 
   test('module tabs show inside finance and not elsewhere', () => {

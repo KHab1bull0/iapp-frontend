@@ -16,7 +16,7 @@ export function ModuleTabs({ module }: { module: ModuleManifest }) {
     <div className={s.wrap}>
       <nav className={s.tabs} aria-label={t.nav.pagesOf(text(module.name))}>
         {module.pages.map(({ path, label, end }) => (
-          <NavLink key={path} to={path} end={end} className={({ isActive }) => clsx(s.tab, isActive && s.active)}>
+          <NavLink key={path} to={path} end={end} viewTransition className={({ isActive }) => clsx(s.tab, isActive && s.active)}>
             {text(label)}
           </NavLink>
         ))}

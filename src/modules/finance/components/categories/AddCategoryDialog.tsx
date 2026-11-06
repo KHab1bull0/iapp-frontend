@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
 import { useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
@@ -46,10 +46,13 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
     }
   }
 
-  useEffect(() => {
+  // Reset the fields each time it opens (or is handed another category).
+  // Done while rendering, React's pattern for state that follows props.
+  const [shown, setShown] = useState({ open, category })
+  if (shown.open !== open || shown.category !== category) {
+    setShown({ open, category })
     if (open) reset()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, category])
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()

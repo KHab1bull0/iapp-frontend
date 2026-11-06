@@ -311,6 +311,24 @@
   }
 }
 
+/* ---------- Page changes: a short cross-fade (View Transitions API) ----------
+   Navigation links opt in with React Router's viewTransition prop. Browsers
+   without the API just switch pages as before. The bars keep their own
+   names so they stay still while the page beneath them fades. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: var(--ease-house);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 /* ---------- Respect the OS "reduce motion" setting ---------- */
 @media (prefers-reduced-motion: reduce) {
   *,

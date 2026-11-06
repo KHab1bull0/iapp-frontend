@@ -2,6 +2,7 @@
 @use '@/core/styles/mixins' as *;
 
 .sidebar {
+  view-transition-name: sidebar;
   background: var(--bg-elev);
   border-right: 1px solid var(--border);
   padding: 20px 14px 16px;

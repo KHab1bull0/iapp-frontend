@@ -18,5 +18,14 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // A provider next to its hook, a component next to its imperative
+      // trigger (toast) or its class recipe (buttonVariants), are kept
+      // together on purpose; fast refresh still works for the components.
+      'react-refresh/only-export-components': [
+        'error',
+        { allowExportNames: ['useAuth', 'useTheme', 'toast', 'buttonVariants'] },
+      ],
+    },
   },
 ])

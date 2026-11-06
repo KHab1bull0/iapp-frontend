@@ -2,6 +2,7 @@
 @use '@/core/styles/mixins' as *;
 
 .bottomnav {
+  view-transition-name: bottom-nav;
   display: none;
 
   @include bp-tablet {

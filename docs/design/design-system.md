@@ -53,3 +53,17 @@ atributlari `var()` ni tushunmaydi, shuning uchun bu yerda literal hex ishlatila
 ## Matn
 - Interfeys tili — UZ (asosiy) va EN. Har bir matn modulning `i18n.ts` ida.
 - Sana: `useDayLabel()` ("Bugun", "Ertaga", "Ch, 3-iyn"); summa: `formatAmount`; oy: `formatMonthLong`.
+
+## Harakat va o'tishlar
+- Sahifalar orasida 180ms cross-fade (View Transitions API). Navigatsiya havolalari `viewTransition` propi
+  bilan yoqiladi. Pastki menyu va sidebar o'z `view-transition-name` lariga ega, shuning uchun qimirlamaydi.
+- Vazifa belgilanganda checkbox "pop" bo'ladi va telefonda qisqa tebranadi (`navigator.vibrate(10)`).
+- Swipe: `useSwipe` (`src/core/hooks/useSwipe.ts`), faqat touch. Har bir swipe amalining tugma bilan
+  qilinadigan muqobili ham bor.
+
+## Sifat tekshiruvlari
+- `src/core/styles/contrast.test.ts` — rang tokenlari juftliklari ≥ 4.5:1.
+- `src/core/a11y.test.tsx` — asosiy ekranlarni axe-core bilan tekshiradi: nomlar, rollar, landmarklar.
+  Yangi ekran qo'shilsa, shu yerga ham qo'shing.
+- `npm run lint` toza bo'lishi shart. `react-refresh` uchun ataylab ruxsat berilgan istisnolar
+  `eslint.config.js` da sanab o'tilgan.

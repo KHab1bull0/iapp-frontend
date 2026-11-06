@@ -9,6 +9,7 @@ import { CategoryList } from '@/modules/finance/components/categories/CategoryLi
 // Shell styles, so the page looks like the app's other settings pages.
 import { useFinanceT } from '@/modules/finance/i18n'
 import s from '@/pages/settings/settings.module.scss'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 
 type CatTab = 'expense' | 'income'
 
@@ -16,13 +17,13 @@ function CategoriesSkeleton() {
   return (
     <div className={s.catGrid}>
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className={s.catCard} style={{ opacity: 0.5 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--border)' }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ height: 14, width: 80, background: 'var(--border)', borderRadius: 4 }} />
-            <div style={{ height: 11, width: 50, background: 'var(--border)', borderRadius: 4 }} />
+        <div key={i} className={s.catCard} aria-hidden>
+          <Skeleton width={36} height={36} radius={10} />
+          <div className={s.skeletonText}>
+            <Skeleton width={80} height={14} />
+            <Skeleton width={50} height={12} />
           </div>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--border)' }} />
+          <Skeleton width={28} height={28} radius={8} />
         </div>
       ))}
     </div>

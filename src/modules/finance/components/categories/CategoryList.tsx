@@ -11,6 +11,7 @@ import {
 import { AddCategoryDialog } from './AddCategoryDialog'
 import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './CategoryList.module.scss'
+import { EmptyState } from '@/core/components/ui/EmptyState'
 
 function CategoryCard({ cat, onEdit }: { cat: Category; onEdit: (cat: Category) => void }) {
   const qc = useQueryClient()
@@ -95,9 +96,7 @@ export function CategoryList({ categories, type }: Props) {
 
   if (filtered.length === 0) {
     return (
-      <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>
-        {t.categories.empty(t[type].toLowerCase())}
-      </div>
+      <EmptyState compact title={t.categories.empty(t[type].toLowerCase())} />
     )
   }
 

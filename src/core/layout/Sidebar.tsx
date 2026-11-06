@@ -31,6 +31,7 @@ function NavItem({ to, icon: Icon, label, end, collapsed }: NavItemProps) {
     <NavLink
       to={to}
       end={end}
+      viewTransition
       className={({ isActive }) => clsx(s.navItem, isActive && s.active)}
       title={collapsed ? label : undefined}
     >
@@ -76,13 +77,14 @@ export function Sidebar({ modules, collapsed, onToggle, onSearch }: SidebarProps
             </>
           )}
         </button>
-        <button className={s.searchBtn} onClick={onSearch} aria-label={t.palette.open} title={t.palette.open}>
-          <Search size={16} />
+        <button className={s.searchBtn} onClick={onSearch} title={t.palette.open}>
+          <Search size={16} aria-hidden />
+          <span className="sr-only">{t.palette.open}</span>
           {!collapsed && <kbd className={s.kbd}>⌘K</kbd>}
         </button>
       </div>
 
-      <nav className={s.nav}>
+      <nav className={s.nav} aria-label={t.nav.modules}>
         <NavItem to="/" end icon={House} label={t.nav.today} collapsed={collapsed} />
 
         {modules.map((m) => (
