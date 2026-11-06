@@ -13,6 +13,8 @@ import {
   AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/core/components/ui/alert-dialog'
+import { useNavigate } from 'react-router-dom'
+import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { AddTransactionDialog } from './AddTransactionDialog'
 import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionList.module.scss'
@@ -133,8 +135,12 @@ export function TransactionList({
 }: Props) {
   const t = useFinanceT()
   const quickAdd = useQuickAdd()
+  const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const [editing, setEditing] = useState<Transaction | null>(null)
-  const openEdit = (tx: Transaction) => setEditing(tx)
+  // Phones: the edit page; desktop: the panel over the list.
+  const openEdit = (tx: Transaction) =>
+    isMobile ? navigate(`/finance/transactions/${tx.id}/edit`) : setEditing(tx)
 
   if (transactions.length === 0) {
     return (

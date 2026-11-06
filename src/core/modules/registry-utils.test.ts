@@ -26,6 +26,7 @@ const withQuickAdd = (id: string, n: number): ModuleManifest => ({
     id: `${id}-${i}`,
     label: `New ${i}`,
     icon: Box,
+    to: `/${id}/new-${i}`,
     Editor: () => null,
   })),
 })

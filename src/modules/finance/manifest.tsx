@@ -31,7 +31,7 @@ export const finance: ModuleManifest = {
   ],
   homeCard: FinanceHomeCard,
   quickAdd: [
-    { id: 'finance.transaction', label: { uz: 'Tranzaksiya', en: 'Transaction' }, icon: Receipt, Editor: AddTransactionDialog },
+    { id: 'finance.transaction', label: { uz: 'Tranzaksiya', en: 'Transaction' }, icon: Receipt, to: '/finance/transactions/new', Editor: AddTransactionDialog },
   ],
   settingsPath: '/finance/settings',
 }

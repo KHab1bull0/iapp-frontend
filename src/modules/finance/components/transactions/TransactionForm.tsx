@@ -175,7 +175,7 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
         </div>
       )}
 
-      <div className={s.formActions} data-sheet-actions>
+      <div className={s.formActions} data-form-actions>
         <button type="button" className={s.btnSecondary} onClick={onCancel}>
           {t.cancel}
         </button>

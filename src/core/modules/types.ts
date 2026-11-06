@@ -27,7 +27,9 @@ export interface QuickAddAction {
   id: string
   label: Text
   icon: LucideIcon
-  /** Opens the module's own add sheet. */
+  /** Phones: the module's add page (full-screen, outside the app shell). */
+  to: string
+  /** Desktop: the module's add dialog/panel, opened over the current page. */
   Editor: ComponentType<{ open: boolean; onOpenChange: (open: boolean) => void }>
 }
 

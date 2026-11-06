@@ -1,9 +1,9 @@
 import { BarChart3, CalendarCheck, CircleCheck, ListChecks, ListTodo } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
 import { TasksHomeCard } from './TasksHomeCard'
-import { TaskDialog } from './components/TaskDialog'
 import { useDueCount } from './useDueCount'
 import { AllTasksPage, TaskFormPage, TaskStatsPage, TodayPage } from './pages/lazy'
+import { TaskDialog } from './components/TaskDialog'
 
 export const tasks: ModuleManifest = {
   id: 'tasks',
@@ -26,5 +26,5 @@ export const tasks: ModuleManifest = {
     { path: ':id/edit', element: <TaskFormPage /> },
   ],
   homeCard: TasksHomeCard,
-  quickAdd: [{ id: 'tasks.task', label: { uz: 'Vazifa', en: 'Task' }, icon: CircleCheck, Editor: TaskDialog }],
+  quickAdd: [{ id: 'tasks.task', label: { uz: 'Vazifa', en: 'Task' }, icon: CircleCheck, to: '/tasks/new', Editor: TaskDialog }],
 }

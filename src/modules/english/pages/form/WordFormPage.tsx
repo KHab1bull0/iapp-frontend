@@ -1,26 +1,20 @@
-import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
-import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { englishKeys, fetchWord } from '@/modules/english/api/english'
 import { WordForm } from '@/modules/english/components/WordForm'
 import { useEnglishT } from '@/modules/english/i18n'
 import s from './WordFormPage.module.scss'
 
-/** Full-screen add/edit on touch layouts; desktop uses WordDialog. */
+/** Add/edit a word: a page of its own on every screen size, outside the app shell. */
 export function WordFormPage() {
   const t = useEnglishT()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const isMobile = useIsMobile()
   const isEdit = Boolean(id)
 
   const close = () => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/english/vocabulary'))
 
-  useEffect(() => {
-    if (!isMobile) navigate('/english/vocabulary', { replace: true })
-  }, [isMobile, navigate])
 
   const { data: word, isLoading, isError } = useQuery({
     queryKey: englishKeys.word(id ?? ''),

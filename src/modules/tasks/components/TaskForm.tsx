@@ -233,7 +233,7 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
         />
       </label>
 
-      <div className={s.actions} data-sheet-actions>
+      <div className={s.actions} data-form-actions>
         {task && (
           <AlertDialog>
             <AlertDialogTrigger asChild>

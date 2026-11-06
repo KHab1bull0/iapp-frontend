@@ -83,9 +83,9 @@
   gap: 8px;
 }
 
-// A form's Save/Cancel row (marked data-sheet-actions) sticks to the bottom
+// A form's Save/Cancel row (marked data-form-actions) sticks to the bottom
 // of the sheet while the fields scroll, in thumb reach.
-.body :global([data-sheet-actions]) {
+.body :global([data-form-actions]) {
   position: sticky;
   bottom: -16px;
   z-index: 1;

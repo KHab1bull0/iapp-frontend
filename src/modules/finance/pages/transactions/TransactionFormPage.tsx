@@ -1,35 +1,25 @@
-import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { fetchTransaction } from '@/modules/finance/api/transactions'
-import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { TransactionForm } from '@/modules/finance/components/transactions/TransactionForm'
 import { useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionFormPage.module.scss'
 
 /**
- * Full-screen add/edit, used on touch layouts.
+ * Add/edit a transaction: a page of its own on every screen size.
  *
  * Routed outside AppLayout, so it carries no app header and no bottom nav —
  * entering a transaction is a single task that owns the whole viewport, and
  * the nav would only offer ways to abandon it half-finished. Its own back
  * button is the way out.
- *
- * Desktop keeps the dialog, so if the viewport grows past the breakpoint while
- * this page is open we hand the user back to the list rather than leave them
- * on a route desktop never uses.
  */
 export function TransactionFormPage() {
   const t = useFinanceT()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const isMobile = useIsMobile()
   const isEdit = Boolean(id)
 
-  useEffect(() => {
-    if (!isMobile) navigate('/finance/transactions', { replace: true })
-  }, [isMobile, navigate])
 
   const { data: transaction, isLoading, isError } = useQuery({
     queryKey: ['transaction', id],
@@ -37,7 +27,8 @@ export function TransactionFormPage() {
     enabled: isEdit,
   })
 
-  const close = () => navigate('/finance/transactions')
+  // Back to wherever it was opened from (the list, Statistics, Today).
+  const close = () => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/finance/transactions'))
 
   return (
     <div className={s.page}>

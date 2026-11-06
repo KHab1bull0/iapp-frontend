@@ -14,6 +14,7 @@ function renderShell(path: string) {
         <AuthProvider>
           <MemoryRouter initialEntries={[path]}>
             <Routes>
+              <Route path="/finance/transactions/new" element={<h1>Add page</h1>} />
               <Route path="*" element={<AppLayout modules={[finance]} />} />
             </Routes>
           </MemoryRouter>
@@ -53,7 +54,20 @@ describe('AppLayout driven by the registry', () => {
     expect(within(bottom).getByRole('button', { name: 'Add' })).toBeTruthy()
   })
 
-  test('"+" opens the add sheet straight away when there is only one thing to add', () => {
+  test('on a phone "+" opens the add page instead', () => {
+    const desktop = window.matchMedia
+    window.matchMedia = ((q: string) => ({ ...desktop(q), matches: true })) as typeof window.matchMedia
+    try {
+      renderShell('/finance')
+      const navs = screen.getAllByRole('navigation')
+      fireEvent.click(within(navs[navs.length - 1]).getByRole('button', { name: 'Add' }))
+      expect(screen.getByRole('heading', { name: 'Add page' })).toBeTruthy()
+    } finally {
+      window.matchMedia = desktop
+    }
+  })
+
+  test('on desktop "+" opens the add panel straight away when there is only one thing to add', () => {
     renderShell('/finance')
     const navs = screen.getAllByRole('navigation')
     fireEvent.click(within(navs[navs.length - 1]).getByRole('button', { name: 'Add' }))

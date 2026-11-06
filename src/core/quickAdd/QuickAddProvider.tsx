@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Sheet } from '@/core/components/ui/Sheet'
+import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { useText } from '@/core/i18n'
 import { useCoreT } from '@/core/i18n/useCoreT'
 import { activeModule, quickAddActions } from '@/core/modules/registry-utils'
@@ -10,14 +11,17 @@ import { isDialogOpen, isTyping } from '@/core/lib/dom'
 import s from './QuickAdd.module.scss'
 
 /**
- * Owns "+": the chooser sheet (what to add) and whichever module add sheet is
- * open. Everything that adds goes through here, so it looks and behaves the
- * same from the bottom bar, the sidebar, ⌘K, a home card or an empty state.
+ * Owns "+": the chooser (what to add), then the module's add page on phones
+ * or its add panel on desktop. Everything that adds goes through here, so it
+ * behaves the same from the bottom bar, the sidebar, the top bar, ⌘K, N, a
+ * home card or an empty state.
  */
 export function QuickAddProvider({ modules, children }: { modules: ModuleManifest[]; children: ReactNode }) {
   const t = useCoreT()
   const text = useText()
   const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const [chooserOpen, setChooserOpen] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
 
@@ -26,16 +30,23 @@ export function QuickAddProvider({ modules, children }: { modules: ModuleManifes
 
   const open = useCallback(
     (actionId?: string) => {
+      // Phones go to the add page; desktop opens the editor over this page.
+      const go = (id: string) => {
+        const action = all.find((a) => a.id === id)
+        if (!action) return
+        if (isMobile) navigate(action.to)
+        else setActiveId(id)
+      }
       if (actionId) {
         setChooserOpen(false)
-        setActiveId(actionId)
+        go(actionId)
       } else if (all.length === 1) {
-        setActiveId(all[0].id)
+        go(all[0].id)
       } else {
         setChooserOpen(true)
       }
     },
-    [all],
+    [all, navigate, isMobile],
   )
 
   // "N" adds, as in most task and mail apps.
@@ -74,9 +85,10 @@ export function QuickAddProvider({ modules, children }: { modules: ModuleManifes
         </div>
       </Sheet>
 
-      {all.map(({ id, Editor }) => (
-        <Editor key={id} open={activeId === id} onOpenChange={(o) => setActiveId(o ? id : null)} />
-      ))}
+      {!isMobile &&
+        all.map(({ id, Editor }) => (
+          <Editor key={id} open={activeId === id} onOpenChange={(o) => setActiveId(o ? id : null)} />
+        ))}
     </QuickAddContext.Provider>
   )
 }

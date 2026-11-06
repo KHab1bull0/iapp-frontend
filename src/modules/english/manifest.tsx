@@ -1,8 +1,8 @@
 import { BarChart3, BookOpen, BookPlus, Languages, Layers } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
 import { EnglishHomeCard } from './EnglishHomeCard'
-import { WordDialog } from './components/WordDialog'
 import { useReviewCount } from './useReviewCount'
+import { WordDialog } from './components/WordDialog'
 import {
   CategoriesPage,
   EnglishSettingsIndex,
@@ -47,6 +47,6 @@ export const english: ModuleManifest = {
     { path: ':id/edit', element: <WordFormPage /> },
   ],
   homeCard: EnglishHomeCard,
-  quickAdd: [{ id: 'english.word', label: { uz: "So'z", en: 'Word' }, icon: BookPlus, Editor: WordDialog }],
+  quickAdd: [{ id: 'english.word', label: { uz: "So'z", en: 'Word' }, icon: BookPlus, to: '/english/new', Editor: WordDialog }],
   settingsPath: '/english/settings',
 }
