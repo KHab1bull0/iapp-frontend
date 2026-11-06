@@ -4,7 +4,7 @@
 // Shared by Today and All tasks.
 .page {
   padding: 32px;
-  padding-bottom: 104px; // room for the floating add button
+  padding-bottom: 24px;
   max-width: 760px;
   margin: 0 auto;
   display: flex;
@@ -39,7 +39,7 @@
 }
 
 .count {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--fg-muted);
 }
 
@@ -71,32 +71,50 @@
   @include btn-size-sm;
 }
 
-// Floating add button: above the bottom nav on phones, bottom-right on desktop.
-.fab {
-  position: fixed;
-  right: 32px;
-  bottom: 32px;
-  z-index: 40;
-  width: 56px;
-  height: 56px;
-  border-radius: $radius-pill;
-  border: none;
-  background: var(--primary);
-  color: var(--primary-fg);
-  box-shadow: 0 8px 22px rgba(22, 163, 74, 0.45);
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Today's progress at the top: ring, "3 of 5 done", the date.
+.summary {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 16px;
+  padding: 14px 16px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: $radius-xl;
+}
+
+.summaryTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--fg-strong);
+}
+
+.summarySub {
+  margin-top: 2px;
+  font-size: var(--fs-small);
+  color: var(--fg-muted);
+}
+
+.foldHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
   cursor: pointer;
-  transition: transform $t-fast, background $t-fast;
+}
 
-  &:hover { background: var(--primary-hover); }
-  &:active { transform: scale(0.96); }
+.foldIcon {
+  color: var(--fg-muted);
+  transition: transform $t-base var(--ease-house);
 
-  @include bp-tablet {
-    width: 52px;
-    height: 52px;
-    right: calc(20px + var(--safe-right));
-    bottom: calc(var(--bottom-nav-h) + 16px);
-  }
+  &.open { transform: rotate(180deg); }
 }

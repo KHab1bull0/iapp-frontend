@@ -146,12 +146,15 @@ export async function fetchTasksSummary(today: string): Promise<TasksSummary> {
   return data
 }
 
-export async function fetchTaskStats(id: string, today: string): Promise<TaskStats> {
-  const { data } = await api.get<TaskStats>(`/tasks/items/${id}/stats`, { params: { today } })
+/** Days of daily history the stats screens ask for: 17 weeks of heatmap, the last 30 also charted. */
+export const STATS_DAYS = 119
+
+export async function fetchTaskStats(id: string, today: string, days = STATS_DAYS): Promise<TaskStats> {
+  const { data } = await api.get<TaskStats>(`/tasks/items/${id}/stats`, { params: { today, days } })
   return data
 }
 
-export async function fetchOverallStats(today: string): Promise<OverallTaskStats> {
-  const { data } = await api.get<OverallTaskStats>('/tasks/stats', { params: { today } })
+export async function fetchOverallStats(today: string, days = STATS_DAYS): Promise<OverallTaskStats> {
+  const { data } = await api.get<OverallTaskStats>('/tasks/stats', { params: { today, days } })
   return data
 }

@@ -1,20 +1,51 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
-.row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
+.wrap {
+  position: relative;
+  overflow: hidden;
 
   & + & { border-top: 1px solid var(--border); }
 }
 
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+  padding: 10px 16px;
+  background: var(--bg-elev);
+  touch-action: pan-y;
+  transition: transform $t-base var(--ease-house);
+
+  .swiping & { transition: none; }
+}
+
+// What a swipe uncovers: tick on the left, tomorrow on the right.
+.under {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  transition: filter $t-fast;
+
+  &.armed { filter: brightness(1.1); }
+}
+
+.underDone { justify-content: flex-start; background: var(--success-fill); }
+.underLater { justify-content: flex-end; background: #2563EB; }
+
 .check {
-  @include touch-target(10px);
+  @include touch-target(8px);
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   border: 2px solid var(--border-strong);
   border-radius: $radius-pill;
   background: transparent;
@@ -22,14 +53,25 @@
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: background $t-fast, border-color $t-fast;
+  transition: background $t-fast, border-color $t-fast, transform 120ms var(--ease-spring);
 
   &:hover { border-color: var(--primary); }
-  &:disabled { opacity: 0.5; cursor: progress; }
+  &:active { transform: scale(0.88); }
+  &:disabled { cursor: progress; }
 
+  .tick {
+    opacity: 0;
+    transform: scale(0.4);
+    transition: opacity $t-fast, transform 220ms var(--ease-spring);
+  }
+
+  // Ticking while the completion saves, and once done: fill and pop the check.
+  &:disabled,
   &.checked {
     border-color: var(--primary);
     background: var(--primary);
+
+    .tick { opacity: 1; transform: none; }
   }
 }
 
@@ -38,7 +80,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   padding: 0;
   border: none;
   background: transparent;
@@ -48,12 +90,14 @@
 }
 
 .title {
-  font-size: 14px;
+  font-size: 16px;
+  line-height: 22px;
   font-weight: 500;
   color: var(--fg-strong);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color $t-base;
 
   .done & {
     color: var(--fg-muted);
@@ -64,15 +108,17 @@
 .meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 10px;
-  font-size: 12px;
+  gap: 4px 12px;
+  font-size: 13px;
   color: var(--fg-muted);
 }
+
+.time { font-variant-numeric: tabular-nums; font-weight: 500; color: var(--fg); }
 
 .overdue { color: var(--danger); font-weight: 500; }
 
 .repeat {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
 }

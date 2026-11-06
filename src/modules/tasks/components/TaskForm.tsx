@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { todayYmd } from '@/core/lib/format'
+import { DateField } from '@/core/components/ui/DateField'
 import { toast } from '@/core/components/ui/toast'
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -128,16 +129,11 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
       </label>
 
       <div className={s.row}>
-        <label className={s.field}>
+        <div className={s.field}>
           <span className={s.label}>{mode === 'none' ? t.form.date : t.form.nextDate}</span>
-          <input
-            type="date"
-            className={s.input}
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            aria-label={t.form.date}
-          />
-        </label>
+          {/* Our own picker: input[type=date] prints the browser's format, not the app's language. */}
+          <DateField label={t.form.date} value={dueDate || null} onChange={(d) => setDueDate(d ?? '')} clearable={mode === 'none'} />
+        </div>
         <label className={s.field}>
           <span className={s.label}>{t.form.time}</span>
           <input
@@ -237,7 +233,7 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
         />
       </label>
 
-      <div className={s.actions}>
+      <div className={s.actions} data-sheet-actions>
         {task && (
           <AlertDialog>
             <AlertDialogTrigger asChild>

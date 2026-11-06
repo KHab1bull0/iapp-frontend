@@ -60,9 +60,24 @@ describe('TodayPage', () => {
     expect(screen.getByText('A')).toBeTruthy()
     expect(screen.getByText('Every day')).toBeTruthy()
     expect(screen.getByText('09:30')).toBeTruthy()
-    // Done is its own group, always shown, not folded away.
-    expect(screen.getByRole('heading', { name: 'Done' })).toBeTruthy()
+    // Done is its own group, open by default; it can be folded away.
+    expect(screen.getByRole('heading', { name: 'Done (1)' })).toBeTruthy()
     expect(screen.getByText('C')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Done (1)' }))
+    expect(screen.queryByText('C')).toBeNull()
+  })
+
+  test('shows how far through the day you are', async () => {
+    renderPage()
+    expect(await screen.findByRole('progressbar', { name: '1 of 3 done' })).toBeTruthy()
+  })
+
+  test('the bar at the bottom adds a task, reading the day from the text', async () => {
+    renderPage()
+    const input = await screen.findByRole('textbox', { name: 'Quick add' })
+    fireEvent.change(input, { target: { value: 'Gym tomorrow 7am' } })
+    expect(screen.getByRole('button', { name: /Tomorrow/ })).toBeTruthy()
+    expect(screen.getByText('07:00')).toBeTruthy()
   })
 
   test('ticking a task completes it for today, and Undo puts it back', async () => {
@@ -106,7 +121,7 @@ describe('TodayPage', () => {
     renderPage()
     expect(await screen.findByRole('heading', { name: 'Kechikkan' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Bugun' })).toBeTruthy()
-    expect(screen.getByRole('heading', { name: 'Bajarilgan' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Bajarilganlar (1)' })).toBeTruthy()
     expect(screen.getByText('Har kuni')).toBeTruthy()
   })
 })

@@ -49,23 +49,36 @@ describe('TaskForm', () => {
   })
 
   test('a weekly schedule starts with the date\'s weekday and needs at least one', async () => {
+    const NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const wd = tomorrow.getDay()
+    const other = (wd + 3) % 7
+
     renderForm()
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Gym' } })
-    fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2026-11-02' } }) // a Monday
+    // The date is our own picker: open it and take Tomorrow.
+    fireEvent.click(screen.getByRole('button', { name: 'Date: Today' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Tomorrow' }))
+    expect(screen.getByRole('button', { name: 'Date: Tomorrow' })).toBeTruthy()
     fireEvent.click(screen.getByRole('radio', { name: 'Schedule' }))
     fireEvent.change(screen.getByLabelText('Unit'), { target: { value: 'week' } })
     const days = screen.getByRole('group', { name: 'Weekdays' })
-    const mon = within(days).getByRole('checkbox', { name: 'Mon' })
-    expect(mon.getAttribute('aria-checked')).toBe('true')
-    fireEvent.click(mon)
+    const start = within(days).getByRole('checkbox', { name: NAMES[wd] })
+    expect(start.getAttribute('aria-checked')).toBe('true')
+    fireEvent.click(start)
     expect(save().disabled).toBe(true)
-    fireEvent.click(within(days).getByRole('checkbox', { name: 'Mon' }))
-    fireEvent.click(within(days).getByRole('checkbox', { name: 'Thu' }))
+    fireEvent.click(within(days).getByRole('checkbox', { name: NAMES[wd] }))
+    fireEvent.click(within(days).getByRole('checkbox', { name: NAMES[other] }))
     expect(save().disabled).toBe(false)
     fireEvent.click(save())
     await waitFor(() =>
       expect(api.createTask).toHaveBeenCalledWith(
-        expect.objectContaining({ repeatMode: 'schedule', repeatUnit: 'week', repeatWeekdays: [1, 4] }),
+        expect.objectContaining({
+          repeatMode: 'schedule',
+          repeatUnit: 'week',
+          repeatWeekdays: [wd, other].sort((a, b) => a - b),
+        }),
       ),
     )
   })

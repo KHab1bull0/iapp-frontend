@@ -225,7 +225,7 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
 
       {error && <div className={s.fieldErr} role="alert">{error}</div>}
 
-      <div className={s.formActions}>
+      <div className={s.formActions} data-sheet-actions>
         <button type="button" className={s.btnSecondary} onClick={onCancel}>
           {t.cancel}
         </button>

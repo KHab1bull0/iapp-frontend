@@ -207,3 +207,9 @@
   color: var(--fg-strong);
   font-variant-numeric: tabular-nums;
 }
+
+.note {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--fg-muted);
+}

@@ -5,7 +5,12 @@ import { CHART, SERIES } from '@/core/lib/chartColors'
 import { formatDate, parseApiDate } from '@/core/lib/format'
 import { fetchOverallStats, REPEAT_KINDS, tasksKeys, type RepeatKind } from '@/modules/tasks/api/tasks'
 import { ProgressChart, type BarSeries } from '@/modules/tasks/components/stats/ProgressChart'
-import { PeriodToggle, Tile } from '@/modules/tasks/components/stats/parts'
+import { PeriodToggle } from '@/modules/tasks/components/stats/parts'
+import { Heatmap } from '@/modules/tasks/components/stats/Heatmap'
+import { StatGrid, StatTile } from '@/core/components/ui/StatTile'
+import { EmptyState } from '@/core/components/ui/EmptyState'
+import { useQuickAdd } from '@/core/quickAdd/context'
+import { BarChart3, Plus, RefreshCw } from 'lucide-react'
 import { toChartPoints, type Period } from '@/modules/tasks/components/stats/points'
 import st from '@/modules/tasks/components/stats/TaskStats.module.scss'
 import { useTasksT } from '@/modules/tasks/i18n'
@@ -22,6 +27,7 @@ const KIND_COLORS: Record<RepeatKind, string> = {
 export function TaskStatsPage() {
   const t = useTasksT()
   const today = useToday()
+  const quickAdd = useQuickAdd()
   const [period, setPeriod] = useState<Period>('daily')
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.overallStats(today),
@@ -31,12 +37,7 @@ export function TaskStatsPage() {
   if (isError) {
     return (
       <div className={s.page}>
-        <div className={s.empty}>
-          <div className={s.emptyTitle}>{t.stats.loadFailed}</div>
-          <button className={s.btnSecondary} onClick={() => refetch()}>
-            {t.retry}
-          </button>
-        </div>
+        <EmptyState title={t.stats.loadFailed} action={{ label: t.retry, icon: RefreshCw, onClick: () => void refetch() }} />
       </div>
     )
   }
@@ -46,10 +47,12 @@ export function TaskStatsPage() {
   if (data.total === 0) {
     return (
       <div className={s.page}>
-        <div className={s.empty}>
-          <div className={s.emptyTitle}>{t.stats.empty}</div>
-          <div className={s.emptySub}>{t.stats.emptySub}</div>
-        </div>
+        <EmptyState
+          icon={BarChart3}
+          title={t.stats.empty}
+          description={t.stats.emptySub}
+          action={{ label: t.home.addTask, icon: Plus, onClick: () => quickAdd.open('tasks.task') }}
+        />
       </div>
     )
   }
@@ -59,16 +62,16 @@ export function TaskStatsPage() {
 
   return (
     <div className={s.page}>
-      <div className={`${st.tiles} ${st.four}`}>
-        <Tile
+      <StatGrid columns={4}>
+        <StatTile
           label={t.stats.total}
           value={String(data.total)}
           sub={t.stats.totalSub(data.firstDoneOn && formatDate(parseApiDate(data.firstDoneOn)))}
         />
-        <Tile label={t.stats.thisMonth} value={String(data.thisMonth)} sub={t.stats.thisMonthSub} />
-        <Tile label={t.stats.streak} value={t.stats.streakValue(data.currentStreak)} sub={t.stats.bestStreak(data.bestStreak)} />
-        <Tile label={t.today} value={String(data.daily.at(-1)?.count ?? 0)} sub={t.stats.doneCount} />
-      </div>
+        <StatTile label={t.stats.thisMonth} value={String(data.thisMonth)} sub={t.stats.thisMonthSub} />
+        <StatTile label={t.stats.streak} value={t.stats.streakValue(data.currentStreak)} sub={t.stats.bestStreak(data.bestStreak)} tone={data.currentStreak > 0 ? 'warning' : 'default'} />
+        <StatTile label={t.today} value={String(data.daily.at(-1)?.count ?? 0)} sub={t.stats.doneCount} />
+      </StatGrid>
 
       <section className={st.card} aria-label={t.stats.progress}>
         <div className={st.cardHead}>
@@ -84,6 +87,12 @@ export function TaskStatsPage() {
             </span>
           ))}
         </div>
+      </section>
+
+      <section className={st.card} aria-label={t.stats.activity}>
+        <h2 className={st.cardTitle}>{t.stats.activity}</h2>
+        <Heatmap days={data.daily} />
+        <p className={st.note}>{t.stats.streakRule}</p>
       </section>
 
       <section className={st.card} aria-label={t.stats.byKind}>

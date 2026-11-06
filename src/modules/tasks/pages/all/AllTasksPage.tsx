@@ -1,11 +1,14 @@
 import clsx from 'clsx'
 import { useQuery } from '@tanstack/react-query'
-import { RefreshCw } from 'lucide-react'
+import { ListTodo, RefreshCw } from 'lucide-react'
+import { EmptyState } from '@/core/components/ui/EmptyState'
 import { useToday } from '@/core/hooks/useToday'
 import { fetchTasks, tasksKeys } from '@/modules/tasks/api/tasks'
 import { groupByDue } from '@/modules/tasks/lib/repeat'
+import { QuickAddBar } from '@/modules/tasks/components/QuickAddBar'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
+import { useMoveToTomorrow } from '@/modules/tasks/useCompleteTask'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
 
@@ -17,6 +20,7 @@ export function AllTasksPage() {
   const today = useToday()
   const t = useTasksT()
   const editor = useTaskEditor()
+  const toTomorrow = useMoveToTomorrow(today)
 
   const { data: tasks = [], isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.list('active'),
@@ -28,17 +32,9 @@ export function AllTasksPage() {
   return (
     <div className={s.page}>
       {isError ? (
-        <div className={s.empty}>
-          <div className={s.emptyTitle}>{t.loadFailed}</div>
-          <button className={s.btnSecondary} onClick={() => refetch()}>
-            <RefreshCw size={14} /> {t.retry}
-          </button>
-        </div>
+        <EmptyState title={t.loadFailed} action={{ label: t.retry, icon: RefreshCw, onClick: () => void refetch() }} />
       ) : isLoading ? null : groups.length === 0 ? (
-        <div className={s.empty}>
-          <div className={s.emptyTitle}>{t.noTasks}</div>
-          <div className={s.emptySub}>{t.noTasksSub}</div>
-        </div>
+        <EmptyState icon={ListTodo} title={t.noTasks} description={t.noTasksSub} />
       ) : (
         groups.map((g) => (
           <section key={g.key} className={s.section}>
@@ -53,6 +49,7 @@ export function AllTasksPage() {
                   task={task}
                   today={today}
                   showDue={g.key !== 'today' && g.key !== 'none'}
+                  onTomorrow={toTomorrow}
                   onOpen={editor.openEdit}
                 />
               ))}
@@ -61,6 +58,7 @@ export function AllTasksPage() {
         ))
       )}
 
+      <QuickAddBar today={today} defaultDay="none" />
       {editor.dialog}
     </div>
   )

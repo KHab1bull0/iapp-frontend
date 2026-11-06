@@ -1,21 +1,36 @@
+import { useState } from 'react'
 import clsx from 'clsx'
 import { useQuery } from '@tanstack/react-query'
-import { RefreshCw } from 'lucide-react'
+import { ChevronDown, CircleCheckBig, Plus, RefreshCw } from 'lucide-react'
+import { EmptyState } from '@/core/components/ui/EmptyState'
+import { ProgressRing } from '@/core/components/ui/Progress'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useToday } from '@/core/hooks/useToday'
+import { formatFullDate, parseApiDate } from '@/core/lib/format'
+import { useQuickAdd } from '@/core/quickAdd/context'
 import { fetchToday, tasksKeys } from '@/modules/tasks/api/tasks'
+import { QuickAddBar } from '@/modules/tasks/components/QuickAddBar'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { byTime } from '@/modules/tasks/lib/repeat'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
-import { useCompleteTask } from '@/modules/tasks/useCompleteTask'
+import { useCompleteTask, useMoveToTomorrow } from '@/modules/tasks/useCompleteTask'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
 
-/** Tasks → Today: what is due now, overdue first, like a review queue; then what's done. */
+/**
+ * Tasks → Today: how far through the day you are, what is due (overdue
+ * first), and what's done, folded away. Swipe right to tick, left to put off
+ * until tomorrow; the bar at the bottom adds.
+ */
 export function TodayPage() {
   const today = useToday()
   const m = useTasksT()
+  const quickAdd = useQuickAdd()
   const editor = useTaskEditor()
   const { complete, undo, pending } = useCompleteTask(today)
+  const toTomorrow = useMoveToTomorrow(today)
+  // Open by default: done tasks stay in view (and can be unticked) unless folded away.
+  const [showDone, setShowDone] = useState(true)
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.today(today),
@@ -26,36 +41,55 @@ export function TodayPage() {
   // Anything with a time goes first, by the clock.
   const dueToday = byTime(data?.today ?? [])
   const done = data?.doneToday ?? []
+  const all = overdue.length + dueToday.length + done.length
+
+  const row = (t: (typeof dueToday)[number]) => (
+    <TaskRow
+      key={t.id}
+      task={t}
+      today={today}
+      busy={pending.has(t.id)}
+      onToggle={complete}
+      onTomorrow={toTomorrow}
+      onOpen={editor.openEdit}
+    />
+  )
 
   return (
     <div className={s.page}>
       {isError ? (
-        <div className={s.empty}>
-          <div className={s.emptyTitle}>{m.loadFailed}</div>
-          <button className={s.btnSecondary} onClick={() => refetch()}>
-            <RefreshCw size={14} /> {m.retry}
-          </button>
+        <EmptyState
+          title={m.loadFailed}
+          action={{ label: m.retry, icon: RefreshCw, onClick: () => void refetch() }}
+        />
+      ) : isLoading ? (
+        <div className={s.skeletons}>
+          <Skeleton height={76} radius={20} />
+          <Skeleton height={180} radius={16} />
         </div>
-      ) : isLoading ? null : (
+      ) : (
         <>
+          {all > 0 && (
+            <section className={s.summary}>
+              <ProgressRing value={done.length} max={all} label={m.progressTitle(done.length, all)} size={56}>
+                {Math.round((done.length / all) * 100)}%
+              </ProgressRing>
+              <div>
+                <div className={s.summaryTitle}>
+                  {done.length === all ? m.progressAllDone : m.progressTitle(done.length, all)}
+                </div>
+                <div className={s.summarySub}>{formatFullDate(parseApiDate(today))}</div>
+              </div>
+            </section>
+          )}
+
           {overdue.length > 0 && (
             <section className={s.section}>
               <div className={s.sectionHead}>
                 <h2 className={clsx(s.sectionTitle, s.danger)}>{m.overdue}</h2>
                 <span className={s.count}>{overdue.length}</span>
               </div>
-              <div className={s.list}>
-                {overdue.map((t) => (
-                  <TaskRow
-                    key={t.id}
-                    task={t}
-                    today={today}
-                    busy={pending.has(t.id)}
-                    onToggle={complete}
-                    onOpen={editor.openEdit}
-                  />
-                ))}
-              </div>
+              <div className={s.list}>{overdue.map(row)}</div>
             </section>
           )}
 
@@ -65,51 +99,50 @@ export function TodayPage() {
                 <h2 className={s.sectionTitle}>{m.today}</h2>
                 <span className={s.count}>{dueToday.length}</span>
               </div>
-              <div className={s.list}>
-                {dueToday.map((t) => (
-                  <TaskRow
-                    key={t.id}
-                    task={t}
-                    today={today}
-                    busy={pending.has(t.id)}
-                    onToggle={complete}
-                    onOpen={editor.openEdit}
-                  />
-                ))}
-              </div>
+              <div className={s.list}>{dueToday.map(row)}</div>
             </section>
           )}
 
           {overdue.length === 0 && dueToday.length === 0 && (
-            <div className={s.empty}>
-              <div className={s.emptyTitle}>{m.nothingToday}</div>
-              <div className={s.emptySub}>{m.nothingTodaySub}</div>
-            </div>
+            <EmptyState
+              icon={CircleCheckBig}
+              title={done.length > 0 ? m.home.allDone : m.nothingToday}
+              description={done.length > 0 ? m.home.allDoneSub : m.nothingTodaySub}
+              action={{ label: m.home.addTask, icon: Plus, onClick: () => quickAdd.open('tasks.task') }}
+            />
           )}
 
           {done.length > 0 && (
             <section className={s.section}>
-              <div className={s.sectionHead}>
-                <h2 className={s.sectionTitle}>{m.done}</h2>
-                <span className={s.count}>{done.length}</span>
-              </div>
-              <div className={s.list}>
-                {done.map(({ completionId, task }) => (
-                  <TaskRow
-                    key={completionId}
-                    task={task}
-                    today={today}
-                    done
-                    onToggle={() => undo(completionId)}
-                    onOpen={editor.openEdit}
-                  />
-                ))}
-              </div>
+              <button
+                type="button"
+                className={s.foldHead}
+                aria-expanded={showDone}
+                onClick={() => setShowDone((v) => !v)}
+              >
+                <h2 className={s.sectionTitle}>{m.showDone(done.length)}</h2>
+                <ChevronDown size={18} className={clsx(s.foldIcon, showDone && s.open)} aria-hidden />
+              </button>
+              {showDone && (
+                <div className={s.list}>
+                  {done.map(({ completionId, task }) => (
+                    <TaskRow
+                      key={completionId}
+                      task={task}
+                      today={today}
+                      done
+                      onToggle={() => undo(completionId)}
+                      onOpen={editor.openEdit}
+                    />
+                  ))}
+                </div>
+              )}
             </section>
           )}
         </>
       )}
 
+      <QuickAddBar today={today} />
       {editor.dialog}
     </div>
   )

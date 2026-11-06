@@ -199,7 +199,7 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
         {reviewOn ? t.word.joinsHint : t.word.pickDay}
       </span>
 
-      <div className={s.actions}>
+      <div className={s.actions} data-sheet-actions>
         {word && (
           <AlertDialog>
             <AlertDialogTrigger asChild>

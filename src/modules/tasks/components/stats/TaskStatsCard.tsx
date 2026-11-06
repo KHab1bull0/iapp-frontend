@@ -6,7 +6,10 @@ import { fetchTaskStats, tasksKeys } from '@/modules/tasks/api/tasks'
 import { useTasksT } from '@/modules/tasks/i18n'
 import { CHART } from '@/core/lib/chartColors'
 import { ProgressChart } from './ProgressChart'
-import { PeriodToggle, Tile } from './parts'
+import { StatGrid, StatTile } from '@/core/components/ui/StatTile'
+import { Skeleton } from '@/core/components/ui/Skeleton'
+import { Heatmap } from './Heatmap'
+import { PeriodToggle } from './parts'
 import { toChartPoints, type Period } from './points'
 import s from './TaskStats.module.scss'
 
@@ -24,26 +27,27 @@ export function TaskStatsCard({ taskId }: { taskId: string }) {
   if (isLoading || !data) {
     return (
       <section className={s.card} aria-label={t.stats.region} aria-busy="true">
-        <div className={s.skeleton} />
+        <Skeleton height={120} radius={12} />
       </section>
     )
   }
 
   return (
     <section className={s.card} aria-label={t.stats.region}>
-      <div className={s.tiles}>
-        <Tile
+      <StatGrid columns={3}>
+        <StatTile
           label={t.stats.total}
           value={String(data.total)}
           sub={t.stats.totalSub(data.firstDoneOn && formatDate(parseApiDate(data.firstDoneOn)))}
         />
-        <Tile label={t.stats.thisMonth} value={String(data.thisMonth)} sub={t.stats.thisMonthSub} />
-        <Tile
+        <StatTile label={t.stats.thisMonth} value={String(data.thisMonth)} sub={t.stats.thisMonthSub} />
+        <StatTile
           label={t.stats.streak}
           value={t.stats.streakValue(data.currentStreak)}
           sub={t.stats.bestStreak(data.bestStreak)}
+          tone={data.currentStreak > 0 ? 'warning' : 'default'}
         />
-      </div>
+      </StatGrid>
 
       {data.total === 0 ? (
         <div className={s.empty}>
@@ -61,6 +65,9 @@ export function TaskStatsCard({ taskId }: { taskId: string }) {
             bars={[{ key: 'count', label: t.stats.doneCount, color: CHART.primarySoft }]}
             height={150}
           />
+          <h2 className={s.cardTitle}>{t.stats.activity}</h2>
+          <Heatmap days={data.daily} />
+          <p className={s.note}>{t.stats.streakRule}</p>
         </>
       )}
     </section>

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from '@/core/components/ui/toast'
-import { completeTask, tasksKeys, undoCompletion, type Task } from './api/tasks'
+import { addDaysYmd } from '@/core/lib/format'
+import { completeTask, tasksKeys, undoCompletion, updateTask, type Task } from './api/tasks'
 import { useTasksT } from './i18n'
 
 /** A short tick on phones that support it; silently nothing elsewhere. */
@@ -54,4 +55,27 @@ export function useCompleteTask(today: string) {
   })
 
   return { complete: complete.mutate, undo: undo.mutate, pending }
+}
+
+/** Swipe left on a row: put the task off until tomorrow, with Undo. */
+export function useMoveToTomorrow(today: string) {
+  const m = useTasksT()
+  const qc = useQueryClient()
+  const refresh = () => qc.invalidateQueries({ queryKey: tasksKeys.all })
+
+  const move = useMutation({
+    mutationFn: ({ task, to }: { task: Task; to: string | null }) => updateTask(task.id, { dueDate: to }),
+    onSuccess: async (_r, { task, to }) => {
+      await refresh()
+      if (to === addDaysYmd(today, 1)) {
+        toast(m.swipe.moved(task.title), 'success', {
+          label: m.undo,
+          onClick: () => move.mutate({ task, to: task.dueDate }),
+        })
+      }
+    },
+    onError: () => toast(m.swipe.moveFailed, 'error'),
+  })
+
+  return (task: Task) => move.mutate({ task, to: addDaysYmd(today, 1) })
 }

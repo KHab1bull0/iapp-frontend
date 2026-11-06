@@ -1,0 +1,97 @@
+@use '@/core/styles/variables' as *;
+
+$cell: 13px;
+$gap: 3px;
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+// Wide on phones: scrolls sideways, newest weeks in view (rtl trick keeps
+// the scroll pinned to the right end).
+.scroller {
+  overflow-x: auto;
+  direction: rtl;
+  padding-bottom: 2px;
+
+  > * { direction: ltr; }
+}
+
+.months {
+  display: flex;
+  gap: $gap;
+  margin-left: 22px;
+  height: 16px;
+}
+
+.month {
+  width: $cell;
+  flex-shrink: 0;
+  overflow: visible;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+.body {
+  display: flex;
+  gap: 4px;
+  width: max-content;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-rows: repeat(7, $cell);
+  gap: $gap;
+  width: 18px;
+  font-size: 10px;
+  line-height: $cell;
+  color: var(--fg-muted);
+}
+
+.grid {
+  display: flex;
+  gap: $gap;
+}
+
+.week {
+  display: grid;
+  grid-template-rows: repeat(7, $cell);
+  gap: $gap;
+}
+
+.cell {
+  display: inline-block;
+  width: $cell;
+  height: $cell;
+  border-radius: 3px;
+}
+
+.pad { width: $cell; height: $cell; }
+
+.l0 {
+  background: var(--slate-100);
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+.l1 { background: #BBF7D0; }
+.l2 { background: #4ADE80; }
+.l3 { background: #16A34A; }
+.l4 { background: #166534; }
+
+:global(.theme-dark) {
+  .l1 { background: #14532D; }
+  .l2 { background: #15803D; }
+  .l3 { background: #22C55E; }
+  .l4 { background: #86EFAC; }
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--fg-muted);
+}
