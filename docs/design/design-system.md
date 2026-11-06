@@ -67,3 +67,31 @@ atributlari `var()` ni tushunmaydi, shuning uchun bu yerda literal hex ishlatila
   Yangi ekran qo'shilsa, shu yerga ham qo'shing.
 - `npm run lint` toza bo'lishi shart. `react-refresh` uchun ataylab ruxsat berilgan istisnolar
   `eslint.config.js` da sanab o'tilgan.
+
+## Spec v2 — o'lchamlar va komponentlar bir-biriga mos (2026-11-06)
+
+Asos: uchta eng mos ilovaning umumiy jihati.
+- **Things 3** (vazifalar): hammasi bir xil ritmda; ierarxiya o'lcham emas, qalinlik bilan beriladi; ko'p bo'sh joy.
+- **Copilot Money** (moliya): bitta katta raqam, kartalar bir xil radius va paddingda, soya yo'q.
+- **Linear** (desktop): zich, 4px panjara, bir xil balandlikdagi boshqaruvlar, faqat ingichka chegaralar.
+
+Ranglar o'zgarmaydi. Quyidagilar `index.css`, `_mixins.scss` da; kodda **faqat shu qiymatlar** ishlatiladi.
+
+| Narsa | Qoida |
+|---|---|
+| Shrift (8 ta) | `--fs-caption` 12 · `--fs-meta` 13 · `--fs-ui` 15 · `--fs-body` 16/15 · `--fs-title` 17 · `--fs-h2` 20 · `--fs-h1` 24 · `--fs-display` 32 · `--fs-hero` 40. Boshqa px yo'q (istisno: pastki menyu yorlig'i 11). 14px → asosiy matn bo'lsa `--fs-ui`, ikkinchi qator bo'lsa `--fs-meta`. 18/22px → `--fs-title`/`--fs-h1` |
+| Qalinlik | 400 matn · 500 qator nomi, tugma · 600 sarlavha, label · 700 raqam, sahifa sarlavhasi · 800 faqat `--fs-hero`/`--fs-display` |
+| Bo'shliq | Faqat 4, 8, 12, 16, 20, 24, 32, 40, 48. 2/6/10/14 yo'q (istisno: segmented ichidagi 2-3px) |
+| Ritm | `--page-pad` 16/32 · `--section-gap` 20/24 · `--card-pad` 16/20 · `--stack-gap` 12 · label→kontent 8 |
+| Radius | `--radius-sm` 8: ikonka plitkasi, kichik chip, kbd · `--radius-md` 12: input, tugma, select, segmented, menyu qatori · `--radius-lg` 16: **barcha** karta, ro'yxat, plitka, panel kartasi · `--radius-xl` 24: faqat ustida suzuvchi narsalar (sheet, yon panel, dialog) · pill: badge, chip, avatar |
+| Balandlik | `--control-sm` 32 · `--control-md` 40 (touch'da 44) · `--control-lg` 52 · qator `--row-h` 56 / `--row-h-sm` 48 · ikonka plitkasi `--tile-sm` 28 / `--tile-md` 36 / `--tile-lg` 44 |
+| Soya | Sahifadagi sirtlar soyasiz (faqat chegara). Soya faqat suzuvchilarga: sheet/dialog/popover `--shadow-lg`, "+" va yopishqoq panellar `--shadow-md` |
+
+**Mixinlar** (`@use '@/core/styles/mixins' as *;`):
+- `page` — sahifa ustuni (kenglik, chetlar, bo'limlar orasi). Har bir sahifaning `.page` klassi shu.
+- `surface` — sirt (fon, chegara, `--radius-lg`); `card` — sirt va standart padding/gap.
+- `card-title` — karta sarlavhasi; `section-label` — kichik bosh harfli guruh nomi.
+- `row` — ro'yxat qatori; `icon-tile($size)` — ikonka plitkasi.
+- `btn-primary|secondary` + `btn-size-sm|md|lg` — tugmalar; `input-wrap-base` + `field-focus` — maydonlar.
+
+**Komponentlar:** yangi narsa yozishdan oldin `src/core/components/ui/` dagilar ishlatiladi: `StatTile`/`StatGrid`, `ListGroup`/`ListRow`, `EmptyState`, `SegmentedControl`, `Skeleton`, `ProgressBar/Ring`, `Sheet`, `DateField`, `MonthStepper`, `PageHeader`; bosh sahifa kartasi — `core/components/HomeCard`.

@@ -6,22 +6,85 @@
 @mixin bp-desktop { @media (min-width: 1024px) { @content; } }
 @mixin bp-medium  { @media (min-width: 768px)  { @content; } }
 
-@mixin card-base {
+// ── Spec v2 building blocks (docs/design/design-system.md) ─────────────────
+
+/// A surface: every card, list, tile and panel on a page. Flat: border, no
+/// shadow (shadows are for things that float: sheets, popovers, the "+").
+@mixin surface {
   background: var(--bg-elev);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 150ms var(--ease-house);
+}
 
-  @include bp-medium {
-    padding: 24px;
-  }
+/// A surface with the standard inner padding and spacing.
+@mixin card {
+  @include surface;
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap);
+  padding: var(--card-pad);
+  min-width: 0;
+}
+
+/// The small upper-case label above a group ("OVERDUE", "BY CATEGORY").
+@mixin section-label {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+/// A card's title ("Tasks", "Spending by category").
+@mixin card-title {
+  margin: 0;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+/// A page's content column: same width and edges on every page.
+@mixin page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+  width: 100%;
+  max-width: var(--page-w);
+  margin: 0 auto;
+  padding: var(--page-pad);
+}
+
+/// A list row: icon/tick, two lines of text, something on the right.
+@mixin row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--row-h);
+  padding: 8px 16px;
+}
+
+/// An icon in a tinted square (rows, card headers).
+@mixin icon-tile($size: var(--tile-md)) {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: $size;
+  height: $size;
+  border-radius: var(--radius-sm);
+}
+
+/// Kept for older code: a padded surface.
+@mixin card-base {
+  @include surface;
+  padding: var(--card-pad);
 }
 
 @mixin btn-base {
   font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: var(--fs-ui);
   font-weight: 500;
   display: inline-flex;
   align-items: center;
@@ -37,9 +100,9 @@
   &:active { transform: scale(0.98); }
 }
 
-@mixin btn-size-sm { height: 32px; padding: 0 12px; font-size: 13px; border-radius: $radius-sm; }
-@mixin btn-size-md { height: 44px; padding: 0 18px; }
-@mixin btn-size-lg { height: 52px; padding: 0 22px; font-size: 16px; font-weight: 600; border-radius: $radius-lg; }
+@mixin btn-size-sm { height: var(--control-sm); padding: 0 12px; font-size: var(--fs-meta); border-radius: $radius-sm; }
+@mixin btn-size-md { height: var(--control-md); padding: 0 16px; }
+@mixin btn-size-lg { height: var(--control-lg); padding: 0 20px; font-size: var(--fs-body); font-weight: 600; border-radius: $radius-md; }
 
 @mixin btn-primary {
   @include btn-base;
@@ -67,7 +130,7 @@
 @mixin field-base {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px; // label → field
   min-width: 0;
 }
 
@@ -107,7 +170,8 @@
 
 @mixin tabs-base {
   display: inline-flex;
-  padding: 4px;
+  gap: 2px;
+  padding: 3px;
   background: var(--slate-100);
   border-radius: $radius-md;
 
@@ -116,14 +180,14 @@
   }
 }
 
+// One option of a tabs-base strip; the strip is exactly --control-md tall.
 @mixin tab-base {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  // 6px vertical padding left these ~29px tall — too small to hit reliably.
-  padding: 8px 14px;
-  min-height: 36px;
-  font-size: 13px;
+  height: calc(var(--control-md) - 6px);
+  padding: 0 12px;
+  font-size: var(--fs-meta);
   font-weight: 500;
   border-radius: $radius-sm;
   background: transparent;
@@ -133,8 +197,6 @@
   font-family: inherit;
   transition: background $t-fast, color $t-fast, box-shadow $t-fast;
   white-space: nowrap;
-
-  @include bp-tablet { min-height: 40px; }
 }
 
 /// Grows a small control's touch target to ~44px without changing its visual

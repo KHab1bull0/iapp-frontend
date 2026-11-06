@@ -4,6 +4,8 @@ import { useAuth } from '@/core/contexts/AuthContext'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { useProfile } from '@/core/hooks/useProfile'
 import { SignOutButton } from '@/core/components/SignOutButton'
+import { ListGroup, ListRow } from '@/core/components/ui/List'
+import { PageHeader } from '@/core/components/ui/PageHeader'
 import { useCoreT } from '@/core/i18n/useCoreT'
 import type { SettingsOutletContext } from './SettingsLayout'
 import s from './settings.module.scss'
@@ -23,7 +25,7 @@ export function SettingsIndex() {
 
   return (
     <div className={s.hub}>
-      <h1 className={s.h1}>{t.settings.title}</h1>
+      <PageHeader title={t.settings.title} compactBar />
 
       <Link to="/settings/profile" className={s.profileCard}>
         <div className={s.avatar}>{(displayName || 'U')[0]}</div>
@@ -35,25 +37,11 @@ export function SettingsIndex() {
       </Link>
 
       {groups.map((g) => (
-        <section key={g.title} className={s.hubGroup}>
-          <h2 className={s.groupTitle}>{g.title}</h2>
-          <div className={s.list}>
-            {g.items.map(({ to, label, description, icon: Icon }) => (
-              <Link key={to} to={to} className={s.listRow}>
-                <span className={s.iconTile}>
-                  <Icon size={17} />
-                </span>
-                <span className={s.rowText}>
-                  <span className={s.rowTitle}>{label}</span>
-                  <span className={s.rowSub} style={{ display: 'block' }}>
-                    {description}
-                  </span>
-                </span>
-                <ChevronRight size={18} className={s.chevron} />
-              </Link>
-            ))}
-          </div>
-        </section>
+        <ListGroup key={g.title} title={g.title}>
+          {g.items.map(({ to, label, description, icon }) => (
+            <ListRow key={to} to={to} title={label} subtitle={description} icon={icon} />
+          ))}
+        </ListGroup>
       ))}
 
       <SignOutButton />

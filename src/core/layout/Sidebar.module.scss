@@ -5,7 +5,7 @@
   view-transition-name: sidebar;
   background: var(--bg-elev);
   border-right: 1px solid var(--border);
-  padding: 20px 14px 16px;
+  padding: 20px 12px 16px;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -15,7 +15,7 @@
 
   &.collapsed {
     .collapseBtn { display: none; }
-    .navItem { justify-content: center; padding: 12px; }
+    .navItem { justify-content: center; padding: 8px; }
     .navItem span { display: none; }
     .logoWord { display: none; }
     .userMeta { display: none; }
@@ -30,12 +30,12 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
-  padding: 0 6px;
+  padding: 0 8px;
 }
 
 .actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   margin-bottom: 16px;
 
   .collapsed & { flex-direction: column; }
@@ -44,10 +44,10 @@
 .addBtn {
   @include btn-primary;
   flex: 1;
-  height: 40px;
+  height: var(--control-md);
   padding: 0 12px;
   justify-content: flex-start;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: 600;
 
   .kbd { margin-left: auto; background: rgba(255, 255, 255, 0.18); color: inherit; border-color: transparent; }
@@ -56,20 +56,21 @@
 
 .searchBtn {
   @include btn-secondary;
-  height: 40px;
-  padding: 0 10px;
-  gap: 6px;
+  height: var(--control-md);
+  padding: 0 12px;
+  gap: 8px;
   color: var(--fg-muted);
 
   .collapsed & { justify-content: center; }
 }
 
 .kbd {
-  padding: 1px 5px;
+  padding: 0 4px;
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: $radius-sm;
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   font-weight: 500;
   color: var(--fg-muted);
 }
@@ -77,12 +78,12 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .logoMark {
-  width: 36px;
-  height: 36px;
+  width: var(--tile-md);
+  height: var(--tile-md);
   border-radius: $radius-md;
   background: var(--primary);
   display: flex;
@@ -93,7 +94,8 @@
 }
 
 .logoWord {
-  font-size: 16px;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
   font-weight: 600;
   color: var(--fg-strong);
   letter-spacing: -0.01em;
@@ -105,8 +107,8 @@
   border: none;
   color: var(--fg-muted);
   cursor: pointer;
-  width: 28px;
-  height: 28px;
+  width: var(--control-sm);
+  height: var(--control-sm);
   border-radius: $radius-sm;
   display: flex;
   align-items: center;
@@ -127,7 +129,7 @@
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -138,13 +140,15 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  min-height: var(--control-md);
+  padding: 8px 12px;
   background: transparent;
   border: none;
   color: var(--fg);
   cursor: pointer;
   font-family: inherit;
-  font-size: 15px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   font-weight: 500;
   border-radius: $radius-md;
   text-align: left;
@@ -160,7 +164,7 @@
 .navGroup {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   margin-top: 12px;
 
   .collapsed & {
@@ -171,26 +175,23 @@
 }
 
 .navGroupLabel {
+  @include section-label;
   padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--fg-muted);
 }
 
 .sidebarBottom {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-top: 14px;
+  gap: 4px;
+  padding-top: 12px;
   border-top: 1px solid var(--border);
 }
 
 .themeToggle {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  min-height: var(--control-md);
   padding: 8px 12px;
   background: transparent;
   border: none;
@@ -198,7 +199,7 @@
   cursor: pointer;
   color: var(--fg-muted);
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   font-weight: 500;
   white-space: nowrap;
   width: 100%;
@@ -209,7 +210,7 @@
 .user {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 8px 12px;
   border-radius: $radius-md;
   color: inherit;
@@ -219,13 +220,13 @@
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: var(--control-sm);
+  height: var(--control-sm);
   border-radius: $radius-pill;
   background: var(--avatar-bg);
   color: var(--avatar-fg);
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,7 +237,8 @@
 .userMeta { min-width: 0; }
 
 .userHandle {
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -244,7 +246,8 @@
 }
 
 .userName {
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   font-weight: 600;
   color: var(--fg-strong);
   white-space: nowrap;
@@ -254,12 +257,13 @@
 
 .badge {
   margin-left: auto;
-  min-width: 22px;
-  padding: 1px 7px;
+  min-width: 24px;
+  padding: 0 8px;
   border-radius: $radius-pill;
   background: var(--icon-btn-hover);
   color: var(--fg-muted);
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-meta);
   font-weight: 600;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -271,9 +275,9 @@
 .badgeDot {
   position: absolute;
   top: 8px;
-  right: 10px;
-  width: 7px;
-  height: 7px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
   border-radius: $radius-pill;
   background: var(--primary);
 }

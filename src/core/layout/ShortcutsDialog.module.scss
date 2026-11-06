@@ -10,7 +10,8 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 10px 0;
+  min-height: var(--row-h-sm);
+  padding: 8px 0;
 
   & + & { border-top: 1px solid var(--border); }
 }
@@ -23,14 +24,15 @@
 }
 
 .kbd {
-  min-width: 26px;
-  padding: 3px 7px;
+  min-width: var(--tile-sm);
+  padding: 4px 8px;
   border: 1px solid var(--border-strong);
   border-bottom-width: 2px;
-  border-radius: 6px;
+  border-radius: $radius-sm;
   background: var(--bg);
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   font-weight: 600;
   text-align: center;
   color: var(--fg-strong);
@@ -38,6 +40,7 @@
 
 .what {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   color: var(--fg);
 }

@@ -46,7 +46,7 @@ const DialogContent = forwardRef<
           // max-h-[85dvh] replaces max-h-screen: 100vh is the *large* viewport on
           // iOS, so a tall form was cut off above and below the visible area.
           'w-[calc(100%-2rem)] max-w-lg max-h-[85dvh] overflow-y-auto overscroll-contain',
-          'rounded-lg bg-background shadow-xl transition-all data-[state=open]:opacity-100 data-[state=closed]:opacity-0 p-6',
+          'rounded-[var(--radius-xl)] bg-background shadow-[var(--shadow-lg)] transition-all data-[state=open]:opacity-100 data-[state=closed]:opacity-0 p-6',
           className,
         )}
         {...props}
@@ -63,7 +63,7 @@ const DialogContent = forwardRef<
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex flex-col space-y-1.5 mb-4', className)} {...props} />
+  return <div className={cn('flex flex-col space-y-2 mb-4', className)} {...props} />
 }
 DialogHeader.displayName = 'DialogHeader'
 
@@ -83,7 +83,7 @@ const DialogTitle = forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-lg font-semibold leading-none tracking-tight', className)}
+    className={cn('text-[length:var(--fs-h2)] font-semibold leading-none tracking-tight', className)}
     {...props}
   />
 ))
@@ -95,7 +95,7 @@ const DialogDescription = forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-sm text-muted-foreground', className)}
+    className={cn('text-[length:var(--fs-meta)] leading-[var(--lh-meta)] text-muted-foreground', className)}
     {...props}
   />
 ))

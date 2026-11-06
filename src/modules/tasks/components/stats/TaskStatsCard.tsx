@@ -57,7 +57,7 @@ export function TaskStatsCard({ taskId }: { taskId: string }) {
       ) : (
         <>
           <div className={s.cardHead}>
-            <h2 className={s.cardTitle}>{t.stats.progress}</h2>
+            <h2 className={s.groupLabel}>{t.stats.progress}</h2>
             <PeriodToggle value={period} onChange={setPeriod} />
           </div>
           <ProgressChart
@@ -65,7 +65,7 @@ export function TaskStatsCard({ taskId }: { taskId: string }) {
             bars={[{ key: 'count', label: t.stats.doneCount, color: CHART.primarySoft }]}
             height={150}
           />
-          <h2 className={s.cardTitle}>{t.stats.activity}</h2>
+          <h2 className={s.groupLabel}>{t.stats.activity}</h2>
           <Heatmap days={data.daily} />
           <p className={s.note}>{t.stats.streakRule}</p>
         </>

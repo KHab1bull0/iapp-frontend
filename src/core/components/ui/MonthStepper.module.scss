@@ -13,8 +13,9 @@
 .btn {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  // 3px inset + 1px border each side: the whole stepper is one control height.
+  width: calc(var(--control-md) - 8px);
+  height: calc(var(--control-md) - 8px);
   border: none;
   border-radius: $radius-pill;
   background: transparent;
@@ -28,7 +29,7 @@
 .value {
   min-width: 120px;
   text-align: center;
-  font-size: 15px;
+  font-size: var(--fs-ui);
   font-weight: 600;
   color: var(--fg-strong);
   white-space: nowrap;

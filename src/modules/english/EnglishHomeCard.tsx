@@ -36,8 +36,9 @@ export function EnglishHomeCard() {
       linkLabel={t.home.open}
       accessory={
         streak > 0 && (
-          <span className={s.streak}>
-            <Flame size={16} aria-hidden /> {t.home.streak(streak)}
+          // Compact: flame and number; the words are in the label and tooltip.
+          <span className={s.streak} title={t.home.streak(streak)} aria-label={t.home.streak(streak)}>
+            <Flame size={16} aria-hidden /> {streak}
           </span>
         )
       }

@@ -49,12 +49,12 @@ export function DashboardPage() {
     return (
       <div className={s.page}>
         <div className={s.toolbar}>{stepper}</div>
-        <Skeleton height={260} radius={24} />
+        <Skeleton height={260} radius={16} />
         <div className={s.row2}>
           <Skeleton height={96} radius={16} />
           <Skeleton height={96} radius={16} />
         </div>
-        <Skeleton height={220} radius={24} />
+        <Skeleton height={220} radius={16} />
       </div>
     )
   }

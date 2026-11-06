@@ -1,16 +1,14 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
-.page {
-  padding: 32px;
-  max-width: 720px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+// Shared with the module settings pages (finance, english): keep the class
+// names stable.
 
-  @include bp-tablet { padding: 24px; }
-  @include bp-mobile { padding: 16px; gap: 20px; }
+// A settings page. Outside the shell (a module's settings page) it keeps the
+// shell's content width rather than the full page width: these are forms.
+.page {
+  @include page;
+  max-width: 720px;
 }
 
 .pageHead {
@@ -31,28 +29,25 @@
   color: var(--fg-strong);
   white-space: nowrap;
   margin: 0;
-
-  @include bp-mobile { font-size: 22px; line-height: 28px; }
 }
 
 .pageSub {
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
   margin-top: 4px;
 }
 
 .card {
-  @include card-base;
+  @include card;
 }
 
 .settingsCard {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--stack-gap);
 }
 
-// No margin-bottom: .settingsCard is a flex column with gap: 16px, so a margin
-// here stacked on top of the gap and produced 34px of dead space.
 .cardHead {
   display: flex;
   align-items: center;
@@ -62,20 +57,11 @@
 }
 
 .h3 {
-  font-size: var(--fs-h3);
-  line-height: var(--lh-h3);
-  font-weight: 600;
-  color: var(--fg-strong);
-  margin: 0;
+  @include card-title;
 }
 
 .btnSecondary {
   @include btn-secondary;
-  @include btn-size-sm;
-}
-
-.btnDestructive {
-  @include btn-destructive;
   @include btn-size-sm;
 }
 
@@ -101,10 +87,11 @@
 
 .catCard {
   display: grid;
-  grid-template-columns: 36px 1fr 28px;
+  grid-template-columns: var(--tile-md) 1fr var(--tile-sm);
   gap: 12px;
   align-items: center;
-  padding: 10px 0;
+  min-height: var(--row-h);
+  padding: 8px 0;
 
   & + & { border-top: 1px solid var(--border); }
 }
@@ -118,31 +105,26 @@
 }
 
 .rowTitle {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 500;
   color: var(--fg-strong);
 }
 
 .rowSub {
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
-  margin-top: 2px;
-}
-
-.account {
-  display: flex;
-  align-items: center;
-  gap: 14px;
 }
 
 .avatar {
-  width: 44px;
-  height: 44px;
+  width: var(--tile-lg);
+  height: var(--tile-lg);
   border-radius: $radius-pill;
   background: var(--avatar-bg);
   color: var(--avatar-fg);
   font-weight: 600;
-  font-size: 16px;
+  font-size: var(--fs-title);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -150,8 +132,11 @@
   text-transform: uppercase;
 }
 
+// Theme / language choice. Same metrics as SegmentedControl: the group is a
+// --control-md tall, each option a --control-sm one inside it.
 .themeSegment {
   display: inline-flex;
+  max-width: 100%;
   background: var(--slate-100);
   border-radius: $radius-md;
   padding: 4px;
@@ -159,60 +144,20 @@
   :global(.theme-dark) & { background: var(--slate-800); }
 }
 
-.pwForm {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.field {
-  @include field-base;
-}
-
-.fieldLabel {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--fg);
-}
-
-.inputWrap {
-  @include input-wrap-base;
-}
-
-.input {
-  flex: 1;
-  height: 40px;
-  padding: 0 12px;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-family: inherit;
-  font-size: 14px;
-  color: var(--fg-strong);
-
-  &::placeholder { color: var(--fg-muted); }
-}
-
-.formError {
-  font-size: 13px;
-  color: var(--danger);
-  padding: 10px 12px;
-  background: var(--danger-soft);
-  border-radius: $radius-sm;
-}
-
 .segment {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 8px 14px;
-  min-height: 36px;
+  gap: 8px;
+  height: var(--control-sm);
+  padding: 0 12px;
   border-radius: $radius-sm;
   background: transparent;
   border: none;
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  font-weight: 500;
+  white-space: nowrap;
   color: var(--fg-muted);
   cursor: pointer;
   transition: background $t-fast, color $t-fast;
@@ -224,8 +169,54 @@
   }
 }
 
+.pwForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  @include field-base;
+}
+
+.fieldLabel {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.inputWrap {
+  @include input-wrap-base;
+}
+
+// Inside .inputWrap's 1px border, so the whole field is --control-md tall.
+.input {
+  flex: 1;
+  min-width: 0;
+  height: calc(var(--control-md) - 2px);
+  padding: 0 12px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--fs-ui);
+  color: var(--fg-strong);
+
+  &::placeholder { color: var(--fg-muted); }
+}
+
+.formError {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--danger);
+  padding: 8px 12px;
+  background: var(--danger-soft);
+  border-radius: $radius-md;
+}
+
 // Settings was the only form left without the iOS anti-zoom rule, so focusing a
-// password field zoomed the whole page in.
+// password field zoomed the whole page in. (16px, not a token: iOS zooms below it.)
 @supports (-webkit-touch-callout: none) {
   .input { font-size: 16px; }
 }
@@ -238,9 +229,10 @@
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
   gap: 32px;
-  max-width: 1040px;
+  width: 100%;
+  max-width: var(--page-w);
   margin: 0 auto;
-  padding: 32px;
+  padding: var(--page-pad);
 
   @include bp-tablet {
     display: block;
@@ -250,11 +242,11 @@
 
 .sideNav {
   position: sticky;
-  top: 32px;
+  top: var(--page-pad);
   align-self: start;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--section-gap);
 
   @include bp-tablet { display: none; }
 }
@@ -270,25 +262,23 @@
 .sideGroup {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
+// 4px of padding + the group's 4px gap: label → content is 8.
 .groupTitle {
-  padding: 0 12px 6px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--fg-muted);
+  @include section-label;
+  padding: 0 12px 4px;
 }
 
 .sideItem {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
+  gap: 12px;
+  min-height: var(--control-md);
+  padding: 0 12px;
   border-radius: $radius-md;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: 500;
   color: var(--fg);
   text-decoration: none;
@@ -303,12 +293,12 @@
   border-top: 1px solid var(--border);
 }
 
-// A settings page inside the shell drops .page's own padding and width.
+// A settings page inside the shell: the shell already gives the edges and width.
 .layout .page {
   padding: 0;
   max-width: none;
 
-  @include bp-tablet { padding: 16px; }
+  @include bp-tablet { padding: var(--page-pad); }
 }
 
 .back {
@@ -317,9 +307,9 @@
   @include bp-tablet {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    margin-left: -6px;
-    font-size: 14px;
+    gap: 4px;
+    margin-left: -4px;
+    font-size: var(--fs-ui);
     font-weight: 500;
     color: var(--primary);
     text-decoration: none;
@@ -331,9 +321,9 @@
 .backLink {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  margin-left: -6px;
-  font-size: 14px;
+  gap: 4px;
+  margin-left: -4px;
+  font-size: var(--fs-ui);
   font-weight: 500;
   color: var(--primary);
   text-decoration: none;
@@ -342,45 +332,34 @@
 // ── Mobile hub (/settings) ─────────────────────────────────────────────────
 
 .hub {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 16px;
+  @include page;
 }
 
 .profileCard {
-  @include card-base;
+  @include surface;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  padding: var(--card-pad);
   color: var(--fg);
   text-decoration: none;
 }
 
 .profileName {
-  font-size: 17px;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
   font-weight: 600;
   color: var(--fg-strong);
 }
 
-.hubGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
+// The english module's settings list; core settings uses ListGroup.
 .list {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  @include surface;
   overflow: hidden;
 }
 
 .listRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  @include row;
   color: var(--fg);
   text-decoration: none;
 
@@ -389,14 +368,9 @@
 }
 
 .iconTile {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: $radius-sm;
+  @include icon-tile(var(--tile-md));
   background: var(--hover-bg);
   color: var(--primary);
-  flex-shrink: 0;
 }
 
 .rowText {
@@ -411,26 +385,29 @@
 
 .hubFooter {
   text-align: center;
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg-muted);
 }
 
 // ── Profile ────────────────────────────────────────────────────────────────
 
 .hero {
-  @include card-base;
+  @include surface;
   display: flex;
   align-items: center;
   gap: 16px;
+  padding: var(--card-pad);
 }
 
+// The profile page's hero avatar: larger than --tile-lg on purpose.
 .avatarLg {
   width: 64px;
   height: 64px;
   border-radius: $radius-pill;
   background: var(--avatar-bg);
   color: var(--avatar-fg);
-  font-size: 24px;
+  font-size: var(--fs-h1);
   font-weight: 600;
   display: grid;
   place-items: center;
@@ -439,13 +416,15 @@
 }
 
 .heroName {
-  font-size: 20px;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
   font-weight: 700;
   color: var(--fg-strong);
 }
 
 .hint {
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg-muted);
 }
 
@@ -460,40 +439,12 @@
 }
 
 .btnPrimary {
-  @include btn-base;
-  @include btn-size-md;
   @include btn-primary;
-}
-
-.badge {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 2px 8px;
-  border-radius: $radius-pill;
-  background: var(--slate-100);
-  color: var(--fg-muted);
-  font-size: 11px;
-  font-weight: 600;
-  vertical-align: middle;
-
-  :global(.theme-dark) & { background: var(--slate-800); }
-}
-
-.select {
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: $radius-md;
-  background: var(--bg-elev);
-  color: var(--fg);
-  font-family: inherit;
-  font-size: 14px;
-
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  @include btn-size-md;
 }
 
 .skeletonText {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }

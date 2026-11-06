@@ -20,32 +20,28 @@
 .authBrand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-top: auto;
   margin-bottom: 32px;
   flex-shrink: 0;
 }
 
 .logoMark {
-  width: 36px;
-  height: 36px;
-  border-radius: $radius-md;
+  @include icon-tile(var(--tile-md));
   background: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: var(--primary-fg);
-  flex-shrink: 0;
 }
 
 .authBrandName {
-  font-size: 20px;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
   font-weight: 600;
   color: var(--fg-strong);
 }
 
 .authCard {
-  @include card-base;
+  @include surface;
+  padding: var(--card-pad);
   width: 100%;
   max-width: 400px;
   margin-bottom: auto;
@@ -53,14 +49,16 @@
 }
 
 .authTitle {
-  font-size: 22px;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
   font-weight: 600;
   color: var(--fg-strong);
-  margin: 0 0 6px;
+  margin: 0 0 4px;
 }
 
 .authSub {
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
   margin: 0 0 24px;
 }
@@ -93,8 +91,9 @@
 }
 
 .fieldLabel {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
   color: var(--fg);
 }
 
@@ -102,26 +101,29 @@
   @include input-wrap-base;
 }
 
+// Inside .inputWrap's 1px border, so the whole field is --control-md tall.
 .input {
   flex: 1;
-  height: 40px;
+  min-width: 0;
+  height: calc(var(--control-md) - 2px);
   padding: 0 12px;
   background: transparent;
   border: none;
   outline: none;
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   color: var(--fg-strong);
 
   &::placeholder { color: var(--fg-muted); }
 }
 
 .authError {
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--danger);
-  padding: 10px 12px;
+  padding: 8px 12px;
   background: var(--danger-soft);
-  border-radius: $radius-sm;
+  border-radius: $radius-md;
 }
 
 .btnPrimary {
@@ -132,7 +134,8 @@
 
 .authSwitch {
   text-align: center;
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
   margin-top: 16px;
 
@@ -143,7 +146,7 @@
     color: var(--primary);
     cursor: pointer;
     font-family: inherit;
-    font-size: 13px;
+    font-size: var(--fs-meta);
     font-weight: 500;
     padding: 0;
 
@@ -151,32 +154,35 @@
   }
 }
 
+// 16px, not a token: iOS zooms into any field below it.
 @supports (-webkit-touch-callout: none) {
   .input { font-size: 16px; }
 }
 
 // Language choice before signing in; top-right, out of the form's way.
+// Same metrics as Settings → Preferences: a --control-md group of
+// --control-sm options.
 .langSwitch {
   position: absolute;
   top: calc(16px + var(--safe-top, 0px));
   right: 16px;
   display: flex;
-  padding: 3px;
-  border-radius: 10px;
+  padding: 4px;
+  border-radius: $radius-md;
   background: var(--slate-100);
 
   :global(.theme-dark) & { background: var(--slate-800); }
 }
 
 .langOption {
-  height: 30px;
-  padding: 0 10px;
+  height: var(--control-sm);
+  padding: 0 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: $radius-sm;
   background: transparent;
   color: var(--fg-muted);
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--fs-meta);
   font-weight: 500;
   cursor: pointer;
 

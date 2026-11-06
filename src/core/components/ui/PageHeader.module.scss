@@ -4,7 +4,7 @@
 .header {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--stack-gap);
 }
 
 .titleRow {
@@ -25,14 +25,16 @@
   color: var(--fg-strong);
 
   @include bp-desktop {
-    font-size: 28px;
-    line-height: 36px;
+    font-size: var(--fs-h1);
+    line-height: var(--lh-h1);
+    font-weight: 700;
   }
 }
 
 .subtitle {
-  margin-top: 2px;
-  font-size: var(--fs-small);
+  margin-top: 4px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 
@@ -79,7 +81,8 @@
 }
 
 .barTitle {
-  font-size: 16px;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
   font-weight: 600;
   color: var(--fg-strong);
 }

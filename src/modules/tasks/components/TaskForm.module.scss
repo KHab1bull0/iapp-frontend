@@ -4,52 +4,51 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .row {
   display: grid;
   // minmax(0, …): a column may shrink below its field's intrinsic width.
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   min-width: 0;
 }
 
 .label {
-  font-size: 12px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   font-weight: 600;
   color: var(--fg-muted);
 }
 
 .hint {
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg-muted);
 }
 
 .input {
   width: 100%;
   min-width: 0;
-  height: 40px;
+  height: var(--control-md);
   padding: 0 12px;
   border: 1px solid var(--border);
-  border-radius: $radius-md;
+  border-radius: var(--radius-md);
   background: var(--bg-elev);
   color: var(--fg-strong);
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   outline: none;
   transition: border-color $t-fast, box-shadow $t-fast;
 
-  &:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--ring-soft);
-  }
+  @include field-focus;
 
   &::placeholder { color: var(--fg-muted); }
 
@@ -59,14 +58,15 @@
 
 .textarea {
   height: auto;
-  padding: 10px 12px;
+  padding: 8px 12px;
   resize: vertical;
 }
 
 .segments {
   display: flex;
+  gap: 2px;
   padding: 3px;
-  border-radius: $radius-md;
+  border-radius: var(--radius-md);
   background: var(--slate-100);
 
   :global(.theme-dark) & { background: var(--slate-800); }
@@ -74,13 +74,14 @@
 
 .segment {
   flex: 1;
-  height: 34px;
+  // With the 3px track padding the control is as tall as the inputs.
+  height: calc(var(--control-md) - 6px);
   border: none;
-  border-radius: $radius-sm;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--fg-muted);
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   font-weight: 500;
   cursor: pointer;
 
@@ -94,17 +95,17 @@
 .days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 
 .day {
-  height: 36px;
+  height: var(--control-md);
   border: 1px solid var(--border);
-  border-radius: $radius-md;
+  border-radius: var(--radius-md);
   background: var(--bg-elev);
   color: var(--fg);
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--fs-meta);
   font-weight: 500;
   cursor: pointer;
 

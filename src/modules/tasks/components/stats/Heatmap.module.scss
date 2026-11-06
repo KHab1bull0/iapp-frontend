@@ -1,7 +1,13 @@
 @use '@/core/styles/variables' as *;
 
+// The grid's own geometry: 13px squares 3px apart (like the 2-3px inside a
+// segmented control, the gap is below the spacing scale on purpose).
 $cell: 13px;
 $gap: 3px;
+// Weekday column wide enough for "Wed" at caption size, then the 4px gap to
+// the grid: month labels start 32px in, over the first week.
+$label-w: 28px;
+$label-gap: 4px;
 
 .wrap {
   display: flex;
@@ -14,7 +20,7 @@ $gap: 3px;
 .scroller {
   overflow-x: auto;
   direction: rtl;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
 
   > * { direction: ltr; }
 }
@@ -22,8 +28,8 @@ $gap: 3px;
 .months {
   display: flex;
   gap: $gap;
-  margin-left: 22px;
-  height: 16px;
+  margin-left: $label-w + $label-gap;
+  height: var(--lh-caption);
 }
 
 .month {
@@ -31,13 +37,14 @@ $gap: 3px;
   flex-shrink: 0;
   overflow: visible;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg-muted);
 }
 
 .body {
   display: flex;
-  gap: 4px;
+  gap: $label-gap;
   width: max-content;
 }
 
@@ -45,8 +52,8 @@ $gap: 3px;
   display: grid;
   grid-template-rows: repeat(7, $cell);
   gap: $gap;
-  width: 18px;
-  font-size: 10px;
+  width: $label-w;
+  font-size: var(--fs-caption);
   line-height: $cell;
   color: var(--fg-muted);
 }
@@ -92,6 +99,7 @@ $gap: 3px;
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg-muted);
 }

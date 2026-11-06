@@ -4,13 +4,7 @@
 // Shared by the stats card in the task editor and the Statistics page.
 
 .card {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  @include card;
 }
 
 .cardHead {
@@ -21,78 +15,14 @@
   flex-wrap: wrap;
 }
 
+// The heading of a card on the Statistics page.
 .cardTitle {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--fg-muted);
+  @include card-title;
 }
 
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-
-  &.four {
-    grid-template-columns: repeat(4, 1fr);
-    @include bp-mobile { grid-template-columns: 1fr 1fr; }
-  }
-}
-
-.tile {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: $radius-md;
-  padding: 10px 12px;
-  min-width: 0;
-}
-
-.tileLabel,
-.tileSub {
-  font-size: 11px;
-  color: var(--fg-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tileValue {
-  margin-top: 2px;
-  font-size: 22px;
-  line-height: 28px;
-  font-weight: 700;
-  color: var(--fg-strong);
-  font-variant-numeric: tabular-nums;
-}
-
-.segments {
-  display: inline-flex;
-  padding: 3px;
-  border-radius: $radius-md;
-  background: var(--slate-100);
-
-  :global(.theme-dark) & { background: var(--slate-800); }
-}
-
-.segment {
-  height: 28px;
-  padding: 0 12px;
-  border: none;
-  border-radius: $radius-sm;
-  background: transparent;
-  color: var(--fg-muted);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-
-  &.active {
-    background: var(--bg-elev);
-    color: var(--fg-strong);
-    box-shadow: 0 1px 2px rgba(15, 17, 23, 0.08);
-  }
+// A group inside one card (the task editor's "Progress", "Activity").
+.groupLabel {
+  @include section-label;
 }
 
 .chart {
@@ -104,10 +34,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg);
 
-  > span { display: inline-flex; align-items: center; gap: 6px; }
+  > span { display: inline-flex; align-items: center; gap: 8px; }
 }
 
 .dot {
@@ -116,16 +47,21 @@
   border-radius: 3px;
 }
 
+// Floats over the chart, so it alone has a shadow.
 .tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   background: var(--bg-elev);
   border: 1px solid var(--border);
-  border-radius: $radius-md;
+  border-radius: var(--radius-md);
   padding: 8px 12px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   box-shadow: 0 4px 12px rgba(15, 17, 23, 0.08);
   font-variant-numeric: tabular-nums;
 
-  p { margin: 2px 0; }
+  p { margin: 0; }
 }
 
 .tooltipTitle {
@@ -137,27 +73,24 @@
   color: var(--fg);
 }
 
+// Same type as the shared EmptyState, sized to sit inside a card.
 .empty {
   @include empty-base;
+  gap: 4px;
   padding: 16px 8px;
 }
 
 .emptyTitle {
-  font-size: 14px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   font-weight: 600;
   color: var(--fg-strong);
 }
 
 .emptySub {
-  font-size: 12px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
-}
-
-.skeleton {
-  height: 120px;
-  border-radius: $radius-md;
-  background: var(--border);
-  opacity: 0.5;
 }
 
 // Horizontal bars: completions per repeat type.
@@ -167,28 +100,29 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .row {
   display: grid;
   grid-template-columns: minmax(90px, 30%) 1fr 40px;
   align-items: center;
-  gap: 10px;
-  font-size: 13px;
+  gap: 12px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
 }
 
 .rowLabel {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: var(--fg);
   min-width: 0;
 }
 
 .track {
   height: 8px;
-  border-radius: 999px;
+  border-radius: $radius-pill;
   background: var(--slate-100);
   overflow: hidden;
 
@@ -198,7 +132,7 @@
 .bar {
   display: block;
   height: 100%;
-  border-radius: 999px;
+  border-radius: $radius-pill;
 }
 
 .rowValue {
@@ -211,5 +145,6 @@
 .note {
   margin: 0;
   font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg-muted);
 }

@@ -4,55 +4,13 @@
 .tiles {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: var(--stack-gap);
 
   @include bp-mobile { grid-template-columns: 1fr 1fr; }
 }
 
-.tile {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 14px 16px;
-  min-width: 0;
-}
-
-.tileLabel {
-  font-size: 12px;
-  color: var(--fg-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tileValue {
-  margin-top: 4px;
-  font-size: 26px;
-  line-height: 32px;
-  font-weight: 700;
-  color: var(--fg-strong);
-  font-variant-numeric: tabular-nums;
-}
-
-.tileSub {
-  margin-top: 2px;
-  font-size: 12px;
-  color: var(--fg-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  &.danger { color: var(--danger); }
-}
-
 .card {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  @include card;
 }
 
 .cardHead {
@@ -63,28 +21,26 @@
   flex-wrap: wrap;
 }
 
+// Every card on this page is headed by the same small label.
 .cardTitle {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--fg-muted);
+  @include section-label;
 }
 
 .muted {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 
 .legend {
   display: flex;
   gap: 12px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg);
 
-  > span { display: inline-flex; align-items: center; gap: 6px; }
+  > span { display: inline-flex; align-items: center; gap: 8px; }
 }
 
 .dot {
@@ -104,7 +60,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .row {
@@ -112,7 +68,8 @@
   grid-template-columns: minmax(0, 9rem) 1fr 2.5rem;
   align-items: center;
   gap: 12px;
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
 
   @include bp-mobile { grid-template-columns: minmax(0, 7rem) 1fr 2rem; }
 }
@@ -133,7 +90,7 @@
 
 .bar {
   min-width: 4px;
-  border-radius: 4px;
+  border-radius: 4px; // half the track: a rounded bar
   background: var(--primary);
 }
 
@@ -161,7 +118,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
   cursor: default;
 }
@@ -173,7 +130,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: 2px; // a surface gap between the two segments
+  gap: 2px; // a hairline of surface between the two segments (chart mark, not layout)
   border-bottom: 1px solid var(--border);
 }
 
@@ -186,15 +143,17 @@
 }
 
 .colValue {
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   font-weight: 600;
   color: var(--fg-strong);
   font-variant-numeric: tabular-nums;
-  min-height: 16px;
+  min-height: var(--lh-caption);
 }
 
 .axis {
-  font-size: 11px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;

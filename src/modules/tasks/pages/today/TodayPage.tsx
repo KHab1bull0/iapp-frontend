@@ -72,7 +72,7 @@ export function TodayPage() {
         />
       ) : isLoading ? (
         <div className={s.skeletons}>
-          <Skeleton height={76} radius={20} />
+          <Skeleton height={88} radius={16} />
           <Skeleton height={180} radius={16} />
         </div>
       ) : (
@@ -94,7 +94,7 @@ export function TodayPage() {
           {stats && stats.total > 0 && (
             <section className={s.railCard} aria-label={m.stats.activity}>
               <div className={s.railHead}>
-                <h2 className={s.sectionTitle}>{m.stats.activity}</h2>
+                <h2 className={s.railTitle}>{m.stats.activity}</h2>
                 {stats.currentStreak > 0 && <span className={s.streak}>{m.stats.streakValue(stats.currentStreak)}</span>}
               </div>
               <Heatmap days={stats.daily.slice(-56)} />

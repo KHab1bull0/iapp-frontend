@@ -7,9 +7,9 @@
   align-items: center;
   text-align: center;
   gap: 8px;
-  padding: 56px 24px;
+  padding: 48px 24px;
 
-  &.compact { padding: 28px 16px; gap: 6px; }
+  &.compact { padding: 32px 16px; gap: 4px; }
 }
 
 .glyph {
@@ -18,24 +18,24 @@
   width: 64px;
   height: 64px;
   margin-bottom: 8px;
-  border-radius: $radius-xl;
+  border-radius: $radius-lg;
   background: var(--primary-soft);
   color: var(--primary);
 
-  .compact & { width: 48px; height: 48px; border-radius: $radius-lg; margin-bottom: 4px; }
+  .compact & { width: 48px; height: 48px; margin-bottom: 4px; }
 }
 
 .title {
-  font-size: 17px;
-  line-height: 24px;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
   font-weight: 600;
   color: var(--fg-strong);
 }
 
 .description {
   max-width: 34ch;
-  font-size: var(--fs-small);
-  line-height: 20px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 
@@ -43,7 +43,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   margin-top: 12px;
 }
 

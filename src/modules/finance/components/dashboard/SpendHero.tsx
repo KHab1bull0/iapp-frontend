@@ -58,7 +58,7 @@ export function SpendHero({ spent, daily }: { spent: number; daily: DailySpendPo
               <LineChart data={daily} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
                 <XAxis
                   dataKey="day"
-                  tick={{ fontSize: 11, fill: 'var(--fg-muted)' }}
+                  tick={{ fontSize: 12, fill: 'var(--fg-muted)' }}
                   axisLine={false}
                   tickLine={false}
                   interval="preserveStartEnd"

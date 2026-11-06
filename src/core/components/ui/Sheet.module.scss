@@ -47,7 +47,8 @@
 
 .description {
   margin: 4px 0 0;
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 
@@ -62,7 +63,7 @@
 .footer {
   flex-shrink: 0;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   padding: 12px 20px calc(12px + var(--safe-bottom));
   border-top: 1px solid var(--border);
   background: var(--bg-elev);
@@ -79,7 +80,7 @@
 .dialogFooter {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 8px;
 }
 
 // A form's Save/Cancel row (marked data-sheet-actions) sticks to the bottom
@@ -132,10 +133,10 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: var(--control-md);
+  height: var(--control-md);
   border: none;
-  border-radius: $radius-pill;
+  border-radius: $radius-md;
   background: transparent;
   color: var(--fg-muted);
   cursor: pointer;

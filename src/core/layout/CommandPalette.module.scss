@@ -1,4 +1,5 @@
 @use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
 
 .overlay {
   position: fixed;
@@ -17,20 +18,21 @@
   overflow: hidden;
   background: var(--bg-elev);
   border: 1px solid var(--border);
-  border-radius: $radius-lg;
+  border-radius: $radius-xl;
   box-shadow: var(--shadow-lg);
 }
 
 .input {
   width: 100%;
-  height: 56px;
-  padding: 0 18px;
+  height: var(--control-lg);
+  padding: 0 20px;
   border: none;
   border-bottom: 1px solid var(--border);
   background: transparent;
   color: var(--fg-strong);
   font: inherit;
-  font-size: 16px;
+  // --fs-body stays 16px on phones, so iOS does not zoom in on focus.
+  font-size: var(--fs-body);
   outline: none;
 
   &::placeholder { color: var(--fg-muted); }
@@ -46,17 +48,14 @@
   padding: 24px;
   text-align: center;
   color: var(--fg-muted);
-  font-size: 14px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
 }
 
 .group {
   :global([cmdk-group-heading]) {
-    padding: 8px 10px 4px;
-    font-size: var(--fs-caption);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--fg-muted);
+    @include section-label;
+    padding: 8px 12px 4px;
   }
 }
 
@@ -64,11 +63,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 44px;
-  padding: 0 10px;
-  border-radius: $radius-sm;
+  height: var(--control-md);
+  padding: 0 12px;
+  border-radius: $radius-md;
   color: var(--fg);
-  font-size: 15px;
+  font-size: var(--fs-ui);
   cursor: pointer;
 
   &[data-selected='true'] {

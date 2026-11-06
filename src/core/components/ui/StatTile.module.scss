@@ -3,7 +3,7 @@
 
 .grid {
   display: grid;
-  gap: 10px;
+  gap: var(--stack-gap);
 
   &.cols2 { grid-template-columns: repeat(2, 1fr); }
   &.cols3 { grid-template-columns: repeat(3, 1fr); }
@@ -15,11 +15,9 @@
 }
 
 .tile {
+  @include surface;
   min-width: 0;
-  padding: 14px 16px;
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: $radius-lg;
+  padding: var(--card-pad);
 }
 
 .head {
@@ -31,7 +29,8 @@
 
 .label {
   min-width: 0;
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -39,12 +38,7 @@
 }
 
 .icon {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-  border-radius: $radius-sm;
+  @include icon-tile(var(--tile-sm));
   background: var(--icon-btn-hover);
   color: var(--fg-muted);
 
@@ -55,9 +49,9 @@
 }
 
 .value {
-  margin-top: 6px;
-  font-size: 24px;
-  line-height: 30px;
+  margin-top: 8px;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
   font-weight: 700;
   color: var(--fg-strong);
   font-variant-numeric: tabular-nums;
@@ -72,7 +66,7 @@
 .warningText { color: var(--warning); }
 
 .sub {
-  margin-top: 2px;
+  margin-top: 4px;
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--fg-muted);

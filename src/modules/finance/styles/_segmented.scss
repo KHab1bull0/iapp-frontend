@@ -1,0 +1,50 @@
+@use '@/core/styles/variables' as *;
+
+// The finance screens' hand-rolled segmented tabs (type, period, category
+// type). Same box as core SegmentedControl: a track as tall as every other
+// control (--control-md), 3px inside it (the spec's one allowed exception).
+// Each module that uses `segment` defines its own `.active` modifier.
+
+@mixin segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  background: var(--slate-100);
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+/// Fills its track: for tabs that should share the full width.
+@mixin segmented-stretch {
+  display: flex;
+  width: 100%;
+
+  > * { flex: 1; }
+}
+
+@mixin segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: calc(var(--control-md) - 6px);
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg-muted);
+  font-family: inherit;
+  font-size: var(--fs-ui);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background $t-fast, color $t-fast, box-shadow $t-fast;
+
+  &.active {
+    background: var(--bg-elev);
+    color: var(--fg-strong);
+    box-shadow: 0 1px 2px rgba(15, 17, 23, 0.08);
+  }
+}

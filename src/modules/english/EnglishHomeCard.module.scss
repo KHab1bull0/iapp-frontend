@@ -5,22 +5,24 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: $radius-pill;
   background: var(--warning-soft);
   color: var(--warning);
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   font-weight: 600;
 }
 
 .sub {
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 
 .count {
-  font-size: 20px;
-  line-height: 28px;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
   font-weight: 700;
   color: var(--fg-strong);
 }

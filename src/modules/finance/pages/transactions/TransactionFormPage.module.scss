@@ -35,7 +35,7 @@
   width: 36px;
   height: 36px;
   flex-shrink: 0;
-  border-radius: $radius-md;
+  border-radius: var(--radius-md);
   background: transparent;
   border: none;
   display: inline-flex;
@@ -49,8 +49,8 @@
 }
 
 .h1 {
-  font-size: 18px;
-  line-height: 24px;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--fg-strong);
@@ -61,18 +61,19 @@
   white-space: nowrap;
 }
 
-// The document scrolls, so this is just the content column.
+// The document scrolls, so this is just the content column: the shared page
+// column, narrowed for a single form and kept clear of the notch/home bar.
 .body {
+  @include page;
   flex: 1;
-  padding: 20px 16px;
-  padding-bottom: calc(24px + var(--safe-bottom));
-  padding-left: max(16px, var(--safe-left));
-  padding-right: max(16px, var(--safe-right));
+  max-width: 640px;
+  padding-bottom: calc(var(--page-pad) + var(--safe-bottom));
+  padding-left: max(var(--page-pad), var(--safe-left));
+  padding-right: max(var(--page-pad), var(--safe-right));
 }
 
 .inner {
-  max-width: 640px;
-  margin: 0 auto;
+  min-width: 0;
 }
 
 .state {
@@ -80,13 +81,15 @@
 }
 
 .stateTitle {
-  font-size: 15px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   font-weight: 600;
   color: var(--fg-strong);
 }
 
 .stateSub {
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 

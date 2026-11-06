@@ -71,9 +71,9 @@
 .add {
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
-  margin-top: -14px;
+  width: var(--control-lg);
+  height: var(--control-lg);
+  margin-top: -16px;
   border: 4px solid var(--bg-elev);
   border-radius: $radius-pill;
   background: var(--primary);

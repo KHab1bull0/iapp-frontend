@@ -1,23 +1,25 @@
-@use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
 .period {
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 
 .label {
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 
 .spent {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 6px;
-  margin-top: 2px;
-  font-size: 30px;
-  line-height: 38px;
+  column-gap: 8px;
+  margin-top: 4px;
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--fg-strong);
@@ -25,7 +27,7 @@
 }
 
 .currency {
-  font-size: 14px;
+  font-size: var(--fs-meta);
   font-weight: 600;
   color: var(--fg-muted);
 }
@@ -38,13 +40,15 @@
 }
 
 .income {
-  font-size: 16px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   font-weight: 600;
   color: var(--success);
 }
 
 .balance {
-  font-size: 16px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   font-weight: 600;
   color: var(--fg-strong);
 }
@@ -60,7 +64,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 

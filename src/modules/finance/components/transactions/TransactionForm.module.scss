@@ -4,7 +4,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
 }
 
 // The amount, large and centred: the one thing every entry needs.
@@ -20,15 +20,12 @@
 }
 
 .amountInput {
-  font-size: 44px;
-  line-height: 52px;
+  font-size: var(--fs-hero);
+  line-height: var(--lh-hero);
   font-weight: 800;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   color: inherit;
-}
-
-.amountInput {
   width: 100%;
   min-width: 0;
   max-width: 320px;
@@ -42,7 +39,7 @@
 }
 
 .amountSfx {
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 600;
   color: var(--fg-muted);
 }
@@ -52,14 +49,16 @@
 }
 
 .fieldLabel {
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   font-weight: 600;
   color: var(--fg-muted);
 }
 
 .hint {
   margin: 0;
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 
@@ -72,15 +71,15 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 40px;
-  padding: 0 14px;
+  gap: 8px;
+  height: var(--control-md); // 44px on touch: a chip is a tap target
+  padding: 0 12px;
   border: 1.5px solid var(--border);
-  border-radius: $radius-pill;
+  border-radius: var(--radius-pill);
   background: var(--bg-elev);
   color: var(--fg);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: 500;
   cursor: pointer;
   transition: border-color $t-fast, background $t-fast;
@@ -102,27 +101,28 @@
 .input {
   width: 100%;
   min-width: 0;
-  height: 46px;
-  padding: 0 14px;
+  height: calc(var(--control-md) - 2px);
+  padding: 0 12px;
   border: none;
   background: transparent;
   color: var(--fg-strong);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--fs-ui);
   outline: none;
 
   &::placeholder { color: var(--fg-muted); }
 }
 
 .fieldErr {
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   font-weight: 500;
   color: var(--danger);
 }
 
 .formActions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 
   > * { flex: 1; }
 }

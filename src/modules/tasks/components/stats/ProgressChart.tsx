@@ -65,7 +65,7 @@ export function ProgressChart({ data, bars, height = 180 }: { data: ChartPoint[]
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: 'var(--fg-muted)' }}
+            tick={{ fontSize: 12, fill: 'var(--fg-muted)' }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
@@ -74,7 +74,7 @@ export function ProgressChart({ data, bars, height = 180 }: { data: ChartPoint[]
           <YAxis
             yAxisId="total"
             allowDecimals={false}
-            tick={{ fontSize: 11, fill: 'var(--fg-muted)' }}
+            tick={{ fontSize: 12, fill: 'var(--fg-muted)' }}
             axisLine={false}
             tickLine={false}
             width={32}

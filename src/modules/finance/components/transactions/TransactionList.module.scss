@@ -1,38 +1,9 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
+// One day's rows on one flat surface.
 .card {
-  @include card-base;
-}
-
-.emptyCard {
-  @include card-base;
-  @include empty-base;
-}
-
-.emptyGlyph {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  background: var(--slate-100);
-  color: var(--fg-muted);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 4px;
-
-  :global(.theme-dark) & { background: var(--slate-800); }
-}
-
-.emptyTitle {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--fg-strong);
-}
-
-.emptySub {
-  font-size: 13px;
-  color: var(--fg-muted);
+  @include surface;
 }
 
 .dayGroup {
@@ -45,19 +16,18 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 0 6px;
+  gap: 8px;
+  // Lines up with the rows' icons below.
+  padding: 0 16px;
 }
 
 .dayLabel {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--fg-muted);
+  @include section-label;
 }
 
 .dayTotal {
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
 
@@ -68,7 +38,7 @@
 .groups {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--section-gap);
 }
 
 .loadMore {
@@ -78,7 +48,6 @@
 }
 
 .txList {
-  padding: 0;
   overflow: hidden;
 }
 
@@ -120,14 +89,12 @@
 
 // The whole row opens it for editing.
 .txMain {
+  @include row;
   flex: 1;
   min-width: 0;
   display: grid;
-  grid-template-columns: 42px 1fr auto;
-  align-items: center;
-  gap: 12px;
-  min-height: 64px;
-  padding: 10px 8px 10px 16px;
+  grid-template-columns: var(--tile-md) 1fr auto;
+  padding-right: 8px;
   border: none;
   background: transparent;
   color: inherit;
@@ -138,27 +105,23 @@
   &:hover { background: var(--row-hover); }
 }
 
+// Category emoji: a circle is fine for these (pill radius).
 .txCat {
-  width: 42px;
-  height: 42px;
-  border-radius: $radius-pill;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 19px;
-  flex-shrink: 0;
+  @include icon-tile(var(--tile-md));
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-title);
 }
 
 .txMeta {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .txTitle {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 500;
   color: var(--fg-strong);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -166,7 +129,8 @@
 }
 
 .txSub {
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -175,8 +139,9 @@
 
 .txAmt {
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 600;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   white-space: nowrap;
 
   &.amtIn  { color: var(--success); }
@@ -186,9 +151,9 @@
 .txDel {
   @include touch-target(6px);
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: $radius-sm;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  border-radius: var(--radius-sm);
   background: transparent;
   border: none;
   color: var(--fg-muted);
@@ -217,24 +182,22 @@
 
 @include bp-desktop {
   .txMain {
-    grid-template-columns: 36px minmax(0, 1fr) 200px 64px 150px;
-    min-height: 52px;
+    grid-template-columns: var(--tile-md) minmax(0, 1fr) 200px 64px 150px;
+    // One line per row here, so the one-line height.
+    min-height: var(--row-h-sm);
     gap: 16px;
-    padding: 8px 8px 8px 16px;
   }
-
-  .txCat { width: 36px; height: 36px; font-size: 17px; }
 
   // The note alone; category and time get their own columns.
   .txSub { display: none; }
-  .txTitle { font-weight: 500; }
 
   .colCategory {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
-    font-size: 14px;
+    font-size: var(--fs-ui);
+    line-height: var(--lh-ui);
     color: var(--fg);
     white-space: nowrap;
     overflow: hidden;
@@ -243,7 +206,8 @@
 
   .colTime {
     display: block;
-    font-size: 13px;
+    font-size: var(--fs-meta);
+    line-height: var(--lh-meta);
     color: var(--fg-muted);
     font-variant-numeric: tabular-nums;
   }
@@ -255,5 +219,5 @@
   flex-shrink: 0;
   width: 8px;
   height: 8px;
-  border-radius: $radius-pill;
+  border-radius: var(--radius-pill);
 }

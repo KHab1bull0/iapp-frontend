@@ -70,7 +70,7 @@ export function MonthlyBarChart({ data }: Props) {
               // Compact notation ("1,2 mln"): full so'm figures overflowed the
               // fixed axis width on phones.
               tickFormatter={formatAxis}
-              tick={{ fontSize: 11, fill: 'var(--fg-muted)' }}
+              tick={{ fontSize: 12, fill: 'var(--fg-muted)' }}
               axisLine={false}
               tickLine={false}
               width={48}

@@ -20,13 +20,14 @@
 .toast {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px 10px 12px;
-  border-radius: 12px;
+  gap: 12px;
+  padding: 8px 16px 8px 12px;
+  border-radius: $radius-md;
   background: var(--bg-elev);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-md);
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   animation: toastIn 220ms var(--ease-house);
   pointer-events: auto;
 }
@@ -58,7 +59,7 @@
   background: transparent;
   color: var(--primary);
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   font-weight: 600;
   cursor: pointer;
 

@@ -2,14 +2,7 @@
 @use '@/core/styles/mixins' as *;
 
 .page {
-  padding: 32px;
-  max-width: var(--page-w);
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-
-  @include bp-tablet { padding: 20px 16px; }
+  @include page;
 }
 
 .grid {
@@ -26,12 +19,12 @@
 .avatar {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: var(--tile-lg);
+  height: var(--tile-lg);
   border-radius: $radius-pill;
   background: var(--avatar-bg);
   color: var(--avatar-fg);
-  font-size: 17px;
+  font-size: var(--fs-title);
   font-weight: 700;
   text-decoration: none;
 

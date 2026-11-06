@@ -1,0 +1,48 @@
+@use '@/core/styles/mixins' as *;
+@use '@/modules/finance/styles/segmented' as *;
+
+// Finance → Settings. The back link and page heading still come from the
+// app's settings styles so this page reads like its siblings; the column and
+// the card follow the spec's building blocks.
+
+.page {
+  @include page;
+  // The settings pages' single, narrower column.
+  max-width: 720px;
+}
+
+.card {
+  @include card;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.title {
+  @include card-title;
+}
+
+.btnSecondary {
+  @include btn-secondary;
+  @include btn-size-sm;
+}
+
+.tabs {
+  @include segmented;
+  align-self: flex-start;
+}
+
+.tab {
+  @include segment;
+}
+
+.skeletonText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

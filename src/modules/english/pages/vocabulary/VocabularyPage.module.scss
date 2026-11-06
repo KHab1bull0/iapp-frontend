@@ -18,18 +18,12 @@
 }
 
 .search {
+  @include input-wrap-base;
   flex: 1 1 240px;
-  display: flex;
-  align-items: center;
   gap: 8px;
-  height: 44px;
-  padding: 0 14px;
-  border: 1px solid var(--border);
-  border-radius: $radius-pill;
-  background: var(--bg-elev);
+  height: var(--control-md);
+  padding: 0 12px;
   color: var(--fg-muted);
-
-  &:focus-within { border-color: var(--primary); }
 }
 
 .searchInput {
@@ -40,7 +34,10 @@
   background: transparent;
   color: var(--fg-strong);
   font-family: inherit;
-  font-size: 16px;
+  font-size: var(--fs-ui);
+
+  // iOS zooms the page into any field under 16px when it takes focus.
+  @supports (-webkit-touch-callout: none) { font-size: 16px; }
 }
 
 .filters {
@@ -53,25 +50,22 @@
   @include field-focus;
   flex: 1;
   min-width: 0;
-  height: 44px;
-  padding: 0 14px;
+  height: var(--control-md);
+  padding: 0 12px;
   border: 1px solid var(--border);
-  border-radius: $radius-pill;
+  border-radius: var(--radius-md);
   background: var(--bg-elev);
   color: var(--fg);
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--fs-ui);
 
   @supports (-webkit-touch-callout: none) { font-size: 16px; }
 }
 
 .row {
+  @include row;
   width: 100%;
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 14px;
   border: none;
   background: transparent;
   font-family: inherit;
@@ -86,11 +80,11 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .word {
-  font-size: 15px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   font-weight: 600;
   color: var(--fg-strong);
   overflow: hidden;
@@ -99,7 +93,8 @@
 }
 
 .translation {
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -111,16 +106,19 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 3px;
-  font-size: 12px;
+  gap: 4px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg-muted);
 }
 
 .badge {
-  padding: 1px 8px;
+  padding: 0 8px;
   border-radius: $radius-pill;
   background: var(--hover-bg);
   color: var(--primary);
+  font-size: var(--fs-badge);
+  line-height: var(--lh-meta);
   font-weight: 600;
 }
 
@@ -139,18 +137,17 @@
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) 140px 160px 130px;
     align-items: center;
     gap: 16px;
-    padding: 10px 18px;
+    padding: 8px 16px;
   }
+
+  // One line per word here, so the one-line row height.
+  .row { min-height: var(--row-h-sm); }
 
   .head {
     padding-top: 12px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--border);
-    font-size: var(--fs-caption);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--fg-muted);
+    @include section-label;
   }
 
   .head + .row { border-top: none; }
@@ -159,14 +156,18 @@
   .main,
   .meta { display: contents; }
 
-  .translation { font-size: 14px; color: var(--fg); }
+  // Table cells: the review date reads at the secondary size.
+  .meta { font-size: var(--fs-meta); line-height: var(--lh-meta); }
+
+  .translation { font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--fg); }
 
   .badge { justify-self: start; }
 
   .category,
   .category:empty {
     display: block;
-    font-size: 14px;
+    font-size: var(--fs-ui);
+    line-height: var(--lh-ui);
     color: var(--fg);
   }
 }

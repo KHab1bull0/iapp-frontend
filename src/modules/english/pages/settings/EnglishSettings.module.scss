@@ -1,32 +1,37 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
-
-
 .help {
-  margin: 4px 0 0;
-  font-size: 13px;
+  margin: 0;
+  padding: 0 4px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 
-.help { padding: 0 4px; }
-
+// Same height whether a row is read or being edited (inputs are --control-md).
 .row,
 .addRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
+  @include row;
 
   & + & { border-top: 1px solid var(--border); }
 }
 
 .addRow { background: var(--row-hover); }
 
+// Add / edit forms: on a phone the buttons drop under the fields rather than
+// squeezing the name input to nothing.
+.addRow,
+form.row {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
 .name {
   flex: 1;
   min-width: 0;
-  font-size: 14px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   font-weight: 500;
   color: var(--fg-strong);
   overflow: hidden;
@@ -35,7 +40,8 @@
 }
 
 .sub {
-  font-size: 12px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
   white-space: nowrap;
 }
@@ -43,27 +49,27 @@
 .input,
 .daysInput {
   @include field-focus;
-  height: 36px;
+  height: var(--control-md);
   min-width: 0;
-  padding: 0 10px;
+  padding: 0 12px;
   border: 1px solid var(--border);
-  border-radius: $radius-md;
+  border-radius: var(--radius-md);
   background: var(--bg-elev);
   color: var(--fg-strong);
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--fs-ui);
 
   @supports (-webkit-touch-callout: none) { font-size: 16px; }
 }
 
-.input { flex: 1; }
+.input { flex: 1 1 120px; }
 .daysInput { width: 80px; flex-shrink: 0; }
 
 .iconBtn {
   @include touch-target(4px);
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: var(--control-sm);
+  height: var(--control-sm);
   border: none;
   border-radius: $radius-sm;
   background: transparent;
@@ -75,9 +81,10 @@
   &:hover { background: var(--icon-btn-hover); color: var(--fg-strong); }
 }
 
+// Same height as the inputs they sit beside.
 .btnPrimary {
   @include btn-primary;
-  @include btn-size-sm;
+  @include btn-size-md;
   flex-shrink: 0;
 
   &:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -85,6 +92,6 @@
 
 .btnGhost {
   @include btn-secondary;
-  @include btn-size-sm;
+  @include btn-size-md;
   flex-shrink: 0;
 }

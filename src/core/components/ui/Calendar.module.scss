@@ -13,7 +13,8 @@
 }
 
 .month {
-  font-size: 16px;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
   font-weight: 600;
   color: var(--fg-strong);
 }
@@ -21,10 +22,10 @@
 .nav {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: var(--control-md);
+  height: var(--control-md);
   border: none;
-  border-radius: $radius-pill;
+  border-radius: $radius-md;
   background: transparent;
   color: var(--fg);
   cursor: pointer;
@@ -35,11 +36,11 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 4px;
 }
 
 .weekday {
-  padding: 6px 0;
+  padding: 8px 0;
   text-align: center;
   font-size: var(--fs-caption);
   font-weight: 600;
@@ -54,7 +55,7 @@
   background: transparent;
   color: var(--fg);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--fs-ui);
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   transition: background $t-fast;

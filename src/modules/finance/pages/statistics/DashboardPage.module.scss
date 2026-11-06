@@ -1,15 +1,7 @@
-@use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
 .page {
-  padding: 32px;
-  max-width: var(--page-w);
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-
-  @include bp-tablet { padding: 16px; }
+  @include page;
 }
 
 .toolbar {
@@ -22,13 +14,13 @@
 .row2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: var(--stack-gap);
 }
 
 .chartGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: var(--section-gap);
   align-items: start;
 
   @include bp-tablet { grid-template-columns: 1fr; }

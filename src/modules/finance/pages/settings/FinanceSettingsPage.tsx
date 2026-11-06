@@ -6,24 +6,27 @@ import { ChevronLeft, Plus } from 'lucide-react'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { AddCategoryDialog } from '@/modules/finance/components/categories/AddCategoryDialog'
 import { CategoryList } from '@/modules/finance/components/categories/CategoryList'
-// Shell styles, so the page looks like the app's other settings pages.
 import { useFinanceT } from '@/modules/finance/i18n'
-import s from '@/pages/settings/settings.module.scss'
+// Shell styles (back link, page heading), so the page looks like the app's
+// other settings pages; the column, card and rows are this module's own.
+import shell from '@/pages/settings/settings.module.scss'
+import rows from '@/modules/finance/components/categories/CategoryList.module.scss'
+import s from './FinanceSettingsPage.module.scss'
 import { Skeleton } from '@/core/components/ui/Skeleton'
 
 type CatTab = 'expense' | 'income'
 
 function CategoriesSkeleton() {
   return (
-    <div className={s.catGrid}>
+    <div className={rows.catGrid}>
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className={s.catCard} aria-hidden>
-          <Skeleton width={36} height={36} radius={10} />
+        <div key={i} className={rows.catCard} aria-hidden>
+          <Skeleton width={36} height={36} radius={8} />
           <div className={s.skeletonText}>
             <Skeleton width={80} height={14} />
             <Skeleton width={50} height={12} />
           </div>
-          <Skeleton width={28} height={28} radius={8} />
+          <Skeleton width={32} height={32} radius={8} />
         </div>
       ))}
     </div>
@@ -44,19 +47,19 @@ export function FinanceSettingsPage() {
   return (
     <div className={s.page}>
       {/* Opened from Settings → Modules, so that is where back leads. */}
-      <Link to="/settings" className={s.backLink}>
+      <Link to="/settings" className={shell.backLink}>
         <ChevronLeft size={18} /> {t.settingsLink}
       </Link>
-      <header className={s.pageHead}>
+      <header className={shell.pageHead}>
         <div>
-          <h1 className={s.h1}>{t.categories.settingsTitle}</h1>
-          <div className={s.pageSub}>{t.categories.settingsSub}</div>
+          <h1 className={shell.h1}>{t.categories.settingsTitle}</h1>
+          <div className={shell.pageSub}>{t.categories.settingsSub}</div>
         </div>
       </header>
 
-      <div className={clsx(s.card, s.settingsCard)}>
+      <div className={s.card}>
         <div className={s.cardHead}>
-          <h2 className={s.h3}>{t.categories.title}</h2>
+          <h2 className={s.title}>{t.categories.title}</h2>
           <button className={s.btnSecondary} onClick={() => setDialogOpen(true)}>
             <Plus size={14} /> {t.categories.new}
           </button>

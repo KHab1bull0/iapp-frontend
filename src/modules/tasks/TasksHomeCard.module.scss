@@ -1,22 +1,22 @@
 @use '@/core/styles/variables' as *;
 
 .ringText {
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .sub {
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
   color: var(--fg-muted);
 }
 
 .skeletons {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .overdue {
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
   font-weight: 600;
   color: var(--danger);
 }
@@ -30,7 +30,7 @@
 
 .more {
   align-self: flex-start;
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
   font-weight: 600;
   color: var(--primary);
   text-decoration: none;

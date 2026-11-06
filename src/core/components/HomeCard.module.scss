@@ -1,18 +1,9 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
+// A page card: flat surface, --radius-lg, standard padding (Spec v2).
 .card {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 16px;
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: $radius-xl;
-  box-shadow: var(--shadow-sm);
-  min-width: 0;
-
-  @include bp-medium { padding: 20px; }
+  @include card;
 }
 
 .head {
@@ -25,10 +16,10 @@
 .titleLink {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
-  margin: -6px;
-  padding: 6px;
+  margin: -8px;
+  padding: 8px;
   border-radius: $radius-md;
   color: inherit;
   text-decoration: none;
@@ -37,29 +28,26 @@
 }
 
 .icon {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: $radius-md;
+  @include icon-tile(var(--tile-md));
   background: var(--primary-soft);
   color: var(--primary);
-  flex-shrink: 0;
 }
 
 .title {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--fg-strong);
+  @include card-title;
+  // One line: a long name gives way (…) before it wraps under a badge.
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.chevron { color: var(--fg-subtle); }
+.chevron { flex-shrink: 0; color: var(--fg-subtle); }
 
 .accessory { flex-shrink: 0; }
 
 .body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--stack-gap);
   min-width: 0;
 }

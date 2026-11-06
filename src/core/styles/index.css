@@ -53,22 +53,42 @@
   --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
 
   /*
-    Type scale (docs/design/design-system.md). Body is 16px on phones, close
-    to the iOS 17pt default, and 15px on wider screens where text sits
-    farther from the eye. Nothing that has to be read goes under 12px; 11px is
-    only for the bottom bar's labels, as on iOS.
+    Type scale — docs/design/design-system.md ("Spec v2"). Eight sizes, no
+    others. Body is 16px on phones (close to iOS's 17pt) and 15px on wider
+    screens. Nothing readable under 12px; 11px only for bottom-bar labels.
   */
-  --fs-display: 32px; --lh-display: 40px;
-  --fs-h1: 24px;    --lh-h1: 32px;    --fw-h1: 700;
-  --fs-h2: 20px;    --lh-h2: 28px;    --fw-h2: 600;
-  --fs-h3: 16px;    --lh-h3: 24px;    --fw-h3: 600;
-  --fs-body: 16px;  --lh-body: 24px;  --fw-body: 400;
-  --fs-small: 13px; --lh-small: 18px; --fw-small: 400;
-  --fs-caption: 12px; --lh-caption: 16px;
-  --fs-badge: 12px; --lh-badge: 16px; --fw-badge: 500;
-  --fs-number-xl: 40px; --lh-number-xl: 48px;
-  --fs-number-lg: 28px; --lh-number-lg: 36px;
-  --fs-number-md: 18px; --lh-number-md: 24px;
+  --fs-caption: 12px; --lh-caption: 16px;   /* section labels, axis ticks, hints */
+  --fs-meta:    13px; --lh-meta:    18px;   /* secondary line of a row, sub-labels */
+  --fs-ui:      15px; --lh-ui:      20px;   /* row titles, buttons, inputs, nav */
+  --fs-body:    16px; --lh-body:    24px;   /* running text (15px from tablet up) */
+  --fs-title:   17px; --lh-title:   24px;   /* card titles, empty-state titles */
+  --fs-h2:      20px; --lh-h2:      28px;   /* sheet / dialog titles */
+  --fs-h1:      24px; --lh-h1:      32px;   /* desktop page titles, stat values */
+  --fs-display: 32px; --lh-display: 40px;   /* phone large titles */
+  --fs-hero:    40px; --lh-hero:    48px;   /* the one headline number on a screen */
+  /* Kept as aliases for older code. */
+  --fs-small: var(--fs-meta); --lh-small: var(--lh-meta);
+  --fs-h3: var(--fs-title); --lh-h3: var(--lh-title);
+  --fs-badge: var(--fs-caption); --lh-badge: var(--lh-caption);
+
+  /*
+    Sizes of things — one per role, so the same kind of control is the same
+    height everywhere. Touch layouts grow controls to 44px (see below).
+  */
+  --control-sm: 32px;   /* compact: chips, segmented options, icon buttons in rows */
+  --control-md: 40px;   /* inputs, buttons, selects, toolbar items */
+  --control-lg: 52px;   /* the primary action of a sheet or screen */
+  --row-h:      56px;   /* a list row with a second line */
+  --row-h-sm:   48px;   /* a one-line list row */
+  --tile-sm:    28px;   /* icon tile inside a small control */
+  --tile-md:    36px;   /* icon tile of a row or card header */
+  --tile-lg:    44px;   /* avatar, hero icon */
+
+  /* Layout rhythm. */
+  --page-pad:    16px;  /* page edge padding (32px on desktop) */
+  --section-gap: 20px;  /* between blocks of a page (24px on desktop) */
+  --card-pad:    16px;  /* inside a card (20px on desktop) */
+  --stack-gap:   12px;  /* between items inside a card */
 
   --ease-house: cubic-bezier(0.2, 0, 0, 1);
   /* Overshoots a little: for things that pop in (a tick, a sheet). */
@@ -104,6 +124,20 @@
 
 @media (min-width: 768px) {
   :root { --fs-body: 15px; --lh-body: 22px; }
+}
+
+/* Desktop: more room at the edges, Linear-dense controls. */
+@media (min-width: 1024px) {
+  :root {
+    --page-pad: 32px;
+    --section-gap: 24px;
+    --card-pad: 20px;
+  }
+}
+
+/* Touch screens: every control at least 44px tall (Apple HIG). */
+@media (pointer: coarse) {
+  :root { --control-md: 44px; }
 }
 
 /* ---------- Light theme ---------- */

@@ -1,12 +1,5 @@
 @use '@/core/styles/mixins' as *;
 
 .page {
-  padding: 32px;
-  max-width: 720px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-
-  @include bp-tablet { padding: 16px; }
+  @include page;
 }

@@ -1,19 +1,15 @@
 @use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
 
 .group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .groupTitle {
-  margin: 0;
+  @include section-label;
   padding: 0 16px;
-  font-size: var(--fs-caption);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--fg-muted);
 }
 
 .groupFooter {
@@ -24,9 +20,7 @@
 }
 
 .list {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: $radius-lg;
+  @include surface;
   overflow: hidden;
 
   > * + * { border-top: 1px solid var(--border); }
@@ -37,8 +31,8 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  min-height: 56px;
-  padding: 10px 16px;
+  min-height: var(--row-h);
+  padding: 8px 16px;
   border: none;
   background: transparent;
   color: inherit;
@@ -56,12 +50,7 @@
 }
 
 .icon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: $radius-sm;
+  @include icon-tile(var(--tile-md));
   background: var(--primary-soft);
   color: var(--primary);
 
@@ -73,12 +62,11 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .title {
-  font-size: 15px;
-  line-height: 20px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   font-weight: 500;
   color: var(--fg-strong);
   overflow: hidden;
@@ -89,8 +77,8 @@
 }
 
 .subtitle {
-  font-size: var(--fs-small);
-  line-height: 18px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -99,7 +87,8 @@
 
 .value {
   flex-shrink: 0;
-  font-size: 15px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   font-weight: 600;
   color: var(--fg-strong);
   font-variant-numeric: tabular-nums;

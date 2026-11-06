@@ -37,7 +37,7 @@ const AlertDialogContent = forwardRef<
       className={cn(
         'fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2',
         'w-[calc(100%-2rem)] max-w-md max-h-[85dvh] overflow-y-auto overscroll-contain',
-        'rounded-lg border bg-background p-6 shadow-xl transition-all data-[state=open]:opacity-100 data-[state=closed]:opacity-0',
+        'rounded-[var(--radius-xl)] border bg-background p-6 shadow-[var(--shadow-lg)] transition-all data-[state=open]:opacity-100 data-[state=closed]:opacity-0',
         className,
       )}
       {...props}
@@ -67,7 +67,7 @@ const AlertDialogTitle = forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Title
     ref={ref}
-    className={cn('text-lg font-semibold', className)}
+    className={cn('text-[length:var(--fs-h2)] leading-[var(--lh-h2)] font-semibold', className)}
     {...props}
   />
 ))
@@ -79,7 +79,7 @@ const AlertDialogDescription = forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Description
     ref={ref}
-    className={cn('text-sm text-muted-foreground', className)}
+    className={cn('text-[length:var(--fs-meta)] leading-[var(--lh-meta)] text-muted-foreground', className)}
     {...props}
   />
 ))

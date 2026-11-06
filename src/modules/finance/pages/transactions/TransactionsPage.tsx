@@ -26,7 +26,7 @@ function ListSkeleton() {
           <div className={s.skeletonCard}>
             {[0, 1, 2].map((i) => (
               <div key={i} className={s.skeletonRow}>
-                <Skeleton width={42} height={42} radius={999} />
+                <Skeleton width={36} height={36} radius={999} />
                 <div className={s.skeletonText}>
                   <Skeleton width={`${50 + g * 15}%`} height={14} />
                   <Skeleton width="35%" height={12} />

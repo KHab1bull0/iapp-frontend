@@ -1,22 +1,25 @@
-@use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
 .card {
-  @include card-base;
-  border-radius: $radius-xl;
+  @include card;
 }
 
+// Floats over the chart, so it is the one thing here with a shadow.
 .tip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   padding: 8px 12px;
   min-width: 140px;
   background: var(--bg-elev);
   border: 1px solid var(--border);
-  border-radius: $radius-md;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   font-variant-numeric: tabular-nums;
 
-  p { margin: 2px 0; }
+  p { margin: 0; }
 }
 
 .tipTitle {
@@ -26,26 +29,24 @@
 
 .cardHead {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
   gap: 8px;
 }
 
 .h3 {
-  font-size: var(--fs-h3);
-  line-height: var(--lh-h3);
-  font-weight: 600;
-  color: var(--fg-strong);
-  margin: 0;
+  @include card-title;
 }
 
 .barLegend {
   display: flex;
   gap: 16px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--fg-muted);
-  margin-bottom: 12px;
+
+  > span { display: inline-flex; align-items: center; gap: 8px; }
 }
 
 .dot {
@@ -53,8 +54,6 @@
   width: 10px;
   height: 10px;
   border-radius: 3px;
-  margin-right: 6px;
-  vertical-align: middle;
 }
 
 .empty {
@@ -62,12 +61,14 @@
 }
 
 .emptyTitle {
-  font-size: 15px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   font-weight: 600;
   color: var(--fg-strong);
 }
 
 .emptySub {
-  font-size: 13px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }

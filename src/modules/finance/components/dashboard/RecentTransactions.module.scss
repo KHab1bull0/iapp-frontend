@@ -1,27 +1,26 @@
-@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
 
 .recent {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  gap: 8px;
   padding: 0 4px;
 }
 
 .title {
-  margin: 0;
-  font-size: var(--fs-h3);
-  font-weight: 600;
-  color: var(--fg-strong);
+  @include card-title;
 }
 
 .link {
-  font-size: var(--fs-small);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   font-weight: 600;
   color: var(--primary);
   text-decoration: none;
@@ -31,12 +30,9 @@
 
 .amtIn { color: var(--success); }
 
+// Category emoji: a circle is fine for these (pill radius).
 .emoji {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: $radius-pill;
-  font-size: 18px;
+  @include icon-tile(var(--tile-md));
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-title);
 }

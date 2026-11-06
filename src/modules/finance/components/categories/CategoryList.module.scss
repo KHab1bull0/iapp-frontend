@@ -10,29 +10,27 @@
 
 .catCard {
   display: grid;
-  grid-template-columns: 36px 1fr 28px 28px;
+  grid-template-columns: var(--tile-md) 1fr var(--control-sm) var(--control-sm);
   gap: 12px;
   align-items: center;
-  padding: 10px 0;
+  // Row rhythm; no side padding because the settings card already pads it.
+  min-height: var(--row-h);
+  padding: 8px 0;
 
   & + & { border-top: 1px solid var(--border); }
 }
 
 .catEmoji {
-  width: 36px;
-  height: 36px;
-  border-radius: $radius-md;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
+  @include icon-tile(var(--tile-md));
+  font-size: var(--fs-title);
 }
 
 .catMeta { min-width: 0; }
 
 .catName {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 500;
   color: var(--fg-strong);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -40,22 +38,18 @@
 }
 
 .catType {
-  font-size: 11px;
+  @include section-label;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--fg-muted);
-  margin-top: 2px;
 }
 
 .catEdit,
 .catDel {
   // Grow the hit area to 44x44 without disturbing the row grid — the 12px
   // column gap absorbs the bleed on each side.
-  @include touch-target(8px);
-  width: 28px;
-  height: 28px;
-  border-radius: $radius-sm;
+  @include touch-target(6px);
+  width: var(--control-sm);
+  height: var(--control-sm);
+  border-radius: var(--radius-sm);
   background: transparent;
   border: none;
   color: var(--fg-muted);
