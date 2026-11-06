@@ -49,6 +49,9 @@
   max-width: 640px;
   margin: 0 auto;
   padding: 20px 16px calc(24px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .state {

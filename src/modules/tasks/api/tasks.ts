@@ -46,6 +46,37 @@ export interface TasksSummary {
   doneToday: number
 }
 
+/** How a task repeats, as the stats group it. */
+export type RepeatKind = 'once' | 'daily' | 'weekly' | 'monthly'
+export const REPEAT_KINDS: RepeatKind[] = ['once', 'daily', 'weekly', 'monthly']
+
+export interface StatsTotals {
+  total: number
+  thisMonth: number
+  /** Days in a row with a completion, ending today (or yesterday, before today is done). */
+  currentStreak: number
+  bestStreak: number
+  firstDoneOn: string | null
+  lastDoneOn: string | null
+}
+
+/** One day or month: how many times it was done then, and the running total so far. */
+export interface StatsPoint {
+  count: number
+  cumulative: number
+}
+
+export interface TaskStats extends StatsTotals {
+  daily: (StatsPoint & { day: string })[]
+  monthly: (StatsPoint & { month: string })[]
+}
+
+export interface OverallTaskStats extends StatsTotals {
+  byKind: Record<RepeatKind, number>
+  daily: (StatsPoint & Record<RepeatKind, number> & { day: string })[]
+  monthly: (StatsPoint & Record<RepeatKind, number> & { month: string })[]
+}
+
 /**
  * Every key starts with 'tasks', so invalidating ['tasks'] after any change
  * refreshes the lists, Today and the home card together.
@@ -56,6 +87,8 @@ export const tasksKeys = {
   list: (status: 'active' | 'done') => ['tasks', 'list', status] as const,
   one: (id: string) => ['tasks', 'item', id] as const,
   summary: (day: string) => ['tasks', 'summary', day] as const,
+  stats: (id: string, day: string) => ['tasks', 'stats', id, day] as const,
+  overallStats: (day: string) => ['tasks', 'stats', 'all', day] as const,
 }
 
 export async function fetchToday(today: string): Promise<TodayTasks> {
@@ -110,5 +143,15 @@ export async function undoCompletion(completionId: string): Promise<Task> {
 
 export async function fetchTasksSummary(today: string): Promise<TasksSummary> {
   const { data } = await api.get<TasksSummary>('/tasks/summary', { params: { today } })
+  return data
+}
+
+export async function fetchTaskStats(id: string, today: string): Promise<TaskStats> {
+  const { data } = await api.get<TaskStats>(`/tasks/items/${id}/stats`, { params: { today } })
+  return data
+}
+
+export async function fetchOverallStats(today: string): Promise<OverallTaskStats> {
+  const { data } = await api.get<OverallTaskStats>('/tasks/stats', { params: { today } })
   return data
 }

@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { fetchTask, tasksKeys } from '@/modules/tasks/api/tasks'
 import { TaskForm } from '@/modules/tasks/components/TaskForm'
+import { TaskStatsCard } from '@/modules/tasks/components/stats/TaskStatsCard'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from './TaskFormPage.module.scss'
 
@@ -44,7 +45,10 @@ export function TaskFormPage() {
         {isEdit && isLoading ? null : isEdit && (isError || !task) ? (
           <div className={s.state}>{t.notFound}</div>
         ) : (
-          <TaskForm task={task ?? null} onSaved={close} onCancel={close} />
+          <>
+            {task && <TaskStatsCard taskId={task.id} />}
+            <TaskForm task={task ?? null} onSaved={close} onCancel={close} />
+          </>
         )}
       </div>
     </div>

@@ -1,7 +1,7 @@
-import { CalendarCheck, ListChecks, ListTodo } from 'lucide-react'
+import { BarChart3, CalendarCheck, ListChecks, ListTodo } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
 import { TasksHomeCard } from './TasksHomeCard'
-import { AllTasksPage, TaskFormPage, TodayPage } from './pages/lazy'
+import { AllTasksPage, TaskFormPage, TaskStatsPage, TodayPage } from './pages/lazy'
 
 export const tasks: ModuleManifest = {
   id: 'tasks',
@@ -11,10 +11,12 @@ export const tasks: ModuleManifest = {
   pages: [
     { label: { uz: 'Bugun', en: 'Today' }, path: '/tasks', icon: CalendarCheck, end: true },
     { label: { uz: 'Barcha vazifalar', en: 'All tasks' }, path: '/tasks/all', icon: ListTodo },
+    { label: { uz: 'Statistika', en: 'Statistics' }, path: '/tasks/stats', icon: BarChart3 },
   ],
   routes: [
     { index: true, element: <TodayPage /> },
     { path: 'all', element: <AllTasksPage /> },
+    { path: 'stats', element: <TaskStatsPage /> },
   ],
   // Touch-only full-screen add/edit; desktop opens the dialog instead.
   fullscreenRoutes: [

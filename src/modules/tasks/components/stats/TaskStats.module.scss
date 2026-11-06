@@ -1,0 +1,209 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+// Shared by the stats card in the task editor and the Statistics page.
+
+.card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+
+  &.four {
+    grid-template-columns: repeat(4, 1fr);
+    @include bp-mobile { grid-template-columns: 1fr 1fr; }
+  }
+}
+
+.tile {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.tileLabel,
+.tileSub {
+  font-size: 11px;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tileValue {
+  margin-top: 2px;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 700;
+  color: var(--fg-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.segments {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: $radius-md;
+  background: var(--slate-100);
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+.segment {
+  height: 28px;
+  padding: 0 12px;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: var(--fg-muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &.active {
+    background: var(--bg-elev);
+    color: var(--fg-strong);
+    box-shadow: 0 1px 2px rgba(15, 17, 23, 0.08);
+  }
+}
+
+.chart {
+  width: 100%;
+  min-width: 0;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--fg);
+
+  > span { display: inline-flex; align-items: center; gap: 6px; }
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.tooltip {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  padding: 8px 12px;
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(15, 17, 23, 0.08);
+  font-variant-numeric: tabular-nums;
+
+  p { margin: 2px 0; }
+}
+
+.tooltipTitle {
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.tooltipTotal {
+  color: var(--fg);
+}
+
+.empty {
+  @include empty-base;
+  padding: 16px 8px;
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.emptySub {
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.skeleton {
+  height: 120px;
+  border-radius: $radius-md;
+  background: var(--border);
+  opacity: 0.5;
+}
+
+// Horizontal bars: completions per repeat type.
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(90px, 30%) 1fr 40px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.rowLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg);
+  min-width: 0;
+}
+
+.track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--slate-100);
+  overflow: hidden;
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+.bar {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.rowValue {
+  text-align: right;
+  font-weight: 600;
+  color: var(--fg-strong);
+  font-variant-numeric: tabular-nums;
+}
