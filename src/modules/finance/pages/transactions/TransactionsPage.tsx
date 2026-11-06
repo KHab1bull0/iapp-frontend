@@ -1,12 +1,9 @@
 import { useState } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
-import { Plus, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { fetchTransactions, type PaginatedTransactions } from '@/modules/finance/api/transactions'
 import { fetchCategories } from '@/modules/finance/api/categories'
-import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
-import { AddTransactionDialog } from '@/modules/finance/components/transactions/AddTransactionDialog'
 import { TransactionFilters as FiltersBar } from '@/modules/finance/components/transactions/TransactionFilters'
 import { FilterDrawer } from '@/modules/finance/components/transactions/FilterDrawer'
 import { TransactionToolbar } from '@/modules/finance/components/transactions/TransactionToolbar'
@@ -49,17 +46,8 @@ function ListSkeleton() {
 
 export function TransactionsPage() {
   const t = useFinanceT()
-  const [dialogOpen, setDialogOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [filters, setFilters] = useState<TransactionFilterState>(DEFAULT_FILTERS)
-  const navigate = useNavigate()
-  const isMobile = useIsMobile()
-
-  // Touch layouts get a full page; desktop keeps the dialog.
-  function openAdd() {
-    if (isMobile) navigate('/finance/transactions/new')
-    else setDialogOpen(true)
-  }
 
   // Search waits for typing to pause; the other filters apply at once.
   const search = useDebouncedValue(filters.search, 300)
@@ -127,13 +115,6 @@ export function TransactionsPage() {
         />
       )}
 
-      <AddTransactionDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-
-      {/* The only way to add: this page's own floating button, on every width.
-          Phones get the full-screen form, desktop the dialog. */}
-      <button className={s.fab} onClick={openAdd} aria-label={t.tx.add}>
-        <Plus size={22} />
-      </button>
     </div>
   )
 }

@@ -8,7 +8,7 @@ import { word } from './test-data'
 import { EnglishHomeCard } from './EnglishHomeCard'
 
 describe('EnglishHomeCard', () => {
-  test('shows how many words are waiting and links to Review', () => {
+  test('shows how many words are waiting and starts the review in one tap', () => {
     const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
     qc.setQueryData(englishKeys.review(todayYmd()), [word('a'), word('b'), word('c')])
     render(
@@ -19,6 +19,7 @@ describe('EnglishHomeCard', () => {
       </QueryClientProvider>,
     )
     expect(screen.getByText('3 words to memorise')).toBeTruthy()
-    expect(screen.getByRole('link').getAttribute('href')).toBe('/english/review')
+    expect(screen.getByRole('link', { name: 'Start reviewing' }).getAttribute('href')).toBe('/english/review')
+    expect(screen.getByRole('link', { name: 'Open English' }).getAttribute('href')).toBe('/english')
   })
 })

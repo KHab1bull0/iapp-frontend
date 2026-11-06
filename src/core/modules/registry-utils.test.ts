@@ -4,7 +4,7 @@ import type { ModuleManifest } from './types'
 import {
   activeModule,
   bottomNavItems,
-  fabBehavior,
+  quickAddActions,
   isModulePage,
   legacyRedirect,
   validateRegistry,
@@ -22,10 +22,10 @@ const fake = (id: string): ModuleManifest => ({
 const withQuickAdd = (id: string, n: number): ModuleManifest => ({
   ...fake(id),
   quickAdd: Array.from({ length: n }, (_, i) => ({
-    id: `new-${i}`,
+    id: `${id}-${i}`,
     label: `New ${i}`,
     icon: Box,
-    to: `/${id}/new-${i}`,
+    Editor: () => null,
   })),
 })
 
@@ -73,32 +73,32 @@ describe('isModulePage', () => {
 })
 
 describe('bottomNavItems', () => {
-  const kinds = (n: number) =>
-    bottomNavItems(Array.from({ length: n }, (_, i) => fake(`m${i}`))).map((i) =>
+  const kinds = (n: number, add = true) =>
+    bottomNavItems(Array.from({ length: n }, (_, i) => (add ? withQuickAdd(`m${i}`, 1) : fake(`m${i}`)))).map((i) =>
       i.kind === 'module' ? i.module.id : i.kind,
     )
 
-  test('shows every module when there are at most 3', () => {
-    expect(kinds(1)).toEqual(['home', 'm0', 'settings'])
-    expect(kinds(3)).toEqual(['home', 'm0', 'm1', 'm2', 'settings'])
+  test('puts "+" in the middle and shows every module when there are at most 3', () => {
+    expect(kinds(1)).toEqual(['home', 'add', 'm0'])
+    expect(kinds(2)).toEqual(['home', 'm0', 'add', 'm1'])
+    expect(kinds(3)).toEqual(['home', 'm0', 'add', 'm1', 'm2'])
   })
 
-  test('shows the first 2 and a menu when there are more than 3', () => {
-    expect(kinds(4)).toEqual(['home', 'm0', 'm1', 'menu', 'settings'])
+  test('shows the first 2 and "More" when there are more than 3', () => {
+    expect(kinds(4)).toEqual(['home', 'm0', 'add', 'm1', 'menu'])
+  })
+
+  test('has no "+" when nothing can be added', () => {
+    expect(kinds(2, false)).toEqual(['home', 'm0', 'm1'])
   })
 })
 
-describe('fabBehavior', () => {
-  test('none without quick-add actions', () => {
-    expect(fabBehavior([fake('a')])).toEqual({ kind: 'none' })
-  })
-
-  test('direct with exactly one action', () => {
-    expect(fabBehavior([withQuickAdd('a', 1)])).toMatchObject({ kind: 'direct', to: '/a/new-0' })
-  })
-
-  test('menu with several actions across modules', () => {
-    expect(fabBehavior([withQuickAdd('a', 1), withQuickAdd('b', 1)]).kind).toBe('menu')
+describe('quickAddActions', () => {
+  test("lists the current module's actions first", () => {
+    const a = withQuickAdd('a', 1)
+    const b = withQuickAdd('b', 2)
+    expect(quickAddActions([a, b]).map((x) => x.id)).toEqual(['a-0', 'b-0', 'b-1'])
+    expect(quickAddActions([a, b], b).map((x) => x.id)).toEqual(['b-0', 'b-1', 'a-0'])
   })
 })
 

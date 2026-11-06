@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ThemeProvider } from '@/core/contexts/ThemeContext'
@@ -45,11 +45,26 @@ describe('AppLayout driven by the registry', () => {
     expect(within(aside).queryByText('Overview')).toBeNull()
   })
 
-  test('bottom nav has Home, Finance and Settings', () => {
+  test('bottom nav has Today, "+" and Finance; Settings is not a tab', () => {
     renderShell('/finance')
     const navs = screen.getAllByRole('navigation')
     const bottom = navs[navs.length - 1]
-    expect(linkTargets(bottom)).toEqual(['/', '/finance', '/settings'])
+    expect(linkTargets(bottom)).toEqual(['/', '/finance'])
+    expect(within(bottom).getByRole('button', { name: 'Add' })).toBeTruthy()
+  })
+
+  test('"+" opens the add sheet straight away when there is only one thing to add', () => {
+    renderShell('/finance')
+    const navs = screen.getAllByRole('navigation')
+    fireEvent.click(within(navs[navs.length - 1]).getByRole('button', { name: 'Add' }))
+    expect(screen.getByRole('dialog', { name: 'Add transaction' })).toBeTruthy()
+  })
+
+  test('the sidebar has an Add button and a command search', () => {
+    const { container } = renderShell('/finance')
+    const aside = container.querySelector('aside')!
+    expect(within(aside).getByRole('button', { name: /Add/ })).toBeTruthy()
+    expect(within(aside).getByRole('button', { name: 'Commands' })).toBeTruthy()
   })
 
   test('module tabs show inside finance and not elsewhere', () => {
@@ -66,7 +81,7 @@ describe('AppLayout driven by the registry', () => {
     localStorage.setItem('iapp-lang', 'uz')
     renderShell('/finance')
     const aside = document.querySelector('aside')!
-    expect(within(aside).getByRole('link', { name: 'Bosh sahifa' })).toBeTruthy()
+    expect(within(aside).getByRole('link', { name: 'Bugun' })).toBeTruthy()
     expect(within(aside).getByRole('link', { name: 'Sozlamalar' })).toBeTruthy()
   })
 
@@ -80,10 +95,8 @@ describe('AppLayout driven by the registry', () => {
     expect(screen.queryByRole('navigation', { name: 'Finance pages' })).toBeNull()
   })
 
-  test('the shell shows no add button: finance keeps its own on the transactions page', () => {
-    renderShell('/')
-    expect(screen.queryByRole('button', { name: 'Add transaction' })).toBeNull()
-    renderShell('/finance')
+  test('pages draw no add button of their own: "+" in the shell is the one way', () => {
+    renderShell('/finance/transactions')
     expect(screen.queryByRole('button', { name: 'Add transaction' })).toBeNull()
   })
 })

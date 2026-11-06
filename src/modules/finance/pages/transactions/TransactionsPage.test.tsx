@@ -28,11 +28,9 @@ function renderPage() {
 describe('TransactionsPage', () => {
   beforeEach(() => vi.mocked(fetchTransactions).mockClear())
 
-  test('has the floating add button and no title or header button', () => {
+  test('has no add button of its own: the shell "+" adds', () => {
     renderPage()
-    expect(screen.getAllByRole('button', { name: 'Add transaction' })).toHaveLength(1)
-    expect(screen.queryByRole('heading', { name: 'Transactions' })).toBeNull()
-    expect(screen.queryByRole('button', { name: 'Add' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Add transaction' })).toBeNull()
   })
 
   test('the top toolbar has search, category and a button for the full filters', async () => {

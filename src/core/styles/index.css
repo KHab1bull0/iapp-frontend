@@ -96,8 +96,8 @@
   --bottom-nav-h: calc(56px + var(--safe-bottom));
   /* Mobile header: 56px of content plus the status-bar zone. */
   --mobile-header-h: calc(56px + var(--safe-top));
-  /* The FAB floats above the nav; content must clear both. */
-  --fab-clearance: calc(var(--bottom-nav-h) + 76px);
+  /* Room left under the content so its last row clears the bottom bar. */
+  --fab-clearance: calc(var(--bottom-nav-h) + 24px);
 }
 
 @media (min-width: 768px) {

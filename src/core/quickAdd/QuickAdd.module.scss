@@ -1,0 +1,51 @@
+@use '@/core/styles/variables' as *;
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  padding-bottom: 8px;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 96px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: $radius-lg;
+  background: var(--bg);
+  color: var(--fg-strong);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color $t-fast, background $t-fast, transform 80ms;
+
+  &:hover { border-color: var(--border-strong); }
+  &:active { transform: scale(0.98); }
+
+  // The current module's action: what "+" most likely meant.
+  &.first {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-md;
+  background: var(--primary-soft);
+  color: var(--primary);
+
+  .first & {
+    background: var(--primary);
+    color: var(--primary-fg);
+  }
+}

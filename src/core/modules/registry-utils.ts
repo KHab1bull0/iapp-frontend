@@ -1,11 +1,15 @@
-import type { BottomNavItem, FabBehavior, ModuleManifest } from './types'
+import type { BottomNavItem, ModuleManifest, QuickAddAction } from './types'
 
 const ID_PATTERN = /^[a-z][a-z0-9-]*$/
 
 /** Top-level paths the shell owns; a module may not take them. */
 const RESERVED_IDS = new Set(['home', 'settings', 'auth', 'menu'])
 
-/** Bottom nav has five slots: Home, up to three modules, Settings. */
+/**
+ * Bottom nav has five slots (Material's and iOS's upper limit): Today, the
+ * "+" in the middle, and three for modules. Settings sits behind the avatar
+ * on Today instead of taking a slot.
+ */
 const MAX_BOTTOM_NAV_MODULES = 3
 
 /** Throws on the first registry mistake, so it surfaces at startup rather than as a broken route. */
@@ -40,19 +44,22 @@ export function isModulePage(module: ModuleManifest, pathname: string): boolean 
 export function bottomNavItems(modules: ModuleManifest[]): BottomNavItem[] {
   const shown =
     modules.length <= MAX_BOTTOM_NAV_MODULES ? modules : modules.slice(0, MAX_BOTTOM_NAV_MODULES - 1)
-  return [
+  const items: BottomNavItem[] = [
     { kind: 'home' },
     ...shown.map((module): BottomNavItem => ({ kind: 'module', module })),
     ...(shown.length < modules.length ? [{ kind: 'menu' } as const] : []),
-    { kind: 'settings' },
   ]
+  if (quickAddActions(modules).length > 0) items.splice(Math.ceil(items.length / 2), 0, { kind: 'add' })
+  return items
 }
 
-export function fabBehavior(modules: ModuleManifest[]): FabBehavior {
-  const actions = modules.flatMap((m) => m.quickAdd ?? [])
-  if (actions.length === 0) return { kind: 'none' }
-  if (actions.length === 1) return { kind: 'direct', to: actions[0].to, label: actions[0].label }
-  return { kind: 'menu', actions }
+/**
+ * Every module's quick-add actions, those of `current` (the module on screen)
+ * first: on the Finance page "+" offers a transaction before a task.
+ */
+export function quickAddActions(modules: ModuleManifest[], current?: ModuleManifest): QuickAddAction[] {
+  const ordered = current ? [current, ...modules.filter((m) => m !== current)] : modules
+  return ordered.flatMap((m) => m.quickAdd ?? [])
 }
 
 // Pre-module URLs, still opened by installed PWAs and bookmarks. Remove once

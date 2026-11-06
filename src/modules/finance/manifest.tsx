@@ -1,6 +1,7 @@
-import { ArrowLeftRight, ChartColumn, Wallet } from 'lucide-react'
+import { ArrowLeftRight, ChartColumn, Receipt, Wallet } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
 import { FinanceHomeCard } from './FinanceHomeCard'
+import { AddTransactionDialog } from './components/transactions/AddTransactionDialog'
 import {
   DashboardPage,
   FinanceSettingsPage,
@@ -29,5 +30,8 @@ export const finance: ModuleManifest = {
     { path: 'transactions/:id/edit', element: <TransactionFormPage /> },
   ],
   homeCard: FinanceHomeCard,
+  quickAdd: [
+    { id: 'finance.transaction', label: { uz: 'Tranzaksiya', en: 'Transaction' }, icon: Receipt, Editor: AddTransactionDialog },
+  ],
   settingsPath: '/finance/settings',
 }

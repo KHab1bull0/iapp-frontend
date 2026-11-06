@@ -4,7 +4,8 @@ import { useToday } from '@/core/hooks/useToday'
 import { formatDate, parseApiDate } from '@/core/lib/format'
 import { fetchTaskStats, tasksKeys } from '@/modules/tasks/api/tasks'
 import { useTasksT } from '@/modules/tasks/i18n'
-import { DONE_COLOR, ProgressChart } from './ProgressChart'
+import { CHART } from '@/core/lib/chartColors'
+import { ProgressChart } from './ProgressChart'
 import { PeriodToggle, Tile } from './parts'
 import { toChartPoints, type Period } from './points'
 import s from './TaskStats.module.scss'
@@ -57,7 +58,7 @@ export function TaskStatsCard({ taskId }: { taskId: string }) {
           </div>
           <ProgressChart
             data={toChartPoints(data, period)}
-            bars={[{ key: 'count', label: t.stats.doneCount, color: DONE_COLOR }]}
+            bars={[{ key: 'count', label: t.stats.doneCount, color: CHART.primarySoft }]}
             height={150}
           />
         </>

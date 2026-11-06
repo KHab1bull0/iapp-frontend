@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Plus, RefreshCw, Search } from 'lucide-react'
+import { RefreshCw, Search } from 'lucide-react'
 import { useToday } from '@/core/hooks/useToday'
 import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
 import {
@@ -114,9 +114,6 @@ export function VocabularyPage() {
       )}
 
       {editor.dialog}
-      <button className={s.fab} onClick={editor.openNew} aria-label={t.vocab.add}>
-        <Plus size={22} />
-      </button>
     </div>
   )
 }

@@ -40,6 +40,9 @@ export const financeMessages = defineMessages(
     },
     home: {
       failed: "Bu oyni yuklab bo'lmadi",
+      open: 'Moliyani ochish',
+      spent: 'Shu oy sarflandi',
+      addExpense: "Xarajat qo'shish",
     },
     tx: {
       add: "Tranzaksiya qo'shish",
@@ -161,6 +164,9 @@ export const financeMessages = defineMessages(
     },
     home: {
       failed: "Couldn't load this month",
+      open: 'Open Finance',
+      spent: 'Spent this month',
+      addExpense: 'Add expense',
     },
     tx: {
       add: 'Add transaction',

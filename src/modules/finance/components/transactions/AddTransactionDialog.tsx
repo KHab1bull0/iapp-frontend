@@ -1,12 +1,7 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/core/components/ui/dialog'
+import { Sheet } from '@/core/components/ui/Sheet'
 import type { Transaction } from '@/modules/finance/api/transactions'
 import { useFinanceT } from '@/modules/finance/i18n'
 import { TransactionForm } from './TransactionForm'
-
-/**
- * Desktop container for TransactionForm. Touch layouts route to
- * TransactionFormPage instead — see useIsMobile at the call sites.
- */
 
 interface Props {
   open: boolean
@@ -14,25 +9,18 @@ interface Props {
   transaction?: Transaction | null
 }
 
+/** Add/edit a transaction: a bottom sheet on phones, a dialog on desktop. */
 export function AddTransactionDialog({ open, onOpenChange, transaction }: Props) {
   const t = useFinanceT()
-  const isEdit = !!transaction
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{isEdit ? t.tx.editTitle : t.tx.addTitle}</DialogTitle>
-        </DialogHeader>
-
-        <TransactionForm
-          // Remount on open so a fresh dialog never shows the previous entry.
-          key={`${transaction?.id ?? 'new'}-${String(open)}`}
-          transaction={transaction}
-          onSaved={() => onOpenChange(false)}
-          onCancel={() => onOpenChange(false)}
-        />
-      </DialogContent>
-    </Dialog>
+    <Sheet open={open} onOpenChange={onOpenChange} title={transaction ? t.tx.editTitle : t.tx.addTitle}>
+      <TransactionForm
+        // Remount on open so a fresh sheet never shows the previous entry.
+        key={`${transaction?.id ?? 'new'}-${String(open)}`}
+        transaction={transaction}
+        onSaved={() => onOpenChange(false)}
+        onCancel={() => onOpenChange(false)}
+      />
+    </Sheet>
   )
 }

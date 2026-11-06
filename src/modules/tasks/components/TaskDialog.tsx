@@ -1,10 +1,10 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/core/components/ui/dialog'
+import { Sheet } from '@/core/components/ui/Sheet'
 import type { Task } from '@/modules/tasks/api/tasks'
 import { useTasksT } from '@/modules/tasks/i18n'
 import { TaskForm } from './TaskForm'
 import { TaskStatsCard } from './stats/TaskStatsCard'
 
-/** Desktop container for TaskForm; touch layouts route to TaskFormPage. */
+/** Add/edit a task: a bottom sheet on phones, a dialog on desktop. */
 export function TaskDialog({
   open,
   onOpenChange,
@@ -16,20 +16,15 @@ export function TaskDialog({
 }) {
   const t = useTasksT()
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{task ? t.editTask : t.newTask}</DialogTitle>
-        </DialogHeader>
-        {task && open && <TaskStatsCard taskId={task.id} />}
-        <TaskForm
-          // Remount on open so a fresh dialog never shows the previous task.
-          key={`${task?.id ?? 'new'}-${String(open)}`}
-          task={task ?? null}
-          onSaved={() => onOpenChange(false)}
-          onCancel={() => onOpenChange(false)}
-        />
-      </DialogContent>
-    </Dialog>
+    <Sheet open={open} onOpenChange={onOpenChange} title={task ? t.editTask : t.newTask}>
+      {task && open && <TaskStatsCard taskId={task.id} />}
+      <TaskForm
+        // Remount on open so a fresh sheet never shows the previous task.
+        key={`${task?.id ?? 'new'}-${String(open)}`}
+        task={task ?? null}
+        onSaved={() => onOpenChange(false)}
+        onCancel={() => onOpenChange(false)}
+      />
+    </Sheet>
   )
 }

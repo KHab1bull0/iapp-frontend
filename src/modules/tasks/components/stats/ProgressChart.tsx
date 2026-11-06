@@ -3,9 +3,7 @@ import { CHART } from '@/core/lib/chartColors'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from './TaskStats.module.scss'
 
-export const TOTAL_COLOR = CHART.primary
-/** The per-day +1 bars under one task's line. */
-export const DONE_COLOR = CHART.primarySoft
+const TOTAL_COLOR = CHART.primary
 
 export interface BarSeries {
   key: string

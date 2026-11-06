@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import clsx from 'clsx'
-import { useNavigate } from 'react-router-dom'
 import { Pencil, Trash2, Wallet } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { deleteTransaction, type Transaction } from '@/modules/finance/api/transactions'
 import { formatSigned, formatDay, formatAmount, parseApiDate, CURRENCY } from '@/core/lib/format'
 import { toast } from '@/core/components/ui/toast'
@@ -124,14 +122,7 @@ export function TransactionList({
 }: Props) {
   const t = useFinanceT()
   const [editing, setEditing] = useState<Transaction | null>(null)
-  const navigate = useNavigate()
-  const isMobile = useIsMobile()
-
-  // Touch layouts get a full page; desktop keeps the dialog.
-  function openEdit(tx: Transaction) {
-    if (isMobile) navigate(`/finance/transactions/${tx.id}/edit`)
-    else setEditing(tx)
-  }
+  const openEdit = (tx: Transaction) => setEditing(tx)
 
   if (transactions.length === 0) {
     return (

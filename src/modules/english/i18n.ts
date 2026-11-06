@@ -19,6 +19,12 @@ export const englishMessages = defineMessages(
     home: {
       failed: "Takrorlash ro'yxatini yuklab bo'lmadi",
       count: (n: number) => `${n} ta so'z yodlashni kutyapti`,
+      open: 'Ingliz tilini ochish',
+      start: 'Yodlashni boshlash',
+      streak: (n: number) => `${n} kun ketma-ket`,
+      reviewedToday: (n: number) => `Bugun ${n} ta javob`,
+      allDone: "Bugungi so'zlar takrorlandi",
+      addWord: "So'z qo'shish",
     },
     review: {
       failed: "Ro'yxatni yuklab bo'lmadi",
@@ -148,6 +154,12 @@ export const englishMessages = defineMessages(
     home: {
       failed: "Couldn't load the review stack",
       count: (n: number) => `${n} word${n === 1 ? '' : 's'} to memorise`,
+      open: 'Open English',
+      start: 'Start reviewing',
+      streak: (n: number) => `${n}-day streak`,
+      reviewedToday: (n: number) => `${n} answered today`,
+      allDone: "Today's words are done",
+      addWord: 'Add a word',
     },
     review: {
       failed: 'Failed to load the stack',

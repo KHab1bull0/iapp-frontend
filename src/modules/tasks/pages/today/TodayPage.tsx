@@ -1,19 +1,12 @@
-import { useState } from 'react'
 import clsx from 'clsx'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Plus, RefreshCw } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { RefreshCw } from 'lucide-react'
 import { useToday } from '@/core/hooks/useToday'
-import { toast } from '@/core/components/ui/toast'
-import {
-  completeTask,
-  fetchToday,
-  tasksKeys,
-  undoCompletion,
-  type Task,
-} from '@/modules/tasks/api/tasks'
+import { fetchToday, tasksKeys } from '@/modules/tasks/api/tasks'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { byTime } from '@/modules/tasks/lib/repeat'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
+import { useCompleteTask } from '@/modules/tasks/useCompleteTask'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
 
@@ -21,45 +14,12 @@ import s from '../TasksPages.module.scss'
 export function TodayPage() {
   const today = useToday()
   const m = useTasksT()
-  const qc = useQueryClient()
   const editor = useTaskEditor()
-  // Tasks whose completion is being saved; their tick is disabled meanwhile.
-  const [pending, setPending] = useState<Set<string>>(new Set())
+  const { complete, undo, pending } = useCompleteTask(today)
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.today(today),
     queryFn: () => fetchToday(today),
-  })
-
-  const refresh = () => qc.invalidateQueries({ queryKey: tasksKeys.all })
-
-  const undo = useMutation({
-    mutationFn: (completionId: string) => undoCompletion(completionId),
-    onSuccess: refresh,
-    onError: () => toast(m.undoFailed, 'error'),
-  })
-
-  const complete = useMutation({
-    mutationFn: (task: Task) => completeTask(task.id, today, task.dueDate),
-    onMutate: (task) => setPending((p) => new Set(p).add(task.id)),
-    onSettled: (_r, _e, task) =>
-      setPending((p) => {
-        const next = new Set(p)
-        next.delete(task.id)
-        return next
-      }),
-    onSuccess: async ({ completionId }, task) => {
-      await refresh()
-      toast(m.doneToast(task.title), 'success', {
-        label: m.undo,
-        onClick: () => undo.mutate(completionId),
-      })
-    },
-    onError: async () => {
-      // Usually a stale copy (done elsewhere already): show the real state.
-      await refresh()
-      toast(m.completeFailed, 'error')
-    },
   })
 
   const overdue = data?.overdue ?? []
@@ -91,7 +51,7 @@ export function TodayPage() {
                     task={t}
                     today={today}
                     busy={pending.has(t.id)}
-                    onToggle={complete.mutate}
+                    onToggle={complete}
                     onOpen={editor.openEdit}
                   />
                 ))}
@@ -112,7 +72,7 @@ export function TodayPage() {
                     task={t}
                     today={today}
                     busy={pending.has(t.id)}
-                    onToggle={complete.mutate}
+                    onToggle={complete}
                     onOpen={editor.openEdit}
                   />
                 ))}
@@ -140,7 +100,7 @@ export function TodayPage() {
                     task={task}
                     today={today}
                     done
-                    onToggle={() => undo.mutate(completionId)}
+                    onToggle={() => undo(completionId)}
                     onOpen={editor.openEdit}
                   />
                 ))}
@@ -151,9 +111,6 @@ export function TodayPage() {
       )}
 
       {editor.dialog}
-      <button className={s.fab} onClick={editor.openNew} aria-label={m.add}>
-        <Plus size={22} />
-      </button>
     </div>
   )
 }

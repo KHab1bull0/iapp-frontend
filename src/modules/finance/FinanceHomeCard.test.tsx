@@ -10,7 +10,7 @@ import { FinanceHomeCard } from './FinanceHomeCard'
 const amount = (n: number) => formatAmount(n).replace(/\s+/g, ' ')
 
 describe('FinanceHomeCard', () => {
-  test("shows this month's balance, income and expense and links to finance", () => {
+  test("leads with this month's spending, then income and balance, and links to finance", () => {
     const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
     const month = currentMonth()
     qc.setQueryData(financeSummaryKey(month), {
@@ -28,10 +28,12 @@ describe('FinanceHomeCard', () => {
       </QueryClientProvider>,
     )
 
-    expect(screen.getByText(amount(750000))).toBeTruthy()
+    expect(screen.getByText('Spent this month')).toBeTruthy()
+    expect(screen.getByText(amount(250000))).toBeTruthy()
     expect(screen.getByText(`+${amount(1000000)}`)).toBeTruthy()
-    expect(screen.getByText(`−${amount(250000)}`)).toBeTruthy()
-    expect(screen.getByRole('link').getAttribute('href')).toBe('/finance')
+    expect(screen.getByText(amount(750000))).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Open Finance' }).getAttribute('href')).toBe('/finance')
+    expect(screen.getByRole('button', { name: 'Add expense' })).toBeTruthy()
   })
 
   test('opened offline, the card waits instead of crashing', () => {

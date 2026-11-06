@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { useQuery } from '@tanstack/react-query'
-import { Plus, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { useToday } from '@/core/hooks/useToday'
 import { fetchTasks, tasksKeys } from '@/modules/tasks/api/tasks'
 import { groupByDue } from '@/modules/tasks/lib/repeat'
@@ -62,9 +62,6 @@ export function AllTasksPage() {
       )}
 
       {editor.dialog}
-      <button className={s.fab} onClick={editor.openNew} aria-label={t.add}>
-        <Plus size={22} />
-      </button>
     </div>
   )
 }

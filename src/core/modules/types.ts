@@ -13,12 +13,17 @@ export interface ModulePage {
   end?: boolean
 }
 
-/** An entry behind the floating "+" button. */
+/**
+ * Something a module lets you add from anywhere: the "+" in the bottom bar,
+ * the desktop sidebar's Add button and the command palette all list these.
+ */
 export interface QuickAddAction {
+  /** Unique across modules, e.g. 'finance.transaction'. */
   id: string
   label: Text
   icon: LucideIcon
-  to: string
+  /** Opens the module's own add sheet. */
+  Editor: ComponentType<{ open: boolean; onOpenChange: (open: boolean) => void }>
 }
 
 /**
@@ -49,11 +54,6 @@ export interface ModuleManifest {
 
 export type BottomNavItem =
   | { kind: 'home' }
-  | { kind: 'settings' }
+  | { kind: 'add' }
   | { kind: 'menu' }
   | { kind: 'module'; module: ModuleManifest }
-
-export type FabBehavior =
-  | { kind: 'none' }
-  | { kind: 'direct'; to: string; label: Text }
-  | { kind: 'menu'; actions: QuickAddAction[] }

@@ -1,51 +1,92 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ListChecks } from 'lucide-react'
+import { ListChecks, Plus } from 'lucide-react'
+import { HomeCard } from '@/core/components/HomeCard'
+import { EmptyState } from '@/core/components/ui/EmptyState'
+import { ProgressRing } from '@/core/components/ui/Progress'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useToday } from '@/core/hooks/useToday'
+import { useQuickAdd } from '@/core/quickAdd/context'
 import { fetchToday, tasksKeys } from './api/tasks'
+import { TaskRow } from './components/TaskRow'
+import { byTime } from './lib/repeat'
+import { useCompleteTask } from './useCompleteTask'
+import { useTaskEditor } from './useTaskEditor'
 import { useTasksT } from './i18n'
 import s from './TasksHomeCard.module.scss'
 
-const PREVIEW = 3
+const PREVIEW = 5
 
-/** Home: how much is due today, and the first few things, overdue first. */
+/** Home: today's tasks, ticked off right here, with how far through the day you are. */
 export function TasksHomeCard() {
   const m = useTasksT()
   const today = useToday()
+  const quickAdd = useQuickAdd()
+  const editor = useTaskEditor()
+  const { complete, pending } = useCompleteTask(today)
   // Same key as the Today page, so the two share one request and stay in step.
   const { data, isError } = useQuery({
     queryKey: tasksKeys.today(today),
     queryFn: () => fetchToday(today),
   })
 
-  const due = data ? [...data.overdue, ...data.today] : []
+  const due = data ? [...data.overdue, ...byTime(data.today)] : []
+  const done = data?.doneToday.length ?? 0
+  const all = due.length + done
 
   return (
-    <Link to="/tasks" className={s.card}>
-      <div className={s.head}>
-        <span className={s.icon}>
-          <ListChecks size={16} />
-        </span>
-        <span className={s.title}>{m.title}</span>
-        {data && data.overdue.length > 0 && <span className={s.overdue}>{m.home.overdue(data.overdue.length)}</span>}
-      </div>
-
+    <HomeCard
+      icon={ListChecks}
+      title={m.title}
+      to="/tasks"
+      linkLabel={m.home.open}
+      accessory={
+        all > 0 && (
+          <ProgressRing value={done} max={all} label={m.home.progress(done, all)} size={44} stroke={5}>
+            <span className={s.ringText}>
+              {done}/{all}
+            </span>
+          </ProgressRing>
+        )
+      }
+    >
       {isError ? (
         <div className={s.sub}>{m.home.failed}</div>
       ) : !data ? (
-        <span className={s.skeleton} />
+        <div className={s.skeletons}>
+          <Skeleton height={20} width="80%" />
+          <Skeleton height={20} width="60%" />
+        </div>
       ) : due.length === 0 ? (
-        <div className={s.sub}>{m.nothingToday}</div>
+        <EmptyState
+          compact
+          title={done > 0 ? m.home.allDone : m.nothingToday}
+          description={done > 0 ? m.home.allDoneSub : undefined}
+          action={{ label: m.home.addTask, icon: Plus, onClick: () => quickAdd.open('tasks.task') }}
+        />
       ) : (
         <>
-          <div className={s.count}>{m.home.due(due.length)}</div>
-          <ul className={s.list}>
+          {data.overdue.length > 0 && <div className={s.overdue}>{m.home.overdue(data.overdue.length)}</div>}
+          <div className={s.list}>
             {due.slice(0, PREVIEW).map((t) => (
-              <li key={t.id}>{t.title}</li>
+              <TaskRow
+                key={t.id}
+                task={t}
+                today={today}
+                busy={pending.has(t.id)}
+                onToggle={complete}
+                onOpen={editor.openEdit}
+              />
             ))}
-          </ul>
+          </div>
+          {due.length > PREVIEW && (
+            <Link to="/tasks" className={s.more}>
+              {m.home.more(due.length - PREVIEW)}
+            </Link>
+          )}
         </>
       )}
-    </Link>
+      {editor.dialog}
+    </HomeCard>
   )
 }

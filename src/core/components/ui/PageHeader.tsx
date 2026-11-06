@@ -7,31 +7,38 @@ interface Props {
   subtitle?: ReactNode
   /** Buttons on the right of the title. */
   actions?: ReactNode
-  /** Under the title: a module's page switcher, filters. Sticks to the top with the compact title. */
+  /** Under the title: filters, a period switcher. */
   children?: ReactNode
+  /**
+   * Show a compact title bar once the large one scrolls away (phones). Off on
+   * module pages, where the pinned page switcher already says where you are.
+   */
+  compactBar?: boolean
 }
 
 /**
  * A page's large title. Once it scrolls away, a compact bar with the same
  * title stays at the top (on phones), so you always know where you are.
  */
-export function PageHeader({ title, subtitle, actions, children }: Props) {
+export function PageHeader({ title, subtitle, actions, children, compactBar = false }: Props) {
   const titleRef = useRef<HTMLHeadingElement>(null)
   const [compact, setCompact] = useState(false)
 
   useEffect(() => {
     const el = titleRef.current
-    if (!el || typeof IntersectionObserver === 'undefined') return
+    if (!compactBar || !el || typeof IntersectionObserver === 'undefined') return
     const io = new IntersectionObserver(([entry]) => setCompact(!entry.isIntersecting), { threshold: 0 })
     io.observe(el)
     return () => io.disconnect()
-  }, [])
+  }, [compactBar])
 
   return (
     <>
-      <div className={clsx(s.bar, compact && s.barShown)} aria-hidden={!compact}>
-        <span className={s.barTitle}>{title}</span>
-      </div>
+      {compactBar && (
+        <div className={clsx(s.bar, compact && s.barShown)} aria-hidden={!compact}>
+          <span className={s.barTitle}>{title}</span>
+        </div>
+      )}
       <header className={s.header}>
         <div className={s.titleRow}>
           <div className={s.titles}>

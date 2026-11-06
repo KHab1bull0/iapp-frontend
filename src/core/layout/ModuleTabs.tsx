@@ -5,22 +5,22 @@ import { useText } from '@/core/i18n'
 import { useCoreT } from '@/core/i18n/useCoreT'
 import s from './ModuleTabs.module.scss'
 
-/** Mobile switcher between a module's pages; the desktop sidebar groups them instead. */
+/**
+ * Phones: a module's pages as a segmented switcher pinned under the status
+ * bar. Desktop lists them in the sidebar instead.
+ */
 export function ModuleTabs({ module }: { module: ModuleManifest }) {
   const t = useCoreT()
   const text = useText()
   return (
-    <nav className={s.tabs} aria-label={t.nav.pagesOf(text(module.name))}>
-      {module.pages.map(({ path, label, end }) => (
-        <NavLink
-          key={path}
-          to={path}
-          end={end}
-          className={({ isActive }) => clsx(s.tab, isActive && s.active)}
-        >
-          {text(label)}
-        </NavLink>
-      ))}
-    </nav>
+    <div className={s.wrap}>
+      <nav className={s.tabs} aria-label={t.nav.pagesOf(text(module.name))}>
+        {module.pages.map(({ path, label, end }) => (
+          <NavLink key={path} to={path} end={end} className={({ isActive }) => clsx(s.tab, isActive && s.active)}>
+            {text(label)}
+          </NavLink>
+        ))}
+      </nav>
+    </div>
   )
 }
