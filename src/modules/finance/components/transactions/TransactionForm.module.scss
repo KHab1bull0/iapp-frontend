@@ -19,7 +19,6 @@
   &.amtOut { color: var(--fg-strong); }
 }
 
-.amountValue,
 .amountInput {
   font-size: 44px;
   line-height: 52px;
@@ -113,31 +112,6 @@
   outline: none;
 
   &::placeholder { color: var(--fg-muted); }
-}
-
-// Phones: digits on screen instead of the system keyboard.
-.keypad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.key {
-  display: grid;
-  place-items: center;
-  height: 52px;
-  border: none;
-  border-radius: $radius-md;
-  background: var(--icon-btn-hover);
-  color: var(--fg-strong);
-  font: inherit;
-  font-size: 22px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-  transition: background $t-fast, transform 80ms;
-
-  &:active { transform: scale(0.96); background: var(--border); }
 }
 
 .fieldErr {

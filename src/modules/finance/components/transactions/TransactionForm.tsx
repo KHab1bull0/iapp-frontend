@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Delete } from 'lucide-react'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { createTransaction, updateTransaction, type Transaction } from '@/modules/finance/api/transactions'
 import { byRecent, rememberCategory } from '@/modules/finance/lib/recentCategories'
@@ -9,14 +8,13 @@ import { CURRENCY, todayYmd } from '@/core/lib/format'
 import { DateField } from '@/core/components/ui/DateField'
 import { SegmentedControl } from '@/core/components/ui/SegmentedControl'
 import { toast } from '@/core/components/ui/toast'
-import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionForm.module.scss'
 
 /**
  * Add/edit a transaction, amount first: the number is what you came to
- * write down. Phones get a keypad of their own (no keyboard sliding over the
- * form); categories are chips, the ones you use most recently first.
+ * write down (phones open their number keyboard for it). Categories are
+ * chips, the ones you use most recently first.
  */
 
 interface Props {
@@ -40,13 +38,11 @@ function grouped(raw: string): string {
 }
 
 const MAX_DIGITS = 12
-const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', 'back'] as const
 
 export function TransactionForm({ transaction, onSaved, onCancel, className }: Props) {
   const t = useFinanceT()
   const catName = useCategoryName()
   const qc = useQueryClient()
-  const isMobile = useIsMobile()
   const isEdit = !!transaction
 
   const [type, setType] = useState<'income' | 'expense'>(transaction?.type ?? 'expense')
@@ -61,15 +57,6 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
 
   const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: fetchCategories })
   const options = byRecent(categories.filter((c) => c.type === type))
-
-  const press = (key: (typeof KEYS)[number]) => {
-    setError('')
-    if (key === 'back') return setAmount((a) => a.slice(0, -1))
-    setAmount((a) => {
-      const next = (a + key).replace(/^0+/, '')
-      return next.length > MAX_DIGITS ? a : next
-    })
-  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -113,25 +100,19 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
       />
 
       <div className={clsx(s.amount, type === 'income' ? s.amtIn : s.amtOut)}>
-        {isMobile ? (
-          <output className={s.amountValue} aria-label={t.tx.amount} aria-live="polite">
-            {type === 'income' ? '+' : '−'}
-            {grouped(amount) || '0'}
-          </output>
-        ) : (
-          <input
-            className={s.amountInput}
-            inputMode="numeric"
-            aria-label={t.tx.amount}
-            value={grouped(amount)}
-            placeholder="0"
-            onChange={(e) => {
-              const digits = e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, MAX_DIGITS)
-              setAmount(digits)
-              setError('')
-            }}
-          />
-        )}
+        <input
+          className={s.amountInput}
+          inputMode="numeric"
+          enterKeyHint="next"
+          aria-label={t.tx.amount}
+          value={grouped(amount)}
+          placeholder="0"
+          onChange={(e) => {
+            const digits = e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, MAX_DIGITS)
+            setAmount(digits)
+            setError('')
+          }}
+        />
         <span className={s.amountSfx}>{CURRENCY}</span>
       </div>
 
@@ -187,22 +168,6 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
           />
         </div>
       </label>
-
-      {isMobile && (
-        <div className={s.keypad}>
-          {KEYS.map((k) => (
-            <button
-              key={k}
-              type="button"
-              className={s.key}
-              onClick={() => press(k)}
-              aria-label={k === 'back' ? t.tx.backspace : k}
-            >
-              {k === 'back' ? <Delete size={22} /> : k}
-            </button>
-          ))}
-        </div>
-      )}
 
       {error && (
         <div className={s.fieldErr} role="alert">
