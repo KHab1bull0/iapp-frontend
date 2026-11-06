@@ -80,7 +80,7 @@ export function TasksHomeCard() {
             ))}
           </div>
           {due.length > PREVIEW && (
-            <Link to="/tasks" className={s.more}>
+            <Link to="/tasks/today" className={s.more}>
               {m.home.more(due.length - PREVIEW)}
             </Link>
           )}

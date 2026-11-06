@@ -1,4 +1,5 @@
 import { BarChart3, CalendarCheck, CircleCheck, ListChecks, ListTodo } from 'lucide-react'
+import { Navigate } from 'react-router-dom'
 import type { ModuleManifest } from '@/core/modules/types'
 import { TasksHomeCard } from './TasksHomeCard'
 import { useDueCount } from './useDueCount'
@@ -11,16 +12,19 @@ export const tasks: ModuleManifest = {
   icon: ListChecks,
   basePath: '/tasks',
   pages: [
-    { label: { uz: 'Bugun', en: 'Today' }, path: '/tasks', icon: CalendarCheck, end: true, useBadge: useDueCount },
+    // Statistics first, as in Finance and English: opening a module shows where it stands.
+    { label: { uz: 'Statistika', en: 'Statistics' }, path: '/tasks', icon: BarChart3, end: true },
+    { label: { uz: 'Bugun', en: 'Today' }, path: '/tasks/today', icon: CalendarCheck, useBadge: useDueCount },
     { label: { uz: 'Barcha vazifalar', en: 'All tasks' }, path: '/tasks/all', icon: ListTodo },
-    { label: { uz: 'Statistika', en: 'Statistics' }, path: '/tasks/stats', icon: BarChart3 },
   ],
   routes: [
-    { index: true, element: <TodayPage /> },
+    { index: true, element: <TaskStatsPage /> },
+    { path: 'today', element: <TodayPage /> },
     { path: 'all', element: <AllTasksPage /> },
-    { path: 'stats', element: <TaskStatsPage /> },
+    // Where Statistics used to be, for bookmarks.
+    { path: 'stats', element: <Navigate to="/tasks" replace /> },
   ],
-  // Touch-only full-screen add/edit; desktop opens the dialog instead.
+  // Phones add/edit on these pages; desktop opens the panel instead.
   fullscreenRoutes: [
     { path: 'new', element: <TaskFormPage /> },
     { path: ':id/edit', element: <TaskFormPage /> },
