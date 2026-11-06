@@ -42,6 +42,7 @@
 
 .input,
 .daysInput {
+  @include field-focus;
   height: 36px;
   min-width: 0;
   padding: 0 10px;

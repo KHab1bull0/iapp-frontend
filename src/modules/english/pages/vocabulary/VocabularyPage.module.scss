@@ -48,6 +48,7 @@
 }
 
 .select {
+  @include field-focus;
   flex: 1;
   min-width: 0;
   height: 44px;

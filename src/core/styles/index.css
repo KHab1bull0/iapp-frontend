@@ -309,6 +309,17 @@
     box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--primary);
     border-radius: var(--radius-md);
   }
+
+  /*
+    Text fields show focus on their own frame instead: the bordered box they
+    sit in lights up (input-wrap-base's :focus-within, or field-focus on a
+    field that is its own box). A second ring on the bare input inside that
+    frame read as a box within a box.
+  */
+  :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), textarea, select):focus-visible {
+    box-shadow: none;
+    border-radius: 0;
+  }
 }
 
 /* ---------- Page changes: a short cross-fade (View Transitions API) ----------

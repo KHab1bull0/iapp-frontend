@@ -71,6 +71,15 @@
   min-width: 0;
 }
 
+/// Focus for a field that is its own bordered box (no wrapper around it).
+@mixin field-focus {
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--ring-soft);
+    outline: none;
+  }
+}
+
 @mixin input-wrap-base {
   display: flex;
   align-items: center;
