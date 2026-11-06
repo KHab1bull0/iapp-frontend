@@ -1,17 +1,28 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { TrendingUp, TrendingDown, Wallet, RefreshCw } from 'lucide-react'
+import { Plus, RefreshCw, Scale, TrendingUp, Wallet } from 'lucide-react'
 import { fetchDashboard } from '@/modules/finance/api/stats'
-import { currentMonth, formatFullDate, formatMonthLong } from '@/core/lib/format'
-import { StatCard, StatCardSkeleton } from '@/modules/finance/components/dashboard/StatCard'
-import { MonthlyBarChart, MonthlyBarChartSkeleton } from '@/modules/finance/components/dashboard/MonthlyBarChart'
-import { CategoryDonutChart, CategoryDonutChartSkeleton } from '@/modules/finance/components/dashboard/CategoryDonutChart'
-import { RecentTransactions, RecentTransactionsSkeleton } from '@/modules/finance/components/dashboard/RecentTransactions'
+import { CURRENCY, currentMonth, formatAmount, formatSigned } from '@/core/lib/format'
+import { EmptyState } from '@/core/components/ui/EmptyState'
+import { MonthStepper } from '@/core/components/ui/MonthStepper'
+import { Skeleton } from '@/core/components/ui/Skeleton'
+import { StatGrid, StatTile } from '@/core/components/ui/StatTile'
+import { useQuickAdd } from '@/core/quickAdd/context'
+import { SpendHero } from '@/modules/finance/components/dashboard/SpendHero'
+import { CategoryBars } from '@/modules/finance/components/dashboard/CategoryBars'
+import { MonthlyBarChart } from '@/modules/finance/components/dashboard/MonthlyBarChart'
+import { RecentTransactions } from '@/modules/finance/components/dashboard/RecentTransactions'
 import { useFinanceT } from '@/modules/finance/i18n'
 import s from './DashboardPage.module.scss'
 
+/**
+ * Finance → Statistics. One question first: what has this month cost so far,
+ * and is that faster than last month? Then income and balance, where it went,
+ * the last six months and the latest entries.
+ */
 export function DashboardPage() {
   const t = useFinanceT()
+  const quickAdd = useQuickAdd()
   const [month, setMonth] = useState<string>(currentMonth)
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -19,83 +30,75 @@ export function DashboardPage() {
     queryFn: () => fetchDashboard(month),
   })
 
+  const stepper = <MonthStepper value={month} onChange={setMonth} max={currentMonth()} label={t.stats.selectMonth} />
+
   if (isError) {
     return (
-      <div className={s.page} style={{ alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <div className={s.empty}>
-          <div className={s.emptyGlyph}>
-            <span style={{ fontSize: 24 }}>⚠️</span>
-          </div>
-          <div className={s.emptyTitle}>{t.stats.failed}</div>
-          <div className={s.emptySub}>{t.stats.failedSub}</div>
-          <button className={s.btnSecondary} style={{ marginTop: 8, gap: 6 }} onClick={() => refetch()}>
-            <RefreshCw size={14} /> {t.retry}
-          </button>
-        </div>
+      <div className={s.page}>
+        <div className={s.toolbar}>{stepper}</div>
+        <EmptyState
+          title={t.stats.failed}
+          description={t.stats.failedSub}
+          action={{ label: t.retry, icon: RefreshCw, onClick: () => void refetch() }}
+        />
       </div>
     )
   }
 
-  const today = formatFullDate(new Date())
-  // Every figure below is scoped to `month` by the backend, so label it as such.
-  const periodLabel = formatMonthLong(month)
+  if (isLoading || !data) {
+    return (
+      <div className={s.page}>
+        <div className={s.toolbar}>{stepper}</div>
+        <Skeleton height={260} radius={24} />
+        <div className={s.row2}>
+          <Skeleton height={96} radius={16} />
+          <Skeleton height={96} radius={16} />
+        </div>
+        <Skeleton height={220} radius={24} />
+      </div>
+    )
+  }
 
-  // Every figure on the page follows this month, so it sits on the headline card.
-  const monthPicker = (
-    <input
-      type="month"
-      className={s.monthPicker}
-      value={month}
-      max={currentMonth()}
-      onChange={(e) => setMonth(e.target.value || currentMonth())}
-      aria-label={t.stats.selectMonth}
-    />
-  )
+  const empty = data.totalIncome === 0 && data.totalExpense === 0
 
   return (
     <div className={s.page}>
-      <header className={`${s.pageHead} ${s.desktopOnly}`}>
-        <div>
-          <h1 className={s.h1}>{t.stats.title}</h1>
-          <div className={s.pageSub}>{today}</div>
-        </div>
-      </header>
+      <div className={s.toolbar}>{stepper}</div>
 
-      {/* Balance gets the full width; income and expense share the row below. */}
-      <section className={s.statGrid}>
-        {isLoading ? (
-          <>
-            <StatCardSkeleton size="lg" />
-            <StatCardSkeleton size="sm" />
-            <StatCardSkeleton size="sm" />
-          </>
-        ) : (
-          <>
-            <StatCard size="lg" title={t.balance} value={data!.totalBalance} icon={Wallet}       tone="brand"   period={periodLabel} action={monthPicker} />
-            <StatCard size="sm" title={t.income}  value={data!.totalIncome}  icon={TrendingUp}   tone="success" period={periodLabel} />
-            <StatCard size="sm" title={t.expense} value={data!.totalExpense} icon={TrendingDown} tone="danger"  period={periodLabel} />
-          </>
-        )}
-      </section>
-
-      <section className={s.chartGrid}>
-        {isLoading ? (
-          <>
-            <CategoryDonutChartSkeleton />
-            <MonthlyBarChartSkeleton />
-          </>
-        ) : (
-          <>
-            <CategoryDonutChart data={data!.categoryBreakdown} />
-            <MonthlyBarChart data={data!.monthlyChart} />
-          </>
-        )}
-      </section>
-
-      {isLoading ? (
-        <RecentTransactionsSkeleton />
+      {empty ? (
+        <EmptyState
+          icon={Wallet}
+          title={t.stats.emptyMonth}
+          description={t.stats.emptyMonthSub}
+          action={{ label: t.tx.add, icon: Plus, onClick: () => quickAdd.open('finance.transaction') }}
+        />
       ) : (
-        <RecentTransactions transactions={data!.recentTransactions} />
+        <>
+          <SpendHero spent={data.totalExpense} daily={data.dailySpend ?? []} />
+
+          <StatGrid columns={2}>
+            <StatTile
+              label={t.income}
+              value={`+${formatAmount(data.totalIncome)}`}
+              sub={CURRENCY}
+              tone="success"
+              icon={TrendingUp}
+            />
+            <StatTile
+              label={t.balance}
+              value={formatSigned(data.totalBalance, data.totalBalance >= 0 ? 'income' : 'expense')}
+              sub={CURRENCY}
+              icon={Scale}
+            />
+          </StatGrid>
+
+          <div className={s.chartGrid}>
+            <CategoryBars data={data.categoryBreakdown} />
+            <MonthlyBarChart data={data.monthlyChart} />
+          </div>
+
+          <RecentTransactions transactions={data.recentTransactions} />
+        </>
       )}
     </div>
   )

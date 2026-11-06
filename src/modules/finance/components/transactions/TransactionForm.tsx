@@ -1,17 +1,22 @@
-import { useEffect, useState, type FormEvent, type ChangeEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { TrendingUp, TrendingDown, ChevronDown } from 'lucide-react'
+import { Delete } from 'lucide-react'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { createTransaction, updateTransaction, type Transaction } from '@/modules/finance/api/transactions'
-import { CURRENCY } from '@/core/lib/format'
+import { byRecent, rememberCategory } from '@/modules/finance/lib/recentCategories'
+import { CURRENCY, todayYmd } from '@/core/lib/format'
+import { DateField } from '@/core/components/ui/DateField'
+import { SegmentedControl } from '@/core/components/ui/SegmentedControl'
 import { toast } from '@/core/components/ui/toast'
+import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionForm.module.scss'
 
 /**
- * The add/edit form itself, with no opinion about its container. Rendered
- * inside a Dialog on desktop and inside a route page on touch layouts.
+ * Add/edit a transaction, amount first: the number is what you came to
+ * write down. Phones get a keypad of their own (no keyboard sliding over the
+ * form); categories are chips, the ones you use most recently first.
  */
 
 interface Props {
@@ -20,96 +25,68 @@ interface Props {
   onSaved: () => void
   /** Called when the user backs out. */
   onCancel: () => void
-  /** Extra class on the <form>, e.g. to let the page variant fill its column. */
   className?: string
 }
 
-function today() {
-  return new Date().toISOString().slice(0, 10)
-}
-
+/** The device's local time as HH:MM. */
 function now() {
-  return new Date().toTimeString().slice(0, 5)
+  const d = new Date()
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-function formatDisplay(raw: string): string {
-  if (!raw) return ''
-  const [int, dec] = raw.split('.')
-  const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-  return dec !== undefined ? `${grouped}.${dec}` : grouped
+/** "1234567" → "1 234 567". So'm has no sub-unit, so amounts are whole. */
+function grouped(raw: string): string {
+  return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 }
 
-function handleAmountInput(
-  e: ChangeEvent<HTMLInputElement>,
-  setter: (v: string) => void,
-) {
-  const stripped = e.target.value.replace(/\s/g, '')
-  if (/^\d*\.?\d*$/.test(stripped)) setter(stripped)
-}
+const MAX_DIGITS = 12
+const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', 'back'] as const
 
 export function TransactionForm({ transaction, onSaved, onCancel, className }: Props) {
   const t = useFinanceT()
   const catName = useCategoryName()
   const qc = useQueryClient()
+  const isMobile = useIsMobile()
   const isEdit = !!transaction
 
   const [type, setType] = useState<'income' | 'expense'>(transaction?.type ?? 'expense')
-  const [amount, setAmount] = useState(transaction ? String(transaction.amount) : '')
+  const [amount, setAmount] = useState(transaction ? String(Math.round(transaction.amount)) : '')
   const [categoryId, setCategoryId] = useState(transaction?.category.id ?? '')
-  const [date, setDate] = useState(transaction ? transaction.date.slice(0, 10) : today)
-  const [time, setTime] = useState(
-    transaction?.time ?? transaction?.createdAt?.slice(11, 16) ?? now,
-  )
+  // Local calendar day: toISOString() is UTC, a day behind before 5am here.
+  const [date, setDate] = useState(transaction ? transaction.date.slice(0, 10) : todayYmd())
+  const [time, setTime] = useState(transaction?.time ?? transaction?.createdAt?.slice(11, 16) ?? now())
   const [note, setNote] = useState(transaction?.note ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [touched, setTouched] = useState(false)
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: fetchCategories,
-  })
+  const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: fetchCategories })
+  const options = byRecent(categories.filter((c) => c.type === type))
 
-  const filtered = categories.filter((c) => c.type === type)
-
-  // The dialog keeps this component mounted between openings, so re-sync when
-  // it is handed a different transaction. The page variant remounts instead.
-  useEffect(() => {
-    if (!transaction) return
-    setType(transaction.type)
-    setAmount(String(transaction.amount))
-    setCategoryId(transaction.category.id)
-    setDate(transaction.date.slice(0, 10))
-    setTime(transaction.time ?? transaction.createdAt?.slice(11, 16) ?? now())
-    setNote(transaction.note ?? '')
+  const press = (key: (typeof KEYS)[number]) => {
     setError('')
-    setTouched(false)
-  }, [transaction])
+    if (key === 'back') return setAmount((a) => a.slice(0, -1))
+    setAmount((a) => {
+      const next = (a + key).replace(/^0+/, '')
+      return next.length > MAX_DIGITS ? a : next
+    })
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    setTouched(true)
-    const num = parseFloat(amount)
-    if (!num || num <= 0) { setError(t.tx.invalidAmount); return }
-    if (!categoryId) { setError(t.tx.pickCategory); return }
-    if (!date) { setError(t.tx.pickDate); return }
+    const num = Number(amount)
+    if (!num || num <= 0) return setError(t.tx.invalidAmount)
+    if (!categoryId) return setError(t.tx.pickCategory)
 
     setLoading(true)
     setError('')
     try {
       const payload = { amount: num, type, categoryId, date, time: time || undefined, note: note || undefined }
-      if (isEdit && transaction) {
-        await updateTransaction(transaction.id, payload)
-      } else {
-        await createTransaction(payload)
-      }
+      if (isEdit && transaction) await updateTransaction(transaction.id, payload)
+      else await createTransaction(payload)
+      rememberCategory(categoryId)
       await qc.invalidateQueries({ queryKey: ['transactions'] })
       await qc.invalidateQueries({ queryKey: ['dashboard'] })
-      // The edit page caches the row under its own key; without this, reopening
-      // it within the 60s staleTime showed the pre-edit values.
-      if (isEdit && transaction) {
-        await qc.invalidateQueries({ queryKey: ['transaction', transaction.id] })
-      }
+      if (isEdit && transaction) await qc.invalidateQueries({ queryKey: ['transaction', transaction.id] })
       toast(isEdit ? t.tx.updated : t.tx.added, 'success')
       onSaved()
     } catch {
@@ -121,95 +98,83 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
 
   return (
     <form onSubmit={handleSubmit} className={clsx(s.form, className)}>
-      {/* Type toggle */}
-      <div className={s.typeToggle}>
-        <button
-          type="button"
-          className={clsx(s.type, s.typeIn, type === 'income' && s.active)}
-          onClick={() => { setType('income'); setCategoryId('') }}
-        >
-          <span className={s.typeIc}><TrendingUp size={18} /></span>
-          <span className={s.typeTitle}>{t.income}</span>
-          <span className={s.typeSub}>{t.tx.moneyIn}</span>
-        </button>
-        <button
-          type="button"
-          className={clsx(s.type, s.typeOut, type === 'expense' && s.active)}
-          onClick={() => { setType('expense'); setCategoryId('') }}
-        >
-          <span className={s.typeIc}><TrendingDown size={18} /></span>
-          <span className={s.typeTitle}>{t.expense}</span>
-          <span className={s.typeSub}>{t.tx.moneyOut}</span>
-        </button>
-      </div>
+      <SegmentedControl
+        stretch
+        label={t.tx.type}
+        value={type}
+        onChange={(v) => {
+          setType(v)
+          setCategoryId('')
+        }}
+        options={[
+          { value: 'expense', label: t.expense },
+          { value: 'income', label: t.income },
+        ]}
+      />
 
-      {/* Amount */}
-      <div className={s.amountWrap}>
-        <span className={s.amountLabel}>{t.tx.amount}</span>
-        <div className={clsx(
-          s.amount,
-          type === 'income' ? s.amtIn : s.amtOut,
-          touched && !amount && s.error,
-        )}>
+      <div className={clsx(s.amount, type === 'income' ? s.amtIn : s.amtOut)}>
+        {isMobile ? (
+          <output className={s.amountValue} aria-label={t.tx.amount} aria-live="polite">
+            {type === 'income' ? '+' : '−'}
+            {grouped(amount) || '0'}
+          </output>
+        ) : (
           <input
-            inputMode="decimal"
-            value={formatDisplay(amount)}
-            onChange={(e) => handleAmountInput(e, setAmount)}
             className={s.amountInput}
+            inputMode="numeric"
+            aria-label={t.tx.amount}
+            value={grouped(amount)}
             placeholder="0"
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, MAX_DIGITS)
+              setAmount(digits)
+              setError('')
+            }}
           />
-          <span className={s.amountSfx}>{CURRENCY}</span>
-        </div>
+        )}
+        <span className={s.amountSfx}>{CURRENCY}</span>
       </div>
 
-      {/* Category */}
-      <label className={s.field}>
+      <div className={s.field}>
         <span className={s.fieldLabel}>{t.category}</span>
-        <div className={s.inputWrap} style={{ position: 'relative' }}>
-          <select
-            className={clsx(s.input, s.select)}
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            required
-          >
-            <option value="">{t.tx.selectCategory}</option>
-            {filtered.map((c) => (
-              <option key={c.id} value={c.id}>{c.icon} {catName(c.name)}</option>
+        {options.length === 0 ? (
+          <p className={s.hint}>{t.tx.noCategories}</p>
+        ) : (
+          <div className={s.chips} role="radiogroup" aria-label={t.category}>
+            {options.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="radio"
+                aria-checked={categoryId === c.id}
+                className={clsx(s.chip, categoryId === c.id && s.chipOn)}
+                style={categoryId === c.id ? { borderColor: c.color, background: `${c.color}1f` } : undefined}
+                onClick={() => {
+                  setCategoryId(c.id)
+                  setError('')
+                }}
+              >
+                <span aria-hidden>{c.icon}</span>
+                {catName(c.name)}
+              </button>
             ))}
-          </select>
-          <span className={s.selectChev}><ChevronDown size={15} /></span>
-        </div>
-      </label>
-
-      {/* Date + Time grid */}
-      <div className={s.formGrid}>
-        <label className={s.field}>
-          <span className={s.fieldLabel}>{t.tx.date}</span>
-          <div className={s.inputWrap}>
-            <input
-              className={s.input}
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
           </div>
-        </label>
+        )}
+      </div>
 
+      <div className={s.formGrid}>
+        <div className={s.field}>
+          <span className={s.fieldLabel}>{t.tx.date}</span>
+          <DateField label={t.tx.date} value={date} onChange={(d) => d && setDate(d)} max={todayYmd()} />
+        </div>
         <label className={s.field}>
           <span className={s.fieldLabel}>{t.tx.time}</span>
           <div className={s.inputWrap}>
-            <input
-              className={s.input}
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-            />
+            <input className={s.input} type="time" value={time} onChange={(e) => setTime(e.target.value)} />
           </div>
         </label>
       </div>
 
-      {/* Note */}
       <label className={s.field}>
         <span className={s.fieldLabel}>{t.tx.note}</span>
         <div className={s.inputWrap}>
@@ -223,7 +188,27 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
         </div>
       </label>
 
-      {error && <div className={s.fieldErr} role="alert">{error}</div>}
+      {isMobile && (
+        <div className={s.keypad}>
+          {KEYS.map((k) => (
+            <button
+              key={k}
+              type="button"
+              className={s.key}
+              onClick={() => press(k)}
+              aria-label={k === 'back' ? t.tx.backspace : k}
+            >
+              {k === 'back' ? <Delete size={22} /> : k}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <div className={s.fieldErr} role="alert">
+          {error}
+        </div>
+      )}
 
       <div className={s.formActions} data-sheet-actions>
         <button type="button" className={s.btnSecondary} onClick={onCancel}>

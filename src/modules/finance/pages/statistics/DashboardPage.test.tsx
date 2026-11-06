@@ -12,12 +12,16 @@ vi.mock('@/modules/finance/api/stats', async (orig) => ({
     totalExpense: 250000,
     categoryBreakdown: [],
     monthlyChart: [],
+    dailySpend: [
+      { day: 1, current: 100000, previous: 50000 },
+      { day: 2, current: 250000, previous: 200000 },
+    ],
     recentTransactions: [],
   }),
 }))
 
 describe('Statistics page', () => {
-  test('the month picker sits inside the Balance card, and only there', async () => {
+  test('leads with what the month has cost, against last month, and one month switcher', async () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
         <MemoryRouter>
@@ -25,8 +29,9 @@ describe('Statistics page', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    const balance = (await screen.findByText('Balance')).closest('[data-stat]') as HTMLElement
-    expect(within(balance).getByLabelText('Select month')).toBeTruthy()
-    expect(screen.getAllByLabelText('Select month')).toHaveLength(1)
+    const hero = await screen.findByRole('region', { name: 'Spent' })
+    expect(within(hero).getByText('25% more than by this day last month')).toBeTruthy()
+    expect(screen.getAllByRole('group', { name: 'Select month' })).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'Next month' }).hasAttribute('disabled')).toBe(true)
   })
 })

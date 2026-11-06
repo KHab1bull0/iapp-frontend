@@ -49,20 +49,32 @@
 }
 
 .dayLabel {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--fg-muted);
 }
 
 .dayTotal {
-  font-size: 12px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
 
   &.amtIn  { color: var(--success); }
-  &.amtOut { color: var(--danger); }
+  &.amtOut { color: var(--fg-muted); }
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
 }
 
 .txList {
@@ -70,55 +82,82 @@
   overflow: hidden;
 }
 
-.txRow {
-  display: grid;
-  grid-template-columns: 44px 1fr auto auto;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 12px 14px 20px;
-  border-bottom: 1px solid var(--border);
-  transition: background $t-fast;
+.swipeWrap {
+  position: relative;
+  overflow: hidden;
 
-  &:last-child { border-bottom: none; }
-  &:hover { background: var(--row-hover); }
-
-  &:hover .txDel,
-  &:hover .txEdit { opacity: 1; }
-
-  // Tighter on phones so the note still has room once the action buttons are
-  // grown to a real touch target.
-  @include bp-mobile {
-    gap: 10px;
-    padding: 12px 10px 12px 14px;
-
-    .txDel,
-    .txEdit { opacity: 1; }
-  }
+  & + & { border-top: 1px solid var(--border); }
 }
 
-.txActions {
-  display: inline-flex;
+// Uncovered by a left swipe.
+.under {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 24px;
+  background: var(--red-600);
+  color: #fff;
+
+  &.armed { filter: brightness(1.1); }
+}
+
+.txRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 8px;
+  background: var(--bg-elev);
+  touch-action: pan-y;
+  transition: transform $t-base var(--ease-house);
+
+  .swiping & { transition: none; }
+
+  &:hover .txDel { opacity: 1; }
+}
+
+// The whole row opens it for editing.
+.txMain {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
   align-items: center;
   gap: 12px;
+  min-height: 64px;
+  padding: 10px 8px 10px 16px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover { background: var(--row-hover); }
 }
 
 .txCat {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: $radius-pill;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 19px;
   flex-shrink: 0;
 }
 
-.txMeta { min-width: 0; }
+.txMeta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
-// Without truncation a long note wrapped and blew out the row height, pushing
-// the amount and actions around.
 .txTitle {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--fg-strong);
   overflow: hidden;
@@ -127,9 +166,8 @@
 }
 
 .txSub {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--fg-muted);
-  margin-top: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -138,17 +176,16 @@
 .txAmt {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
   white-space: nowrap;
 
   &.amtIn  { color: var(--success); }
-  &.amtOut { color: var(--danger); }
-
-  @include bp-mobile { font-size: 13px; }
+  &.amtOut { color: var(--fg-strong); }
 }
 
-.txDel,
-.txEdit {
+.txDel {
+  @include touch-target(6px);
+  flex-shrink: 0;
   width: 32px;
   height: 32px;
   border-radius: $radius-sm;
@@ -162,24 +199,14 @@
   opacity: 0;
   transition: opacity $t-fast, background $t-fast;
 
-  // 32px is well under the 44px minimum touch target. The 12px .txActions gap
-  // means the grown hit areas sit flush without overlapping.
-  @include touch-target(6px);
+  &:hover { background: var(--danger-soft); color: var(--danger); }
+  &:focus-visible { opacity: 1; }
 
-  @include bp-mobile { opacity: 1; }
-}
-
-.txDel:hover {
-  background: var(--danger-soft);
-  color: var(--danger);
-}
-
-.txEdit:hover {
-  background: var(--bg-elev);
-  color: var(--fg-strong);
+  // No hover on touch: always visible there (swipe is the quicker way).
+  @media (hover: none) { opacity: 0.8; }
 }
 
 .btnSecondary {
   @include btn-secondary;
-  @include btn-size-sm;
+  @include btn-size-md;
 }

@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import clsx from 'clsx'
-import { Pencil, Trash2, Wallet } from 'lucide-react'
+import { Plus, Trash2, Wallet } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { deleteTransaction, type Transaction } from '@/modules/finance/api/transactions'
 import { formatSigned, formatDay, formatAmount, parseApiDate, CURRENCY } from '@/core/lib/format'
 import { toast } from '@/core/components/ui/toast'
+import { EmptyState } from '@/core/components/ui/EmptyState'
+import { useSwipe } from '@/core/hooks/useSwipe'
+import { useQuickAdd } from '@/core/quickAdd/context'
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription,
@@ -37,7 +40,10 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
   const t = useFinanceT()
   const catName = useCategoryName()
   const [deleting, setDeleting] = useState(false)
+  const [confirming, setConfirming] = useState(false)
   const qc = useQueryClient()
+  // Swipe left asks to delete; the bin button is the same without a gesture.
+  const swipe = useSwipe({ onLeft: () => setConfirming(true) })
 
   async function handleDelete() {
     setDeleting(true)
@@ -53,54 +59,52 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
     }
   }
 
+  const amount = `${formatSigned(tx.amount, tx.type)} ${CURRENCY}`
+
   return (
-    <div className={s.txRow}>
-      <div
-        className={s.txCat}
-        style={{ background: tx.category.color + '22', color: tx.category.color }}
-      >
-        {tx.category.icon}
-      </div>
-      <div className={s.txMeta}>
-        <div className={s.txTitle}>{tx.note ?? catName(tx.category.name)}</div>
-        <div className={s.txSub}>
-          {tx.note ? `${catName(tx.category.name)} · ` : ''}{tx.time ?? tx.createdAt?.slice(11, 16) ?? tx.date.slice(0, 10)}
+    <div className={clsx(s.swipeWrap, swipe.dx !== 0 && s.swiping)}>
+      {swipe.dx < 0 && (
+        <div className={clsx(s.under, swipe.armed && s.armed)} aria-hidden>
+          <Trash2 size={20} />
         </div>
-      </div>
-      <div className={clsx(s.txAmt, tx.type === 'income' ? s.amtIn : s.amtOut)}>
-        {formatSigned(tx.amount, tx.type)}
-      </div>
-      <div className={s.txActions}>
-        <button
-          className={s.txEdit}
-          onClick={() => onEdit(tx)}
-          aria-label={t.edit}
-        >
-          <Pencil size={15} />
+      )}
+      <div
+        className={s.txRow}
+        style={swipe.dx ? { transform: `translateX(${swipe.dx}px)` } : undefined}
+        {...swipe.handlers}
+      >
+        <button className={s.txMain} onClick={() => onEdit(tx)} aria-label={`${t.edit}: ${tx.note ?? catName(tx.category.name)}, ${amount}`}>
+          <span className={s.txCat} style={{ background: `${tx.category.color}22`, color: tx.category.color }} aria-hidden>
+            {tx.category.icon}
+          </span>
+          <span className={s.txMeta}>
+            <span className={s.txTitle}>{tx.note ?? catName(tx.category.name)}</span>
+            <span className={s.txSub}>
+              {tx.note ? `${catName(tx.category.name)} · ` : ''}
+              {tx.time ?? tx.createdAt?.slice(11, 16) ?? tx.date.slice(0, 10)}
+            </span>
+          </span>
+          <span className={clsx(s.txAmt, tx.type === 'income' ? s.amtIn : s.amtOut)}>{formatSigned(tx.amount, tx.type)}</span>
         </button>
-        <AlertDialog>
+        <AlertDialog open={confirming} onOpenChange={setConfirming}>
           <AlertDialogTrigger asChild>
             <button className={s.txDel} disabled={deleting} aria-label={t.delete}>
-              <Trash2 size={15} />
+              <Trash2 size={16} />
             </button>
           </AlertDialogTrigger>
           <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t.tx.deleteTitle}</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently remove {formatSigned(tx.amount, tx.type)} {CURRENCY} ({tx.type}).
-              {t.tx.deleteDesc}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t.delete}
-            </AlertDialogAction>
-          </AlertDialogFooter>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t.tx.deleteTitle}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t.tx.deleteWhat(amount)} {t.tx.deleteDesc}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                {t.delete}
+              </AlertDialogAction>
+            </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </div>
@@ -121,24 +125,18 @@ export function TransactionList({
   transactions, hasMore, isFetchingMore, onLoadMore, isFiltered,
 }: Props) {
   const t = useFinanceT()
+  const quickAdd = useQuickAdd()
   const [editing, setEditing] = useState<Transaction | null>(null)
   const openEdit = (tx: Transaction) => setEditing(tx)
 
   if (transactions.length === 0) {
     return (
-      <div className={s.emptyCard}>
-        <div className={s.emptyGlyph}>
-          <Wallet size={28} />
-        </div>
-        <div className={s.emptyTitle}>
-          {isFiltered ? t.tx.noMatches : t.tx.empty}
-        </div>
-        <div className={s.emptySub}>
-          {isFiltered
-            ? t.tx.noMatchesSub
-            : t.tx.emptySub}
-        </div>
-      </div>
+      <EmptyState
+        icon={Wallet}
+        title={isFiltered ? t.tx.noMatches : t.tx.empty}
+        description={isFiltered ? t.tx.noMatchesSub : t.tx.emptySub}
+        action={isFiltered ? undefined : { label: t.tx.add, icon: Plus, onClick: () => quickAdd.open('finance.transaction') }}
+      />
     )
   }
 
@@ -146,14 +144,14 @@ export function TransactionList({
 
   return (
     <>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div className={s.groups}>
       {groups.map(([date, txs]) => {
         const dayTotal = txs.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0)
         return (
           <div key={date} className={s.dayGroup}>
             <div className={s.dayHead}>
               <span className={s.dayLabel}>{formatDayLabel(date, t)}</span>
-              <span className={clsx(s.dayTotal, dayTotal >= 0 ? s.amtIn : s.amtOut)}>
+              <span className={clsx(s.dayTotal, dayTotal >= 0 ? s.amtIn : s.amtOut)} title={t.tx.dayTotal(formatAmount(Math.abs(dayTotal)))}>
                 {dayTotal >= 0 ? '+' : '−'}{formatAmount(Math.abs(dayTotal))}
               </span>
             </div>
@@ -165,7 +163,7 @@ export function TransactionList({
       })}
 
       {hasMore && (
-        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 4 }}>
+        <div className={s.loadMore}>
           <button
             onClick={onLoadMore}
             disabled={isFetchingMore}

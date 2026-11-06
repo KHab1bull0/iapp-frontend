@@ -3,6 +3,25 @@
 
 .card {
   @include card-base;
+  border-radius: $radius-xl;
+}
+
+.tip {
+  padding: 8px 12px;
+  min-width: 140px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  box-shadow: var(--shadow-md);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+
+  p { margin: 2px 0; }
+}
+
+.tipTitle {
+  font-weight: 600;
+  color: var(--fg-strong);
 }
 
 .cardHead {

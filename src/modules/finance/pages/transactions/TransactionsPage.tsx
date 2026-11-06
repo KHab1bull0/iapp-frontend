@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { RefreshCw } from 'lucide-react'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { fetchTransactions, type PaginatedTransactions } from '@/modules/finance/api/transactions'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
@@ -18,23 +19,19 @@ import s from './TransactionsPage.module.scss'
 
 function ListSkeleton() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div className={s.skeletons} aria-hidden>
       {[0, 1].map((g) => (
         <div key={g} className={s.dayGroup}>
-          <div className={s.dayHead}>
-            <div style={{ height: 11, width: 60, background: 'var(--border)', borderRadius: 4 }} />
-            <div style={{ height: 12, width: 50, background: 'var(--border)', borderRadius: 4 }} />
-          </div>
-          <div className={`${s.card} ${s.txList}`}>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className={s.txRow} style={{ opacity: 0.6 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--border)' }} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ height: 14, width: 100 + g * 20, background: 'var(--border)', borderRadius: 4 }} />
-                  <div style={{ height: 12, width: 70, background: 'var(--border)', borderRadius: 4 }} />
+          <Skeleton width={80} height={12} />
+          <div className={s.skeletonCard}>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className={s.skeletonRow}>
+                <Skeleton width={42} height={42} radius={999} />
+                <div className={s.skeletonText}>
+                  <Skeleton width={`${50 + g * 15}%`} height={14} />
+                  <Skeleton width="35%" height={12} />
                 </div>
-                <div style={{ height: 14, width: 56, background: 'var(--border)', borderRadius: 4 }} />
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--border)' }} />
+                <Skeleton width={64} height={14} />
               </div>
             ))}
           </div>

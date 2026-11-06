@@ -16,37 +16,6 @@
   @include bp-mobile { padding: 16px; gap: 20px; }
 }
 
-// Floating add button. On phones it sits above the bottom nav (the shell's
-// .scroll already reserves --fab-clearance); on desktop, bottom-right.
-.fab {
-  position: fixed;
-  right: 32px;
-  bottom: 32px;
-  z-index: 40;
-  width: 56px;
-  height: 56px;
-  border-radius: $radius-pill;
-  border: none;
-  background: var(--primary);
-  color: var(--primary-fg);
-  box-shadow: 0 8px 22px rgba(22, 163, 74, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform $t-fast, background $t-fast;
-
-  &:hover { background: var(--primary-hover); }
-  &:active { transform: scale(0.96); }
-
-  @include bp-tablet {
-    width: 52px;
-    height: 52px;
-    right: calc(20px + var(--safe-right));
-    bottom: calc(var(--bottom-nav-h) + 16px);
-  }
-}
-
 .pageHead {
   display: flex;
   align-items: center;
@@ -141,4 +110,35 @@
 
   &:last-child { border-bottom: none; }
   &:hover { background: var(--row-hover); }
+}
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.skeletonCard {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.skeletonRow {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+
+  & + & { border-top: 1px solid var(--border); }
+}
+
+.skeletonText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }

@@ -22,10 +22,10 @@ interface CustomTooltipProps { active?: boolean; payload?: TooltipEntry[]; label
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
   return (
-    <div className={s.card} style={{ padding: '10px 14px', fontSize: 13, minWidth: 140 }}>
-      <p style={{ fontWeight: 600, color: 'var(--fg-strong)', marginBottom: 6 }}>{label}</p>
+    <div className={s.tip}>
+      <p className={s.tipTitle}>{label}</p>
       {payload.map((p) => (
-        <p key={p.name} style={{ color: p.color, margin: '2px 0', fontVariantNumeric: 'tabular-nums' }}>
+        <p key={p.name} style={{ color: p.color }}>
           {p.name}: {formatAmount(p.value ?? 0)} {CURRENCY}
         </p>
       ))}
@@ -52,7 +52,7 @@ export function MonthlyBarChart({ data }: Props) {
         </div>
       </div>
       {!hasData ? (
-        <div className={s.empty} style={{ padding: '40px 20px' }}>
+        <div className={s.empty}>
           <div className={s.emptyTitle}>{t.stats.noData}</div>
           <div className={s.emptySub}>{t.stats.noDataSub}</div>
         </div>
@@ -81,24 +81,6 @@ export function MonthlyBarChart({ data }: Props) {
           </BarChart>
         </ResponsiveContainer>
       )}
-    </div>
-  )
-}
-
-export function MonthlyBarChartSkeleton() {
-  return (
-    <div className={s.card} style={{ opacity: 0.6 }}>
-      <div className={s.cardHead}>
-        <div style={{ height: 16, width: 120, background: 'var(--border)', borderRadius: 4 }} />
-      </div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height: CHART_HEIGHT, paddingTop: 16 }}>
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <div style={{ flex: 1, background: 'var(--border)', borderRadius: '4px 4px 0 0', opacity: 0.5 + i * 0.1 }} />
-            <div style={{ height: 12, background: 'var(--border)', borderRadius: 4, width: '60%', margin: '0 auto' }} />
-          </div>
-        ))}
-      </div>
     </div>
   )
 }

@@ -21,6 +21,8 @@ interface RowProps {
   icon?: LucideIcon
   /** Background of the icon tile: a category colour, say. */
   iconColor?: string
+  /** Anything else in the icon's place (an emoji tile). */
+  leading?: ReactNode
   /** Right-hand text: an amount, a count, a setting's value. */
   value?: ReactNode
   /** Anything else on the right (a switch, a button); replaces the chevron. */
@@ -30,7 +32,7 @@ interface RowProps {
   tone?: 'default' | 'danger'
 }
 
-export function ListRow({ title, subtitle, icon: Icon, iconColor, value, trailing, to, onClick, tone = 'default' }: RowProps) {
+export function ListRow({ title, subtitle, icon: Icon, iconColor, leading, value, trailing, to, onClick, tone = 'default' }: RowProps) {
   const interactive = Boolean(to || onClick)
   const content = (
     <>
@@ -43,6 +45,7 @@ export function ListRow({ title, subtitle, icon: Icon, iconColor, value, trailin
           <Icon size={18} />
         </span>
       )}
+      {leading}
       <span className={s.text}>
         <span className={clsx(s.title, tone === 'danger' && s.danger)}>{title}</span>
         {subtitle && <span className={s.subtitle}>{subtitle}</span>}

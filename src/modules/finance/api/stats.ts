@@ -25,12 +25,21 @@ export interface RecentTransaction {
   category: { name: string; icon: string; color: string }
 }
 
+/** Spending so far by each day of the month, this month against the last. */
+export interface DailySpendPoint {
+  day: number
+  /** null for days still to come. */
+  current: number | null
+  previous: number
+}
+
 export interface DashboardStats {
   totalBalance: number
   totalIncome: number
   totalExpense: number
   categoryBreakdown: CategoryBreakdown[]
   monthlyChart: MonthPoint[]
+  dailySpend: DailySpendPoint[]
   recentTransactions: RecentTransaction[]
 }
 

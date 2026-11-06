@@ -1,0 +1,86 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: $radius-xl;
+}
+
+.label {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.amount {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--fg-strong);
+  font-variant-numeric: tabular-nums;
+
+  @include bp-small { font-size: 34px; line-height: 42px; }
+}
+
+.currency {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.paceUp,
+.paceDown {
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.paceUp { color: var(--danger); }
+.paceDown { color: var(--success); }
+
+.chart {
+  margin: 8px -4px 0;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--fg-muted);
+
+  > span { display: inline-flex; align-items: center; gap: 6px; }
+}
+
+.swatch {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.swatchDashed {
+  width: 14px;
+  border-top: 2px dashed var(--fg-subtle);
+}
+
+.tip {
+  padding: 8px 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  box-shadow: var(--shadow-md);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+
+  p { margin: 2px 0; }
+}
+
+.tipTitle { font-weight: 600; color: var(--fg-strong); }
+.tipMuted { color: var(--fg-muted); }

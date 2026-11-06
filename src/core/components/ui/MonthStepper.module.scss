@@ -1,0 +1,35 @@
+@use '@/core/styles/variables' as *;
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: $radius-pill;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+}
+
+.btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: $radius-pill;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+
+  &:hover:not(:disabled) { background: var(--icon-btn-hover); }
+  &:disabled { color: var(--fg-subtle); cursor: default; }
+}
+
+.value {
+  min-width: 120px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg-strong);
+  white-space: nowrap;
+}
