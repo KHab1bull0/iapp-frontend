@@ -5,7 +5,6 @@ import { EmptyState } from '@/core/components/ui/EmptyState'
 import { useToday } from '@/core/hooks/useToday'
 import { fetchTasks, tasksKeys } from '@/modules/tasks/api/tasks'
 import { groupByDue } from '@/modules/tasks/lib/repeat'
-import { QuickAddBar } from '@/modules/tasks/components/QuickAddBar'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
 import { useMoveToTomorrow } from '@/modules/tasks/useCompleteTask'
@@ -57,8 +56,6 @@ export function AllTasksPage() {
           </section>
         ))
       )}
-
-      <QuickAddBar today={today} defaultDay="none" />
       {editor.dialog}
     </div>
   )

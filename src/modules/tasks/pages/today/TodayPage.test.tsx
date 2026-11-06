@@ -74,14 +74,6 @@ describe('TodayPage', () => {
     expect(await screen.findByRole('progressbar', { name: '1 of 3 done' })).toBeTruthy()
   })
 
-  test('the bar at the bottom adds a task, reading the day from the text', async () => {
-    renderPage()
-    const input = await screen.findByRole('textbox', { name: 'Quick add' })
-    fireEvent.change(input, { target: { value: 'Gym tomorrow 7am' } })
-    expect(screen.getByRole('button', { name: 'Tomorrow' })).toBeTruthy()
-    expect(screen.getByText('07:00')).toBeTruthy()
-  })
-
   test('ticking a task completes it for today, and Undo puts it back', async () => {
     renderPage()
     fireEvent.click(await screen.findByRole('button', { name: 'Complete B' }))

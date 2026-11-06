@@ -11,7 +11,6 @@ import { useQuickAdd } from '@/core/quickAdd/context'
 import { fetchOverallStats, fetchToday, tasksKeys } from '@/modules/tasks/api/tasks'
 import { Heatmap } from '@/modules/tasks/components/stats/Heatmap'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
-import { QuickAddBar } from '@/modules/tasks/components/QuickAddBar'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { byTime } from '@/modules/tasks/lib/repeat'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
@@ -161,7 +160,6 @@ export function TodayPage() {
               )}
             </section>
           )}
-          <QuickAddBar today={today} />
           </div>
         </div>
       )}

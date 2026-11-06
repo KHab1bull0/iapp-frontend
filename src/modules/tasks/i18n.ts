@@ -92,15 +92,6 @@ export const tasksMessages = defineMessages(
       tomorrow: 'Ertaga',
       overdue: (n: number) => `${n} kun kechikdi`,
     },
-    quick: {
-      placeholder: "Yangi vazifa — masalan: ertaga 9:00 bankka qo'ng'iroq",
-      label: "Tezkor qo'shish",
-      add: "Qo'shish",
-      noDate: 'Sanasiz',
-      added: (title: string) => `“${title}” qo'shildi`,
-      failed: "Vazifani qo'shib bo'lmadi",
-      repeat: { day: 'Har kuni', week: 'Har hafta', month: 'Har oy' },
-    },
     swipe: {
       done: 'Bajarildi',
       tomorrow: 'Ertaga',
@@ -228,15 +219,6 @@ export const tasksMessages = defineMessages(
       today: 'Today',
       tomorrow: 'Tomorrow',
       overdue: (n: number) => `${n} day${n === 1 ? '' : 's'} overdue`,
-    },
-    quick: {
-      placeholder: 'New task — e.g. tomorrow 9:00 call the bank',
-      label: 'Quick add',
-      add: 'Add',
-      noDate: 'No date',
-      added: (title: string) => `“${title}” added`,
-      failed: 'Could not add the task',
-      repeat: { day: 'Every day', week: 'Every week', month: 'Every month' },
     },
     swipe: {
       done: 'Done',

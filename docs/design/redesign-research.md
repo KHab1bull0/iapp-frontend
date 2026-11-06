@@ -10,7 +10,7 @@ Amalga oshirish rejasi va qoidalar: [design-system.md](design-system.md).
 | Soha | Benchmark | Nimani olamiz |
 |---|---|---|
 | Vazifalar | **Things 3**: Apple Design Award, ikki marta. UI "ko'rinmas", e'tibor faqat vazifada; yumshoq animatsiyalar; "Magic Plus" bilan istalgan joydan qo'shish | Bugun ekranini markazga qo'yish, katta checkbox, qo'shishni bir harakatga keltirish |
-| Vazifalar | **Todoist**: tezkor kiritish. Matn yozib Enter bosiladi, sana/takror yozuvdan tanib olinadi | Pastdagi tezkor qo'shish qatori; sana va takrorlash uchun chiplar |
+| Vazifalar | **Todoist**: tezkor kiritish. Matn yozib Enter bosiladi, sana/takror yozuvdan tanib olinadi | ~~Pastdagi tezkor qo'shish qatori~~ — sinab ko'rildi, foydalanuvchi qarori bilan olib tashlandi (2026-11-06): vazifa umumiy "+" orqali qo'shiladi |
 | Odatlar | **Streaks** (ADA 2016), **Habitify**: aniq statistika. Salbiy sharhlarda streak yo'qolishi og'riqli nuqta sifatida tilga olinadi | Kechirimli streak (bir kunlik o'tkazib yuborishda nolga tushmaydi), kalendar-heatmap |
 | Moliya | **Copilot Money**: dizayn bo'yicha konsensus lider, ADA 2024 finalisti. Bosh raqam — "Free to Spend" (oy oxirigacha qolgan) | Dashboardda bitta asosiy raqam va oy davomidagi sarf egri chizig'i |
 | Moliya | **YNAB / Monarch**: har kategoriyada progress bar, rang ma'no beradi | Kategoriya bo'yicha byudjet chiziqlari (byudjet backendi — alohida bosqich) |
