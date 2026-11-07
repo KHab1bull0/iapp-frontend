@@ -206,28 +206,40 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
         />
       </label>
 
-      <div className={s.row}>
-        {levels.length > 0 && (
-          <label className={s.field}>
-            <span className={s.label}>{t.word.level}</span>
-            <select
-              className={s.input}
-              value={shownLevelId}
-              onChange={(e) => chooseLevel(e.target.value)}
-              aria-label={t.word.level}
-            >
-              {levels.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {levelLabel(l)} {l.locked ? '' : `· ${t.days(l.intervalDays)}`}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+      {levels.length > 0 && (
         <div className={s.field}>
-          <span className={s.label}>{t.word.memoriseOn}</span>
-          <DateField label={t.word.memoriseOn} value={reviewOn} onChange={(d) => d && setReviewOn(d)} />
+          <span className={s.label} id="word-level-label">
+            {t.word.level}
+          </span>
+          {/* Chips, like the category: picking one reschedules the word below. */}
+          <div className={s.chips} role="radiogroup" aria-labelledby="word-level-label">
+            {levels.map((l) => {
+              const on = shownLevelId === l.id
+              const name = levelLabel(l)
+              const days = l.locked ? null : t.days(l.intervalDays)
+              return (
+                <button
+                  key={l.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  className={clsx(s.chip, on && s.chipOn)}
+                  onClick={() => chooseLevel(l.id)}
+                  aria-label={days && days !== name ? `${name}, ${days}` : name}
+                >
+                  {on && <Check size={14} strokeWidth={2.5} aria-hidden />}
+                  {name}
+                  {/* A level named after its interval ("3 kun") needs no second label. */}
+                  {days && days !== name && <span className={s.chipSub}>· {days}</span>}
+                </button>
+              )
+            })}
+          </div>
         </div>
+      )}
+      <div className={s.field}>
+        <span className={s.label}>{t.word.memoriseOn}</span>
+        <DateField label={t.word.memoriseOn} value={reviewOn} onChange={(d) => d && setReviewOn(d)} />
       </div>
       {categoryPicker}
       <span className={s.hint}>

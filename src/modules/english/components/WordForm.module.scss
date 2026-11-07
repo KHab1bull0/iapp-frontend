@@ -46,6 +46,11 @@
   &:hover { border-color: var(--border-strong); }
 }
 
+.chipSub {
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+
 .chipOn {
   border-color: var(--primary);
   background: var(--primary-soft);

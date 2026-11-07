@@ -91,6 +91,21 @@ describe('ReviewPage', () => {
     Reflect.deleteProperty(window, 'speechSynthesis')
   })
 
+  test('the summary counts a word kept at its level as forgot, and one moved up as remembered', async () => {
+    api.fetchReview.mockReset()
+    api.fetchReview
+      .mockResolvedValueOnce([word('apple', { levelId: L3.id }), word('river')])
+      .mockResolvedValueOnce([word('river')])
+      .mockResolvedValue([])
+    api.fetchStats.mockResolvedValue({ streak: 0, upcoming: [] })
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Three days/ })) // apple stays at Three days
+    fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Three days/ })) // river: New → Three days
+    expect(await screen.findByText('1 remembered, 1 forgot.')).toBeTruthy()
+  })
+
   test('says so when the stack is empty', async () => {
     api.fetchReview.mockResolvedValue([])
     renderPage()
@@ -132,7 +147,7 @@ describe('ReviewPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
     fireEvent.click(screen.getByRole('button', { name: /^New/ }))
     expect(await screen.findByRole('heading', { name: 'Well done!' })).toBeTruthy()
-    expect(screen.getByText('0 remembered, 1 coming back.')).toBeTruthy()
+    expect(screen.getByText('0 remembered, 1 forgot.')).toBeTruthy()
     expect(await screen.findByText('3-day streak')).toBeTruthy()
     expect(screen.getByText('4 waiting tomorrow')).toBeTruthy()
   })

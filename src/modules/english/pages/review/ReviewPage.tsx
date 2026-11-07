@@ -55,19 +55,23 @@ export function ReviewPage() {
   })
   const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
 
-  const resultOf = (level: Level): Result => (level.locked ? 'forgot' : 'remembered')
+  // As the server counts it: up a level is remembered; the same or lower, forgot.
+  const resultOf = (word: Word, level: Level): Result => {
+    const from = levels.find((l) => l.id === word.levelId)?.intervalDays ?? 0
+    return level.intervalDays > from ? 'remembered' : 'forgot'
+  }
   const answer = useMutation({
     mutationFn: ({ word, level }: { word: Word; level: Level }) => answerWord(word.id, level.id, today),
     // Take the card off the stack straight away, so the next one shows at once
     // (and hidden) instead of the answered one coming back while the request runs.
     onMutate: ({ word, level }) => {
-      const result = resultOf(level)
+      const result = resultOf(word, level)
       setAnswered((a) => ({ ...a, [result]: a[result] + 1 }))
       qc.setQueryData<Word[]>(englishKeys.review(today), (stack) => stack?.filter((w) => w.id !== word.id))
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: englishKeys.all }),
-    onError: async (_e, { level }) => {
-      const result = resultOf(level)
+    onError: async (_e, { word, level }) => {
+      const result = resultOf(word, level)
       setAnswered((a) => ({ ...a, [result]: a[result] - 1 }))
       await refetch()
       toast(t.review.saveFailed, 'error')

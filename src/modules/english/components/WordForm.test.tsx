@@ -67,9 +67,9 @@ describe('WordForm', () => {
   test('a new word starts at New, and can be given another level when adding', async () => {
     api.fetchCategories.mockResolvedValue([])
     renderForm()
-    const level = (await screen.findByLabelText('Level')) as HTMLSelectElement
-    await waitFor(() => expect(level.value).toBe(NEW.id))
-    fireEvent.change(level, { target: { value: L3.id } })
+    const levels = await screen.findByRole('radiogroup', { name: 'Level' })
+    await waitFor(() => expect(within(levels).getByRole('radio', { name: 'New' }).getAttribute('aria-checked')).toBe('true'))
+    fireEvent.click(within(levels).getByRole('radio', { name: 'Three days, 3 days' }))
     const inThree = new Date()
     inThree.setDate(inThree.getDate() + 3)
     expect(screen.getByRole('button', { name: `Memorise on: ${formatDay(ymd(inThree))}` })).toBeTruthy()
@@ -90,13 +90,11 @@ describe('WordForm', () => {
         <WordForm word={word('w1', { levelId: NEW.id })} onSaved={() => {}} onCancel={() => {}} />
       </QueryClientProvider>,
     )
-    const level = (await screen.findByLabelText('Level')) as HTMLSelectElement
-    await waitFor(() => expect(level.options.length).toBe(2))
-    expect(level.value).toBe(NEW.id)
-    // Level and date sit side by side in one row.
-    const row = (el: HTMLElement) => el.parentElement!.parentElement
-    expect(row(level)).toBe(row(screen.getByRole('button', { name: /^Memorise on:/ })))
-    fireEvent.change(level, { target: { value: L3.id } })
+    const levels = await screen.findByRole('radiogroup', { name: 'Level' })
+    await waitFor(() => expect(within(levels).getAllByRole('radio')).toHaveLength(2))
+    expect(within(levels).getByRole('radio', { name: 'New' }).getAttribute('aria-checked')).toBe('true')
+    fireEvent.click(within(levels).getByRole('radio', { name: 'Three days, 3 days' }))
+    expect(within(levels).getByRole('radio', { name: 'Three days, 3 days' }).getAttribute('aria-checked')).toBe('true')
     const inThree = new Date()
     inThree.setDate(inThree.getDate() + 3)
     expect(screen.getByRole('button', { name: `Memorise on: ${formatDay(ymd(inThree))}` })).toBeTruthy()
