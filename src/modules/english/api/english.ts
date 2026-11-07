@@ -10,10 +10,23 @@ export interface Level {
   createdAt: string
 }
 
-export interface Category {
+/** A shelf for tags. Seeded ones are stored in English ("Topics", "Parts of speech") and shown translated. */
+export interface TagGroup {
   id: string
   name: string
   createdAt: string
+}
+
+/** A label on words: a topic ("family") or a part of speech ("noun"); a word can wear many. */
+export interface Tag {
+  id: string
+  name: string
+  groupId: string | null
+  createdAt: string
+  /** Words wearing it. */
+  count: number
+  /** Of those, due on the day asked for. */
+  due: number
 }
 
 export interface Word {
@@ -26,7 +39,8 @@ export interface Word {
   description: string | null
   /** An English sentence using the word. */
   example: string | null
-  categoryId: string | null
+  /** The tags it wears. */
+  tagIds: string[]
   levelId: string
   /** The day it is to be memorised (YYYY-MM-DD); in the review stack from then on. */
   reviewOn: string
@@ -41,7 +55,8 @@ export interface WordInput {
   note?: string | null
   description?: string | null
   example?: string | null
-  categoryId?: string | null
+  /** The whole set of tags; on update, replaces the old one. */
+  tagIds?: string[]
   levelId?: string
   reviewOn?: string
 }
@@ -53,30 +68,32 @@ export interface ImportRow {
   description?: string
   example?: string
   note?: string
-  /** A category's name or id; empty for none. */
-  category?: string
+  /** Tag names (or ids). */
+  tags?: string[]
 }
 
 export interface ImportResult {
   created: number
   skipped: { word: string; reason: 'exists' | 'repeated' }[]
-  categoriesCreated: string[]
+  tagsCreated: string[]
 }
 
 export interface WordFilters {
   search?: string
   levelId?: string
-  categoryId?: string
+  tagId?: string
 }
 
 /** Every key starts with 'english', so invalidating ['english'] refreshes it all, home card included. */
 export const englishKeys = {
   all: ['english'] as const,
   levels: ['english', 'levels'] as const,
-  categories: ['english', 'categories'] as const,
+  groups: ['english', 'tag-groups'] as const,
+  tags: (day: string) => ['english', 'tags', day] as const,
   words: (f: WordFilters) => ['english', 'words', f] as const,
   word: (id: string) => ['english', 'word', id] as const,
-  review: (day: string) => ['english', 'review', day] as const,
+  /** Today's stack; with a tag, only its words. */
+  review: (day: string, tagId?: string) => ['english', 'review', day, tagId ?? 'all'] as const,
   stats: (day: string) => ['english', 'stats', day] as const,
 }
 
@@ -93,17 +110,31 @@ export async function deleteLevel(id: string): Promise<void> {
   await api.delete(`/english/levels/${id}`)
 }
 
-export async function fetchCategories(): Promise<Category[]> {
-  return (await api.get<Category[]>('/english/categories')).data
+export async function fetchGroups(): Promise<TagGroup[]> {
+  return (await api.get<TagGroup[]>('/english/tag-groups')).data
 }
-export async function createCategory(input: { name: string }): Promise<Category> {
-  return (await api.post<Category>('/english/categories', input)).data
+export async function createGroup(input: { name: string }): Promise<TagGroup> {
+  return (await api.post<TagGroup>('/english/tag-groups', input)).data
 }
-export async function updateCategory(id: string, input: { name: string }): Promise<Category> {
-  return (await api.patch<Category>(`/english/categories/${id}`, input)).data
+export async function updateGroup(id: string, input: { name: string }): Promise<TagGroup> {
+  return (await api.patch<TagGroup>(`/english/tag-groups/${id}`, input)).data
 }
-export async function deleteCategory(id: string): Promise<void> {
-  await api.delete(`/english/categories/${id}`)
+export async function deleteGroup(id: string): Promise<void> {
+  await api.delete(`/english/tag-groups/${id}`)
+}
+
+/** Every tag, with its word count and how many are due `today`. */
+export async function fetchTags(today: string): Promise<Tag[]> {
+  return (await api.get<Tag[]>('/english/tags', { params: { today } })).data
+}
+export async function createTag(input: { name: string; groupId?: string | null }): Promise<Tag> {
+  return (await api.post<Tag>('/english/tags', input)).data
+}
+export async function updateTag(id: string, input: { name?: string; groupId?: string | null }): Promise<Tag> {
+  return (await api.patch<Tag>(`/english/tags/${id}`, input)).data
+}
+export async function deleteTag(id: string): Promise<void> {
+  await api.delete(`/english/tags/${id}`)
 }
 
 export async function fetchWords(filters: WordFilters = {}): Promise<Word[]> {
@@ -122,7 +153,7 @@ export async function updateWord(id: string, input: Partial<WordInput>): Promise
 export async function importWords(input: {
   words: ImportRow[]
   today: string
-  createCategories?: boolean
+  createTags?: boolean
 }): Promise<ImportResult> {
   return (await api.post<ImportResult>('/english/words/import', input)).data
 }
@@ -132,8 +163,9 @@ export async function deleteWord(id: string): Promise<void> {
 }
 
 /** The review stack: words whose day has come. */
-export async function fetchReview(today: string): Promise<Word[]> {
-  return (await api.get<Word[]>('/english/review', { params: { today } })).data
+/** Today's stack; with `tagId`, only the words wearing that tag. */
+export async function fetchReview(today: string, tagId?: string): Promise<Word[]> {
+  return (await api.get<Word[]>('/english/review', { params: { today, tagId } })).data
 }
 /** Puts a due word at the level the user picked: it comes back after that level's days. */
 export async function answerWord(id: string, levelId: string, today: string): Promise<Word> {
@@ -154,8 +186,10 @@ export interface Stats {
   /** Answers in the last 30 days. */
   accuracy: { remembered: number; forgot: number }
   levels: (Pick<Level, 'id' | 'name' | 'locked' | 'intervalDays'> & { count: number })[]
-  /** Most words first; `id: null` is the words without a category. */
-  categories: { id: string | null; name: string | null; count: number }[]
+  /** Every tag with how many words wear it, most first. */
+  tags: { id: string; name: string; groupId: string | null; count: number }[]
+  /** Words with no tag. */
+  untagged: number
   /** The next 7 days, tomorrow first. */
   upcoming: { date: string; count: number }[]
   /** The last 14 days, today last. */

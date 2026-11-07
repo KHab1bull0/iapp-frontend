@@ -131,7 +131,7 @@
 
 .due { color: var(--primary); font-weight: 600; }
 
-.category:empty { display: none; }
+.tags:empty { display: none; }
 
 // Header row of the desktop table; phones list without one.
 .head { display: none; }
@@ -170,8 +170,8 @@
 
   .badge { justify-self: start; }
 
-  .category,
-  .category:empty {
+  .tags,
+  .tags:empty {
     display: block;
     font-size: var(--fs-ui);
     line-height: var(--lh-ui);

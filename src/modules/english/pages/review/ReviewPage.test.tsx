@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { todayYmd } from '@/core/lib/format'
-import { NEW, L3, word } from '@/modules/english/test-data'
+import { NEW, L3, group, tag, word } from '@/modules/english/test-data'
 import { ReviewPage } from './ReviewPage'
 
 const api = vi.hoisted(() => ({
@@ -11,13 +11,15 @@ const api = vi.hoisted(() => ({
   fetchLevels: vi.fn(),
   answerWord: vi.fn(),
   fetchStats: vi.fn(),
+  fetchTags: vi.fn(),
+  fetchGroups: vi.fn(),
 }))
 vi.mock('@/modules/english/api/english', async (orig) => ({ ...(await orig<object>()), ...api }))
 
-function renderPage() {
+function renderPage(path = '/english/review') {
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[path]}>
         <ReviewPage />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -29,6 +31,45 @@ describe('ReviewPage', () => {
     api.fetchLevels.mockResolvedValue([NEW, L3])
     api.fetchReview.mockResolvedValue([word('apple', { note: 'a fruit' }), word('river')])
     api.answerWord.mockResolvedValue(word('apple'))
+    // No tag on any word yet: review starts straight away.
+    api.fetchTags.mockResolvedValue([])
+    api.fetchGroups.mockResolvedValue([])
+  })
+
+  describe('with tags on words, the tag cards come first', () => {
+    beforeEach(() => {
+      api.fetchTags.mockResolvedValue([
+        tag('t1', 'family', { count: 10, due: 3 }),
+        tag('t2', 'noun', { groupId: 'g1', count: 8, due: 0 }),
+        tag('t3', 'empty', { count: 0, due: 0 }),
+      ])
+      api.fetchGroups.mockResolvedValue([group('g1', 'Parts of speech')])
+    })
+
+    test('All, then each worn tag by group with due today and in all; nothing due cannot be opened', async () => {
+      renderPage()
+      expect(await screen.findByRole('heading', { name: 'What shall we review?' })).toBeTruthy()
+      const all = await screen.findByRole('link', { name: 'All: 2 today' })
+      expect(all.getAttribute('href')).toBe('/english/review?tag=all')
+      const family = screen.getByRole('link', { name: 'family: 3 due today, 10 in all' })
+      expect(family.getAttribute('href')).toBe('/english/review?tag=t1')
+      const pos = screen.getByRole('region', { name: 'Parts of speech' })
+      expect(within(pos).queryByRole('link')).toBeNull()
+      expect(within(pos).getByText('none today')).toBeTruthy()
+      // A tag no word wears isn't offered.
+      expect(screen.queryByText('empty')).toBeNull()
+    })
+
+    test("a tag's session asks only for its words, and names the tag", async () => {
+      api.fetchReview.mockImplementation((_today: string, tagId?: string) =>
+        Promise.resolve(tagId === 't1' ? [word('mother')] : [word('apple'), word('river')]),
+      )
+      renderPage('/english/review?tag=t1')
+      expect(await screen.findByText('mother')).toBeTruthy()
+      expect(api.fetchReview).toHaveBeenCalledWith(todayYmd(), 't1')
+      expect(screen.getByText('family')).toBeTruthy()
+      expect(screen.getByText('1 to go')).toBeTruthy()
+    })
   })
 
   test('shows the word first, and the translation only when asked', async () => {

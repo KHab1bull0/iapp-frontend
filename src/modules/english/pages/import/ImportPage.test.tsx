@@ -4,11 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import ExcelJS from 'exceljs'
 import { todayYmd } from '@/core/lib/format'
-import { category, word } from '@/modules/english/test-data'
+import { tag, word } from '@/modules/english/test-data'
 import { ImportPage } from './ImportPage'
 
 const api = vi.hoisted(() => ({
-  fetchCategories: vi.fn(),
+  fetchTags: vi.fn(),
+  fetchGroups: vi.fn(),
   fetchWords: vi.fn(),
   importWords: vi.fn(),
 }))
@@ -33,16 +34,17 @@ function renderPage() {
 
 describe('ImportPage', () => {
   beforeEach(() => {
-    api.fetchCategories.mockResolvedValue([category('c1', 'Work')])
+    api.fetchTags.mockResolvedValue([tag('t1', 'Work'), tag('t2', 'noun')])
+    api.fetchGroups.mockResolvedValue([])
     api.fetchWords.mockResolvedValue([word('apple')])
-    api.importWords.mockResolvedValue({ created: 2, skipped: [], categoriesCreated: ['Travel'] })
+    api.importWords.mockResolvedValue({ created: 2, skipped: [], tagsCreated: ['Travel'] })
   })
 
   test('previews what each row will do, then adds only the new words', async () => {
     renderPage()
     const file = await xlsx([
-      ['word', 'description', 'translation', 'category'],
-      ['deadline', 'the latest time', 'muddat', 'Work'],
+      ['word', 'description', 'translation', 'tags'],
+      ['deadline', 'the latest time', 'muddat', 'Work, noun'],
       ['apple', '', 'olma', ''],
       ['luggage', '', 'bagaj', 'Travel'],
       ['oops', '', '', ''],
@@ -53,17 +55,17 @@ describe('ImportPage', () => {
     const preview = await screen.findByRole('region', { name: '2 words ready to add' })
     expect(within(preview).getByText('1 already in your vocabulary — skipped')).toBeTruthy()
     expect(within(preview).getByText('1 row with errors — not added')).toBeTruthy()
-    expect(within(preview).getByText('New categories will be created: Travel')).toBeTruthy()
+    expect(within(preview).getByText('New tags will be created: Travel')).toBeTruthy()
     expect(within(preview).getByText('No translation')).toBeTruthy()
 
     fireEvent.click(within(preview).getByRole('button', { name: 'Add 2 words' }))
     await waitFor(() =>
       expect(api.importWords).toHaveBeenCalledWith({
         today: todayYmd(),
-        createCategories: true,
+        createTags: true,
         words: [
-          expect.objectContaining({ word: 'deadline', translation: 'muddat', description: 'the latest time', category: 'Work' }),
-          expect.objectContaining({ word: 'luggage', translation: 'bagaj', category: 'Travel' }),
+          expect.objectContaining({ word: 'deadline', translation: 'muddat', description: 'the latest time', tags: ['Work', 'noun'] }),
+          expect.objectContaining({ word: 'luggage', translation: 'bagaj', tags: ['Travel'] }),
         ],
       }),
     )

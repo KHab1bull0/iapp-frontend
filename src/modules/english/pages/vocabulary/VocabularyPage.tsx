@@ -8,14 +8,16 @@ import { useToday } from '@/core/hooks/useToday'
 import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
 import {
   englishKeys,
-  fetchCategories,
+  fetchGroups,
   fetchLevels,
+  fetchTags,
   fetchWords,
   type WordFilters,
 } from '@/modules/english/api/english'
 import { reviewLabel } from '@/modules/english/lib/review'
 import { useWordEditor } from '@/modules/english/useWordEditor'
-import { useEnglishT, useLevelName } from '@/modules/english/i18n'
+import { useEnglishT, useGroupName, useLevelName } from '@/modules/english/i18n'
+import { shelve } from '@/modules/english/lib/tags'
 import s from '../EnglishPages.module.scss'
 import v from './VocabularyPage.module.scss'
 
@@ -35,14 +37,16 @@ export function VocabularyPage() {
     queryFn: () => fetchWords(query),
   })
   const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
-  const { data: categories = [] } = useQuery({ queryKey: englishKeys.categories, queryFn: fetchCategories })
+  const groupName = useGroupName()
+  const { data: tags = [] } = useQuery({ queryKey: englishKeys.tags(today), queryFn: () => fetchTags(today) })
+  const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
+  const tagNames = new Map(tags.map((tg) => [tg.id, tg.name]))
 
   const levelName = (id: string) => {
     const level = levels.find((l) => l.id === id)
     return level ? levelLabel(level) : ''
   }
-  const categoryName = (id: string | null) => (id ? categories.find((c) => c.id === id)?.name : undefined)
-  const filtered = Boolean(query.search || query.categoryId)
+  const filtered = Boolean(query.search || query.tagId)
 
   return (
     <div className={s.page}>
@@ -59,19 +63,23 @@ export function VocabularyPage() {
             aria-label={t.vocab.search}
           />
         </div>
-        {categories.length > 0 && (
+        {tags.length > 0 && (
           <div className={v.filters}>
             <select
               className={v.select}
-              value={filters.categoryId ?? ''}
-              onChange={(e) => setFilters((f) => ({ ...f, categoryId: e.target.value || undefined }))}
-              aria-label={t.vocab.categoryFilter}
+              value={filters.tagId ?? ''}
+              onChange={(e) => setFilters((f) => ({ ...f, tagId: e.target.value || undefined }))}
+              aria-label={t.vocab.tagFilter}
             >
-              <option value="">{t.vocab.allCategories}</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
+              <option value="">{t.vocab.allTags}</option>
+              {shelve(tags, groups).map((shelf) => (
+                <optgroup key={shelf.group?.id ?? 'none'} label={groupName(shelf.group)}>
+                  {shelf.tags.map((tg) => (
+                    <option key={tg.id} value={tg.id}>
+                      {tg.name} ({tg.count})
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>
@@ -102,12 +110,12 @@ export function VocabularyPage() {
               <span>{t.word.word}</span>
               <span>{t.word.translation}</span>
               <span>{t.word.level}</span>
-              <span>{t.word.category}</span>
+              <span>{t.word.tags}</span>
               <span>{t.word.memoriseOn}</span>
             </div>
             {words.map((w) => {
               const due = w.reviewOn <= today
-              const category = categoryName(w.categoryId)
+              const wordTags = w.tagIds.map((id) => tagNames.get(id)).filter(Boolean).join(', ')
               return (
                 <button key={w.id} className={v.row} onClick={() => editor.openEdit(w)}>
                   <span className={v.main}>
@@ -117,7 +125,7 @@ export function VocabularyPage() {
                   <span className={v.meta}>
                     <span className={v.badge}>{levelName(w.levelId)}</span>
                     {/* Always there, even empty, so the desktop columns stay aligned. */}
-                    <span className={v.category}>{category ?? ''}</span>
+                    <span className={v.tags}>{wordTags}</span>
                     <span className={due ? v.due : undefined}>{reviewLabel(w.reviewOn, today, t)}</span>
                   </span>
                 </button>

@@ -12,6 +12,6 @@ export interface EnglishSettingsSection {
 export function settingsSections(t: EnglishMessages['settings']): EnglishSettingsSection[] {
   return [
     { label: t.levels, description: t.levelsDesc, to: '/english/settings/levels', icon: Layers },
-    { label: t.categories, description: t.categoriesDesc, to: '/english/settings/categories', icon: Tags },
+    { label: t.tags, description: t.tagsDesc, to: '/english/settings/tags', icon: Tags },
   ]
 }

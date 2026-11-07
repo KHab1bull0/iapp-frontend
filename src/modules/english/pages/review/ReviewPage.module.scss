@@ -30,7 +30,10 @@
 
 .mode {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
+  gap: 8px;
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
@@ -371,4 +374,111 @@
 .secondary {
   @include btn-secondary;
   @include btn-size-lg;
+}
+
+// ── Tag chooser: what to review, before review starts ──
+.chooserHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chooserTitle {
+  margin: 0;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  font-weight: 700;
+  color: var(--fg-strong);
+}
+
+.chooserSub {
+  margin: 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  color: var(--fg-muted);
+}
+
+.tagGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--stack-gap);
+}
+
+.tagCard {
+  @include surface;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'icon name'
+    'icon due'
+    'icon total';
+  column-gap: 12px;
+  align-items: center;
+  padding: 16px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color $t-fast, background $t-fast, transform 80ms;
+
+  &:hover { border-color: var(--primary); background: var(--primary-soft); }
+  &:active { transform: scale(0.98); }
+}
+
+.tagCardOff {
+  opacity: 0.55;
+  cursor: default;
+
+  &:hover { border-color: var(--border); background: var(--bg-elev); }
+  &:active { transform: none; }
+}
+
+.tagCardIcon {
+  @include icon-tile(var(--tile-md));
+  grid-area: icon;
+  align-self: start;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.tagCardName {
+  grid-area: name;
+  min-width: 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 600;
+  color: var(--fg-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tagCardDue {
+  grid-area: due;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.tagCardDueOn { color: var(--success); }
+
+.tagCardTotal {
+  grid-area: total;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--fg-muted);
+}
+
+// The picked tag, beside the direction switch during review.
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: var(--control-sm);
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  white-space: nowrap;
 }

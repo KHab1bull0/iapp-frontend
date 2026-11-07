@@ -63,6 +63,38 @@ form.row {
 }
 
 .input { flex: 1 1 120px; }
+
+.select {
+  @include field-focus;
+  height: var(--control-md);
+  flex: 0 1 160px;
+  min-width: 0;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elev);
+  color: var(--fg-strong);
+  font-family: inherit;
+  font-size: var(--fs-ui);
+
+  @supports (-webkit-touch-callout: none) { font-size: 16px; }
+}
+
+// A tag group's title, with its rename and delete beside it.
+.groupHead {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--control-md);
+  padding: 0 4px;
+
+  > h2 { flex: 1; min-width: 0; }
+}
+
+form.groupHead {
+  gap: 8px;
+  flex-wrap: wrap;
+}
 .daysInput { width: 80px; flex-shrink: 0; }
 
 .iconBtn {

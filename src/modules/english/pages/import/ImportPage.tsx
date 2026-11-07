@@ -7,14 +7,15 @@ import { toast } from '@/core/components/ui/toast'
 import { useToday } from '@/core/hooks/useToday'
 import {
   englishKeys,
-  fetchCategories,
+  fetchGroups,
+  fetchTags,
   fetchWords,
   importWords,
   type ImportResult,
 } from '@/modules/english/api/english'
 import { buildTemplate, parseWorkbook, saveFile, type ParsedRow } from '@/modules/english/lib/excel'
 import { classify } from '@/modules/english/lib/importPlan'
-import { useEnglishT } from '@/modules/english/i18n'
+import { useEnglishT, useGroupName } from '@/modules/english/i18n'
 import s from '../EnglishPages.module.scss'
 import p from './ImportPage.module.scss'
 
@@ -30,7 +31,7 @@ const SHOWN = 100
 
 /**
  * English → Vocabulary → Import from Excel: download the template (with the
- * user's categories in it), upload it filled in, check what will happen to
+ * user's tags in it), upload it filled in, check what will happen to
  * each row, then add them all in one go.
  */
 export function ImportPage() {
@@ -42,7 +43,9 @@ export function ImportPage() {
   const [preparing, setPreparing] = useState(false)
   const [dragging, setDragging] = useState(false)
 
-  const { data: categories = [] } = useQuery({ queryKey: englishKeys.categories, queryFn: fetchCategories })
+  const groupName = useGroupName()
+  const { data: tags = [] } = useQuery({ queryKey: englishKeys.tags(today), queryFn: () => fetchTags(today) })
+  const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
   const { data: words = [] } = useQuery({
     queryKey: englishKeys.words({}),
     queryFn: () => fetchWords({}),
@@ -50,12 +53,12 @@ export function ImportPage() {
 
   const rows = useMemo(() => (phase.name === 'preview' ? phase.rows : []), [phase])
   const plan = useMemo(
-    () => classify(rows, words.map((w) => w.word), categories),
-    [rows, words, categories],
+    () => classify(rows, words.map((w) => w.word), tags),
+    [rows, words, tags],
   )
 
   const add = useMutation({
-    mutationFn: () => importWords({ words: plan.toAdd, today, createCategories: plan.newCategories.length > 0 }),
+    mutationFn: () => importWords({ words: plan.toAdd, today, createTags: plan.newTags.length > 0 }),
     onSuccess: async (result) => {
       await qc.invalidateQueries({ queryKey: englishKeys.all })
       toast(t.imp.done(result.created), 'success')
@@ -67,7 +70,7 @@ export function ImportPage() {
   async function download() {
     setPreparing(true)
     try {
-      saveFile(await buildTemplate(categories, t.imp.template), t.imp.fileName)
+      saveFile(await buildTemplate(tags, groups, t.imp.template, groupName), t.imp.fileName)
     } finally {
       setPreparing(false)
     }
@@ -94,14 +97,14 @@ export function ImportPage() {
   }
 
   if (phase.name === 'done') {
-    const { created, skipped, categoriesCreated } = phase.result
+    const { created, skipped, tagsCreated } = phase.result
     return (
       <div className={s.page}>
         <section className={p.done} aria-label={t.imp.done(created)}>
           <CheckCircle2 size={48} className={p.doneIcon} aria-hidden />
           <h1 className={p.doneTitle}>{t.imp.done(created)}</h1>
           {skipped.length > 0 && <p className={p.muted}>{t.imp.exists(skipped.length)}</p>}
-          {categoriesCreated.length > 0 && <p className={p.muted}>{t.imp.newCategories(categoriesCreated.join(', '))}</p>}
+          {tagsCreated.length > 0 && <p className={p.muted}>{t.imp.newTags(tagsCreated.join(', '))}</p>}
           <div className={p.doneActions}>
             <Link to="/english/review" className={p.primary}>
               <Play size={16} aria-hidden /> {t.imp.toReview}
@@ -194,8 +197,8 @@ export function ImportPage() {
             {plan.counts.repeated > 0 && <li>{t.imp.repeated(plan.counts.repeated)}</li>}
             {plan.counts.invalid > 0 && <li className={p.bad}>{t.imp.invalid(plan.counts.invalid)}</li>}
           </ul>
-          {plan.newCategories.length > 0 && (
-            <p className={p.notice}>{t.imp.newCategories(plan.newCategories.join(', '))}</p>
+          {plan.newTags.length > 0 && (
+            <p className={p.notice}>{t.imp.newTags(plan.newTags.join(', '))}</p>
           )}
 
           <div className={p.tableWrap}>
@@ -208,7 +211,7 @@ export function ImportPage() {
                   <th scope="col" className={p.wide}>
                     {t.word.description}
                   </th>
-                  <th scope="col">{t.word.category}</th>
+                  <th scope="col">{t.word.tags}</th>
                   <th scope="col">{t.imp.status}</th>
                 </tr>
               </thead>
@@ -225,7 +228,7 @@ export function ImportPage() {
                       <td className={p.wide} lang="en">
                         {r.row.description}
                       </td>
-                      <td>{r.row.category}</td>
+                      <td>{r.row.tags?.join(', ')}</td>
                       <td>
                         <span className={clsx(p.badge, p[status])}>
                           {status === 'invalid'

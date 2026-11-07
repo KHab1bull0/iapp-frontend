@@ -1,16 +1,17 @@
 import { BarChart3, BookOpen, BookPlus, Languages, Layers } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
+import { Navigate } from 'react-router-dom'
 import { EnglishHomeCard } from './EnglishHomeCard'
 import { useReviewCount } from './useReviewCount'
 import { WordDialog } from './components/WordDialog'
 import {
-  CategoriesPage,
   EnglishSettingsIndex,
   EnglishSettingsLayout,
   ImportPage,
   LevelsPage,
   ReviewPage,
   StatsPage,
+  TagsPage,
   VocabularyPage,
   WordFormPage,
 } from './pages/lazy'
@@ -40,7 +41,9 @@ export const english: ModuleManifest = {
       children: [
         { index: true, element: <EnglishSettingsIndex /> },
         { path: 'levels', element: <LevelsPage /> },
-        { path: 'categories', element: <CategoriesPage /> },
+        { path: 'tags', element: <TagsPage /> },
+        // Categories became tags.
+        { path: 'categories', element: <Navigate to="/english/settings/tags" replace /> },
       ],
     },
   ],

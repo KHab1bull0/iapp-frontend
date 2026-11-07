@@ -28,10 +28,11 @@ const STATS: Stats = {
     { id: 'l0', name: 'New', locked: true, intervalDays: 0, count: 12 },
     { id: 'l3', name: 'Three days', locked: false, intervalDays: 3, count: 30 },
   ],
-  categories: [
-    { id: 'c1', name: 'Travel', count: 20 },
-    { id: null, name: null, count: 22 },
+  tags: [
+    { id: 't1', name: 'Travel', groupId: null, count: 20 },
+    { id: 't2', name: 'verb', groupId: 'g1', count: 0 },
   ],
+  untagged: 22,
   upcoming: days(7, '2026-11-01').map((date, i) => ({ date, count: i === 0 ? 9 : 0 })),
   activity: days(14, '2026-10-18').map((date, i) => ({ date, remembered: i === 13 ? 3 : 1, forgot: i === 13 ? 1 : 0 })),
   growth: days(30, '2026-10-02').map((date, i) => ({ date, total: 20 + Math.floor(i / 2) })),
@@ -63,7 +64,7 @@ describe('StatsPage', () => {
     expect(within(accuracy).getByText('75%')).toBeTruthy()
   })
 
-  test('the vocabulary split by level, its growth, categories and the two weeks around today', async () => {
+  test('the vocabulary split by level, its growth, tags and the two weeks around today', async () => {
     api.fetchStats.mockResolvedValue(STATS)
     renderPage()
     const vocab = await screen.findByRole('region', { name: 'Vocabulary' })
@@ -76,9 +77,11 @@ describe('StatsPage', () => {
     const growth = screen.getByRole('region', { name: 'Vocabulary growth · 30 days' })
     expect(within(growth).getByText('+14 words in 30 days')).toBeTruthy()
 
-    const cats = screen.getByRole('region', { name: 'Words by category' })
-    expect(within(cats).getByText('No category')).toBeTruthy()
+    const cats = screen.getByRole('region', { name: 'Words by tag' })
+    expect(within(cats).getByText('No tag')).toBeTruthy()
     expect(within(cats).getByText('Travel')).toBeTruthy()
+    // A tag no word wears yet isn't a bar.
+    expect(within(cats).queryByText('verb')).toBeNull()
 
     expect(screen.getByRole('region', { name: 'Next 7 days' })).toBeTruthy()
     expect(within(screen.getByRole('region', { name: 'Last 14 days' })).getAllByRole('listitem')).toHaveLength(14)

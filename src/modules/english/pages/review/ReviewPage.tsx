@@ -1,16 +1,28 @@
 import { useEffect, useState } from 'react'
 import clsx from 'clsx'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Flame, Plus, RefreshCw, Volume2, X } from 'lucide-react'
+import { Flame, Layers, Plus, RefreshCw, Tag as TagIcon, Volume2, X } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { ProgressBar } from '@/core/components/ui/Progress'
 import { SegmentedControl } from '@/core/components/ui/SegmentedControl'
 import { useToday } from '@/core/hooks/useToday'
 import { toast } from '@/core/components/ui/toast'
 import { useQuickAdd } from '@/core/quickAdd/context'
-import { answerWord, englishKeys, fetchLevels, fetchReview, fetchStats, type Level, type Word } from '@/modules/english/api/english'
-import { useEnglishT, useLevelName } from '@/modules/english/i18n'
+import {
+  answerWord,
+  englishKeys,
+  fetchGroups,
+  fetchLevels,
+  fetchReview,
+  fetchStats,
+  fetchTags,
+  type Level,
+  type Tag,
+  type Word,
+} from '@/modules/english/api/english'
+import { useEnglishT, useGroupName, useLevelName } from '@/modules/english/i18n'
+import { shelve } from '@/modules/english/lib/tags'
 import { frontSide, loadDirection, saveDirection, type Direction } from '@/modules/english/lib/direction'
 import s from '../EnglishPages.module.scss'
 import r from './ReviewPage.module.scss'
@@ -37,6 +49,21 @@ function speak(word: string) {
  */
 export function ReviewPage() {
   const today = useToday()
+  const [params] = useSearchParams()
+  const tag = params.get('tag')
+  const { data: tags, isLoading } = useQuery({ queryKey: englishKeys.tags(today), queryFn: () => fetchTags(today) })
+
+  if (isLoading) return null
+  // The tag cards come first once a tag has words; until then, straight in.
+  const worn = (tags ?? []).some((tg) => tg.count > 0)
+  if (!tag && worn) return <TagChooser tags={tags ?? []} />
+  const tagId = tag && tag !== 'all' ? tag : undefined
+  return <ReviewSession key={tag ?? 'all'} tagId={tagId} tagName={tags?.find((tg) => tg.id === tagId)?.name} />
+}
+
+/** One review session over today's stack, or one tag's part of it. */
+function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string }) {
+  const today = useToday()
   const t = useEnglishT()
   const levelLabel = useLevelName()
   const qc = useQueryClient()
@@ -50,8 +77,8 @@ export function ReviewPage() {
   const [answered, setAnswered] = useState<Record<Result, number>>({ remembered: 0, forgot: 0 })
 
   const { data: stack = [], isLoading, isError, refetch } = useQuery({
-    queryKey: englishKeys.review(today),
-    queryFn: () => fetchReview(today),
+    queryKey: englishKeys.review(today, tagId),
+    queryFn: () => fetchReview(today, tagId),
   })
   const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
 
@@ -67,7 +94,7 @@ export function ReviewPage() {
     onMutate: ({ word, level }) => {
       const result = resultOf(word, level)
       setAnswered((a) => ({ ...a, [result]: a[result] + 1 }))
-      qc.setQueryData<Word[]>(englishKeys.review(today), (stack) => stack?.filter((w) => w.id !== word.id))
+      qc.setQueryData<Word[]>(englishKeys.review(today, tagId), (stack) => stack?.filter((w) => w.id !== word.id))
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: englishKeys.all }),
     onError: async (_e, { word, level }) => {
@@ -101,7 +128,8 @@ export function ReviewPage() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
-      if (e.key === 'Escape') return navigate('/english')
+      // Out to the tag cards when a tag was picked, else out of review.
+      if (e.key === 'Escape') return navigate(tagId ? '/english/review' : '/english')
       if (!current) return
       if ((e.key === ' ' || e.key === 'Enter') && !revealed) {
         e.preventDefault()
@@ -142,9 +170,15 @@ export function ReviewPage() {
             </div>
           )}
           <div className={r.summaryActions}>
-            <Link to="/" className={r.primary}>
-              {t.review.home}
-            </Link>
+            {tagId ? (
+              <Link to="/english/review" className={r.primary}>
+                <TagIcon size={18} aria-hidden /> {t.review.otherTag}
+              </Link>
+            ) : (
+              <Link to="/" className={r.primary}>
+                {t.review.home}
+              </Link>
+            )}
             <button type="button" className={r.secondary} onClick={() => quickAdd.open('english.word')}>
               <Plus size={18} aria-hidden /> {t.review.addWord}
             </button>
@@ -177,6 +211,11 @@ export function ReviewPage() {
       </header>
 
       <div className={r.mode}>
+        {tagName && (
+          <span className={r.tagChip}>
+            <TagIcon size={14} aria-hidden /> {tagName}
+          </span>
+        )}
         <SegmentedControl
           size="sm"
           label={t.review.direction}
@@ -302,6 +341,73 @@ export function ReviewPage() {
         )}
         <p className={r.keys}>{t.review.keys}</p>
       </footer>
+    </div>
+  )
+}
+
+/**
+ * Before review: what to review. "All" first, then each tag by group, each
+ * card with how many of its words are due today and how many it has in all.
+ * A tag with nothing due today can't be opened.
+ */
+function TagChooser({ tags }: { tags: Tag[] }) {
+  const t = useEnglishT()
+  const today = useToday()
+  const navigate = useNavigate()
+  const groupName = useGroupName()
+  const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
+  const { data: all = [] } = useQuery({ queryKey: englishKeys.review(today), queryFn: () => fetchReview(today) })
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && navigate('/english')
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [navigate])
+
+  const card = (key: string, name: string, due: number, total: number | null, to: string, icon = TagIcon) => {
+    const Icon = icon
+    const body = (
+      <>
+        <span className={r.tagCardIcon} aria-hidden>
+          <Icon size={18} />
+        </span>
+        <span className={r.tagCardName}>{name}</span>
+        <span className={clsx(r.tagCardDue, due > 0 && r.tagCardDueOn)}>{t.review.dueToday(due)}</span>
+        {total !== null && <span className={r.tagCardTotal}>{t.review.ofTotal(total)}</span>}
+      </>
+    )
+    const label = total === null ? `${name}: ${t.review.dueToday(due)}` : t.review.tagCard(name, due, total)
+    return due > 0 ? (
+      <Link key={key} to={to} className={r.tagCard} aria-label={label}>
+        {body}
+      </Link>
+    ) : (
+      <div key={key} className={clsx(r.tagCard, r.tagCardOff)} aria-label={label} aria-disabled>
+        {body}
+      </div>
+    )
+  }
+
+  return (
+    <div className={s.page}>
+      <header className={r.chooserHead}>
+        <h1 className={r.chooserTitle}>{t.review.pickTag}</h1>
+        <p className={r.chooserSub}>{t.review.pickTagSub}</p>
+      </header>
+      <div className={r.tagGrid}>{card('all', t.review.allTags, all.length, null, '/english/review?tag=all', Layers)}</div>
+      {shelve(
+        tags.filter((tg) => tg.count > 0),
+        groups,
+      ).map((shelf) => (
+        <section key={shelf.group?.id ?? 'none'} className={s.section} aria-label={groupName(shelf.group)}>
+          <div className={s.sectionHead}>
+            <h2 className={s.sectionTitle}>{groupName(shelf.group)}</h2>
+          </div>
+          <div className={r.tagGrid}>
+            {shelf.tags.map((tg) => card(tg.id, tg.name, tg.due, tg.count, `/english/review?tag=${tg.id}`))}
+          </div>
+        </section>
+      ))}
     </div>
   )
 }

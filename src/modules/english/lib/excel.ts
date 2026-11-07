@@ -1,5 +1,6 @@
 import type { Workbook, Worksheet } from 'exceljs'
-import type { Category, ImportRow } from '@/modules/english/api/english'
+import type { ImportRow, Tag, TagGroup } from '@/modules/english/api/english'
+import { shelve } from './tags'
 
 /**
  * The Excel template for adding many words at once, and reading a filled-in
@@ -15,25 +16,36 @@ export const COLUMNS = [
   { key: 'example', required: false, max: 500, width: 42 },
   { key: 'translation', required: true, max: 200, width: 22 },
   { key: 'note', required: false, max: 1000, width: 34 },
-  { key: 'category', required: false, max: 50, width: 18 },
+  { key: 'tags', required: false, max: 300, width: 24 },
 ] as const
 
 export type ColumnKey = (typeof COLUMNS)[number]['key']
 
 /** Row 2 of the template: one filled-in word to copy. Left out when a file is read back. */
-export const SAMPLE: Required<ImportRow> = {
+export const SAMPLE = {
   word: 'harvest',
   description: 'the time of year when crops are gathered from the fields',
   example: 'Farmers work from dawn to dusk during the harvest.',
   translation: "hosil, yig'im-terim",
   note: "Qishloq xo'jaligida ko'p ishlatiladi; fe'l sifatida: to harvest — yig'ib olmoq",
-  category: '',
-}
+  tags: 'nature, noun',
+} satisfies Record<ColumnKey, string>
+
+/** A tag cell, "family, noun" (commas or semicolons), as names. */
+export const splitTags = (cell: string) =>
+  cell
+    .split(/[,;]/)
+    .map((x) => x.trim())
+    .filter(Boolean)
+
+/** One tag's name at most this long, at most this many on a word (as the server checks). */
+const TAG_MAX = 50
+const TAGS_PER_WORD = 20
 
 export const MAX_ROWS = 1000
 
 export const WORDS_SHEET = 'Words'
-const CATEGORIES_SHEET = 'Categories'
+const TAGS_SHEET = 'Tags'
 const GUIDE_SHEET = 'Guide'
 
 export interface TemplateText {
@@ -47,12 +59,12 @@ export interface TemplateText {
   meaning: string
   sample: string
   limit: string
-  categoriesTitle: string
-  categoryName: string
-  categoryId: string
-  noCategories: string
+  tagName: string
+  tagGroup: string
+  tagId: string
+  noTags: string
   aiTitle: string
-  aiPrompt: (categories: string[]) => string
+  aiPrompt: (groups: { name: string; tags: string[] }[]) => string
 }
 
 async function excel() {
@@ -85,8 +97,16 @@ export async function normalizeXlsx(data: ArrayBuffer): Promise<ArrayBuffer> {
   return changed ? zip.generateAsync({ type: 'arraybuffer' }) : data
 }
 
-/** The template as a downloadable file: the words sheet, the user's categories, and a guide. */
-export async function buildTemplate(categories: Category[], text: TemplateText): Promise<Blob> {
+/**
+ * The template as a downloadable file: the words sheet, the user's tags (by
+ * group), and a guide. `groupName` shows a group's name in the user's language.
+ */
+export async function buildTemplate(
+  tags: Pick<Tag, 'id' | 'name' | 'groupId'>[],
+  groups: TagGroup[],
+  text: TemplateText,
+  groupName: (g: TagGroup | null) => string,
+): Promise<Blob> {
   const ExcelJS = await excel()
   const wb: Workbook = new ExcelJS.Workbook()
   wb.creator = 'IAPP'
@@ -103,34 +123,23 @@ export async function buildTemplate(categories: Category[], text: TemplateText):
     cell.alignment = { vertical: 'middle' }
     cell.note = `${text.columns[c.key]} (${c.required ? text.required : text.optional}, ≤ ${c.max})`
   })
-  const sample = words.addRow({ ...SAMPLE, category: categories[0]?.name ?? '' })
+  const sample = words.addRow(SAMPLE)
   sample.font = { italic: true, color: { argb: 'FF64748B' } }
   sample.getCell(1).note = text.sample
 
-  // The category column offers the user's categories as a list. A name that
-  // is not on it only warns: the import can create it.
-  if (categories.length > 0) {
-    const col = COLUMNS.findIndex((c) => c.key === 'category') + 1
-    for (let r = 2; r <= MAX_ROWS + 1; r++) {
-      words.getCell(r, col).dataValidation = {
-        type: 'list',
-        allowBlank: true,
-        formulae: [`'${CATEGORIES_SHEET}'!$A$2:$A$${categories.length + 1}`],
-        showErrorMessage: true,
-        errorStyle: 'warning',
-      }
-    }
-  }
-
-  // ── Categories ──
-  const cats = wb.addWorksheet(CATEGORIES_SHEET)
-  cats.columns = [
-    { header: text.categoryName, key: 'name', width: 28 },
-    { header: text.categoryId, key: 'id', width: 40 },
+  // ── Tags ── (a word takes several, so the column is typed, not picked: this sheet is the list)
+  const shelves = shelve(tags, groups)
+  const list = wb.addWorksheet(TAGS_SHEET)
+  list.columns = [
+    { header: text.tagName, key: 'name', width: 24 },
+    { header: text.tagGroup, key: 'group', width: 24 },
+    { header: text.tagId, key: 'id', width: 40 },
   ]
-  cats.getRow(1).font = { bold: true }
-  if (categories.length === 0) cats.addRow({ name: text.noCategories })
-  for (const c of categories) cats.addRow({ name: c.name, id: c.id })
+  list.getRow(1).font = { bold: true }
+  if (tags.length === 0) list.addRow({ name: text.noTags })
+  for (const shelf of shelves) {
+    for (const tag of shelf.tags) list.addRow({ name: tag.name, group: groupName(shelf.group), id: tag.id })
+  }
 
   // ── Guide ──
   const guide = wb.addWorksheet(GUIDE_SHEET)
@@ -150,13 +159,15 @@ export async function buildTemplate(categories: Category[], text: TemplateText):
       c.key,
       c.required ? text.required : text.optional,
       text.columns[c.key],
-      c.key === 'category' ? (categories[0]?.name ?? '') : SAMPLE[c.key],
+      SAMPLE[c.key],
       c.max,
     ])
   }
   guide.addRow([])
   guide.addRow([text.aiTitle]).font = { bold: true }
-  const prompt = guide.addRow([text.aiPrompt(categories.map((c) => c.name))])
+  const prompt = guide.addRow([
+    text.aiPrompt(shelves.map((sh) => ({ name: groupName(sh.group), tags: sh.tags.map((tg) => tg.name) }))),
+  ])
   guide.mergeCells(prompt.number, 1, prompt.number, 4)
   prompt.alignment = { wrapText: true, vertical: 'top' }
   prompt.height = 220
@@ -195,9 +206,11 @@ export async function parseWorkbook(file: Blob): Promise<ParseResult> {
   // Columns by their header, wherever they are; any case, extra spaces ignored.
   const at = new Map<ColumnKey, number>()
   ws.getRow(1).eachCell((cell, col) => {
-    const key = cell.text?.trim().toLowerCase()
+    const raw = cell.text?.trim().toLowerCase()
+    // The template's column before tags was "category": its value is read as a tag.
+    const key = raw === 'category' ? 'tags' : raw
     const known = COLUMNS.find((c) => c.key === key)
-    if (known) at.set(known.key, col)
+    if (known && !at.has(known.key)) at.set(known.key, col)
   })
   if (!at.has('word') || !at.has('translation')) return { ok: false, error: 'noHeader' }
 
@@ -207,20 +220,28 @@ export async function parseWorkbook(file: Blob): Promise<ParseResult> {
       const col = at.get(key)
       return col ? cellText(ws, r, col) : ''
     }
+    const cells = Object.fromEntries(COLUMNS.map((c) => [c.key, get(c.key)])) as Record<ColumnKey, string>
+    if (COLUMNS.every((c) => !cells[c.key])) continue // an empty line
+    if (cells.word === SAMPLE.word && cells.translation === SAMPLE.translation) continue // the template's sample
+    const tags = splitTags(cells.tags)
     const row: ImportRow = {
-      word: get('word'),
-      translation: get('translation'),
-      description: get('description'),
-      example: get('example'),
-      note: get('note'),
-      category: get('category'),
+      word: cells.word,
+      translation: cells.translation,
+      description: cells.description,
+      example: cells.example,
+      note: cells.note,
+      tags,
     }
-    if (COLUMNS.every((c) => !row[c.key])) continue // an empty line
-    if (row.word === SAMPLE.word && row.translation === SAMPLE.translation) continue // the template's sample
     const problems: ParsedRow['problems'] = []
     if (!row.word) problems.push('missingWord')
     if (!row.translation) problems.push('missingTranslation')
-    if (COLUMNS.some((c) => (row[c.key]?.length ?? 0) > c.max)) problems.push('tooLong')
+    if (
+      COLUMNS.some((c) => cells[c.key].length > c.max) ||
+      tags.length > TAGS_PER_WORD ||
+      tags.some((tg) => tg.length > TAG_MAX)
+    ) {
+      problems.push('tooLong')
+    }
     rows.push({ line: r, row, problems })
   }
   if (rows.length > MAX_ROWS) return { ok: false, error: 'tooMany' }

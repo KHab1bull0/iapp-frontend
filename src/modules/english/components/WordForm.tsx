@@ -9,7 +9,6 @@ import {
   createWord,
   deleteWord,
   englishKeys,
-  fetchCategories,
   fetchLevels,
   updateWord,
   type Word,
@@ -18,6 +17,7 @@ import {
 import { useEnglishT, useLevelName } from '@/modules/english/i18n'
 import s from './WordForm.module.scss'
 import { DateField } from '@/core/components/ui/DateField'
+import { TagPicker } from './TagPicker'
 
 interface Props {
   word: Word | null
@@ -38,15 +38,9 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
   const [note, setNote] = useState(word?.note ?? '')
   const [description, setDescription] = useState(word?.description ?? '')
   const [example, setExample] = useState(word?.example ?? '')
-  const [categoryId, setCategoryId] = useState(word?.categoryId ?? '')
+  const [tagIds, setTagIds] = useState<string[]>(word?.tagIds ?? [])
   const [reviewOn, setReviewOn] = useState(word?.reviewOn ?? todayYmd())
   const [levelId, setLevelId] = useState(word?.levelId ?? '')
-
-  // The picker only appears once there is a category to pick.
-  const { data: categories = [] } = useQuery({
-    queryKey: englishKeys.categories,
-    queryFn: fetchCategories,
-  })
 
   const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
   // A new word starts at New (the locked level) unless another is picked.
@@ -63,33 +57,6 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
     }
   }
 
-  // Chips, as for a transaction's category: every choice in view, one tap.
-  const categoryPicker = categories.length > 0 && (
-    <div className={s.field}>
-      <span className={s.label} id="word-category-label">
-        {t.word.category}
-      </span>
-      <div className={s.chips} role="radiogroup" aria-labelledby="word-category-label">
-        {[{ id: '', name: t.word.none }, ...categories].map((c) => {
-          const on = categoryId === c.id
-          return (
-            <button
-              key={c.id || 'none'}
-              type="button"
-              role="radio"
-              aria-checked={on}
-              className={clsx(s.chip, on && s.chipOn)}
-              onClick={() => setCategoryId(c.id)}
-            >
-              {on && <Check size={14} strokeWidth={2.5} aria-hidden />}
-              {c.name}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-
   const valid = text.trim() && translation.trim() && reviewOn
 
   const save = useMutation({
@@ -100,7 +67,7 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
         note: note.trim() || null,
         description: description.trim() || null,
         example: example.trim() || null,
-        categoryId: categoryId || null,
+        tagIds,
         reviewOn,
         ...(shownLevelId ? { levelId: shownLevelId } : {}),
       }
@@ -211,7 +178,7 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
           <span className={s.label} id="word-level-label">
             {t.word.level}
           </span>
-          {/* Chips, like the category: picking one reschedules the word below. */}
+          {/* Chips, like the tags: picking one reschedules the word below. */}
           <div className={s.chips} role="radiogroup" aria-labelledby="word-level-label">
             {levels.map((l) => {
               const on = shownLevelId === l.id
@@ -241,7 +208,7 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
         <span className={s.label}>{t.word.memoriseOn}</span>
         <DateField label={t.word.memoriseOn} value={reviewOn} onChange={(d) => d && setReviewOn(d)} />
       </div>
-      {categoryPicker}
+      <TagPicker value={tagIds} onChange={setTagIds} />
       <span className={s.hint}>
         {reviewOn ? t.word.joinsHint : t.word.pickDay}
       </span>

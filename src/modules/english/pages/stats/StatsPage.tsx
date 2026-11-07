@@ -148,14 +148,15 @@ export function StatsPage() {
         <Activity days={data.activity} />
         <Upcoming days={data.upcoming} />
       </div>
-      {data.categories.length > 0 && (
+      {(data.tags ?? []).some((tg) => tg.count > 0) && (
         <BarRows
-          title={t.stats.byCategory}
-          rows={data.categories.map((c) => ({
-            key: c.id ?? 'none',
-            label: c.name ?? t.stats.uncategorized,
-            count: c.count,
-          }))}
+          title={t.stats.byTag}
+          rows={[
+            ...data.tags
+              .filter((tg) => tg.count > 0)
+              .map((tg) => ({ key: tg.id, label: tg.name, count: tg.count })),
+            ...(data.untagged ? [{ key: 'none', label: t.stats.untagged, count: data.untagged }] : []),
+          ]}
         />
       )}
     </div>

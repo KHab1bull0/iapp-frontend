@@ -20,7 +20,7 @@
   min-width: 0;
 }
 
-// Category chips: the same shape as a transaction's category chips.
+// Chips (level, tags): the same shape as a transaction's category chips.
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -44,6 +44,43 @@
   transition: border-color $t-fast, background $t-fast;
 
   &:hover { border-color: var(--border-strong); }
+}
+
+.shelves {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shelf {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shelfName {
+  @include section-label;
+}
+
+.chipAdd {
+  border-style: dashed;
+  color: var(--fg-muted);
+}
+
+// The new tag's name, typed where the "+" chip was.
+.chipInput {
+  @include field-focus;
+  height: var(--control-md);
+  width: 160px;
+  padding: 0 12px;
+  border: 1.5px solid var(--primary);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elev);
+  color: var(--fg-strong);
+  font: inherit;
+  font-size: var(--fs-ui);
+
+  @supports (-webkit-touch-callout: none) { font-size: 16px; }
 }
 
 .chipSub {

@@ -12,8 +12,6 @@ export const EnglishSettingsIndex = lazy(() =>
   import('./settings').then((m) => ({ default: m.EnglishSettingsIndex })),
 )
 export const LevelsPage = lazy(() => import('./settings').then((m) => ({ default: m.LevelsPage })))
-export const CategoriesPage = lazy(() =>
-  import('./settings').then((m) => ({ default: m.CategoriesPage })),
-)
+export const TagsPage = lazy(() => import('./settings').then((m) => ({ default: m.TagsPage })))
 export const ImportPage = lazy(() => import('./import').then((m) => ({ default: m.ImportPage })))
 export const WordFormPage = lazy(() => import('./form').then((m) => ({ default: m.WordFormPage })))
