@@ -4,11 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { todayYmd } from '@/core/lib/format'
 import { DateField } from '@/core/components/ui/DateField'
 import { toast } from '@/core/components/ui/toast'
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
-} from '@/core/components/ui/alert-dialog'
+import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
 import {
   createTask,
   deleteTask,
@@ -233,32 +229,20 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
         />
       </label>
 
-      <div className={s.actions} data-form-actions>
+      <div data-form-actions>
         {task && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
+          <ConfirmDialog
+            trigger={
               <button type="button" className={s.btnDanger}>
                 {t.form.delete}
               </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.form.deleteTitle(task.title)}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t.form.deleteDesc}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.form.cancel}</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => remove.mutate()}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  {t.form.delete}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            }
+            title={t.form.deleteTitle(task.title)}
+            description={t.form.deleteDesc}
+            confirmLabel={t.form.delete}
+            cancelLabel={t.form.cancel}
+            onConfirm={() => remove.mutate()}
+          />
         )}
         <button type="button" className={s.btnSecondary} onClick={onCancel}>
           {t.form.cancel}

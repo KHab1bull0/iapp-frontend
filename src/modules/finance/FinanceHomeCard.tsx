@@ -1,17 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
-import { Minus, RefreshCw, Wallet } from 'lucide-react'
+import { RefreshCw, Wallet } from 'lucide-react'
 import { HomeCard } from '@/core/components/HomeCard'
 import { Skeleton } from '@/core/components/ui/Skeleton'
 import { CURRENCY, currentMonth, formatAmount, formatMonthLong } from '@/core/lib/format'
-import { useQuickAdd } from '@/core/quickAdd/context'
 import { fetchFinanceSummary, financeSummaryKey } from './api/summary'
 import { useFinanceT } from './i18n'
 import s from './FinanceHomeCard.module.scss'
 
-/** Home: what this month has cost so far, the balance beside it, and a quick way to log a spend. */
+/** Home: what this month has cost so far and the balance beside it. Adding goes through the shell's "+". */
 export function FinanceHomeCard() {
   const t = useFinanceT()
-  const quickAdd = useQuickAdd()
   const month = currentMonth()
   const { data, isError, refetch } = useQuery({
     queryKey: financeSummaryKey(month),
@@ -52,9 +50,6 @@ export function FinanceHomeCard() {
               <div className={s.balance}>{data ? formatAmount(data.totalBalance) : <Skeleton width={80} />}</div>
             </div>
           </div>
-          <button className={s.add} onClick={() => quickAdd.open('finance.transaction')}>
-            <Minus size={18} aria-hidden /> {t.home.addExpense}
-          </button>
         </>
       )}
     </HomeCard>

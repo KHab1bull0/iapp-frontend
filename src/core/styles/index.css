@@ -358,16 +358,31 @@
   }
 }
 
-/* ---------- A form's Save/Cancel row ----------
-   Add/edit forms are pages; their action row (marked data-form-actions)
-   sticks to the bottom of the screen while the fields scroll, in thumb
-   reach on phones. */
+/* ---------- A form's Save/Cancel/Delete row ----------
+   Add/edit pages mark their action row with data-form-actions. It is fixed
+   to the bottom of the screen, whatever sits above the form (a task's stats
+   card) and however short or long the form is; the page keeps
+   --form-actions-space free at its foot so nothing hides behind it. Its
+   buttons share one width and height (the btn-action-* mixins) and differ
+   only in colour. Inside a sheet, side panel or dialog the row sticks to the
+   bottom of that box instead (Sheet.module.scss, AddCategoryDialog).
+   --form-gutter is the page's side padding; the buttons line up with the
+   form's 640px column. */
+:root {
+  --form-actions-space: calc(var(--control-lg) + 25px + var(--safe-bottom));
+}
+
 @layer base {
   [data-form-actions] {
-    position: sticky;
+    position: fixed;
+    left: 0;
+    right: 0;
     bottom: 0;
-    z-index: 5;
-    padding: 12px 0 calc(12px + var(--safe-bottom));
+    z-index: 20;
+    display: flex;
+    gap: 12px;
+    padding: 12px max(var(--form-gutter, 16px), calc((100% - 640px) / 2 + var(--form-gutter, 16px)))
+      calc(12px + var(--safe-bottom));
     background: var(--bg);
     border-top: 1px solid var(--border);
   }

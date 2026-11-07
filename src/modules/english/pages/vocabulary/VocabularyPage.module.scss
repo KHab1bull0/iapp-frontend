@@ -40,6 +40,13 @@
   @supports (-webkit-touch-callout: none) { font-size: 16px; }
 }
 
+.importBtn {
+  @include btn-secondary;
+  @include btn-size-md;
+  flex: 0 0 auto;
+  text-decoration: none;
+}
+
 .filters {
   display: flex;
   gap: 8px;

@@ -131,24 +131,19 @@
   border-radius: var(--radius-sm);
 }
 
+// Same action row as the add/edit pages (global [data-form-actions] rule),
+// here pinned to the bottom of the dialog, which scrolls with 24px padding.
 .formActions {
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
-  padding-top: 4px;
+  position: sticky;
+  left: auto;
+  right: auto;
+  bottom: -24px;
+  margin: auto -24px -24px;
+  padding: 12px 24px 24px;
 }
 
-.btnSecondary {
-  @include btn-secondary;
-  @include btn-size-md;
-  flex: 1;
-}
-
-.btnPrimary {
-  @include btn-primary;
-  @include btn-size-md;
-  flex: 1;
-}
+.btnSecondary { @include btn-action-secondary; }
+.btnPrimary { @include btn-action-primary; }
 
 // iOS zooms the page into any field under 16px when it takes focus.
 @supports (-webkit-touch-callout: none) {

@@ -60,32 +60,8 @@
   resize: vertical;
 }
 
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding-top: 4px;
-}
-
-.btnDanger {
-  @include btn-base;
-  @include btn-size-md;
-  margin-right: auto;
-  background: transparent;
-  color: var(--danger);
-  border-color: transparent;
-
-  &:hover { background: var(--danger-soft); }
-}
-
-.btnSecondary {
-  @include btn-secondary;
-  @include btn-size-md;
-}
-
-.btnPrimary {
-  @include btn-primary;
-  @include btn-size-md;
-
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
-}
+// The action row's layout (bottom of the screen, one row) is the global
+// [data-form-actions] rule; the buttons share a size and differ by colour.
+.btnDanger { @include btn-action-danger; }
+.btnSecondary { @include btn-action-secondary; }
+.btnPrimary { @include btn-action-primary; }

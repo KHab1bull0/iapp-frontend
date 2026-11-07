@@ -60,6 +60,11 @@
   text-overflow: ellipsis;
 }
 
+.valueSm {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+}
+
 .primaryText { color: var(--primary); }
 .successText { color: var(--success); }
 .dangerText { color: var(--danger); }

@@ -5,6 +5,7 @@ import { Inbox } from 'lucide-react'
 import { monthGrid } from '@/core/lib/calendar'
 import { setFormatLang, todayYmd } from '@/core/lib/format'
 import { Calendar } from './Calendar'
+import { ConfirmDialog } from './ConfirmDialog'
 import { DateField } from './DateField'
 import { EmptyState } from './EmptyState'
 import { ListGroup, ListRow } from './List'
@@ -130,5 +131,37 @@ describe('DateField', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Tomorrow' }))
     expect(onChange).toHaveBeenCalledTimes(1)
     expect(onChange.mock.calls[0][0]).not.toBe(todayYmd())
+  })
+})
+
+describe('ConfirmDialog', () => {
+  const renderIt = (onConfirm = vi.fn()) => {
+    render(
+      <ConfirmDialog
+        trigger={<button>Delete word</button>}
+        title='Delete "harbour"?'
+        description="Its review history stays in the stats."
+        confirmLabel="Delete"
+        onConfirm={onConfirm}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Delete word' }))
+    return onConfirm
+  }
+
+  test('asks with a title, the consequence and the verb, then confirms', () => {
+    const onConfirm = renderIt()
+    const dialog = screen.getByRole('alertdialog', { name: 'Delete "harbour"?' })
+    expect(dialog.textContent).toContain('Its review history stays in the stats.')
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    expect(onConfirm).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('alertdialog')).toBeNull()
+  })
+
+  test('Cancel backs out without confirming', () => {
+    const onConfirm = renderIt()
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(onConfirm).not.toHaveBeenCalled()
+    expect(screen.queryByRole('alertdialog')).toBeNull()
   })
 })

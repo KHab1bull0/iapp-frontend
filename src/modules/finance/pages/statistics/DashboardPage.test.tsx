@@ -29,7 +29,7 @@ describe('Statistics page', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    const hero = await screen.findByRole('region', { name: 'Spent' })
+    const hero = await screen.findByRole('region', { name: 'Expenses' })
     expect(within(hero).getByText('25% more than by this day last month')).toBeTruthy()
     expect(screen.getAllByRole('group', { name: 'Select month' })).toHaveLength(1)
     expect(screen.getByRole('button', { name: 'Next month' }).hasAttribute('disabled')).toBe(true)

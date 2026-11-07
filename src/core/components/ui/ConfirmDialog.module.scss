@@ -1,0 +1,122 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(15, 17, 23, 0.45);
+  backdrop-filter: blur(2px);
+  animation: fade $t-base var(--ease-house);
+}
+
+// Phone: a card floating just above the bottom edge, buttons stacked.
+.card {
+  position: fixed;
+  z-index: 71;
+  left: 8px;
+  right: 8px;
+  bottom: calc(8px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 20px 20px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: $radius-xl;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  outline: none;
+  animation: rise $t-slow var(--ease-house);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  border-radius: $radius-pill;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.iconDanger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
+  font-weight: 600;
+  color: var(--fg-strong);
+  overflow-wrap: anywhere;
+}
+
+.description {
+  margin: 8px 0 0;
+  max-width: 36ch;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  color: var(--fg-muted);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-self: stretch;
+  margin-top: 24px;
+}
+
+// One size for both; colour tells them apart.
+.confirm {
+  @include btn-action-primary;
+  flex: 0 0 auto;
+}
+
+// Red-600 in both themes, as btn-destructive: white on it is ≥ 4.5:1.
+.confirmDanger {
+  background: var(--red-600);
+  color: white;
+  &:hover { background: #B91C1C; }
+}
+
+.cancel {
+  @include btn-action-secondary;
+  flex: 0 0 auto;
+}
+
+// Desktop: centred and compact, buttons side by side, the verb on the right.
+@media (min-width: 768px) {
+  .card {
+    left: 50%;
+    right: auto;
+    top: 50%;
+    bottom: auto;
+    width: min(400px, calc(100vw - 32px));
+    transform: translate(-50%, -50%);
+    animation: pop $t-base var(--ease-house);
+  }
+
+  .actions {
+    flex-direction: row-reverse;
+    gap: 12px;
+
+    > * { flex: 1 1 0; }
+  }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+}

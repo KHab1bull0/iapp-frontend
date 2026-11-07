@@ -45,11 +45,18 @@
   color: var(--fg-strong);
 }
 
+// The form's action row (data-form-actions) is fixed to the bottom of the
+// screen; the bottom padding keeps the last field clear of it.
 .body {
+  --form-gutter: 16px;
+  flex: 1;
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  padding: 20px 16px calc(24px + var(--safe-bottom));
+  padding: 20px var(--form-gutter) calc(var(--form-actions-space) + 24px);
+  display: flex;
+  flex-direction: column;
+
 }
 
 .state {

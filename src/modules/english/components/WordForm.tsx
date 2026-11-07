@@ -3,11 +3,7 @@ import clsx from 'clsx'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { todayYmd, ymd } from '@/core/lib/format'
 import { toast } from '@/core/components/ui/toast'
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
-} from '@/core/components/ui/alert-dialog'
+import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
 import {
   createWord,
   deleteWord,
@@ -39,6 +35,8 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
   const [text, setText] = useState(word?.word ?? '')
   const [translation, setTranslation] = useState(word?.translation ?? '')
   const [note, setNote] = useState(word?.note ?? '')
+  const [description, setDescription] = useState(word?.description ?? '')
+  const [example, setExample] = useState(word?.example ?? '')
   const [categoryId, setCategoryId] = useState(word?.categoryId ?? '')
   const [reviewOn, setReviewOn] = useState(word?.reviewOn ?? todayYmd())
   const [levelId, setLevelId] = useState(word?.levelId ?? '')
@@ -91,6 +89,8 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
         word: text.trim(),
         translation: translation.trim(),
         note: note.trim() || null,
+        description: description.trim() || null,
+        example: example.trim() || null,
         categoryId: categoryId || null,
         reviewOn,
         ...(shownLevelId ? { levelId: shownLevelId } : {}),
@@ -154,6 +154,37 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
       </div>
 
       <label className={s.field}>
+        <span className={s.label}>{t.word.description}</span>
+        <textarea
+          className={clsx(s.input, s.textarea)}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          maxLength={500}
+          rows={2}
+          placeholder={t.word.descriptionPlaceholder}
+          aria-label={t.word.description}
+          aria-describedby="word-description-hint"
+          lang="en"
+        />
+        <span id="word-description-hint" className={s.hint}>
+          {t.word.descriptionHint}
+        </span>
+      </label>
+
+      <label className={s.field}>
+        <span className={s.label}>{t.word.example}</span>
+        <input
+          className={s.input}
+          value={example}
+          onChange={(e) => setExample(e.target.value)}
+          maxLength={500}
+          placeholder={t.word.examplePlaceholder}
+          aria-label={t.word.example}
+          lang="en"
+        />
+      </label>
+
+      <label className={s.field}>
         <span className={s.label}>{t.word.note}</span>
         <textarea
           className={clsx(s.input, s.textarea)}
@@ -194,30 +225,20 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
         {reviewOn ? t.word.joinsHint : t.word.pickDay}
       </span>
 
-      <div className={s.actions} data-form-actions>
+      <div data-form-actions>
         {word && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
+          <ConfirmDialog
+            trigger={
               <button type="button" className={s.btnDanger}>
                 {t.delete}
               </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.deleteTitle(word.word)}</AlertDialogTitle>
-                <AlertDialogDescription>{t.word.deleteDesc}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => remove.mutate()}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  {t.delete}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            }
+            title={t.deleteTitle(word.word)}
+            description={t.word.deleteDesc}
+            confirmLabel={t.delete}
+            cancelLabel={t.cancel}
+            onConfirm={() => remove.mutate()}
+          />
         )}
         <button type="button" className={s.btnSecondary} onClick={onCancel}>
           {t.cancel}

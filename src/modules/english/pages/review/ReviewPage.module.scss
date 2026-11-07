@@ -145,6 +145,23 @@
   overflow-wrap: anywhere;
 }
 
+.description {
+  margin: 0;
+  max-width: 32ch;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--fg);
+  text-align: center;
+}
+
+.example {
+  margin: 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-style: italic;
+  color: var(--fg-muted);
+}
+
 .tapHint {
   font-size: var(--fs-meta);
   line-height: var(--lh-meta);
@@ -193,27 +210,82 @@
   @include btn-size-lg;
 }
 
-.actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+// Once the answer shows: every level as a chip, as the category chips in the
+// transaction form. One tap puts the word there and brings up the next card.
+.levels {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: answerIn $t-base var(--ease-house);
 }
 
-.forgot,
-.remembered {
-  &:disabled { opacity: 0.5; }
+.levelsLabel {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  font-weight: 600;
+  color: var(--fg-muted);
 }
 
-.forgot {
-  @include btn-base;
-  @include btn-size-lg;
-  background: var(--danger-soft);
-  color: var(--danger);
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
 
-.remembered {
-  @include btn-primary;
-  @include btn-size-lg;
+.chip {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 88px;
+  height: var(--control-lg);
+  padding: 0 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elev);
+  color: var(--fg-strong);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color $t-fast, background $t-fast, transform 80ms;
+
+  &:hover { border-color: var(--primary); background: var(--primary-soft); }
+  &:active { transform: scale(0.97); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.chipName {
+  font-size: var(--fs-ui);
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+.chipWhen {
+  font-size: var(--fs-caption);
+  line-height: 1.1;
+  color: var(--fg-muted);
+}
+
+// New = "not yet": back in today's stack.
+.chipAgain {
+  &:hover { border-color: var(--danger); background: var(--danger-soft); }
+  .chipWhen { color: var(--danger); }
+}
+
+// Where the word is now: a dot, so moving it up or down is a clear choice.
+.chipCurrent::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--primary);
 }
 
 .keys {

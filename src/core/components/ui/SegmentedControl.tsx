@@ -6,6 +6,8 @@ export interface Segment<T extends string> {
   value: T
   label: string
   icon?: LucideIcon
+  /** Colours the chosen segment, e.g. expense red and income green. */
+  tone?: 'success' | 'danger'
 }
 
 interface Props<T extends string> {
@@ -36,13 +38,13 @@ export function SegmentedControl<T extends string>({
       role="radiogroup"
       aria-label={label}
     >
-      {options.map(({ value: v, label: l, icon: Icon }) => (
+      {options.map(({ value: v, label: l, icon: Icon, tone }) => (
         <button
           key={v}
           type="button"
           role="radio"
           aria-checked={value === v}
-          className={clsx(s.segment, value === v && s.active)}
+          className={clsx(s.segment, value === v && s.active, value === v && tone && s[tone])}
           onClick={() => onChange(v)}
         >
           {Icon && <Icon size={size === 'sm' ? 14 : 16} aria-hidden />}

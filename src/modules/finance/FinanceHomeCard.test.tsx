@@ -33,7 +33,8 @@ describe('FinanceHomeCard', () => {
     expect(screen.getByText(`+${amount(1000000)}`)).toBeTruthy()
     expect(screen.getByText(amount(750000))).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Open Finance' }).getAttribute('href')).toBe('/finance')
-    expect(screen.getByRole('button', { name: 'Add expense' })).toBeTruthy()
+    // No add button of its own: "+" in the shell is the one way to add.
+    expect(screen.queryByRole('button')).toBeNull()
   })
 
   test('opened offline, the card waits instead of crashing', () => {

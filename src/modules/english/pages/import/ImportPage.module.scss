@@ -1,0 +1,242 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.intro {
+  margin: 0;
+  max-width: 60ch;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  color: var(--fg);
+}
+
+.muted {
+  margin: 0;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
+// A numbered step: the number in a tile on the left, the step on the right.
+.step {
+  @include card;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+  transition: border-color $t-fast, background $t-fast;
+}
+
+.dragging {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.stepNo {
+  @include icon-tile(var(--tile-md));
+  flex-shrink: 0;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.stepBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.stepTitle {
+  @include card-title;
+  margin: 0;
+}
+
+.primary,
+.secondary {
+  @include btn-size-md;
+  margin-top: 4px;
+  text-decoration: none;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.primary { @include btn-primary; }
+.secondary { @include btn-secondary; }
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  color: var(--fg-strong);
+  font-size: var(--fs-ui);
+}
+
+.fileName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.error {
+  margin: 0;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--danger);
+}
+
+// ── preview ──
+.preview {
+  @include card;
+}
+
+.summary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  > li {
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-elev-2);
+    font-size: var(--fs-meta);
+    line-height: var(--lh-meta);
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  > li.good { background: var(--success-soft); color: var(--success); }
+  > li.bad { background: var(--danger-soft); color: var(--danger); }
+}
+
+.notice {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  font-weight: 600;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--card-pad));
+  padding: 0 var(--card-pad);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+
+  th {
+    text-align: left;
+    padding: 8px 12px 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    color: var(--fg-muted);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 8px 12px 8px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--fg);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+}
+
+.wide {
+  min-width: 220px;
+  @include bp-mobile { display: none; }
+}
+
+.num {
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.strong {
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.dim td { color: var(--fg-muted); }
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--bg-elev-2);
+  color: var(--fg-muted);
+}
+
+.new { background: var(--success-soft); color: var(--success); }
+.invalid { background: var(--danger-soft); color: var(--danger); }
+
+.actions {
+  display: flex;
+  gap: 12px;
+
+  > * { flex: 1 1 0; }
+
+  @include bp-desktop {
+    justify-content: flex-end;
+    > * { flex: 0 0 auto; min-width: 160px; }
+  }
+}
+
+// ── done ──
+.done {
+  @include card;
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.doneIcon { color: var(--success); }
+
+.doneTitle {
+  margin: 0;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: 700;
+  color: var(--fg-strong);
+}
+
+.doneActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}

@@ -8,11 +8,7 @@ import { toast } from '@/core/components/ui/toast'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { useSwipe } from '@/core/hooks/useSwipe'
 import { useQuickAdd } from '@/core/quickAdd/context'
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
-} from '@/core/components/ui/alert-dialog'
+import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
 import { useNavigate } from 'react-router-dom'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { AddTransactionDialog } from './AddTransactionDialog'
@@ -95,27 +91,20 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
           <span className={s.colTime}>{time}</span>
           <span className={clsx(s.txAmt, tx.type === 'income' ? s.amtIn : s.amtOut)}>{formatSigned(tx.amount, tx.type)}</span>
         </button>
-        <AlertDialog open={confirming} onOpenChange={setConfirming}>
-          <AlertDialogTrigger asChild>
+        <ConfirmDialog
+          open={confirming}
+          onOpenChange={setConfirming}
+          trigger={
             <button className={s.txDel} disabled={deleting} aria-label={t.delete}>
               <Trash2 size={16} />
             </button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t.tx.deleteTitle}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t.tx.deleteWhat(amount)} {t.tx.deleteDesc}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                {t.delete}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          }
+          title={t.tx.deleteTitle}
+          description={<>{t.tx.deleteWhat(amount)} {t.tx.deleteDesc}</>}
+          confirmLabel={t.delete}
+          cancelLabel={t.cancel}
+          onConfirm={handleDelete}
+        />
       </div>
     </div>
   )

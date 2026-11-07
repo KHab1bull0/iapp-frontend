@@ -154,7 +154,7 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
 
           {error && <div className={s.formError} role="alert">{error}</div>}
 
-          <div className={s.formActions}>
+          <div className={s.formActions} data-form-actions>
             <button type="button" className={s.btnSecondary} onClick={() => onOpenChange(false)}>
               {t.cancel}
             </button>

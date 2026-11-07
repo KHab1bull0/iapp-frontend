@@ -11,6 +11,17 @@
 
 .card {
   @include card;
+  min-width: 0;
+}
+
+// Two cards side by side on wide screens, stacked on phones.
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--stack-gap);
+  align-items: stretch;
+
+  @include bp-tablet { grid-template-columns: 1fr; }
 }
 
 .cardHead {
@@ -35,12 +46,14 @@
 
 .legend {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 4px;
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--fg);
 
-  > span { display: inline-flex; align-items: center; gap: 8px; }
+  > span { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
 }
 
 .dot {

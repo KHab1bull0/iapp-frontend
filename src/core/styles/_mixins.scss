@@ -127,6 +127,39 @@
   &:hover { background: #B91C1C; }
 }
 
+// Add/edit forms' action row (Save, Cancel, Delete): every button the same
+// height and width, told apart by colour alone. The row itself is laid out
+// by the global [data-form-actions] rule in index.css.
+@mixin form-action {
+  @include btn-size-lg;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 12px;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+@mixin btn-action-primary {
+  @include btn-primary;
+  @include form-action;
+}
+
+@mixin btn-action-secondary {
+  @include btn-secondary;
+  @include form-action;
+}
+
+// Red outline on the card colour: --danger on --bg-elev is checked for AA in
+// both themes (contrast.test.ts), unlike red text on a pale red fill.
+@mixin btn-action-danger {
+  @include btn-base;
+  @include form-action;
+  background: var(--bg-elev);
+  color: var(--danger);
+  border-color: var(--danger);
+  &:hover { background: var(--danger-soft); }
+}
+
 @mixin field-base {
   display: flex;
   flex-direction: column;

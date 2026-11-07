@@ -7,6 +7,7 @@ import {
   CategoriesPage,
   EnglishSettingsIndex,
   EnglishSettingsLayout,
+  ImportPage,
   LevelsPage,
   ReviewPage,
   StatsPage,
@@ -29,6 +30,8 @@ export const english: ModuleManifest = {
     { index: true, element: <StatsPage /> },
     { path: 'review', element: <ReviewPage /> },
     { path: 'vocabulary', element: <VocabularyPage /> },
+    // Opened from Vocabulary: many words at once from an Excel file.
+    { path: 'import', element: <ImportPage /> },
     // Not in the menu: opened from Settings → Modules → English. Nested like
     // the app's Settings: a section list, then one page per section.
     {

@@ -9,6 +9,8 @@ export const word = (id: string, over: Partial<Word> = {}): Word => ({
   word: id,
   translation: `${id}-uz`,
   note: null,
+  description: null,
+  example: null,
   categoryId: null,
   levelId: NEW.id,
   reviewOn: '2026-10-31',

@@ -2,14 +2,14 @@ import clsx from 'clsx'
 import { useQuery } from '@tanstack/react-query'
 import { BookOpen, Plus, RefreshCw } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
-import { StatTile } from '@/core/components/ui/StatTile'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { useToday } from '@/core/hooks/useToday'
 import { formatDay, formatWeekday } from '@/core/lib/format'
 import { englishKeys, fetchStats, type Stats } from '@/modules/english/api/english'
-import { useEnglishT, useLevelName } from '@/modules/english/i18n'
+import { useEnglishT } from '@/modules/english/i18n'
 import s from '../EnglishPages.module.scss'
 import st from './StatsPage.module.scss'
+import { AccuracyCard, GrowthCard, TodayCard, VocabularyCard } from './StatsVisuals'
 
 /** Horizontal bars, one row per item; the count is always written beside the bar. */
 function BarRows({ title, rows }: { title: string; rows: { key: string; label: string; sub?: string; count: number }[] }) {
@@ -96,10 +96,13 @@ function Upcoming({ days }: { days: Stats['upcoming'] }) {
   )
 }
 
-/** English → Statistics: the vocabulary at a glance and how review is going. */
+/**
+ * English → Statistics, drawn rather than listed: today's stack as a ring,
+ * how well words stick, the vocabulary split by level, how it has grown, the
+ * last two weeks of answers and what the next week brings.
+ */
 export function StatsPage() {
   const t = useEnglishT()
-  const levelName = useLevelName()
   const quickAdd = useQuickAdd()
   const today = useToday()
   const { data, isLoading, isError, refetch } = useQuery({
@@ -131,40 +134,20 @@ export function StatsPage() {
     )
   }
 
-  const answered = data.accuracy.remembered + data.accuracy.forgot
-  const accuracy = answered ? `${Math.round((data.accuracy.remembered / answered) * 100)}%` : '—'
-
   return (
     <div className={s.page}>
-      <div className={st.tiles}>
-        <StatTile label={t.stats.words} value={String(data.total)} sub={t.stats.addedThisWeek(data.addedThisWeek)} />
-        <StatTile
-          label={t.stats.due}
-          value={String(data.due)}
-          sub={data.overdue ? t.stats.overdue(data.overdue) : data.due ? t.vocab.dueToday : t.stats.allDone}
-          tone={data.overdue ? 'danger' : 'default'}
-        />
-        <StatTile label={t.stats.reviewedToday} value={String(data.reviewedToday)} sub={t.stats.answers} />
-        <StatTile label={t.stats.streak} value={String(data.streak)} sub={t.stats.streakSub(data.streak)} />
-        <StatTile
-          label={t.stats.accuracy}
-          value={accuracy}
-          sub={answered ? t.stats.accuracySub(answered) : t.stats.noAnswers}
-        />
-        <StatTile label={t.stats.unseen} value={String(data.unseen)} sub={t.stats.unseenSub} />
+      <div className={st.pair}>
+        <TodayCard stats={data} />
+        <AccuracyCard stats={data} />
       </div>
-
-      <BarRows
-        title={t.stats.byLevel}
-        rows={data.levels.map((l) => ({
-          key: l.id,
-          label: levelName(l),
-          sub: l.locked ? undefined : t.days(l.intervalDays),
-          count: l.count,
-        }))}
-      />
-      <Activity days={data.activity} />
-      <Upcoming days={data.upcoming} />
+      <div className={st.pair}>
+        <VocabularyCard stats={data} />
+        <GrowthCard growth={data.growth ?? []} />
+      </div>
+      <div className={st.pair}>
+        <Activity days={data.activity} />
+        <Upcoming days={data.upcoming} />
+      </div>
       {data.categories.length > 0 && (
         <BarRows
           title={t.stats.byCategory}

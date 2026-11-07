@@ -83,13 +83,23 @@
   gap: 8px;
 }
 
-// A form's Save/Cancel row (marked data-form-actions) sticks to the bottom
-// of the sheet while the fields scroll, in thumb reach.
+// A form's Save/Cancel/Delete row (marked data-form-actions) stays at the
+// bottom of the sheet or panel: the form fills the body, so a short form
+// still has its buttons at the bottom edge, and they stick while fields scroll.
+.body:has(> form > [data-form-actions]) {
+  display: flex;
+  flex-direction: column;
+
+  > form { flex: 1 0 auto; }
+}
+
 .body :global([data-form-actions]) {
   position: sticky;
+  left: auto;
+  right: auto;
   bottom: -16px;
   z-index: 1;
-  margin: 8px -20px -16px;
+  margin: auto -20px -16px;
   padding: 12px 20px calc(12px + var(--safe-bottom));
   background: var(--bg-elev);
   border-top: 1px solid var(--border);

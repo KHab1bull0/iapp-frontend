@@ -34,7 +34,8 @@ atributlari `var()` ni tushunmaydi, shuning uchun bu yerda literal hex ishlatila
 |---|---|
 | `PageHeader` | Har bir sahifa sarlavhasi. Katta title; skrollda mobilda ixcham bar paydo bo'ladi. `children` — tablar/filtrlar |
 | `SegmentedControl` | 2–4 ta o'zaro istisno tanlov (davr, rejim). O'zingizning radiogroup'ingizni yozmang |
-| `Sheet` | Formalar va tanlovlar. Mobilda pastdan chiquvchi oyna, desktopda dialog. Saqlash `footer` ga qo'yiladi |
+| `Sheet` | Formalar va tanlovlar. Mobilda pastdan chiquvchi oyna, desktopda dialog yoki yon panel. Saqlash `footer` ga qo'yiladi |
+| `ConfirmDialog` | Qaytarib bo'lmaydigan amal oldidan so'rash (o'chirish, chiqish). Telefonda pastdan chiqadi, tugmalar ustma-ust (fe'l tepada); desktopda markazda, tugmalar yonma-yon (fe'l o'ngda). Tugma matni — fe'lning o'zi, "OK" emas |
 | `ListGroup` + `ListRow` | Sozlamalar, kategoriyalar va har qanday "ikonka + nom + qiymat + ›" ro'yxati |
 | `EmptyState` | Har bir bo'sh ro'yxat yoki sahifa. `action` majburiy, agar foydalanuvchi biror narsa qo'sha olsa |
 | `Skeleton` | Yuklanishda kontent shaklida joy egallaydi |
@@ -95,3 +96,12 @@ Ranglar o'zgarmaydi. Quyidagilar `index.css`, `_mixins.scss` da; kodda **faqat s
 - `btn-primary|secondary` + `btn-size-sm|md|lg` — tugmalar; `input-wrap-base` + `field-focus` — maydonlar.
 
 **Komponentlar:** yangi narsa yozishdan oldin `src/core/components/ui/` dagilar ishlatiladi: `StatTile`/`StatGrid`, `ListGroup`/`ListRow`, `EmptyState`, `SegmentedControl`, `Skeleton`, `ProgressBar/Ring`, `Sheet`, `DateField`, `MonthStepper`, `PageHeader`; bosh sahifa kartasi — `core/components/HomeCard`.
+
+## Qo'shish/tahrirlash formalarining tugmalari (2026-11-07)
+- Tugmalar qatori `data-form-actions` bilan belgilanadi. Sahifada u ekranning pastiga **fixed** bo'ladi (forma
+  qisqa bo'lsa ham, tepasida karta bo'lsa ham). Sahifa pastida `--form-actions-space` bo'sh joy qoldiriladi.
+  Sheet, yon panel va dialog ichida qator shu oynaning pastiga yopishadi (sticky).
+- Hamma tugmalar bir xil o'lchamda (`--control-lg`, teng kenglik) va faqat rangi bilan farqlanadi:
+  `btn-action-primary` (Saqlash, yashil), `btn-action-secondary` (Bekor qilish, kulrang chiziq),
+  `btn-action-danger` (O'chirish, qizil chiziq). Tartib: O'chirish · Bekor qilish · Saqlash.
+- Rangli segment: `SegmentedControl` variantiga `tone: 'success' | 'danger'` beriladi (masalan, Kirim/Chiqim).

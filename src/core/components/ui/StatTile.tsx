@@ -8,11 +8,13 @@ interface Props {
   sub?: string
   tone?: 'default' | 'success' | 'danger' | 'warning' | 'primary'
   icon?: LucideIcon
+  /** 'sm' for figures beside a bigger headline number (20px instead of 24px). */
+  size?: 'md' | 'sm'
   className?: string
 }
 
 /** One headline number with its label: the building block of every stats row. */
-export function StatTile({ label, value, sub, tone = 'default', icon: Icon, className }: Props) {
+export function StatTile({ label, value, sub, tone = 'default', icon: Icon, size = 'md', className }: Props) {
   return (
     <div className={clsx(s.tile, className)}>
       <div className={s.head}>
@@ -23,7 +25,7 @@ export function StatTile({ label, value, sub, tone = 'default', icon: Icon, clas
           </span>
         )}
       </div>
-      <div className={clsx(s.value, tone !== 'default' && s[`${tone}Text`])}>{value}</div>
+      <div className={clsx(s.value, size === 'sm' && s.valueSm, tone !== 'default' && s[`${tone}Text`])}>{value}</div>
       {sub && <div className={s.sub}>{sub}</div>}
     </div>
   )

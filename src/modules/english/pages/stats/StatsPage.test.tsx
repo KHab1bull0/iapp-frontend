@@ -33,7 +33,8 @@ const STATS: Stats = {
     { id: null, name: null, count: 22 },
   ],
   upcoming: days(7, '2026-11-01').map((date, i) => ({ date, count: i === 0 ? 9 : 0 })),
-  activity: days(14, '2026-10-18').map((date) => ({ date, remembered: 1, forgot: 0 })),
+  activity: days(14, '2026-10-18').map((date, i) => ({ date, remembered: i === 13 ? 3 : 1, forgot: i === 13 ? 1 : 0 })),
+  growth: days(30, '2026-10-02').map((date, i) => ({ date, total: 20 + Math.floor(i / 2) })),
 }
 
 function renderPage() {
@@ -47,18 +48,33 @@ function renderPage() {
 }
 
 describe('StatsPage', () => {
-  test('shows the headline numbers, words per level and per category', async () => {
+  test("today's stack as a ring, what was remembered and forgot, what is left", async () => {
     api.fetchStats.mockResolvedValue(STATS)
     renderPage()
-    expect(await screen.findByText('42')).toBeTruthy()
-    expect(screen.getByText('+3 this week')).toBeTruthy()
-    expect(screen.getByText('2 overdue')).toBeTruthy()
-    expect(screen.getByText('75%')).toBeTruthy()
-    expect(screen.getByText('6 days in a row')).toBeTruthy()
+    const today = await screen.findByRole('region', { name: 'Today' })
+    // 4 answered today, 7 still due: 4 of 11.
+    expect(within(today).getByRole('progressbar', { name: '4 of 11 answered today' })).toBeTruthy()
+    expect(within(today).getByText('3')).toBeTruthy()
+    expect(within(today).getByText(/2 overdue/)).toBeTruthy()
+    expect(within(today).getByText('6 days in a row')).toBeTruthy()
+    expect(within(today).getByRole('link', { name: 'Start review' }).getAttribute('href')).toBe('/english/review')
 
-    const levels = screen.getByRole('region', { name: 'Words by level' })
-    expect(within(levels).getByText('New')).toBeTruthy()
-    expect(within(levels).getByText('30')).toBeTruthy()
+    const accuracy = screen.getByRole('region', { name: 'Remembered' })
+    expect(within(accuracy).getByText('75%')).toBeTruthy()
+  })
+
+  test('the vocabulary split by level, its growth, categories and the two weeks around today', async () => {
+    api.fetchStats.mockResolvedValue(STATS)
+    renderPage()
+    const vocab = await screen.findByRole('region', { name: 'Vocabulary' })
+    expect(within(vocab).getByText('42')).toBeTruthy()
+    expect(within(vocab).getByText('+3 this week')).toBeTruthy()
+    // Words past New have been remembered at least once.
+    expect(within(vocab).getByText('30 learned · 71%')).toBeTruthy()
+    expect(within(vocab).getByRole('img').getAttribute('aria-label')).toBe('New: 12 words, 29%; Three days: 30 words, 71%')
+
+    const growth = screen.getByRole('region', { name: 'Vocabulary growth · 30 days' })
+    expect(within(growth).getByText('+14 words in 30 days')).toBeTruthy()
 
     const cats = screen.getByRole('region', { name: 'Words by category' })
     expect(within(cats).getByText('No category')).toBeTruthy()
@@ -79,9 +95,9 @@ describe('StatsPage', () => {
     localStorage.setItem('iapp-lang', 'uz')
     api.fetchStats.mockResolvedValue(STATS)
     renderPage()
-    expect(await screen.findByText("So'zlar")).toBeTruthy()
-    expect(screen.getByRole('region', { name: "Darajalar bo'yicha" })).toBeTruthy()
+    expect(await screen.findByRole('region', { name: "Lug'at" })).toBeTruthy()
     expect(screen.getByText('Yangi')).toBeTruthy()
-    expect(screen.getByText('2 tasi kechikkan')).toBeTruthy()
+    expect(screen.getByText(/2 tasi kechikkan/)).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Yodlashni boshlash' })).toBeTruthy()
   })
 })

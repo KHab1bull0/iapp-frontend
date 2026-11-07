@@ -53,12 +53,6 @@
   color: var(--fg-strong);
 }
 
-.add {
-  @include btn-secondary;
-  @include btn-size-md;
-  width: 100%;
-}
-
 .error {
   display: flex;
   align-items: center;

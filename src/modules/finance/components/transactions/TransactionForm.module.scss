@@ -120,19 +120,7 @@
   color: var(--danger);
 }
 
-.formActions {
-  display: flex;
-  gap: 12px;
-
-  > * { flex: 1; }
-}
-
-.btnPrimary {
-  @include btn-primary;
-  @include btn-size-lg;
-}
-
-.btnSecondary {
-  @include btn-secondary;
-  @include btn-size-lg;
-}
+// The action row's layout (bottom of the screen, one row) is the global
+// [data-form-actions] rule; the buttons share a size and differ by colour.
+.btnSecondary { @include btn-action-secondary; }
+.btnPrimary { @include btn-action-primary; }

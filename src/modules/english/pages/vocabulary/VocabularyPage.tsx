@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { BookOpen, Plus, RefreshCw, Search } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { BookOpen, FileSpreadsheet, Plus, RefreshCw, Search } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { useToday } from '@/core/hooks/useToday'
@@ -75,6 +76,9 @@ export function VocabularyPage() {
             </select>
           </div>
         )}
+        <Link to="/english/import" className={v.importBtn}>
+          <FileSpreadsheet size={16} aria-hidden /> {t.imp.open}
+        </Link>
       </div>
 
       {isError ? (
@@ -85,6 +89,7 @@ export function VocabularyPage() {
           title={filtered ? t.vocab.noMatch : t.vocab.empty}
           description={filtered ? undefined : t.vocab.emptySub}
           action={filtered ? undefined : { label: t.vocab.add, icon: Plus, onClick: () => quickAdd.open('english.word') }}
+          secondary={filtered ? undefined : { label: t.imp.open, icon: FileSpreadsheet, to: '/english/import' }}
         />
       ) : (
         <section className={s.section}>

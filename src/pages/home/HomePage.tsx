@@ -8,6 +8,15 @@ import { useText } from '@/core/i18n'
 import { useCoreT } from '@/core/i18n/useCoreT'
 import s from './HomePage.module.scss'
 
+// The report's own order: money first, then the day's tasks, then the rest
+// in menu order. The menu itself keeps the registry's order.
+const HOME_FIRST = ['finance', 'tasks']
+const homeRank = (id: string) => {
+  const i = HOME_FIRST.indexOf(id)
+  return i < 0 ? HOME_FIRST.length : i
+}
+const HOME_MODULES = [...MODULES].sort((a, b) => homeRank(a.id) - homeRank(b.id))
+
 function greetingKey(hour: number): 'morning' | 'afternoon' | 'evening' {
   if (hour >= 5 && hour < 12) return 'morning'
   if (hour >= 12 && hour < 18) return 'afternoon'
@@ -36,7 +45,7 @@ export function HomePage() {
         }
       />
       <div className={s.grid}>
-        {MODULES.map(({ id, name, homeCard: Card }) =>
+        {HOME_MODULES.map(({ id, name, homeCard: Card }) =>
           Card ? (
             <ModuleCardBoundary key={id} moduleName={text(name)}>
               <Card />

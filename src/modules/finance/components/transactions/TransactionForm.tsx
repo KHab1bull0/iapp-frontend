@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
+import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { createTransaction, updateTransaction, type Transaction } from '@/modules/finance/api/transactions'
@@ -94,8 +95,10 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
           setCategoryId('')
         }}
         options={[
-          { value: 'expense', label: t.expense },
-          { value: 'income', label: t.income },
+          // Money out, money in: the arrows banking apps use, and the colour
+          // the amount below takes.
+          { value: 'expense', label: t.expense, icon: ArrowUpRight, tone: 'danger' },
+          { value: 'income', label: t.income, icon: ArrowDownLeft, tone: 'success' },
         ]}
       />
 
@@ -175,7 +178,7 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
         </div>
       )}
 
-      <div className={s.formActions} data-form-actions>
+      <div data-form-actions>
         <button type="button" className={s.btnSecondary} onClick={onCancel}>
           {t.cancel}
         </button>

@@ -8,7 +8,7 @@ import { ProgressBar } from '@/core/components/ui/Progress'
 import { useToday } from '@/core/hooks/useToday'
 import { toast } from '@/core/components/ui/toast'
 import { useQuickAdd } from '@/core/quickAdd/context'
-import { answerWord, englishKeys, fetchLevels, fetchReview, fetchStats, type Word } from '@/modules/english/api/english'
+import { answerWord, englishKeys, fetchLevels, fetchReview, fetchStats, type Level, type Word } from '@/modules/english/api/english'
 import { useEnglishT, useLevelName } from '@/modules/english/i18n'
 import s from '../EnglishPages.module.scss'
 import r from './ReviewPage.module.scss'
@@ -27,9 +27,11 @@ function speak(word: string) {
 
 /**
  * English → Review, as a focus mode: the rest of the app steps aside, one
- * card at a time with a progress bar on top and the two answers at the
- * bottom in thumb reach. Space shows the answer; 1 and 2 answer; Esc leaves.
- * When the stack is done, a summary says how it went.
+ * card at a time with a progress bar on top. Once the answer shows, every
+ * level is laid out as a chip at the bottom, in thumb reach: the user puts
+ * the word where they think it belongs, and the next card comes up at once.
+ * New means "not yet" (back today, counted as forgot). Space shows the
+ * answer; 1, 2, 3… pick a level; Esc leaves. A summary closes the stack.
  */
 export function ReviewPage() {
   const today = useToday()
@@ -49,16 +51,19 @@ export function ReviewPage() {
   })
   const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
 
+  const resultOf = (level: Level): Result => (level.locked ? 'forgot' : 'remembered')
   const answer = useMutation({
-    mutationFn: ({ word, result }: { word: Word; result: Result }) => answerWord(word.id, result, today),
+    mutationFn: ({ word, level }: { word: Word; level: Level }) => answerWord(word.id, level.id, today),
     // Take the card off the stack straight away, so the next one shows at once
     // (and hidden) instead of the answered one coming back while the request runs.
-    onMutate: ({ word, result }) => {
+    onMutate: ({ word, level }) => {
+      const result = resultOf(level)
       setAnswered((a) => ({ ...a, [result]: a[result] + 1 }))
       qc.setQueryData<Word[]>(englishKeys.review(today), (stack) => stack?.filter((w) => w.id !== word.id))
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: englishKeys.all }),
-    onError: async (_e, { result }) => {
+    onError: async (_e, { level }) => {
+      const result = resultOf(level)
       setAnswered((a) => ({ ...a, [result]: a[result] - 1 }))
       await refetch()
       toast(t.review.saveFailed, 'error')
@@ -80,8 +85,8 @@ export function ReviewPage() {
     enabled: sessionOver,
   })
 
-  const reply = (result: Result) => {
-    if (current && revealed && !answer.isPending) answer.mutate({ word: current, result })
+  const choose = (target: Level | undefined) => {
+    if (current && revealed && target && !answer.isPending) answer.mutate({ word: current, level: target })
   }
 
   useEffect(() => {
@@ -92,8 +97,7 @@ export function ReviewPage() {
       if ((e.key === ' ' || e.key === 'Enter') && !revealed) {
         e.preventDefault()
         setRevealedId(current.id)
-      } else if (e.key === '1') reply('forgot')
-      else if (e.key === '2') reply('remembered')
+      } else if (/^[1-9]$/.test(e.key)) choose(levels[Number(e.key) - 1])
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -176,6 +180,12 @@ export function ReviewPage() {
         >
           {level && <span className={r.level}>{levelLabel(level)}</span>}
           <div className={r.word}>{current.word}</div>
+          {/* A hint in English, before the translation: recall the word from its meaning. */}
+          {current.description && (
+            <p className={r.description} lang="en">
+              {current.description}
+            </p>
+          )}
           {canSpeak() && (
             <button
               type="button"
@@ -193,6 +203,11 @@ export function ReviewPage() {
             <div className={r.answer}>
               <div className={r.translation}>{current.translation}</div>
               {current.note && <div className={r.note}>{current.note}</div>}
+              {current.example && (
+                <p className={r.example} lang="en">
+                  “{current.example}”
+                </p>
+              )}
             </div>
           ) : (
             <div className={r.tapHint}>{t.review.tapToFlip}</div>
@@ -202,13 +217,32 @@ export function ReviewPage() {
 
       <footer className={r.bottom}>
         {revealed ? (
-          <div className={r.actions}>
-            <button className={r.forgot} disabled={answer.isPending} onClick={() => reply('forgot')}>
-              {t.review.forgot}
-            </button>
-            <button className={r.remembered} disabled={answer.isPending} onClick={() => reply('remembered')}>
-              {t.review.remembered}
-            </button>
+          <div className={r.levels} role="group" aria-labelledby="review-pick-level">
+            <p id="review-pick-level" className={r.levelsLabel}>
+              {t.review.pickLevel}
+            </p>
+            <div className={r.chips}>
+              {levels.map((l, i) => {
+                const when = l.locked ? t.review.again : t.days(l.intervalDays)
+                const isCurrent = l.id === current.levelId
+                return (
+                  <button
+                    key={l.id}
+                    type="button"
+                    className={clsx(r.chip, l.locked && r.chipAgain, isCurrent && r.chipCurrent)}
+                    disabled={answer.isPending}
+                    onClick={() => choose(l)}
+                    aria-label={t.review.levelChip(levelLabel(l), when)}
+                    aria-keyshortcuts={i < 9 ? String(i + 1) : undefined}
+                    title={isCurrent ? t.review.current : undefined}
+                  >
+                    <span className={r.chipName}>{levelLabel(l)}</span>
+                    {/* A level named after its interval ("3 kun") needs no second line. */}
+                    {levelLabel(l) !== when && <span className={r.chipWhen}>{when}</span>}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         ) : (
           <button className={r.show} onClick={() => setRevealedId(current.id)}>

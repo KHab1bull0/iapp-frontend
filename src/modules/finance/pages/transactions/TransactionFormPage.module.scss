@@ -62,13 +62,16 @@
 }
 
 // The document scrolls, so this is just the content column: the shared page
-// column, narrowed for a single form and kept clear of the notch/home bar.
+// column, narrowed for a single form and kept clear of the notch. The form's
+// action row (data-form-actions) is fixed to the bottom of the screen; the
+// bottom padding keeps the last field clear of it.
 .body {
   @include page;
+  --form-gutter: max(var(--page-pad), var(--safe-left));
   flex: 1;
   max-width: 640px;
-  padding-bottom: calc(var(--page-pad) + var(--safe-bottom));
-  padding-left: max(var(--page-pad), var(--safe-left));
+  padding-bottom: calc(var(--form-actions-space) + var(--page-pad));
+  padding-left: var(--form-gutter);
   padding-right: max(var(--page-pad), var(--safe-right));
 }
 

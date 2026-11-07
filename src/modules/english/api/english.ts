@@ -20,7 +20,12 @@ export interface Word {
   id: string
   word: string
   translation: string
+  /** A note on the translation (Uzbek): usage, nuance. */
   note: string | null
+  /** The meaning in simple English: shown with the word on the review card's front. */
+  description: string | null
+  /** An English sentence using the word. */
+  example: string | null
   categoryId: string | null
   levelId: string
   /** The day it is to be memorised (YYYY-MM-DD); in the review stack from then on. */
@@ -34,9 +39,28 @@ export interface WordInput {
   word: string
   translation: string
   note?: string | null
+  description?: string | null
+  example?: string | null
   categoryId?: string | null
   levelId?: string
   reviewOn?: string
+}
+
+/** One row of the Excel template, as sent to the server. */
+export interface ImportRow {
+  word: string
+  translation: string
+  description?: string
+  example?: string
+  note?: string
+  /** A category's name or id; empty for none. */
+  category?: string
+}
+
+export interface ImportResult {
+  created: number
+  skipped: { word: string; reason: 'exists' | 'repeated' }[]
+  categoriesCreated: string[]
 }
 
 export interface WordFilters {
@@ -94,6 +118,15 @@ export async function createWord(input: WordInput): Promise<Word> {
 export async function updateWord(id: string, input: Partial<WordInput>): Promise<Word> {
   return (await api.patch<Word>(`/english/words/${id}`, input)).data
 }
+/** Adds the rows of an Excel file in one go (all or nothing); words already there are skipped. */
+export async function importWords(input: {
+  words: ImportRow[]
+  today: string
+  createCategories?: boolean
+}): Promise<ImportResult> {
+  return (await api.post<ImportResult>('/english/words/import', input)).data
+}
+
 export async function deleteWord(id: string): Promise<void> {
   await api.delete(`/english/words/${id}`)
 }
@@ -102,8 +135,9 @@ export async function deleteWord(id: string): Promise<void> {
 export async function fetchReview(today: string): Promise<Word[]> {
   return (await api.get<Word[]>('/english/review', { params: { today } })).data
 }
-export async function answerWord(id: string, result: 'remembered' | 'forgot', today: string): Promise<Word> {
-  return (await api.post<Word>(`/english/words/${id}/review`, { result, today })).data
+/** Puts a due word at the level the user picked: it comes back after that level's days. */
+export async function answerWord(id: string, levelId: string, today: string): Promise<Word> {
+  return (await api.post<Word>(`/english/words/${id}/review`, { levelId, today })).data
 }
 
 export interface Stats {
@@ -126,6 +160,8 @@ export interface Stats {
   upcoming: { date: string; count: number }[]
   /** The last 14 days, today last. */
   activity: { date: string; remembered: number; forgot: number }[]
+  /** The vocabulary's size at the end of each of the last 30 days, today last. */
+  growth: { date: string; total: number }[]
 }
 
 export async function fetchStats(today: string): Promise<Stats> {

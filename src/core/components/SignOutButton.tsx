@@ -1,11 +1,7 @@
 import clsx from 'clsx'
 import { LogOut } from 'lucide-react'
 import { useAuth } from '@/core/contexts/AuthContext'
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
-} from '@/core/components/ui/alert-dialog'
+import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
 import { useCoreT } from '@/core/i18n/useCoreT'
 import s from './SignOutButton.module.scss'
 
@@ -20,29 +16,18 @@ export function SignOutButton({ variant = 'block' }: Props) {
   const t = useCoreT()
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
+    <ConfirmDialog
+      trigger={
         <button className={clsx(variant === 'block' ? s.signOut : s.signOutCompact)}>
           <LogOut size={variant === 'block' ? 18 : 15} /> {t.signOut.button}
         </button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{t.signOut.title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {t.signOut.description}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={logout}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {t.signOut.button}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      }
+      title={t.signOut.title}
+      description={t.signOut.description}
+      confirmLabel={t.signOut.button}
+      cancelLabel={t.common.cancel}
+      icon={LogOut}
+      onConfirm={logout}
+    />
   )
 }

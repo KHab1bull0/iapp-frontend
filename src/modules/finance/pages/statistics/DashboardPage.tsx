@@ -79,6 +79,7 @@ export function DashboardPage() {
           <StatGrid columns={2}>
             <StatTile
               label={t.income}
+              size="sm"
               value={`+${formatAmount(data.totalIncome)}`}
               sub={CURRENCY}
               tone="success"
@@ -86,6 +87,7 @@ export function DashboardPage() {
             />
             <StatTile
               label={t.balance}
+              size="sm"
               value={formatSigned(data.totalBalance, data.totalBalance >= 0 ? 'income' : 'expense')}
               sub={CURRENCY}
               icon={Scale}

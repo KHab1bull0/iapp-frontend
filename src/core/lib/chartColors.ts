@@ -22,6 +22,20 @@ export const CHART = {
  */
 export const SERIES = ['#3B82F6', '#F59E0B', '#EC4899', '#14B8A6', '#8B5CF6', '#94A3B8'] as const
 
+/**
+ * One hue, light to dark, for ordered steps of the same thing (English review
+ * levels: the longer a word stays away, the darker). Pick evenly spread
+ * steps with `rampSteps`.
+ */
+export const GREEN_RAMP = ['#86EFAC', '#4ADE80', '#22C55E', '#16A34A', '#15803D', '#166534'] as const
+
+/** `n` colours from a ramp, spread from its light end to its dark end. */
+export function rampSteps(ramp: readonly string[], n: number): string[] {
+  if (n <= 0) return []
+  if (n === 1) return [ramp[Math.floor(ramp.length / 2)]]
+  return Array.from({ length: n }, (_, i) => ramp[Math.round((i * (ramp.length - 1)) / (n - 1))])
+}
+
 /** What people pick from for their own categories. */
 export const CATEGORY_SWATCHES = [
   '#ef4444', '#f97316', '#eab308', '#22c55e',

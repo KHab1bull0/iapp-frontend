@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { todayYmd } from '@/core/lib/format'
@@ -36,18 +36,35 @@ describe('ReviewPage', () => {
     expect(await screen.findByText('apple')).toBeTruthy()
     expect(screen.getByText('2 to go')).toBeTruthy()
     expect(screen.queryByText('apple-uz')).toBeNull()
-    expect(screen.queryByRole('button', { name: 'Remembered' })).toBeNull()
+    expect(screen.queryByRole('group', { name: 'Which level does it go to?' })).toBeNull()
 
     fireEvent.click(screen.getByRole('button', { name: 'Show' }))
     expect(screen.getByText('apple-uz')).toBeTruthy()
     expect(screen.getByText('a fruit')).toBeTruthy()
   })
 
-  test('remembered and forgot are sent for today', async () => {
+  test('once shown, every level is a chip; the picked one is sent for today', async () => {
     renderPage()
     fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Remembered' }))
-    await waitFor(() => expect(api.answerWord).toHaveBeenCalledWith('apple', 'remembered', todayYmd()))
+    const group = screen.getByRole('group', { name: 'Which level does it go to?' })
+    const chips = within(group).getAllByRole('button')
+    expect(chips.map((c) => c.getAttribute('aria-label'))).toEqual(['New, again today', 'Three days, 3 days'])
+    fireEvent.click(chips[1])
+    await waitFor(() => expect(api.answerWord).toHaveBeenCalledWith('apple', L3.id, todayYmd()))
+  })
+
+  test('the English description is on the front; the example comes with the answer', async () => {
+    api.fetchReview.mockResolvedValue([
+      word('harvest', { description: 'when crops are gathered', example: 'The harvest was good.', note: 'qishloqda' }),
+    ])
+    renderPage()
+    expect(await screen.findByText('when crops are gathered')).toBeTruthy()
+    expect(screen.queryByText('harvest-uz')).toBeNull()
+    expect(screen.queryByText(/The harvest was good/)).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Show' }))
+    expect(screen.getByText('harvest-uz')).toBeTruthy()
+    expect(screen.getByText('qishloqda')).toBeTruthy()
+    expect(screen.getByText(/The harvest was good/)).toBeTruthy()
   })
 
   test('says so when the stack is empty', async () => {
@@ -60,7 +77,7 @@ describe('ReviewPage', () => {
     api.answerWord.mockReturnValue(new Promise(() => {}))
     renderPage()
     fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Remembered' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Three days/ }))
     expect(await screen.findByText('river')).toBeTruthy()
     expect(screen.queryByText('apple')).toBeNull()
     expect(screen.queryByText('river-uz')).toBeNull()
@@ -74,13 +91,13 @@ describe('ReviewPage', () => {
     expect(link.getAttribute('href')).toBe('/english/settings')
   })
 
-  test('Space shows the answer and 2 says remembered', async () => {
+  test('Space shows the answer and a number key picks that level', async () => {
     renderPage()
     await screen.findByText('apple')
     fireEvent.keyDown(window, { key: ' ' })
     expect(screen.getByText('apple-uz')).toBeTruthy()
-    fireEvent.keyDown(window, { key: '2' })
-    await waitFor(() => expect(api.answerWord).toHaveBeenCalledWith('apple', 'remembered', todayYmd()))
+    fireEvent.keyDown(window, { key: '1' })
+    await waitFor(() => expect(api.answerWord).toHaveBeenCalledWith('apple', NEW.id, todayYmd()))
   })
 
   test('after the last card, a summary says how it went', async () => {
@@ -89,7 +106,7 @@ describe('ReviewPage', () => {
     api.fetchStats.mockResolvedValue({ streak: 3, upcoming: [{ date: '2099-01-01', count: 4 }] })
     renderPage()
     fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Forgot' }))
+    fireEvent.click(screen.getByRole('button', { name: /^New/ }))
     expect(await screen.findByRole('heading', { name: 'Well done!' })).toBeTruthy()
     expect(screen.getByText('0 remembered, 1 coming back.')).toBeTruthy()
     expect(await screen.findByText('3-day streak')).toBeTruthy()
