@@ -67,6 +67,30 @@ describe('ReviewPage', () => {
     expect(screen.getByText(/The harvest was good/)).toBeTruthy()
   })
 
+  test('UZ → EN asks from the translation; the English word, its description and sound come with the answer', async () => {
+    api.fetchReview.mockResolvedValue([word('harvest', { description: 'when crops are gathered', note: 'qishloqda' })])
+    Object.defineProperty(window, 'speechSynthesis', { value: { cancel() {}, speak() {} }, configurable: true })
+    renderPage()
+    await screen.findByText('harvest')
+    expect(screen.getByRole('button', { name: 'Hear it' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('radio', { name: 'UZ → EN' }))
+    expect(screen.getByText('harvest-uz')).toBeTruthy()
+    expect(screen.queryByText('harvest')).toBeNull()
+    expect(screen.queryByText('when crops are gathered')).toBeNull()
+    expect(screen.queryByText('qishloqda')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Hear it' })).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show' }))
+    expect(screen.getByText('harvest')).toBeTruthy()
+    expect(screen.getByText('when crops are gathered')).toBeTruthy()
+    expect(screen.getByText('qishloqda')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Hear it' })).toBeTruthy()
+    // Remembered for next time.
+    expect(localStorage.getItem('iapp-review-direction')).toBe('uz-en')
+    localStorage.removeItem('iapp-review-direction')
+    Reflect.deleteProperty(window, 'speechSynthesis')
+  })
+
   test('says so when the stack is empty', async () => {
     api.fetchReview.mockResolvedValue([])
     renderPage()

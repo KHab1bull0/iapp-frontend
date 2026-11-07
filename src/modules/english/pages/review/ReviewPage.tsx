@@ -5,11 +5,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Flame, Plus, RefreshCw, Volume2, X } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { ProgressBar } from '@/core/components/ui/Progress'
+import { SegmentedControl } from '@/core/components/ui/SegmentedControl'
 import { useToday } from '@/core/hooks/useToday'
 import { toast } from '@/core/components/ui/toast'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { answerWord, englishKeys, fetchLevels, fetchReview, fetchStats, type Level, type Word } from '@/modules/english/api/english'
 import { useEnglishT, useLevelName } from '@/modules/english/i18n'
+import { frontSide, loadDirection, saveDirection, type Direction } from '@/modules/english/lib/direction'
 import s from '../EnglishPages.module.scss'
 import r from './ReviewPage.module.scss'
 
@@ -42,6 +44,8 @@ export function ReviewPage() {
   const quickAdd = useQuickAdd()
   // Which card's answer is showing; a new card always starts hidden.
   const [revealedId, setRevealedId] = useState<string | null>(null)
+  // English first, Uzbek first, or a mix; remembered on this device.
+  const [direction, setDirection] = useState<Direction>(loadDirection)
   // This session's answers, for the progress bar and the summary.
   const [answered, setAnswered] = useState<Record<Result, number>>({ remembered: 0, forgot: 0 })
 
@@ -71,6 +75,7 @@ export function ReviewPage() {
   })
 
   const current = stack[0]
+  const side = current ? frontSide(direction, current.id) : 'en'
   const revealed = current !== undefined && revealedId === current.id
   const level = current && levels.find((l) => l.id === current.levelId)
   // Only the starting level: "remembered" has nowhere to move a word to.
@@ -167,6 +172,24 @@ export function ReviewPage() {
         <span className={r.toGo}>{t.review.toGo(stack.length)}</span>
       </header>
 
+      <div className={r.mode}>
+        <SegmentedControl
+          size="sm"
+          label={t.review.direction}
+          value={direction}
+          onChange={(d) => {
+            setDirection(d)
+            saveDirection(d)
+            setRevealedId(null) // the card turns back to its (new) front
+          }}
+          options={[
+            { value: 'en-uz', label: t.review.enUz },
+            { value: 'uz-en', label: t.review.uzEn },
+            { value: 'mixed', label: t.review.mixed },
+          ]}
+        />
+      </div>
+
       {noLevels && (
         <Link to="/english/settings" className={r.hint}>
           {t.review.addLevels}
@@ -179,14 +202,25 @@ export function ReviewPage() {
           onClick={() => !revealed && setRevealedId(current.id)}
         >
           {level && <span className={r.level}>{levelLabel(level)}</span>}
-          <div className={r.word}>{current.word}</div>
-          {/* A hint in English, before the translation: recall the word from its meaning. */}
-          {current.description && (
-            <p className={r.description} lang="en">
-              {current.description}
-            </p>
+          {side === 'en' ? (
+            <>
+              <div className={r.word} lang="en">
+                {current.word}
+              </div>
+              {/* A hint in English, before the translation: recall the word from its meaning. */}
+              {current.description && (
+                <p className={r.description} lang="en">
+                  {current.description}
+                </p>
+              )}
+            </>
+          ) : (
+            // Uzbek first: recall the English word. Its note waits for the
+            // answer, as it may name the word.
+            <div className={r.word}>{current.translation}</div>
           )}
-          {canSpeak() && (
+          {/* Hearing the word would give it away while the Uzbek side is up. */}
+          {canSpeak() && (side === 'en' || revealed) && (
             <button
               type="button"
               className={r.listen}
@@ -201,7 +235,20 @@ export function ReviewPage() {
           )}
           {revealed ? (
             <div className={r.answer}>
-              <div className={r.translation}>{current.translation}</div>
+              {side === 'en' ? (
+                <div className={r.translation}>{current.translation}</div>
+              ) : (
+                <>
+                  <div className={r.translation} lang="en">
+                    {current.word}
+                  </div>
+                  {current.description && (
+                    <p className={r.description} lang="en">
+                      {current.description}
+                    </p>
+                  )}
+                </>
+              )}
               {current.note && <div className={r.note}>{current.note}</div>}
               {current.example && (
                 <p className={r.example} lang="en">

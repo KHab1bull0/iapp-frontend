@@ -28,6 +28,14 @@
   margin: 0 auto;
 }
 
+.mode {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
 .close {
   display: grid;
   place-items: center;
