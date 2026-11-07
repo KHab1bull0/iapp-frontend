@@ -59,6 +59,32 @@ async function excel() {
   return (await import('exceljs')).default
 }
 
+/**
+ * exceljs finds a sheet's comments only under its own file names
+ * (xl/comments1.xml, xl/drawings/vmlDrawing1.vml). Files written by openpyxl
+ * (Python: what ChatGPT and most scripts use) keep them elsewhere
+ * (xl/comments/comment1.xml, absolute links), and exceljs then fails on the
+ * whole file. The import needs only the cells, so the sheets' links to their
+ * comments are dropped before exceljs reads the file.
+ */
+export async function normalizeXlsx(data: ArrayBuffer): Promise<ArrayBuffer> {
+  const JSZip = (await import('jszip')).default
+  // A Uint8Array view: JSZip checks types with instanceof, which a buffer from
+  // another realm (a test's jsdom) fails.
+  const zip = await JSZip.loadAsync(new Uint8Array(data))
+  let changed = false
+  const rels = Object.keys(zip.files).filter((name) => /^xl\/worksheets\/_rels\/[^/]+\.rels$/.test(name))
+  for (const name of rels) {
+    const xml = await zip.file(name)!.async('string')
+    const fixed = xml.replace(/<Relationship\b[^>]*\/relationships\/(?:comments|vmlDrawing)"[^>]*\/>/g, '')
+    if (fixed !== xml) {
+      zip.file(name, fixed)
+      changed = true
+    }
+  }
+  return changed ? zip.generateAsync({ type: 'arraybuffer' }) : data
+}
+
 /** The template as a downloadable file: the words sheet, the user's categories, and a guide. */
 export async function buildTemplate(categories: Category[], text: TemplateText): Promise<Blob> {
   const ExcelJS = await excel()
@@ -159,7 +185,7 @@ export async function parseWorkbook(file: Blob): Promise<ParseResult> {
   const ExcelJS = await excel()
   const wb = new ExcelJS.Workbook()
   try {
-    await wb.xlsx.load(await file.arrayBuffer())
+    await wb.xlsx.load(await normalizeXlsx(await file.arrayBuffer()))
   } catch {
     return { ok: false, error: 'unreadable' }
   }

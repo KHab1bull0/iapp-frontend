@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import ExcelJS from 'exceljs'
+import JSZip from 'jszip'
 import { englishMessages } from '@/modules/english/i18n'
 import { category } from '@/modules/english/test-data'
 import { buildTemplate, COLUMNS, parseWorkbook, SAMPLE, WORDS_SHEET } from './excel'
@@ -61,5 +62,36 @@ describe('reading a filled-in file', () => {
   test("says so when the header lacks 'word' or 'translation', or the file isn't Excel", async () => {
     expect(await parseWorkbook(await sheet([['word', 'meaning'], ['a', 'b']]))).toEqual({ ok: false, error: 'noHeader' })
     expect(await parseWorkbook(new Blob(['not a spreadsheet']))).toEqual({ ok: false, error: 'unreadable' })
+  })
+})
+
+describe('files from other tools', () => {
+  /** Lays out a sheet's comments the way openpyxl (Python) writes them. */
+  async function openpyxlStyle(): Promise<Blob> {
+    const wb = new ExcelJS.Workbook()
+    const ws = wb.addWorksheet('Words')
+    ws.addRow(['word', 'translation'])
+    ws.addRow(['shelter', 'boshpana'])
+    ws.getCell('A1').note = 'The English word'
+    const zip = await JSZip.loadAsync(new Uint8Array(await wb.xlsx.writeBuffer()))
+    const move = async (from: string, to: string) => {
+      zip.file(to, await zip.file(from)!.async('uint8array'))
+      zip.remove(from)
+    }
+    await move('xl/comments1.xml', 'xl/comments/comment1.xml')
+    await move('xl/drawings/vmlDrawing1.vml', 'xl/drawings/commentsDrawing1.vml')
+    const rels = 'xl/worksheets/_rels/sheet1.xml.rels'
+    const xml = (await zip.file(rels)!.async('string'))
+      .replace('../comments1.xml', '/xl/comments/comment1.xml')
+      .replace('../drawings/vmlDrawing1.vml', '/xl/drawings/commentsDrawing1.vml')
+    zip.file(rels, xml)
+    return new Blob([await zip.generateAsync({ type: 'arraybuffer' })])
+  }
+
+  test('reads a file whose comments are where openpyxl puts them (exceljs alone fails on it)', async () => {
+    const file = await openpyxlStyle()
+    await expect(new ExcelJS.Workbook().xlsx.load(await file.arrayBuffer())).rejects.toThrow()
+    const parsed = await parseWorkbook(file)
+    expect(parsed.ok && parsed.rows.map((r) => r.row.word)).toEqual(['shelter'])
   })
 })

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
+import { Check } from 'lucide-react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { todayYmd, ymd } from '@/core/lib/format'
 import { toast } from '@/core/components/ui/toast'
@@ -62,23 +63,31 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
     }
   }
 
+  // Chips, as for a transaction's category: every choice in view, one tap.
   const categoryPicker = categories.length > 0 && (
-    <label className={s.field}>
-      <span className={s.label}>{t.word.category}</span>
-      <select
-        className={s.input}
-        value={categoryId}
-        onChange={(e) => setCategoryId(e.target.value)}
-        aria-label={t.word.category}
-      >
-        <option value="">{t.word.none}</option>
-        {categories.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name}
-          </option>
-        ))}
-      </select>
-    </label>
+    <div className={s.field}>
+      <span className={s.label} id="word-category-label">
+        {t.word.category}
+      </span>
+      <div className={s.chips} role="radiogroup" aria-labelledby="word-category-label">
+        {[{ id: '', name: t.word.none }, ...categories].map((c) => {
+          const on = categoryId === c.id
+          return (
+            <button
+              key={c.id || 'none'}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              className={clsx(s.chip, on && s.chipOn)}
+              onClick={() => setCategoryId(c.id)}
+            >
+              {on && <Check size={14} strokeWidth={2.5} aria-hidden />}
+              {c.name}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 
   const valid = text.trim() && translation.trim() && reviewOn

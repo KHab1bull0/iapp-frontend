@@ -20,6 +20,41 @@
   min-width: 0;
 }
 
+// Category chips: the same shape as a transaction's category chips.
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: var(--control-md); // 44px on touch: a chip is a tap target
+  padding: 0 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elev);
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-ui);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color $t-fast, background $t-fast;
+
+  &:hover { border-color: var(--border-strong); }
+}
+
+.chipOn {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--fg-strong);
+  font-weight: 600;
+
+  &:hover { border-color: var(--primary); }
+}
+
 .label {
   font-size: var(--fs-meta);
   line-height: var(--lh-meta);

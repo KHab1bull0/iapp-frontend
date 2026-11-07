@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { addDaysYmd, formatDay, todayYmd, ymd } from '@/core/lib/format'
 import { L3, NEW, category, word } from '@/modules/english/test-data'
@@ -34,7 +34,7 @@ describe('WordForm', () => {
     renderForm()
     expect(screen.getByRole('button', { name: 'Memorise on: Today' })).toBeTruthy()
     await waitFor(() => expect(api.fetchCategories).toHaveBeenCalled())
-    expect(screen.queryByLabelText('Category')).toBeNull()
+    expect(screen.queryByRole('radiogroup', { name: 'Category' })).toBeNull()
 
     fireEvent.change(screen.getByLabelText('Word'), { target: { value: 'apple' } })
     fireEvent.change(screen.getByLabelText('Translation'), { target: { value: 'olma' } })
@@ -48,12 +48,14 @@ describe('WordForm', () => {
     )
   })
 
-  test('with categories, one can be picked, optionally', async () => {
-    api.fetchCategories.mockResolvedValue([category('c1', 'Travel')])
+  test('with categories, one can be picked from chips, optionally', async () => {
+    api.fetchCategories.mockResolvedValue([category('c1', 'Travel'), category('c2', 'Work')])
     renderForm()
-    const picker = (await screen.findByLabelText('Category')) as HTMLSelectElement
-    expect(picker.value).toBe('')
-    fireEvent.change(picker, { target: { value: 'c1' } })
+    const chips = await screen.findByRole('radiogroup', { name: 'Category' })
+    expect(within(chips).getAllByRole('radio').map((c) => c.textContent)).toEqual(['None', 'Travel', 'Work'])
+    expect(within(chips).getByRole('radio', { name: 'None' }).getAttribute('aria-checked')).toBe('true')
+    fireEvent.click(within(chips).getByRole('radio', { name: 'Travel' }))
+    expect(within(chips).getByRole('radio', { name: 'Travel' }).getAttribute('aria-checked')).toBe('true')
     fireEvent.change(screen.getByLabelText('Word'), { target: { value: 'ticket' } })
     fireEvent.change(screen.getByLabelText('Translation'), { target: { value: 'chipta' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
