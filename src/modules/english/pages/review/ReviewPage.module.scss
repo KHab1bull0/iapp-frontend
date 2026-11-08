@@ -482,3 +482,52 @@
   font-weight: 600;
   white-space: nowrap;
 }
+
+// Words still in the queue: bring more into today (+10 / +20 / +50).
+.more {
+  @include surface;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.moreIcon {
+  @include icon-tile(var(--tile-md));
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.moreText {
+  flex: 1 1 160px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.moreTitle {
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.moreSub {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
+.moreButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.moreBtn {
+  @include btn-secondary;
+  @include btn-size-md;
+  min-width: 56px;
+  font-weight: 600;
+  color: var(--primary);
+}

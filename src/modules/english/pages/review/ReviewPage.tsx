@@ -139,9 +139,7 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
     enabled: !isLoading && !current,
   })
   const moreNew = summary && summary.queued > 0 && (
-    <button type="button" className={r.secondary} onClick={() => addExtraNew(perDay)}>
-      <Sparkles size={18} aria-hidden /> {t.review.moreNew(perDay)}
-    </button>
+    <MoreNewWords queued={summary.queued} perDay={perDay} onAdd={addExtraNew} />
   )
 
   const choose = (target: Level | undefined) => {
@@ -202,13 +200,13 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
                 {t.review.home}
               </Link>
             )}
-            {moreNew || (
+            {!moreNew && (
               <button type="button" className={r.secondary} onClick={() => quickAdd.open('english.word')}>
                 <Plus size={18} aria-hidden /> {t.review.addWord}
               </button>
             )}
           </div>
-          {summary && summary.queued > 0 && <p className={r.summarySub}>{t.review.queuedLeft(summary.queued)}</p>}
+          {moreNew}
         </section>
       </div>
     )
@@ -218,11 +216,10 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
     return (
       <div className={s.page}>
         {summary && summary.queued > 0 ? (
-          <EmptyState
-            title={t.nothingToday}
-            description={t.review.queuedLeft(summary.queued)}
-            action={{ label: t.review.moreNew(perDay), icon: Sparkles, onClick: () => addExtraNew(perDay) }}
-          />
+          <>
+            <EmptyState title={t.nothingToday} description={t.review.queuedLeft(summary.queued)} />
+            {moreNew}
+          </>
         ) : (
           <EmptyState
             title={t.nothingToday}
@@ -394,11 +391,18 @@ function TagChooser({ tags }: { tags: Tag[] }) {
   const navigate = useNavigate()
   const groupName = useGroupName()
   const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
-  const [extraNew] = useExtraNew(today)
+  const [extraNew, addExtraNew] = useExtraNew(today)
   const { data: all = [] } = useQuery({
     queryKey: englishKeys.review(today, undefined, extraNew),
     queryFn: () => fetchReview(today, undefined, extraNew),
   })
+  const { data: summary } = useQuery({
+    queryKey: ['english', 'summary', today, extraNew],
+    queryFn: () => fetchSummary(today, extraNew),
+  })
+  const { data: settings } = useQuery({ queryKey: englishKeys.settings, queryFn: fetchEnglishSettings })
+  // Words still waiting beyond what today already brings.
+  const waiting = summary ? summary.queued - summary.newLeft : 0
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && navigate('/english')
@@ -436,6 +440,7 @@ function TagChooser({ tags }: { tags: Tag[] }) {
         <h1 className={r.chooserTitle}>{t.review.pickTag}</h1>
         <p className={r.chooserSub}>{t.review.pickTagSub}</p>
       </header>
+      {waiting > 0 && <MoreNewWords queued={waiting} perDay={settings?.newPerDay || 20} onAdd={addExtraNew} />}
       <div className={r.tagGrid}>{card('all', t.review.allTags, all.length, null, '/english/review?tag=all', Layers)}</div>
       {shelve(
         tags.filter((tg) => tg.count > 0),
@@ -451,5 +456,32 @@ function TagChooser({ tags }: { tags: Tag[] }) {
         </section>
       ))}
     </div>
+  )
+}
+
+/**
+ * Words not learned yet beyond today's number: how many wait, and buttons to
+ * bring more into today's review (+10, the daily number, +50).
+ */
+function MoreNewWords({ queued, perDay, onAdd }: { queued: number; perDay: number; onAdd: (n: number) => void }) {
+  const t = useEnglishT()
+  const options = [...new Set([10, perDay, 50])].filter((n) => n > 0).sort((a, b) => a - b)
+  return (
+    <section className={r.more} aria-label={t.review.addMore}>
+      <span className={r.moreIcon} aria-hidden>
+        <Sparkles size={18} />
+      </span>
+      <div className={r.moreText}>
+        <span className={r.moreTitle}>{t.review.queuedCount(queued)}</span>
+        <span className={r.moreSub}>{t.review.addMore}</span>
+      </div>
+      <div className={r.moreButtons}>
+        {options.map((n) => (
+          <button key={n} type="button" className={r.moreBtn} onClick={() => onAdd(n)} aria-label={t.review.moreNew(n)}>
+            +{n}
+          </button>
+        ))}
+      </div>
+    </section>
   )
 }

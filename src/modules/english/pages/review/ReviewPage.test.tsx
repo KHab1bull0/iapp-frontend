@@ -65,6 +65,17 @@ describe('ReviewPage', () => {
       expect(screen.queryByText('empty')).toBeNull()
     })
 
+    test('words still waiting can be brought into today from the tag cards (+10 / +20 / +50)', async () => {
+      api.fetchSummary.mockResolvedValue({ due: 0, queued: 900, newLeft: 0 })
+      renderPage()
+      const more = await screen.findByRole('region', { name: "Add more new words to today's review" })
+      expect(within(more).getByText('900 words not learned yet')).toBeTruthy()
+      fireEvent.click(within(more).getByRole('button', { name: '20 more new words' }))
+      await waitFor(() => expect(api.fetchTags).toHaveBeenCalledWith(todayYmd(), 20))
+      await waitFor(() => expect(api.fetchReview).toHaveBeenCalledWith(todayYmd(), undefined, 20))
+      localStorage.removeItem('iapp-extra-new')
+    })
+
     test("a tag's session asks only for its words, and names the tag", async () => {
       api.fetchReview.mockImplementation((_today: string, tagId?: string) =>
         Promise.resolve(tagId === 't1' ? [word('mother')] : [word('apple'), word('river')]),
