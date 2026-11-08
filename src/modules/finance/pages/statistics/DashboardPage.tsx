@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Plus, RefreshCw, Scale, TrendingUp, Wallet } from 'lucide-react'
+import { Plus, RefreshCw, Wallet } from 'lucide-react'
 import { fetchDashboard } from '@/modules/finance/api/stats'
-import { CURRENCY, currentMonth, formatAmount, formatSigned } from '@/core/lib/format'
+import { currentMonth } from '@/core/lib/format'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { MonthStepper } from '@/core/components/ui/MonthStepper'
 import { Skeleton } from '@/core/components/ui/Skeleton'
-import { StatGrid, StatTile } from '@/core/components/ui/StatTile'
 import { useQuickAdd } from '@/core/quickAdd/context'
+import { BalanceHero } from '@/modules/finance/components/dashboard/BalanceHero'
 import { SpendHero } from '@/modules/finance/components/dashboard/SpendHero'
 import { CategoryBars } from '@/modules/finance/components/dashboard/CategoryBars'
 import { MonthlyBarChart } from '@/modules/finance/components/dashboard/MonthlyBarChart'
@@ -16,9 +16,9 @@ import { useFinanceT } from '@/modules/finance/i18n'
 import s from './DashboardPage.module.scss'
 
 /**
- * Finance → Statistics. One question first: what has this month cost so far,
- * and is that faster than last month? Then income and balance, where it went,
- * the last six months and the latest entries.
+ * Finance → Statistics. The month's balance first, then what it is made of
+ * (income, expenses), whether spending runs faster than last month, where it
+ * went, the last six months and the latest entries.
  */
 export function DashboardPage() {
   const t = useFinanceT()
@@ -63,7 +63,8 @@ export function DashboardPage() {
 
   return (
     <div className={s.page}>
-      <div className={s.toolbar}>{stepper}</div>
+      {/* With figures to show, the month switcher sits in the balance card. */}
+      {empty && <div className={s.toolbar}>{stepper}</div>}
 
       {empty ? (
         <EmptyState
@@ -74,25 +75,16 @@ export function DashboardPage() {
         />
       ) : (
         <>
-          <SpendHero spent={data.totalExpense} daily={data.dailySpend ?? []} />
+          <BalanceHero
+            balance={data.totalBalance}
+            income={data.totalIncome}
+            expense={data.totalExpense}
+            accessory={<MonthStepper value={month} onChange={setMonth} max={currentMonth()} label={t.stats.selectMonth} size="sm" />}
+          />
 
-          <StatGrid columns={2}>
-            <StatTile
-              label={t.income}
-              size="sm"
-              value={`+${formatAmount(data.totalIncome)}`}
-              sub={CURRENCY}
-              tone="success"
-              icon={TrendingUp}
-            />
-            <StatTile
-              label={t.balance}
-              size="sm"
-              value={formatSigned(data.totalBalance, data.totalBalance >= 0 ? 'income' : 'expense')}
-              sub={CURRENCY}
-              icon={Scale}
-            />
-          </StatGrid>
+          {(data.dailySpend ?? []).length > 0 && (
+            <SpendHero spent={data.totalExpense} daily={data.dailySpend ?? []} title={t.stats.spendTrend} showAmount={false} />
+          )}
 
           <div className={s.chartGrid}>
             <CategoryBars data={data.categoryBreakdown} />

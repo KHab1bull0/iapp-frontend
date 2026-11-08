@@ -35,17 +35,32 @@ function Tip({ active, payload }: TipProps) {
  * and a line of it laid over last month's, so "am I spending faster?" is
  * one glance.
  */
-export function SpendHero({ spent, daily }: { spent: number; daily: DailySpendPoint[] }) {
+export function SpendHero({
+  spent,
+  daily,
+  title,
+  showAmount = true,
+}: {
+  spent: number
+  daily: DailySpendPoint[]
+  /** Defaults to "Expenses". */
+  title?: string
+  /** Off where the amount is already shown (the Statistics page's Expenses tile). */
+  showAmount?: boolean
+}) {
   const t = useFinanceT()
   const pace = paceVsLast(daily)
+  const heading = title ?? t.stats.spent
 
   return (
-    <section className={s.hero} aria-label={t.stats.spent}>
-      <div className={s.label}>{t.stats.spent}</div>
-      <div className={s.amount}>
-        {formatAmount(spent)}
-        <span className={s.currency}>{CURRENCY}</span>
-      </div>
+    <section className={s.hero} aria-label={heading}>
+      <div className={s.label}>{heading}</div>
+      {showAmount && (
+        <div className={s.amount}>
+          {formatAmount(spent)}
+          <span className={s.currency}>{CURRENCY}</span>
+        </div>
+      )}
       {pace && (
         <div className={pace.more ? s.paceUp : s.paceDown}>
           {pace.pct === 0 ? t.stats.sameAsLast : t.stats.vsLast(pace.pct, pace.more)}

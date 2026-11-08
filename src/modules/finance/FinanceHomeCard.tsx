@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query'
 import { RefreshCw, Wallet } from 'lucide-react'
 import { HomeCard } from '@/core/components/HomeCard'
 import { Skeleton } from '@/core/components/ui/Skeleton'
-import { CURRENCY, currentMonth, formatAmount, formatMonthLong } from '@/core/lib/format'
+import clsx from 'clsx'
+import { CURRENCY, currentMonth, formatAmount, formatMonthLong, formatSigned } from '@/core/lib/format'
 import { fetchFinanceSummary, financeSummaryKey } from './api/summary'
 import { useFinanceT } from './i18n'
 import s from './FinanceHomeCard.module.scss'
 
-/** Home: what this month has cost so far and the balance beside it. Adding goes through the shell's "+". */
+/** Home: this month's balance, and the income and expenses it is made of. Adding goes through the shell's "+". */
 export function FinanceHomeCard() {
   const t = useFinanceT()
   const month = currentMonth()
@@ -34,9 +35,17 @@ export function FinanceHomeCard() {
       ) : (
         <>
           <div>
-            <div className={s.label}>{t.home.spent}</div>
-            <div className={s.spent}>
-              {data ? formatAmount(data.totalExpense) : <Skeleton width={140} height={32} />}
+            <div className={s.label}>{t.home.balance}</div>
+            <div className={clsx(s.headline, data && data.totalBalance < 0 && s.negative)}>
+              {data ? (
+                data.totalBalance === 0 ? (
+                  formatAmount(0)
+                ) : (
+                  formatSigned(data.totalBalance, data.totalBalance > 0 ? 'income' : 'expense')
+                )
+              ) : (
+                <Skeleton width={140} height={32} />
+              )}
               <span className={s.currency}>{CURRENCY}</span>
             </div>
           </div>
@@ -46,8 +55,8 @@ export function FinanceHomeCard() {
               <div className={s.income}>{data ? `+${formatAmount(data.totalIncome)}` : <Skeleton width={80} />}</div>
             </div>
             <div>
-              <div className={s.label}>{t.balance}</div>
-              <div className={s.balance}>{data ? formatAmount(data.totalBalance) : <Skeleton width={80} />}</div>
+              <div className={s.label}>{t.expense}</div>
+              <div className={s.expense}>{data ? `−${formatAmount(data.totalExpense)}` : <Skeleton width={80} />}</div>
             </div>
           </div>
         </>

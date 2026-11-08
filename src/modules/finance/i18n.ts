@@ -38,6 +38,7 @@ export const financeMessages = defineMessages(
       noTransactions: "Hali tranzaksiya yo'q",
       noTransactionsSub: "Birinchi kirim yoki chiqimingizni qo'shing",
       spent: 'Chiqim',
+      spendTrend: 'Chiqim: shu oy va o\'tgan oy',
       vsLast: (pct: number, more: boolean) => `O'tgan oyning shu kunidagidan ${pct}% ${more ? "ko'p" : 'kam'}`,
       sameAsLast: "O'tgan oy bilan bir xil",
       thisMonth: 'Shu oy',
@@ -50,7 +51,7 @@ export const financeMessages = defineMessages(
     home: {
       failed: "Bu oyni yuklab bo'lmadi",
       open: 'Moliyani ochish',
-      spent: 'Shu oy sarflandi',
+      balance: 'Shu oy balansi',
     },
     tx: {
       add: "Tranzaksiya qo'shish",
@@ -175,6 +176,7 @@ export const financeMessages = defineMessages(
       noTransactions: 'No transactions yet',
       noTransactionsSub: 'Add your first income or expense',
       spent: 'Expenses',
+      spendTrend: 'Expenses: this month and last',
       vsLast: (pct: number, more: boolean) => `${pct}% ${more ? 'more' : 'less'} than by this day last month`,
       sameAsLast: 'Same as last month',
       thisMonth: 'This month',
@@ -187,7 +189,7 @@ export const financeMessages = defineMessages(
     home: {
       failed: "Couldn't load this month",
       open: 'Open Finance',
-      spent: 'Spent this month',
+      balance: "This month's balance",
     },
     tx: {
       add: 'Add transaction',

@@ -10,7 +10,7 @@ import { FinanceHomeCard } from './FinanceHomeCard'
 const amount = (n: number) => formatAmount(n).replace(/\s+/g, ' ')
 
 describe('FinanceHomeCard', () => {
-  test("leads with this month's spending, then income and balance, and links to finance", () => {
+  test("leads with this month's balance, then income and expenses, and links to finance", () => {
     const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
     const month = currentMonth()
     qc.setQueryData(financeSummaryKey(month), {
@@ -28,10 +28,10 @@ describe('FinanceHomeCard', () => {
       </QueryClientProvider>,
     )
 
-    expect(screen.getByText('Spent this month')).toBeTruthy()
-    expect(screen.getByText(amount(250000))).toBeTruthy()
+    expect(screen.getByText("This month's balance")).toBeTruthy()
+    expect(screen.getByText(`+${amount(750000)}`)).toBeTruthy()
     expect(screen.getByText(`+${amount(1000000)}`)).toBeTruthy()
-    expect(screen.getByText(amount(750000))).toBeTruthy()
+    expect(screen.getByText(`−${amount(250000)}`)).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Open Finance' }).getAttribute('href')).toBe('/finance')
     // No add button of its own: "+" in the shell is the one way to add.
     expect(screen.queryByRole('button')).toBeNull()
@@ -48,7 +48,7 @@ describe('FinanceHomeCard', () => {
           </MemoryRouter>
         </QueryClientProvider>,
       )
-      expect(screen.getByText('Balance')).toBeTruthy()
+      expect(screen.getByText("This month's balance")).toBeTruthy()
     } finally {
       onlineManager.setOnline(true)
     }

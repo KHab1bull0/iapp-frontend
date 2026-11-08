@@ -34,3 +34,20 @@
   color: var(--fg-strong);
   white-space: nowrap;
 }
+
+// Compact, for a card's header: 32px tall, the month in the meta size.
+.sm {
+  gap: 0;
+  padding: 2px;
+
+  .btn {
+    width: calc(var(--control-sm) - 6px);
+    height: calc(var(--control-sm) - 6px);
+  }
+
+  .value {
+    min-width: 0;
+    padding: 0 4px;
+    font-size: var(--fs-meta);
+  }
+}

@@ -12,7 +12,7 @@
   color: var(--fg-muted);
 }
 
-.spent {
+.headline {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -46,11 +46,13 @@
   color: var(--success);
 }
 
-.balance {
+.negative { color: var(--danger); }
+
+.expense {
   font-size: var(--fs-ui);
   line-height: var(--lh-ui);
   font-weight: 600;
-  color: var(--fg-strong);
+  color: var(--danger);
 }
 
 .error {

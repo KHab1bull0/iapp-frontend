@@ -12,6 +12,30 @@
   margin-bottom: 4px;
 }
 
+// The balance card's head: a wallet tile and the title, as on the home card.
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.headIcon {
+  @include icon-tile(var(--tile-md));
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.headTitle {
+  @include card-title;
+  flex: 1;
+  min-width: 0;
+}
+
+.headAccessory {
+  flex-shrink: 0;
+}
+
 .amount {
   display: flex;
   flex-wrap: wrap;
@@ -24,6 +48,60 @@
   color: var(--fg-strong);
   font-variant-numeric: tabular-nums;
 }
+
+.amountNegative { color: var(--danger); }
+
+// Income and expenses, under the balance in the same card.
+.flows {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+
+  > div { min-width: 0; }
+
+  @include bp-mobile { gap: 8px; }
+}
+
+.flowIcon {
+  @include icon-tile(var(--tile-md));
+  flex-shrink: 0;
+
+  // Phones: a smaller tile leaves the amount its full width.
+  @include bp-mobile { @include icon-tile(var(--tile-sm)); }
+}
+
+.flowIn { background: var(--success-soft); color: var(--success); }
+.flowOut { background: var(--danger-soft); color: var(--danger); }
+
+.flowLabel {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
+.flowValue {
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  // Always the whole amount: never cut short; a very long one breaks instead.
+  overflow-wrap: anywhere;
+
+  @include bp-mobile { font-size: var(--fs-ui); line-height: var(--lh-ui); }
+}
+
+.flowValueIn { color: var(--success); }
+.flowValueOut { color: var(--danger); }
 
 .currency {
   font-size: var(--fs-body);

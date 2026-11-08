@@ -32,7 +32,8 @@ describe('finance in Uzbek', () => {
       </QueryClientProvider>,
     )
     expect(screen.getByText('Moliya')).toBeTruthy()
-    expect(screen.getByText('Balans')).toBeTruthy()
+    expect(screen.getByText('Shu oy balansi')).toBeTruthy()
     expect(screen.getByText('Kirim')).toBeTruthy()
+    expect(screen.getByText('Chiqim')).toBeTruthy()
   })
 })
