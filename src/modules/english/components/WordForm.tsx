@@ -104,32 +104,31 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
 
   return (
     <form className={s.form} onSubmit={submit}>
-      <div className={s.row}>
-        <label className={s.field}>
-          <span className={s.label}>{t.word.word}</span>
-          <input
-            className={s.input}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            maxLength={100}
-            placeholder={t.word.wordPlaceholder}
-            aria-label={t.word.word}
-            autoFocus={!word}
-            autoCapitalize="none"
-          />
-        </label>
-        <label className={s.field}>
-          <span className={s.label}>{t.word.translation}</span>
-          <input
-            className={s.input}
-            value={translation}
-            onChange={(e) => setTranslation(e.target.value)}
-            maxLength={200}
-            placeholder={t.word.translationPlaceholder}
-            aria-label={t.word.translation}
-          />
-        </label>
-      </div>
+      {/* One above the other, each the full width: long words and phrases fit. */}
+      <label className={s.field}>
+        <span className={s.label}>{t.word.word}</span>
+        <input
+          className={s.input}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          maxLength={100}
+          placeholder={t.word.wordPlaceholder}
+          aria-label={t.word.word}
+          autoFocus={!word}
+          autoCapitalize="none"
+        />
+      </label>
+      <label className={s.field}>
+        <span className={s.label}>{t.word.translation}</span>
+        <input
+          className={s.input}
+          value={translation}
+          onChange={(e) => setTranslation(e.target.value)}
+          maxLength={200}
+          placeholder={t.word.translationPlaceholder}
+          aria-label={t.word.translation}
+        />
+      </label>
 
       <label className={s.field}>
         <span className={s.label}>{t.word.description}</span>
@@ -150,19 +149,6 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
       </label>
 
       <label className={s.field}>
-        <span className={s.label}>{t.word.example}</span>
-        <input
-          className={s.input}
-          value={example}
-          onChange={(e) => setExample(e.target.value)}
-          maxLength={500}
-          placeholder={t.word.examplePlaceholder}
-          aria-label={t.word.example}
-          lang="en"
-        />
-      </label>
-
-      <label className={s.field}>
         <span className={s.label}>{t.word.note}</span>
         <textarea
           className={clsx(s.input, s.textarea)}
@@ -172,6 +158,20 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
           rows={2}
           placeholder={t.word.notePlaceholder}
           aria-label={t.word.note}
+        />
+      </label>
+
+      <label className={s.field}>
+        <span className={s.label}>{t.word.example}</span>
+        <textarea
+          className={clsx(s.input, s.textarea)}
+          value={example}
+          onChange={(e) => setExample(e.target.value)}
+          maxLength={500}
+          rows={2}
+          placeholder={t.word.examplePlaceholder}
+          aria-label={t.word.example}
+          lang="en"
         />
       </label>
 

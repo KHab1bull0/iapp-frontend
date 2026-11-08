@@ -23,7 +23,7 @@ export const english: ModuleManifest = {
   basePath: '/english',
   pages: [
     // Statistics first: opening English shows where the vocabulary stands.
-    { label: { uz: 'Statistika', en: 'Statistics' }, path: '/english', icon: BarChart3, end: true },
+    { label: { uz: 'Tahlil', en: 'Stats' }, path: '/english', icon: BarChart3, end: true },
     { label: { uz: 'Yodlash', en: 'Memorise' }, path: '/english/review', icon: Layers, useBadge: useReviewCount },
     { label: { uz: "Lug'at", en: 'Vocabulary' }, path: '/english/vocabulary', icon: BookOpen },
   ],

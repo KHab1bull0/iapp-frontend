@@ -81,9 +81,9 @@ describe('buildRoutes', () => {
     expect(elementTypes('/english/abc/edit', all)).not.toContain(AppLayout)
   })
 
-  test('english opens on Statistics, then Memorise and Vocabulary', () => {
+  test('english opens on Stats, then Memorise and Vocabulary', () => {
     expect(english.pages.map((p) => [localize(p.label, 'en'), p.path])).toEqual([
-      ['Statistics', '/english'],
+      ['Stats', '/english'],
       ['Memorise', '/english/review'],
       ['Vocabulary', '/english/vocabulary'],
     ])

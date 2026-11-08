@@ -7,7 +7,7 @@ import s from './SpendHero.module.scss'
 
 /**
  * The Statistics page's headline card: the month's balance, big, with the
- * sign written out (red too when below zero), and under it, in the same
+ * sign written out, and under it, in the same
  * card, the income and expenses it is made of (in the same currency).
  */
 export function BalanceHero({
@@ -32,7 +32,7 @@ export function BalanceHero({
         <span className={s.headTitle}>{t.balance}</span>
         {accessory && <div className={s.headAccessory}>{accessory}</div>}
       </div>
-      <div className={clsx(s.amount, balance < 0 && s.amountNegative)}>
+      <div className={s.amount}>
         {balance === 0 ? formatAmount(0) : formatSigned(balance, balance > 0 ? 'income' : 'expense')}
         <span className={s.currency}>{CURRENCY}</span>
       </div>

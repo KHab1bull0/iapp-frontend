@@ -1,6 +1,6 @@
 import clsx from 'clsx'
-import { Link, NavLink, Outlet } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
+import { NavLink, Outlet } from 'react-router-dom'
+import { BackButton } from '@/core/components/BackButton'
 import { useEnglishT } from '@/modules/english/i18n'
 import { settingsSections } from './sections'
 // The app's Settings shell styles, so both settings look and behave alike.
@@ -15,9 +15,7 @@ export function EnglishSettingsLayout() {
   return (
     <div className={st.layout}>
       <aside className={st.sideNav}>
-        <Link to="/settings" className={st.backLink}>
-          <ChevronLeft size={18} /> {t.settings.appSettings}
-        </Link>
+        <BackButton fallback="/english" className={st.backLink} />
         <h1 className={st.sideNavTitle}>{t.title}</h1>
         <nav className={st.sideGroup} aria-label={t.settings.sections}>
           {settingsSections(t.settings).map(({ to, label, icon: Icon }) => (

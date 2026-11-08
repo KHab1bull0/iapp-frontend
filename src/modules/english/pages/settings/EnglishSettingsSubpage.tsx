@@ -1,10 +1,8 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
-import { useEnglishT } from '@/modules/english/i18n'
+import { BackButton } from '@/core/components/BackButton'
 import st from '@/pages/settings/settings.module.scss'
 
-/** One English settings page: back to the section list on phones, then title and content. */
+/** One English settings page: back (to wherever it was opened from) on phones, then title and content. */
 export function EnglishSettingsSubpage({
   title,
   description,
@@ -14,12 +12,9 @@ export function EnglishSettingsSubpage({
   description: string
   children: ReactNode
 }) {
-  const t = useEnglishT()
   return (
     <div className={st.page}>
-      <Link to="/english/settings" className={st.back}>
-        <ChevronLeft size={18} /> {t.settings.back}
-      </Link>
+      <BackButton fallback="/english/settings" className={st.back} />
       <header className={st.pageHead}>
         <div>
           <h1 className={st.h1}>{title}</h1>

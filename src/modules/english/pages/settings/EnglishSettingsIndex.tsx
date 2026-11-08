@@ -1,5 +1,6 @@
 import { Link, Navigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import { BackButton } from '@/core/components/BackButton'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { useEnglishT } from '@/modules/english/i18n'
 import { settingsSections } from './sections'
@@ -13,9 +14,7 @@ export function EnglishSettingsIndex() {
 
   return (
     <div className={st.hub}>
-      <Link to="/settings" className={st.backLink}>
-        <ChevronLeft size={18} /> {t.appSettings}
-      </Link>
+      <BackButton fallback="/english" className={st.backLink} />
       <h1 className={st.h1}>{t.title}</h1>
       <div className={st.list}>
         {settingsSections(t).map(({ to, label, description, icon: Icon }) => (

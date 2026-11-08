@@ -4,6 +4,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { BottomNav } from './BottomNav'
 import { ModuleTabs } from './ModuleTabs'
+import { useHideOnScroll } from '@/core/hooks/useHideOnScroll'
 import { CommandPalette } from './CommandPalette'
 import { DesktopTopBar } from './DesktopTopBar'
 import { ShortcutsDialog } from './ShortcutsDialog'
@@ -32,6 +33,10 @@ export function AppLayout({ modules }: AppLayoutProps) {
   const { pathname } = useLocation()
   const active = activeModule(modules, pathname)
   const onModulePage = Boolean(active && isModulePage(active, pathname))
+  // A module's own settings open from the gear in its tabs, so the tabs stay there too.
+  const onModuleSettings = Boolean(
+    active?.settingsPath && (pathname === active.settingsPath || pathname.startsWith(`${active.settingsPath}/`)),
+  )
 
   // "?" lists the shortcuts, "/" jumps to the page's search, "[" folds the sidebar.
   useEffect(() => {
@@ -57,6 +62,13 @@ export function AppLayout({ modules }: AppLayoutProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // Phones: the tabs and bottom nav slide away while scrolling down.
+  const barsHidden = useHideOnScroll(pathname)
+  // Sticky bits under the tabs (a page's search) follow them up: --module-tabs-h.
+  useEffect(() => {
+    document.documentElement.toggleAttribute('data-bars-hidden', barsHidden)
+  }, [barsHidden])
+
   return (
     <QuickAddProvider modules={modules}>
       <div className={clsx(s.app, sidebarCollapsed && s.collapsed)}>
@@ -72,7 +84,9 @@ export function AppLayout({ modules }: AppLayoutProps) {
             {active && onModulePage && (
               <DesktopTopBar module={active} pathname={pathname} onShortcuts={() => setShortcutsOpen(true)} />
             )}
-            {active && active.pages.length > 1 && onModulePage && <ModuleTabs module={active} />}
+            {active && active.pages.length > 1 && (onModulePage || onModuleSettings) && (
+              <ModuleTabs module={active} hidden={barsHidden} />
+            )}
             <ChunkErrorBoundary key={pathname}>
               <Suspense fallback={null}>
                 <Outlet />
@@ -80,7 +94,7 @@ export function AppLayout({ modules }: AppLayoutProps) {
             </ChunkErrorBoundary>
           </div>
 
-          <BottomNav modules={modules} />
+          <BottomNav modules={modules} hidden={barsHidden} />
         </main>
       </div>
       <CommandPalette modules={modules} open={paletteOpen} onOpenChange={setPaletteOpen} />

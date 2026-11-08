@@ -57,10 +57,10 @@ describe('AppLayout driven by the registry', () => {
     localStorage.removeItem('iapp-sidebar-collapsed')
   })
 
-  test("finance's first page is called Statistics", () => {
+  test("finance's first page is called Stats", () => {
     const { container } = renderShell('/finance')
     const aside = container.querySelector('aside')!
-    expect(within(aside).getByRole('link', { name: 'Statistics' }).getAttribute('href')).toBe('/finance')
+    expect(within(aside).getByRole('link', { name: 'Stats' }).getAttribute('href')).toBe('/finance')
     expect(within(aside).queryByText('Overview')).toBeNull()
   })
 
@@ -104,9 +104,12 @@ describe('AppLayout driven by the registry', () => {
     expect(screen.getByRole('navigation', { name: 'Finance pages' })).toBeTruthy()
   })
 
-  test("finance settings is reached from Settings, so it shows no finance tabs", () => {
+  test("the module's tabs end with a gear to its settings, and stay on that page", () => {
     renderShell('/finance/settings')
-    expect(screen.queryByRole('navigation', { name: 'Finance pages' })).toBeNull()
+    const tabs = screen.getByRole('navigation', { name: 'Finance pages' })
+    const gear = within(tabs).getByRole('link', { name: 'Settings' })
+    expect(gear.getAttribute('href')).toBe('/finance/settings')
+    expect(gear.getAttribute('aria-current')).toBe('page')
   })
 
   test('in Uzbek the navigation reads Uzbek', () => {

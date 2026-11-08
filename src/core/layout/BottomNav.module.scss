@@ -38,6 +38,15 @@
   }
 }
 
+// Scrolling down slides it off the bottom edge (useHideOnScroll), "+" with it.
+.bottomnav {
+  transition: transform $t-slow var(--ease-house);
+}
+
+.hidden {
+  transform: translateY(100%);
+}
+
 .bnavItem {
   display: flex;
   flex-direction: column;

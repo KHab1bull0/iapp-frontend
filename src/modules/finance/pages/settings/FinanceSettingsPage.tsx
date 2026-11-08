@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import clsx from 'clsx'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
-import { ChevronLeft, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
+import { BackButton } from '@/core/components/BackButton'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { AddCategoryDialog } from '@/modules/finance/components/categories/AddCategoryDialog'
 import { CategoryList } from '@/modules/finance/components/categories/CategoryList'
@@ -46,10 +46,8 @@ export function FinanceSettingsPage() {
 
   return (
     <div className={s.page}>
-      {/* Opened from Settings → Modules, so that is where back leads. */}
-      <Link to="/settings" className={shell.backLink}>
-        <ChevronLeft size={18} /> {t.settingsLink}
-      </Link>
+      {/* Back to wherever it was opened from: the tabs' gear, or Settings → Modules. */}
+      <BackButton fallback="/finance" className={shell.backLink} />
       <header className={shell.pageHead}>
         <div>
           <h1 className={shell.h1}>{t.categories.settingsTitle}</h1>

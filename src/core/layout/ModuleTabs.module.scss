@@ -10,41 +10,76 @@
     top: 0;
     z-index: 30;
     margin-top: calc(-1 * var(--safe-top));
-    padding: calc(var(--safe-top) + 8px) var(--page-pad) 8px;
+    padding-top: var(--safe-top);
     background: color-mix(in srgb, var(--bg) 88%, transparent);
     backdrop-filter: saturate(180%) blur(16px);
     -webkit-backdrop-filter: saturate(180%) blur(16px);
+    border-bottom: 1px solid var(--border);
+    // Scrolling down slides it up out of view (useHideOnScroll).
+    transition: transform $t-slow var(--ease-house);
   }
 }
 
-.tabs {
-  display: flex;
-  gap: 2px;
-  padding: 3px;
-  border-radius: $radius-md;
-  background: var(--slate-100);
+.hidden {
+  transform: translateY(-100%);
+}
 
-  :global(.theme-dark) & { background: var(--slate-800); }
+.tabs {
+  position: relative;
+  display: flex;
+  padding: 0 var(--page-pad);
 }
 
 .tab {
-  flex: 1;
-  display: grid;
-  place-items: center;
-  // Same height as SegmentedControl md: the whole strip is one control tall.
-  height: calc(var(--control-md) - 6px);
-  padding: 0 12px;
-  border-radius: $radius-sm;
+  // Shares the row by label length, so a longer name still fits whole.
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 4px;
+  height: var(--control-md);
   font-size: var(--fs-ui);
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
   color: var(--fg-muted);
-  transition: background $t-fast, color $t-fast, box-shadow $t-fast;
+  transition: color $t-fast;
+
+  &:hover { color: var(--fg); }
 
   &.active {
-    background: var(--bg-elev);
-    color: var(--fg-strong);
-    box-shadow: 0 1px 3px rgba(15, 17, 23, 0.1);
+    color: var(--primary);
+    font-weight: 600;
+  }
+}
+
+// The module's settings: a gear, narrower than the page tabs.
+.gear {
+  flex: 0 0 var(--control-md);
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// The line under the open tab; it slides from tab to tab.
+.indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  // Its width and offset (the open tab's) come inline.
+  height: 3px;
+  pointer-events: none;
+  transition: transform $t-slow var(--ease-spring);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0 22%;
+    border-radius: 3px 3px 0 0;
+    background: var(--primary);
   }
 }

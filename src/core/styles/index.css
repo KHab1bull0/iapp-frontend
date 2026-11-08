@@ -369,6 +369,15 @@
    --form-gutter is the page's side padding; the buttons line up with the
    form's 640px column. */
 :root {
+  /* Phones: the module tabs' height, for what sticks under them; 0 while they're hidden. */
+  --module-tabs-h: 45px;
+}
+
+:root[data-bars-hidden] {
+  --module-tabs-h: 0px;
+}
+
+:root {
   --form-actions-space: calc(var(--control-lg) + 25px + var(--safe-bottom));
 }
 

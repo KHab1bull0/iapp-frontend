@@ -11,7 +11,7 @@ import s from './BottomNav.module.scss'
 type Link = { to: string; icon: LucideIcon; label: string; end: boolean }
 
 /** Phones and tablets: Today, the modules, and "+" in the middle where the thumb rests. */
-export function BottomNav({ modules }: { modules: ModuleManifest[] }) {
+export function BottomNav({ modules, hidden = false }: { modules: ModuleManifest[]; hidden?: boolean }) {
   const t = useCoreT()
   const text = useText()
   const quickAdd = useQuickAdd()
@@ -28,7 +28,11 @@ export function BottomNav({ modules }: { modules: ModuleManifest[] }) {
   const items = bottomNavItems(modules)
 
   return (
-    <nav className={s.bottomnav} aria-label={t.nav.main} style={{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }}>
+    <nav
+      className={clsx(s.bottomnav, hidden && s.hidden)}
+      aria-label={t.nav.main}
+      style={{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }}
+    >
       {items.map((item) => {
         if (item.kind === 'add') {
           return (

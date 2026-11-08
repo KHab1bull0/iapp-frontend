@@ -12,7 +12,11 @@
   padding: 8px 0;
   background: var(--bg);
 
-  @include bp-tablet { top: calc(var(--safe-top) + 60px); }
+  // Under the module tabs; up to the top when they slide away.
+  @include bp-tablet {
+    top: calc(var(--safe-top) + var(--module-tabs-h));
+    transition: top $t-slow var(--ease-house);
+  }
   // Under the desktop top bar.
   @include bp-desktop { top: 72px; }
 }

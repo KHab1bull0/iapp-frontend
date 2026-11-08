@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import { RefreshCw, Wallet } from 'lucide-react'
 import { HomeCard } from '@/core/components/HomeCard'
 import { Skeleton } from '@/core/components/ui/Skeleton'
-import clsx from 'clsx'
 import { CURRENCY, currentMonth, formatAmount, formatMonthLong, formatSigned } from '@/core/lib/format'
 import { fetchFinanceSummary, financeSummaryKey } from './api/summary'
 import { useFinanceT } from './i18n'
@@ -36,7 +35,7 @@ export function FinanceHomeCard() {
         <>
           <div>
             <div className={s.label}>{t.home.balance}</div>
-            <div className={clsx(s.headline, data && data.totalBalance < 0 && s.negative)}>
+            <div className={s.headline}>
               {data ? (
                 data.totalBalance === 0 ? (
                   formatAmount(0)
