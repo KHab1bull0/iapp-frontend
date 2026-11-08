@@ -10,6 +10,7 @@ import { ImportPage } from './ImportPage'
 const api = vi.hoisted(() => ({
   fetchTags: vi.fn(),
   fetchGroups: vi.fn(),
+  fetchEnglishSettings: vi.fn(),
   fetchWords: vi.fn(),
   importWords: vi.fn(),
 }))
@@ -36,6 +37,7 @@ describe('ImportPage', () => {
   beforeEach(() => {
     api.fetchTags.mockResolvedValue([tag('t1', 'Work'), tag('t2', 'noun')])
     api.fetchGroups.mockResolvedValue([])
+    api.fetchEnglishSettings.mockResolvedValue({ newPerDay: 20 })
     api.fetchWords.mockResolvedValue([word('apple')])
     api.importWords.mockResolvedValue({ created: 2, skipped: [], tagsCreated: ['Travel'] })
   })

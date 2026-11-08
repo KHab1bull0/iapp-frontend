@@ -8,7 +8,9 @@ import {
   createLevel,
   deleteLevel,
   englishKeys,
+  fetchEnglishSettings,
   fetchLevels,
+  updateEnglishSettings,
   updateLevel,
   type Level,
 } from '@/modules/english/api/english'
@@ -97,6 +99,61 @@ function LevelRow({ level }: { level: Level }) {
 }
 
 /** English settings → Levels: how long a remembered word stays away at each step. */
+/** How many words not learned yet come into review each day. */
+function NewPerDay() {
+  const qc = useQueryClient()
+  const { lang } = useLang()
+  const t = useEnglishT()
+  const { data } = useQuery({ queryKey: englishKeys.settings, queryFn: fetchEnglishSettings })
+  const [value, setValue] = useState<string | null>(null)
+  const shown = value ?? (data ? String(data.newPerDay) : '')
+  const n = Number(shown)
+  const valid = shown !== '' && Number.isInteger(n) && n >= 0 && n <= 500 && n !== data?.newPerDay
+
+  const save = useMutation({
+    mutationFn: () => updateEnglishSettings({ newPerDay: n }),
+    onSuccess: async () => {
+      setValue(null)
+      await qc.invalidateQueries({ queryKey: englishKeys.all })
+      toast(t.settings.newPerDaySaved, 'success')
+    },
+    onError: (err) => toast(apiErrorText(err, lang, t.settings.newPerDayFailed), 'error'),
+  })
+
+  return (
+    <section className={s.section} aria-label={t.settings.newPerDay}>
+      <div className={s.sectionHead}>
+        <h2 className={s.sectionTitle}>{t.settings.newPerDay}</h2>
+      </div>
+      <p className={e.help}>{t.settings.newPerDayHelp}</p>
+      <div className={s.list}>
+        <form
+          className={e.row}
+          onSubmit={(ev: FormEvent) => {
+            ev.preventDefault()
+            if (valid) save.mutate()
+          }}
+        >
+          <span className={e.name}>{t.settings.newPerDay}</span>
+          <input
+            className={e.daysInput}
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={500}
+            value={shown}
+            onChange={(ev) => setValue(ev.target.value)}
+            aria-label={t.settings.newPerDay}
+          />
+          <button type="submit" className={e.btnPrimary} disabled={!valid || save.isPending}>
+            {t.save}
+          </button>
+        </form>
+      </div>
+    </section>
+  )
+}
+
 export function LevelsPage() {
   const qc = useQueryClient()
   const { lang } = useLang()
@@ -120,6 +177,7 @@ export function LevelsPage() {
 
   return (
     <EnglishSettingsSubpage title={t.settings.levels} description={t.settings.levelsDesc}>
+      <NewPerDay />
       <section className={s.section} aria-label={t.settings.levels}>
         <div className={s.sectionHead}>
           <h2 className={s.sectionTitle}>{t.settings.levels}</h2>

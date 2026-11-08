@@ -11,6 +11,9 @@ import v from './StatsVisuals.module.scss'
 
 const pct = (part: number, whole: number) => (whole > 0 ? Math.round((part / whole) * 100) : 0)
 
+/** Words not learned yet: lighter than New's gray, as they haven't started. */
+const CHART_QUEUED = '#CBD5E1'
+
 /**
  * Today: a ring of how much of today's stack has been answered, the split of
  * those answers, what is left and the streak, with the way into review.
@@ -67,6 +70,7 @@ export function TodayCard({ stats }: { stats: Stats }) {
           </li>
         </ul>
       </div>
+      {stats.queued > 0 && <p className={st.muted}>{t.stats.newToday(stats.newLeft, stats.newPerDay)}</p>}
       {status ? (
         <p className={st.muted}>{status}</p>
       ) : (
@@ -135,12 +139,18 @@ export function VocabularyCard({ stats }: { stats: Stats }) {
   const levelName = useLevelName()
   const steps = rampSteps(GREEN_RAMP, stats.levels.filter((l) => !l.locked).length)
   let step = 0
-  const levels = stats.levels.map((l) => ({
-    ...l,
-    label: levelName(l),
-    color: l.locked ? CHART.neutral : steps[step++],
-    share: pct(l.count, stats.total),
-  }))
+  const levels = [
+    // Not learned yet: waiting in the queue, the palest part of the bar.
+    ...(stats.queued
+      ? [{ id: 'queued', locked: true, intervalDays: 0, count: stats.queued, label: t.stats.queued, color: CHART_QUEUED, share: pct(stats.queued, stats.total) }]
+      : []),
+    ...stats.levels.map((l) => ({
+      ...l,
+      label: levelName(l),
+      color: l.locked ? CHART.neutral : steps[step++],
+      share: pct(l.count, stats.total),
+    })),
+  ]
   const learned = levels.filter((l) => !l.locked).reduce((n, l) => n + l.count, 0)
 
   return (

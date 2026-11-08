@@ -34,7 +34,7 @@ export function QuickAddProvider({ modules, children }: { modules: ModuleManifes
       const go = (id: string) => {
         const action = all.find((a) => a.id === id)
         if (!action) return
-        if (isMobile) navigate(action.to)
+        if (isMobile || !action.Editor) navigate(action.to)
         else setActiveId(id)
       }
       if (actionId) {
@@ -86,9 +86,9 @@ export function QuickAddProvider({ modules, children }: { modules: ModuleManifes
       </Sheet>
 
       {!isMobile &&
-        all.map(({ id, Editor }) => (
-          <Editor key={id} open={activeId === id} onOpenChange={(o) => setActiveId(o ? id : null)} />
-        ))}
+        all.map(({ id, Editor }) =>
+          Editor ? <Editor key={id} open={activeId === id} onOpenChange={(o) => setActiveId(o ? id : null)} /> : null,
+        )}
     </QuickAddContext.Provider>
   )
 }

@@ -1,4 +1,4 @@
-import { BarChart3, BookOpen, BookPlus, Languages, Layers } from 'lucide-react'
+import { BarChart3, BookOpen, BookPlus, FileSpreadsheet, Languages, Layers } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
 import { Navigate } from 'react-router-dom'
 import { EnglishHomeCard } from './EnglishHomeCard'
@@ -53,6 +53,10 @@ export const english: ModuleManifest = {
     { path: ':id/edit', element: <WordFormPage /> },
   ],
   homeCard: EnglishHomeCard,
-  quickAdd: [{ id: 'english.word', label: { uz: "So'z", en: 'Word' }, icon: BookPlus, to: '/english/new', Editor: WordDialog }],
+  // "+" asks how: one word by hand, or many from an Excel file.
+  quickAdd: [
+    { id: 'english.word', label: { uz: "So'z", en: 'Word' }, icon: BookPlus, to: '/english/new', Editor: WordDialog },
+    { id: 'english.import', label: { uz: "Excel'dan so'zlar", en: 'Words from Excel' }, icon: FileSpreadsheet, to: '/english/import' },
+  ],
   settingsPath: '/english/settings',
 }

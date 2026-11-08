@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import clsx from 'clsx'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Flame, Layers, Plus, RefreshCw, Tag as TagIcon, Volume2, X } from 'lucide-react'
+import { Flame, Layers, Plus, RefreshCw, Sparkles, Tag as TagIcon, Volume2, X } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { ProgressBar } from '@/core/components/ui/Progress'
 import { SegmentedControl } from '@/core/components/ui/SegmentedControl'
@@ -12,10 +12,12 @@ import { useQuickAdd } from '@/core/quickAdd/context'
 import {
   answerWord,
   englishKeys,
+  fetchEnglishSettings,
   fetchGroups,
   fetchLevels,
   fetchReview,
   fetchStats,
+  fetchSummary,
   fetchTags,
   type Level,
   type Tag,
@@ -23,6 +25,7 @@ import {
 } from '@/modules/english/api/english'
 import { useEnglishT, useGroupName, useLevelName } from '@/modules/english/i18n'
 import { shelve } from '@/modules/english/lib/tags'
+import { useExtraNew } from '@/modules/english/lib/extraNew'
 import { frontSide, loadDirection, saveDirection, type Direction } from '@/modules/english/lib/direction'
 import s from '../EnglishPages.module.scss'
 import r from './ReviewPage.module.scss'
@@ -51,7 +54,11 @@ export function ReviewPage() {
   const today = useToday()
   const [params] = useSearchParams()
   const tag = params.get('tag')
-  const { data: tags, isLoading } = useQuery({ queryKey: englishKeys.tags(today), queryFn: () => fetchTags(today) })
+  const [extraNew] = useExtraNew(today)
+  const { data: tags, isLoading } = useQuery({
+    queryKey: englishKeys.tags(today, extraNew),
+    queryFn: () => fetchTags(today, extraNew),
+  })
 
   if (isLoading) return null
   // The tag cards come first once a tag has words; until then, straight in.
@@ -76,11 +83,16 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
   // This session's answers, for the progress bar and the summary.
   const [answered, setAnswered] = useState<Record<Result, number>>({ remembered: 0, forgot: 0 })
 
+  // "20 more today": extra new words on top of the daily number.
+  const [extraNew, addExtraNew] = useExtraNew(today)
+  const stackKey = englishKeys.review(today, tagId, extraNew)
   const { data: stack = [], isLoading, isError, refetch } = useQuery({
-    queryKey: englishKeys.review(today, tagId),
-    queryFn: () => fetchReview(today, tagId),
+    queryKey: stackKey,
+    queryFn: () => fetchReview(today, tagId, extraNew),
   })
   const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
+  const { data: settings } = useQuery({ queryKey: englishKeys.settings, queryFn: fetchEnglishSettings })
+  const perDay = settings?.newPerDay || 20
 
   // As the server counts it: up a level is remembered; the same or lower, forgot.
   const resultOf = (word: Word, level: Level): Result => {
@@ -94,7 +106,7 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
     onMutate: ({ word, level }) => {
       const result = resultOf(word, level)
       setAnswered((a) => ({ ...a, [result]: a[result] + 1 }))
-      qc.setQueryData<Word[]>(englishKeys.review(today, tagId), (stack) => stack?.filter((w) => w.id !== word.id))
+      qc.setQueryData<Word[]>(stackKey, (stack) => stack?.filter((w) => w.id !== word.id))
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: englishKeys.all }),
     onError: async (_e, { word, level }) => {
@@ -120,6 +132,17 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
     queryFn: () => fetchStats(today),
     enabled: sessionOver,
   })
+  // Once the stack is empty: are there words not learned yet beyond today's number?
+  const { data: summary } = useQuery({
+    queryKey: ['english', 'summary', today, extraNew],
+    queryFn: () => fetchSummary(today, extraNew),
+    enabled: !isLoading && !current,
+  })
+  const moreNew = summary && summary.queued > 0 && (
+    <button type="button" className={r.secondary} onClick={() => addExtraNew(perDay)}>
+      <Sparkles size={18} aria-hidden /> {t.review.moreNew(perDay)}
+    </button>
+  )
 
   const choose = (target: Level | undefined) => {
     if (current && revealed && target && !answer.isPending) answer.mutate({ word: current, level: target })
@@ -179,10 +202,13 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
                 {t.review.home}
               </Link>
             )}
-            <button type="button" className={r.secondary} onClick={() => quickAdd.open('english.word')}>
-              <Plus size={18} aria-hidden /> {t.review.addWord}
-            </button>
+            {moreNew || (
+              <button type="button" className={r.secondary} onClick={() => quickAdd.open('english.word')}>
+                <Plus size={18} aria-hidden /> {t.review.addWord}
+              </button>
+            )}
           </div>
+          {summary && summary.queued > 0 && <p className={r.summarySub}>{t.review.queuedLeft(summary.queued)}</p>}
         </section>
       </div>
     )
@@ -191,11 +217,19 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
   if (!current) {
     return (
       <div className={s.page}>
-        <EmptyState
-          title={t.nothingToday}
-          description={t.review.emptySub}
-          action={{ label: t.review.addWord, icon: Plus, onClick: () => quickAdd.open('english.word') }}
-        />
+        {summary && summary.queued > 0 ? (
+          <EmptyState
+            title={t.nothingToday}
+            description={t.review.queuedLeft(summary.queued)}
+            action={{ label: t.review.moreNew(perDay), icon: Sparkles, onClick: () => addExtraNew(perDay) }}
+          />
+        ) : (
+          <EmptyState
+            title={t.nothingToday}
+            description={t.review.emptySub}
+            action={{ label: t.review.addWord, icon: Plus, onClick: () => quickAdd.open('english.word') }}
+          />
+        )}
       </div>
     )
   }
@@ -244,7 +278,11 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
           className={clsx(r.card, revealed && r.flipped)}
           onClick={() => !revealed && setRevealedId(current.id)}
         >
-          {level && <span className={r.level}>{levelLabel(level)}</span>}
+          {level ? (
+            <span className={r.level}>{levelLabel(level)}</span>
+          ) : (
+            <span className={r.level}>{t.review.newWord}</span>
+          )}
           {side === 'en' ? (
             <>
               <div className={r.word} lang="en">
@@ -356,7 +394,11 @@ function TagChooser({ tags }: { tags: Tag[] }) {
   const navigate = useNavigate()
   const groupName = useGroupName()
   const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
-  const { data: all = [] } = useQuery({ queryKey: englishKeys.review(today), queryFn: () => fetchReview(today) })
+  const [extraNew] = useExtraNew(today)
+  const { data: all = [] } = useQuery({
+    queryKey: englishKeys.review(today, undefined, extraNew),
+    queryFn: () => fetchReview(today, undefined, extraNew),
+  })
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && navigate('/english')

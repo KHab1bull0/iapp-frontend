@@ -7,6 +7,7 @@ import { toast } from '@/core/components/ui/toast'
 import { useToday } from '@/core/hooks/useToday'
 import {
   englishKeys,
+  fetchEnglishSettings,
   fetchGroups,
   fetchTags,
   fetchWords,
@@ -46,6 +47,7 @@ export function ImportPage() {
   const groupName = useGroupName()
   const { data: tags = [] } = useQuery({ queryKey: englishKeys.tags(today), queryFn: () => fetchTags(today) })
   const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
+  const { data: settings } = useQuery({ queryKey: englishKeys.settings, queryFn: fetchEnglishSettings })
   const { data: words = [] } = useQuery({
     queryKey: englishKeys.words({}),
     queryFn: () => fetchWords({}),
@@ -103,6 +105,7 @@ export function ImportPage() {
         <section className={p.done} aria-label={t.imp.done(created)}>
           <CheckCircle2 size={48} className={p.doneIcon} aria-hidden />
           <h1 className={p.doneTitle}>{t.imp.done(created)}</h1>
+          {created > 0 && <p className={p.muted}>{t.imp.queuedNote(settings?.newPerDay ?? 20)}</p>}
           {skipped.length > 0 && <p className={p.muted}>{t.imp.exists(skipped.length)}</p>}
           {tagsCreated.length > 0 && <p className={p.muted}>{t.imp.newTags(tagsCreated.join(', '))}</p>}
           <div className={p.doneActions}>

@@ -25,8 +25,15 @@ export interface Tag {
   createdAt: string
   /** Words wearing it. */
   count: number
-  /** Of those, due on the day asked for. */
+  /** Of those, up on the day asked for: due, plus the new words the day still allows. */
   due: number
+  /** Of those, not learned yet. */
+  queued?: number
+}
+
+export interface EnglishSettings {
+  /** Words not learned yet that come into review each day. */
+  newPerDay: number
 }
 
 export interface Word {
@@ -41,9 +48,10 @@ export interface Word {
   example: string | null
   /** The tags it wears. */
   tagIds: string[]
-  levelId: string
-  /** The day it is to be memorised (YYYY-MM-DD); in the review stack from then on. */
-  reviewOn: string
+  /** null while not learned yet (waiting in the queue of new words). */
+  levelId: string | null
+  /** The day it comes up in review (YYYY-MM-DD); null while in the queue. */
+  reviewOn: string | null
   lastReviewedAt: string | null
   createdAt: string
   updatedAt: string
@@ -57,7 +65,8 @@ export interface WordInput {
   example?: string | null
   /** The whole set of tags; on update, replaces the old one. */
   tagIds?: string[]
-  levelId?: string
+  /** A level schedules the word; none (or null, on update) puts it in the queue of words not learned yet. */
+  levelId?: string | null
   reviewOn?: string
 }
 
@@ -89,11 +98,12 @@ export const englishKeys = {
   all: ['english'] as const,
   levels: ['english', 'levels'] as const,
   groups: ['english', 'tag-groups'] as const,
-  tags: (day: string) => ['english', 'tags', day] as const,
+  tags: (day: string, extraNew = 0) => ['english', 'tags', day, extraNew] as const,
+  settings: ['english', 'settings'] as const,
   words: (f: WordFilters) => ['english', 'words', f] as const,
   word: (id: string) => ['english', 'word', id] as const,
   /** Today's stack; with a tag, only its words. */
-  review: (day: string, tagId?: string) => ['english', 'review', day, tagId ?? 'all'] as const,
+  review: (day: string, tagId?: string, extraNew = 0) => ['english', 'review', day, tagId ?? 'all', extraNew] as const,
   stats: (day: string) => ['english', 'stats', day] as const,
 }
 
@@ -124,8 +134,15 @@ export async function deleteGroup(id: string): Promise<void> {
 }
 
 /** Every tag, with its word count and how many are due `today`. */
-export async function fetchTags(today: string): Promise<Tag[]> {
-  return (await api.get<Tag[]>('/english/tags', { params: { today } })).data
+export async function fetchTags(today: string, extraNew = 0): Promise<Tag[]> {
+  return (await api.get<Tag[]>('/english/tags', { params: { today, extraNew: extraNew || undefined } })).data
+}
+
+export async function fetchEnglishSettings(): Promise<EnglishSettings> {
+  return (await api.get<EnglishSettings>('/english/settings')).data
+}
+export async function updateEnglishSettings(input: EnglishSettings): Promise<EnglishSettings> {
+  return (await api.patch<EnglishSettings>('/english/settings', input)).data
 }
 export async function createTag(input: { name: string; groupId?: string | null }): Promise<Tag> {
   return (await api.post<Tag>('/english/tags', input)).data
@@ -163,9 +180,25 @@ export async function deleteWord(id: string): Promise<void> {
 }
 
 /** The review stack: words whose day has come. */
-/** Today's stack; with `tagId`, only the words wearing that tag. */
-export async function fetchReview(today: string, tagId?: string): Promise<Word[]> {
-  return (await api.get<Word[]>('/english/review', { params: { today, tagId } })).data
+/**
+ * Today's stack: due words and the day's new words from the queue; with
+ * `tagId`, only the words wearing that tag; `extraNew` asks for more new
+ * words than the daily number.
+ */
+export async function fetchReview(today: string, tagId?: string, extraNew = 0): Promise<Word[]> {
+  return (await api.get<Word[]>('/english/review', { params: { today, tagId, extraNew: extraNew || undefined } })).data
+}
+
+export interface Summary {
+  /** Up today: due words and the new words the day still allows. */
+  due: number
+  /** Words not learned yet, waiting. */
+  queued: number
+  /** New words today can still bring. */
+  newLeft: number
+}
+export async function fetchSummary(today: string, extraNew = 0): Promise<Summary> {
+  return (await api.get<Summary>('/english/summary', { params: { today, extraNew: extraNew || undefined } })).data
 }
 /** Puts a due word at the level the user picked: it comes back after that level's days. */
 export async function answerWord(id: string, levelId: string, today: string): Promise<Word> {
@@ -179,6 +212,11 @@ export interface Stats {
   overdue: number
   /** Never answered in review yet. */
   unseen: number
+  /** Not learned yet: waiting in the queue, a few a day. */
+  queued: number
+  newPerDay: number
+  /** New words today can still bring from the queue. */
+  newLeft: number
   addedThisWeek: number
   reviewedToday: number
   /** Days in a row with at least one answer, up to today. */

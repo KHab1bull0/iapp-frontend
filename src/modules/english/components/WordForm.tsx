@@ -9,6 +9,7 @@ import {
   createWord,
   deleteWord,
   englishKeys,
+  fetchEnglishSettings,
   fetchLevels,
   updateWord,
   type Word,
@@ -39,12 +40,12 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
   const [description, setDescription] = useState(word?.description ?? '')
   const [example, setExample] = useState(word?.example ?? '')
   const [tagIds, setTagIds] = useState<string[]>(word?.tagIds ?? [])
-  const [reviewOn, setReviewOn] = useState(word?.reviewOn ?? todayYmd())
+  // '' = not learned yet: the word waits in the queue, with no day.
   const [levelId, setLevelId] = useState(word?.levelId ?? '')
+  const [reviewOn, setReviewOn] = useState(word?.reviewOn ?? todayYmd())
 
   const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
-  // A new word starts at New (the locked level) unless another is picked.
-  const shownLevelId = levelId || levels.find((l) => l.locked)?.id || ''
+  const { data: settings } = useQuery({ queryKey: englishKeys.settings, queryFn: fetchEnglishSettings })
 
   // Moving a word to a level reschedules it as review would: today + that level's days.
   function chooseLevel(id: string) {
@@ -57,7 +58,8 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
     }
   }
 
-  const valid = text.trim() && translation.trim() && reviewOn
+  const queued = levelId === ''
+  const valid = text.trim() && translation.trim() && (queued || reviewOn)
 
   const save = useMutation({
     mutationFn: () => {
@@ -68,8 +70,8 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
         description: description.trim() || null,
         example: example.trim() || null,
         tagIds,
-        reviewOn,
-        ...(shownLevelId ? { levelId: shownLevelId } : {}),
+        // Not learned: into the queue (no level, no day); else the level and its day.
+        ...(queued ? (word ? { levelId: null } : {}) : { levelId, reviewOn }),
       }
       return word ? updateWord(word.id, input) : createWord(input)
     },
@@ -180,8 +182,18 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
           </span>
           {/* Chips, like the tags: picking one reschedules the word below. */}
           <div className={s.chips} role="radiogroup" aria-labelledby="word-level-label">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={queued}
+              className={clsx(s.chip, queued && s.chipOn)}
+              onClick={() => setLevelId('')}
+            >
+              {queued && <Check size={14} strokeWidth={2.5} aria-hidden />}
+              {t.word.unlearned}
+            </button>
             {levels.map((l) => {
-              const on = shownLevelId === l.id
+              const on = levelId === l.id
               const name = levelLabel(l)
               const days = l.locked ? null : t.days(l.intervalDays)
               return (
@@ -204,14 +216,18 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
           </div>
         </div>
       )}
-      <div className={s.field}>
-        <span className={s.label}>{t.word.memoriseOn}</span>
-        <DateField label={t.word.memoriseOn} value={reviewOn} onChange={(d) => d && setReviewOn(d)} />
-      </div>
+      {queued ? (
+        <span className={s.hint}>{t.word.unlearnedHint(settings?.newPerDay ?? 20)}</span>
+      ) : (
+        <>
+          <div className={s.field}>
+            <span className={s.label}>{t.word.memoriseOn}</span>
+            <DateField label={t.word.memoriseOn} value={reviewOn} onChange={(d) => d && setReviewOn(d)} />
+          </div>
+          <span className={s.hint}>{reviewOn ? t.word.joinsHint : t.word.pickDay}</span>
+        </>
+      )}
       <TagPicker value={tagIds} onChange={setTagIds} />
-      <span className={s.hint}>
-        {reviewOn ? t.word.joinsHint : t.word.pickDay}
-      </span>
 
       <div data-form-actions>
         {word && (

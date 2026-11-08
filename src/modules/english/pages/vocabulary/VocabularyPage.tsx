@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import clsx from 'clsx'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
-import { BookOpen, FileSpreadsheet, Plus, RefreshCw, Search } from 'lucide-react'
+import { BookOpen, Check, FileSpreadsheet, Plus, RefreshCw, Search, SlidersHorizontal } from 'lucide-react'
+import { Sheet } from '@/core/components/ui/Sheet'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { useToday } from '@/core/hooks/useToday'
@@ -12,6 +13,7 @@ import {
   fetchLevels,
   fetchTags,
   fetchWords,
+  type Word,
   type WordFilters,
 } from '@/modules/english/api/english'
 import { reviewLabel } from '@/modules/english/lib/review'
@@ -21,6 +23,9 @@ import { shelve } from '@/modules/english/lib/tags'
 import s from '../EnglishPages.module.scss'
 import v from './VocabularyPage.module.scss'
 
+/** One empty list, so "no data yet" is the same value every render. */
+const NO_WORDS: Word[] = []
+
 /** English → Vocabulary: every word, with its level and the day it comes up. */
 export function VocabularyPage() {
   const today = useToday()
@@ -29,10 +34,11 @@ export function VocabularyPage() {
   const editor = useWordEditor()
   const quickAdd = useQuickAdd()
   const [filters, setFilters] = useState<WordFilters>({})
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const search = useDebouncedValue(filters.search, 300)
   const query = { ...filters, search: search?.trim() || undefined }
 
-  const { data: words = [], isLoading, isError, refetch } = useQuery({
+  const { data: words = NO_WORDS, isLoading, isError, refetch } = useQuery({
     queryKey: englishKeys.words(query),
     queryFn: () => fetchWords(query),
   })
@@ -42,11 +48,32 @@ export function VocabularyPage() {
   const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
   const tagNames = new Map(tags.map((tg) => [tg.id, tg.name]))
 
-  const levelName = (id: string) => {
+  const levelName = (id: string | null) => {
+    if (!id) return t.vocab.unlearned
     const level = levels.find((l) => l.id === id)
     return level ? levelLabel(level) : ''
   }
   const filtered = Boolean(query.search || query.tagId)
+
+  // A long vocabulary is drawn a page at a time: more as the list's end comes into view.
+  const PAGE = 60
+  const [shown, setShown] = useState(PAGE)
+  const [shownFor, setShownFor] = useState(words)
+  if (shownFor !== words) {
+    setShownFor(words)
+    setShown(PAGE)
+  }
+  const sentinel = useRef<HTMLDivElement>(null)
+  const more = shown < words.length
+  useEffect(() => {
+    const el = sentinel.current
+    if (!el || !more || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) setShown((n) => n + PAGE)
+    }, { rootMargin: '600px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [more, shown])
 
   return (
     <div className={s.page}>
@@ -63,30 +90,16 @@ export function VocabularyPage() {
             aria-label={t.vocab.search}
           />
         </div>
-        {tags.length > 0 && (
-          <div className={v.filters}>
-            <select
-              className={v.select}
-              value={filters.tagId ?? ''}
-              onChange={(e) => setFilters((f) => ({ ...f, tagId: e.target.value || undefined }))}
-              aria-label={t.vocab.tagFilter}
-            >
-              <option value="">{t.vocab.allTags}</option>
-              {shelve(tags, groups).map((shelf) => (
-                <optgroup key={shelf.group?.id ?? 'none'} label={groupName(shelf.group)}>
-                  {shelf.tags.map((tg) => (
-                    <option key={tg.id} value={tg.id}>
-                      {tg.name} ({tg.count})
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </div>
-        )}
-        <Link to="/english/import" className={v.importBtn}>
-          <FileSpreadsheet size={16} aria-hidden /> {t.imp.open}
-        </Link>
+        <button
+          type="button"
+          className={clsx(v.filterBtn, filters.tagId && v.filterOn)}
+          onClick={() => setFiltersOpen(true)}
+          aria-label={t.vocab.filters}
+          aria-haspopup="dialog"
+        >
+          <SlidersHorizontal size={18} aria-hidden />
+          {filters.tagId && <span className={v.filterDot} aria-hidden />}
+        </button>
       </div>
 
       {isError ? (
@@ -106,34 +119,92 @@ export function VocabularyPage() {
             <span className={s.count}>{words.length}</span>
           </div>
           <div className={s.list}>
-            <div className={v.head} aria-hidden>
-              <span>{t.word.word}</span>
-              <span>{t.word.translation}</span>
-              <span>{t.word.level}</span>
-              <span>{t.word.tags}</span>
-              <span>{t.word.memoriseOn}</span>
-            </div>
-            {words.map((w) => {
-              const due = w.reviewOn <= today
+            {words.slice(0, shown).map((w) => {
+              const due = w.reviewOn !== null && w.reviewOn <= today
               const wordTags = w.tagIds.map((id) => tagNames.get(id)).filter(Boolean).join(', ')
               return (
                 <button key={w.id} className={v.row} onClick={() => editor.openEdit(w)}>
-                  <span className={v.main}>
-                    <span className={v.word}>{w.word}</span>
-                    <span className={v.translation}>{w.translation}</span>
+                  {/* The word always whole; its level beside it never squeezes it. */}
+                  <span className={v.top}>
+                    <span className={v.word} lang="en">
+                      {w.word}
+                    </span>
+                    <span className={clsx(v.badge, !w.levelId && v.badgeQueued)}>{levelName(w.levelId)}</span>
                   </span>
-                  <span className={v.meta}>
-                    <span className={v.badge}>{levelName(w.levelId)}</span>
-                    {/* Always there, even empty, so the desktop columns stay aligned. */}
-                    <span className={v.tags}>{wordTags}</span>
-                    <span className={due ? v.due : undefined}>{reviewLabel(w.reviewOn, today, t)}</span>
+                  <span className={v.translation}>{w.translation}</span>
+                  {w.description && (
+                    <span className={v.description} lang="en">
+                      {w.description}
+                    </span>
+                  )}
+                  <span className={v.foot}>
+                    {wordTags && <span className={v.tags}>{wordTags}</span>}
+                    <span className={clsx(v.when, due && v.due)}>
+                      {w.reviewOn ? reviewLabel(w.reviewOn, today, t) : t.vocab.queued}
+                    </span>
                   </span>
                 </button>
               )
             })}
           </div>
+          {more && <div ref={sentinel} className={v.sentinel} aria-hidden />}
         </section>
       )}
+
+      {/* Everything but the search: from the filter button, a sheet from the bottom. */}
+      <Sheet
+        open={filtersOpen}
+        onOpenChange={setFiltersOpen}
+        title={t.vocab.filters}
+        footer={
+          <button
+            type="button"
+            className={v.clear}
+            disabled={!filters.tagId}
+            onClick={() => {
+              setFilters((f) => ({ ...f, tagId: undefined }))
+              setFiltersOpen(false)
+            }}
+          >
+            {t.vocab.clearFilters}
+          </button>
+        }
+      >
+        <div className={v.filterBody}>
+          <span className={v.filterLabel}>{t.vocab.tagFilter}</span>
+          {tags.length === 0 ? (
+            <p className={v.filterEmpty}>{t.vocab.noTags}</p>
+          ) : (
+            shelve(tags, groups).map((shelf) => (
+              <div key={shelf.group?.id ?? 'none'} className={v.shelf}>
+                <span className={v.shelfName}>{groupName(shelf.group)}</span>
+                <div className={v.chips} role="radiogroup" aria-label={groupName(shelf.group)}>
+                  {shelf.tags.map((tg) => {
+                    const on = filters.tagId === tg.id
+                    return (
+                      <button
+                        key={tg.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={on}
+                        className={clsx(v.chip, on && v.chipOn)}
+                        onClick={() => {
+                          setFilters((f) => ({ ...f, tagId: on ? undefined : tg.id }))
+                          setFiltersOpen(false)
+                        }}
+                      >
+                        {on && <Check size={14} strokeWidth={2.5} aria-hidden />}
+                        {tg.name}
+                        <span className={v.chipCount}>{tg.count}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </Sheet>
 
       {editor.dialog}
     </div>

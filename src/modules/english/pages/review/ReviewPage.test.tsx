@@ -13,6 +13,8 @@ const api = vi.hoisted(() => ({
   fetchStats: vi.fn(),
   fetchTags: vi.fn(),
   fetchGroups: vi.fn(),
+  fetchEnglishSettings: vi.fn(),
+  fetchSummary: vi.fn(),
 }))
 vi.mock('@/modules/english/api/english', async (orig) => ({ ...(await orig<object>()), ...api }))
 
@@ -34,6 +36,9 @@ describe('ReviewPage', () => {
     // No tag on any word yet: review starts straight away.
     api.fetchTags.mockResolvedValue([])
     api.fetchGroups.mockResolvedValue([])
+    api.fetchEnglishSettings.mockResolvedValue({ newPerDay: 20 })
+    api.fetchSummary.mockResolvedValue({ due: 0, queued: 0, newLeft: 0 })
+    localStorage.removeItem('iapp-extra-new')
   })
 
   describe('with tags on words, the tag cards come first', () => {
@@ -66,7 +71,7 @@ describe('ReviewPage', () => {
       )
       renderPage('/english/review?tag=t1')
       expect(await screen.findByText('mother')).toBeTruthy()
-      expect(api.fetchReview).toHaveBeenCalledWith(todayYmd(), 't1')
+      expect(api.fetchReview).toHaveBeenCalledWith(todayYmd(), 't1', 0)
       expect(screen.getByText('family')).toBeTruthy()
       expect(screen.getByText('1 to go')).toBeTruthy()
     })
@@ -145,6 +150,21 @@ describe('ReviewPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
     fireEvent.click(screen.getByRole('button', { name: /^Three days/ })) // river: New → Three days
     expect(await screen.findByText('1 remembered, 1 forgot.')).toBeTruthy()
+  })
+
+  test("with words still in the queue, an empty stack offers today's number again", async () => {
+    api.fetchReview.mockImplementation((_today: string, _tag?: string, extra = 0) =>
+      Promise.resolve(extra ? [word('meadow', { levelId: null, reviewOn: null })] : []),
+    )
+    api.fetchSummary.mockResolvedValue({ due: 0, queued: 30, newLeft: 0 })
+    renderPage()
+    expect(await screen.findByText('30 more words not learned yet are waiting.')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '20 more new words' }))
+    expect(await screen.findByText('meadow')).toBeTruthy()
+    expect(api.fetchReview).toHaveBeenCalledWith(todayYmd(), undefined, 20)
+    // A word not learned yet says so instead of a level.
+    expect(screen.getByText('New word')).toBeTruthy()
+    localStorage.removeItem('iapp-extra-new')
   })
 
   test('says so when the stack is empty', async () => {

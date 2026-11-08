@@ -13,6 +13,7 @@ const api = vi.hoisted(() => ({
   fetchGroups: vi.fn(),
   createTag: vi.fn(),
   fetchLevels: vi.fn(),
+  fetchEnglishSettings: vi.fn(),
 }))
 vi.mock('@/modules/english/api/english', async (orig) => ({ ...(await orig<object>()), ...api }))
 
@@ -31,22 +32,38 @@ describe('WordForm', () => {
     api.fetchLevels.mockResolvedValue([NEW, L3])
     api.fetchTags.mockResolvedValue([])
     api.fetchGroups.mockResolvedValue([])
+    api.fetchEnglishSettings.mockResolvedValue({ newPerDay: 20 })
   })
 
-  test('a new word is due today unless another day is picked, and has no tags unless given some', async () => {
-    api.fetchTags.mockResolvedValue([])
+  test('a new word is not learned yet: it joins the queue, with no level, no day and no tags unless given', async () => {
     renderForm()
-    expect(screen.getByRole('button', { name: 'Memorise on: Today' })).toBeTruthy()
-    await waitFor(() => expect(api.fetchTags).toHaveBeenCalled())
+    const levels = await screen.findByRole('radiogroup', { name: 'Level' })
+    expect(within(levels).getByRole('radio', { name: 'Not learned' }).getAttribute('aria-checked')).toBe('true')
+    // No day to pick while it waits in the queue.
+    expect(screen.queryByRole('button', { name: /^Memorise on/ })).toBeNull()
+    expect(await screen.findByText('It joins the queue: 20 new words come into review each day.')).toBeTruthy()
 
     fireEvent.change(screen.getByLabelText('Word'), { target: { value: 'apple' } })
     fireEvent.change(screen.getByLabelText('Translation'), { target: { value: 'olma' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.createWord).toHaveBeenCalled())
+    const input = api.createWord.mock.calls[0][0] as Record<string, unknown>
+    expect(input).toMatchObject({ word: 'apple', translation: 'olma', tagIds: [] })
+    expect('levelId' in input || 'reviewOn' in input).toBe(false)
+  })
+
+  test('given a level, a new word is scheduled: its day follows the level and can be moved', async () => {
+    renderForm()
+    const levels = await screen.findByRole('radiogroup', { name: 'Level' })
+    fireEvent.click(await within(levels).findByRole('radio', { name: 'New' }))
     fireEvent.click(screen.getByRole('button', { name: 'Memorise on: Today' }))
     fireEvent.click(screen.getByRole('button', { name: 'Tomorrow' }))
+    fireEvent.change(screen.getByLabelText('Word'), { target: { value: 'pear' } })
+    fireEvent.change(screen.getByLabelText('Translation'), { target: { value: 'nok' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     await waitFor(() =>
       expect(api.createWord).toHaveBeenCalledWith(
-        expect.objectContaining({ word: 'apple', translation: 'olma', reviewOn: addDaysYmd(todayYmd(), 1), tagIds: [] }),
+        expect.objectContaining({ levelId: NEW.id, reviewOn: addDaysYmd(todayYmd(), 1) }),
       ),
     )
   })
@@ -84,12 +101,10 @@ describe('WordForm', () => {
     await waitFor(() => expect(api.createWord).toHaveBeenCalledWith(expect.objectContaining({ tagIds: ['t9'] })))
   })
 
-  test('a new word starts at New, and can be given another level when adding', async () => {
-    api.fetchTags.mockResolvedValue([])
+  test('a level with days schedules the word that many days ahead', async () => {
     renderForm()
     const levels = await screen.findByRole('radiogroup', { name: 'Level' })
-    await waitFor(() => expect(within(levels).getByRole('radio', { name: 'New' }).getAttribute('aria-checked')).toBe('true'))
-    fireEvent.click(within(levels).getByRole('radio', { name: 'Three days, 3 days' }))
+    fireEvent.click(await within(levels).findByRole('radio', { name: 'Three days, 3 days' }))
     const inThree = new Date()
     inThree.setDate(inThree.getDate() + 3)
     expect(screen.getByRole('button', { name: `Memorise on: ${formatDay(ymd(inThree))}` })).toBeTruthy()
@@ -111,7 +126,7 @@ describe('WordForm', () => {
       </QueryClientProvider>,
     )
     const levels = await screen.findByRole('radiogroup', { name: 'Level' })
-    await waitFor(() => expect(within(levels).getAllByRole('radio')).toHaveLength(2))
+    await waitFor(() => expect(within(levels).getAllByRole('radio')).toHaveLength(3))
     expect(within(levels).getByRole('radio', { name: 'New' }).getAttribute('aria-checked')).toBe('true')
     fireEvent.click(within(levels).getByRole('radio', { name: 'Three days, 3 days' }))
     expect(within(levels).getByRole('radio', { name: 'Three days, 3 days' }).getAttribute('aria-checked')).toBe('true')
@@ -125,5 +140,17 @@ describe('WordForm', () => {
         expect.objectContaining({ levelId: L3.id, reviewOn: ymd(inThree) }),
       ),
     )
+  })
+
+  test('editing can send a word back to the queue of words not learned yet', async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <WordForm word={word('w2', { levelId: L3.id, reviewOn: '2099-01-01' })} onSaved={() => {}} onCancel={() => {}} />
+      </QueryClientProvider>,
+    )
+    const levels = await screen.findByRole('radiogroup', { name: 'Level' })
+    fireEvent.click(await within(levels).findByRole('radio', { name: 'Not learned' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.updateWord).toHaveBeenCalledWith('w2', expect.objectContaining({ levelId: null })))
   })
 })
