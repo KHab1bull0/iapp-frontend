@@ -58,15 +58,29 @@
 
 .filterOn { border-color: var(--primary); color: var(--primary); }
 
-// A filter is on: a dot in the corner.
-.filterDot {
+// Filters on: how many tags, in the corner.
+.filterCount {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 8px;
-  height: 8px;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
   border-radius: var(--radius-pill);
   background: var(--primary);
+  color: var(--primary-fg);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.filterHint {
+  margin: -4px 0 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--fg-muted);
 }
 
 .filterBody {
@@ -135,10 +149,11 @@
 }
 
 .clear {
-  @include btn-secondary;
-  @include btn-size-lg;
+  @include btn-action-secondary;
+}
 
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+.apply {
+  @include btn-action-primary;
 }
 
 .row {

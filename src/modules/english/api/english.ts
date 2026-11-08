@@ -90,7 +90,8 @@ export interface ImportResult {
 export interface WordFilters {
   search?: string
   levelId?: string
-  tagId?: string
+  /** Within one group any of these tags, across groups all of them. */
+  tagIds?: string[]
 }
 
 /** Every key starts with 'english', so invalidating ['english'] refreshes it all, home card included. */
@@ -155,7 +156,9 @@ export async function deleteTag(id: string): Promise<void> {
 }
 
 export async function fetchWords(filters: WordFilters = {}): Promise<Word[]> {
-  return (await api.get<Word[]>('/english/words', { params: filters })).data
+  const { tagIds, ...rest } = filters
+  const params = { ...rest, tagIds: tagIds?.length ? tagIds.join(',') : undefined }
+  return (await api.get<Word[]>('/english/words', { params })).data
 }
 export async function fetchWord(id: string): Promise<Word> {
   return (await api.get<Word>(`/english/words/${id}`)).data

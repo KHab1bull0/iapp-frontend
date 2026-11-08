@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { NEW, L3, word, tag, group } from '@/modules/english/test-data'
@@ -40,8 +40,17 @@ describe('VocabularyPage', () => {
     expect(screen.queryByRole('link', { name: 'Import from Excel' })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
     const sheet = await screen.findByRole('dialog', { name: 'Filters' })
-    expect(within(sheet).getByRole('radiogroup', { name: 'Parts of speech' })).toBeTruthy()
-    fireEvent.click(within(sheet).getByRole('radio', { name: /travel/ }))
-    expect(api.fetchWords).toHaveBeenLastCalledWith(expect.objectContaining({ tagId: 't1' }))
+    expect(within(sheet).getByRole('group', { name: 'Parts of speech' })).toBeTruthy()
+    // Several tags can be picked; nothing is searched until Search.
+    const calls = api.fetchWords.mock.calls.length
+    fireEvent.click(within(sheet).getByRole('button', { name: /travel/ }))
+    fireEvent.click(within(sheet).getByRole('button', { name: /noun/ }))
+    expect(within(sheet).getByRole('button', { name: /travel/ }).getAttribute('aria-pressed')).toBe('true')
+    expect(api.fetchWords.mock.calls.length).toBe(calls)
+    fireEvent.click(within(sheet).getByRole('button', { name: 'Search' }))
+    await waitFor(() =>
+      expect(api.fetchWords).toHaveBeenLastCalledWith(expect.objectContaining({ tagIds: ['t1', 't2'] })),
+    )
+    expect(screen.getByRole('button', { name: 'Filters: 2 tags' })).toBeTruthy()
   })
 })
