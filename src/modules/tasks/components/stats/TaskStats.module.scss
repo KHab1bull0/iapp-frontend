@@ -20,7 +20,15 @@
   @include card-title;
 }
 
-// A group inside one card (the task editor's "Progress", "Activity").
+// A group inside one card (the task editor's "Progress", "Activity"): its
+// parts sit close, the groups further apart, so they don't run together.
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap);
+  margin-top: 8px;
+}
+
 .groupLabel {
   @include section-label;
 }
