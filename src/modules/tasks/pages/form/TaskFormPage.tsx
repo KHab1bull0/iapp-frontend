@@ -6,6 +6,7 @@ import { MissedDay } from '@/modules/tasks/components/MissedDay'
 import { TaskForm } from '@/modules/tasks/components/TaskForm'
 import { TaskStatsCard } from '@/modules/tasks/components/stats/TaskStatsCard'
 import { useTasksT } from '@/modules/tasks/i18n'
+import st from '@/modules/tasks/components/stats/TaskStats.module.scss'
 import s from './TaskFormPage.module.scss'
 
 /**
@@ -43,6 +44,7 @@ export function TaskFormPage() {
             {task && <TaskStatsCard taskId={task.id} />}
             {/* Same as the desktop panel (TaskDialog): an overdue task's past day, ticked off. */}
             {task && <MissedDay task={task} onDone={close} />}
+            {task && <hr className={st.divider} />}
             <TaskForm task={task ?? null} onSaved={close} onCancel={close} />
           </>
         )}

@@ -171,3 +171,20 @@
   line-height: var(--lh-caption);
   color: var(--fg-muted);
 }
+
+// The desktop panel's top: stats, the past-day tick and the divider, spaced
+// as the phone's edit page spaces them.
+.editorTop {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+// In the task editor: between the task's stats (and its past-day tick) and the form.
+.divider {
+  width: 100%;
+  margin: 4px 0;
+  border: none;
+  border-top: 1px solid var(--border);
+}
