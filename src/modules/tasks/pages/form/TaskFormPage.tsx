@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { fetchTask, tasksKeys } from '@/modules/tasks/api/tasks'
+import { MissedDay } from '@/modules/tasks/components/MissedDay'
 import { TaskForm } from '@/modules/tasks/components/TaskForm'
 import { TaskStatsCard } from '@/modules/tasks/components/stats/TaskStatsCard'
 import { useTasksT } from '@/modules/tasks/i18n'
@@ -19,7 +20,6 @@ export function TaskFormPage() {
 
   // Back to wherever it was opened from (Today or All tasks).
   const close = () => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/tasks'))
-
 
   const { data: task, isLoading, isError } = useQuery({
     queryKey: tasksKeys.one(id ?? ''),
@@ -41,6 +41,8 @@ export function TaskFormPage() {
         ) : (
           <>
             {task && <TaskStatsCard taskId={task.id} />}
+            {/* Same as the desktop panel (TaskDialog): an overdue task's past day, ticked off. */}
+            {task && <MissedDay task={task} onDone={close} />}
             <TaskForm task={task ?? null} onSaved={close} onCancel={close} />
           </>
         )}
