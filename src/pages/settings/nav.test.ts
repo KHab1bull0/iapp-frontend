@@ -12,7 +12,10 @@ describe('settingsNav', () => {
     expect(groups).toEqual([
       { title: 'Modules', items: ['Finance /finance/settings'] },
       { title: 'Account', items: ['Profile /settings/profile', 'Security /settings/security'] },
-      { title: 'App', items: ['Preferences /settings/preferences', 'About /settings/about'] },
+      {
+        title: 'App',
+        items: ['Preferences /settings/preferences', 'Notifications /settings/notifications', 'About /settings/about'],
+      },
     ])
   })
 

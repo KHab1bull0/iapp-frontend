@@ -9,6 +9,7 @@ import { AuthPage } from '@/pages/auth'
 import { HomePage } from '@/pages/home'
 import {
   AboutPage,
+  NotificationsPage,
   PreferencesPage,
   ProfilePage,
   SecurityPage,
@@ -55,6 +56,7 @@ export function buildRoutes(modules: ModuleManifest[]): RouteObject[] {
                 { path: 'profile', element: <ProfilePage /> },
                 { path: 'security', element: <SecurityPage /> },
                 { path: 'preferences', element: <PreferencesPage /> },
+                { path: 'notifications', element: <NotificationsPage /> },
                 { path: 'about', element: <AboutPage /> },
               ],
             },

@@ -1,4 +1,4 @@
-import { Info, ShieldCheck, SlidersHorizontal, UserRound, type LucideIcon } from 'lucide-react'
+import { Bell, Info, ShieldCheck, SlidersHorizontal, UserRound, type LucideIcon } from 'lucide-react'
 import type { ModuleManifest } from '@/core/modules/types'
 import { localize, type Lang } from '@/core/i18n'
 import { coreMessages } from '@/core/i18n/messages'
@@ -45,6 +45,7 @@ export function settingsNav(modules: ModuleManifest[], lang: Lang): SettingsNavG
       title: t.groups.app,
       items: [
         { label: t.preferences, description: t.preferencesDesc, to: '/settings/preferences', icon: SlidersHorizontal },
+        { label: t.notifications, description: t.notificationsDesc, to: '/settings/notifications', icon: Bell },
         { label: t.about, description: t.aboutDesc, to: '/settings/about', icon: Info },
       ],
     },

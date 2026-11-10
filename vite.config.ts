@@ -84,6 +84,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest}"],
+        // Web Push listeners (push, notificationclick). generateSW owns the
+        // worker's source, so they live in public/push-sw.js and the
+        // generated sw.js loads them; Workbox caching stays as it is.
+        importScripts: ["push-sw.js"],
         // Drop precaches from superseded builds instead of letting them
         // accumulate in Cache Storage.
         cleanupOutdatedCaches: true,

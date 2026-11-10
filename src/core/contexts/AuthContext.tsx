@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react'
 import { clearApiCache } from '@/core/lib/pwa'
+import { forgetDevicePush } from '@/core/notifications/push'
 
 interface AuthUser {
   id: string
@@ -49,6 +50,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const logout = useCallback(() => {
+    // Read before it is removed: the server is told with the session that ends.
+    void forgetDevicePush(localStorage.getItem('token'))
     localStorage.removeItem('token')
     setUser(null)
     // The service worker caches API GETs so the app still renders offline.

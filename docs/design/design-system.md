@@ -37,6 +37,7 @@ atributlari `var()` ni tushunmaydi, shuning uchun bu yerda literal hex ishlatila
 | `Sheet` | Formalar va tanlovlar. Mobilda pastdan chiquvchi oyna, desktopda dialog yoki yon panel. Saqlash `footer` ga qo'yiladi |
 | `ConfirmDialog` | Qaytarib bo'lmaydigan amal oldidan so'rash (o'chirish, chiqish). Telefonda pastdan chiqadi, tugmalar ustma-ust (fe'l tepada); desktopda markazda, tugmalar yonma-yon (fe'l o'ngda). Tugma matni — fe'lning o'zi, "OK" emas |
 | `ListGroup` + `ListRow` | Sozlamalar, kategoriyalar va har qanday "ikonka + nom + qiymat + ›" ro'yxati |
+| `Switch` | Darhol qo'llanadigan yoqish/o'chirish (Saqlash tugmasisiz), odatda `ListRow.trailing` da. `label` majburiy |
 | `EmptyState` | Har bir bo'sh ro'yxat yoki sahifa. `action` majburiy, agar foydalanuvchi biror narsa qo'sha olsa |
 | `Skeleton` | Yuklanishda kontent shaklida joy egallaydi |
 | `StatTile`, `StatGrid` | Bosh raqamlar qatori |

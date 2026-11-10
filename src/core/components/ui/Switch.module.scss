@@ -1,0 +1,40 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+// Track --tile-lg × --tile-sm (44 × 28) with the knob inset 2px, the same
+// inset exception the segmented controls use. The visible track is shorter
+// than a touch target, so the hit area bleeds out to 44px.
+.switch {
+  @include touch-target(8px);
+  flex-shrink: 0;
+  width: var(--tile-lg);
+  height: var(--tile-sm);
+  padding: 2px;
+  border: none;
+  border-radius: $radius-pill;
+  background: var(--border-strong);
+  cursor: pointer;
+  transition: background $t-fast;
+
+  &.on { background: var(--primary); }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ring-soft);
+  }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// Light in both themes: it sits on grey or green, never on the page colour.
+.knob {
+  display: block;
+  width: calc(var(--tile-sm) - 4px);
+  height: calc(var(--tile-sm) - 4px);
+  border-radius: $radius-pill;
+  background: var(--slate-50);
+  box-shadow: var(--shadow-sm);
+  transition: transform $t-fast var(--ease-house);
+
+  .on & { transform: translateX(calc(var(--tile-lg) - var(--tile-sm))); }
+}

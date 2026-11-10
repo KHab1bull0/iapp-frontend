@@ -13,6 +13,7 @@ import { activeModule, isModulePage } from '@/core/modules/registry-utils'
 import type { ModuleManifest } from '@/core/modules/types'
 import { QuickAddProvider } from '@/core/quickAdd/QuickAddProvider'
 import { isDialogOpen, isTyping } from '@/core/lib/dom'
+import { usePushBridge } from '@/core/notifications/usePushBridge'
 import s from './AppLayout.module.scss'
 
 const SIDEBAR_KEY = 'iapp-sidebar-collapsed'
@@ -29,6 +30,7 @@ export function AppLayout({ modules }: AppLayoutProps) {
     localStorage.setItem(SIDEBAR_KEY, sidebarCollapsed ? '1' : '0')
   }, [sidebarCollapsed])
   const [paletteOpen, setPaletteOpen] = useState(false)
+  usePushBridge()
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const { pathname } = useLocation()
   const active = activeModule(modules, pathname)

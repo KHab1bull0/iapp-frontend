@@ -458,3 +458,76 @@ button.backLink {
   font-family: inherit;
   cursor: pointer;
 }
+
+// ── Notifications ──────────────────────────────────────────────────────────
+
+.pushStatus {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pushIcon {
+  @include icon-tile(var(--tile-lg));
+}
+
+.pushIcon_on {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.pushIcon_muted {
+  background: var(--icon-btn-hover);
+  color: var(--fg-muted);
+}
+
+.pushIcon_danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+// Lined up under the text, past the icon tile and its gap.
+.pushSteps {
+  margin: 0;
+  padding-left: calc(var(--tile-lg) + 12px + 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg);
+
+  @include bp-mobile { padding-left: 20px; }
+}
+
+.pushActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  // Thumb reach on a phone: full-width buttons, one per line.
+  @include bp-mobile {
+    flex-direction: column;
+    > * { width: 100%; }
+  }
+}
+
+.pushPrimary {
+  @include btn-primary;
+  @include btn-size-md;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.pushSecondary {
+  @include btn-secondary;
+  @include btn-size-md;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// Wide enough for "08:00" plus the picker icon; the input fills it.
+.timeWrap {
+  width: calc(var(--tile-lg) * 3);
+  flex-shrink: 0;
+}

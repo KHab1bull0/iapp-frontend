@@ -11,6 +11,8 @@ import { MODULES } from '@/modules/registry'
 import { tasksKeys, type Task } from '@/modules/tasks/api/tasks'
 import { TodayPage } from '@/modules/tasks/pages/today/TodayPage'
 import { TransactionForm } from '@/modules/finance/components/transactions/TransactionForm'
+import { NotificationsPage } from '@/pages/settings/NotificationsPage'
+import { installFakePush, uninstallFakePush, UA } from '@/test/push'
 
 // jsdom can't compute colours (contrast is covered by styles/contrast.test.ts)
 // and the page-level landmark rules need the whole document.
@@ -47,6 +49,17 @@ vi.mock('@/modules/finance/api/categories', async (orig) => ({
   ]),
 }))
 
+vi.mock('@/core/notifications/api', async (orig) => ({
+  ...(await orig<object>()),
+  fetchPublicKey: vi.fn().mockResolvedValue('BDxrGylovc0doQJluj-uAqzxpEHkJfyjVfondqgBadfog-sk7pdjyiIM6SHz6wFBAmN-6The2oDbxDIQbulnM8g'),
+  fetchSettings: vi.fn().mockResolvedValue({
+    tasksDigest: true, tasksDigestAt: '08:00', englishReminder: false, englishReminderAt: '20:00',
+  }),
+  fetchDevices: vi.fn().mockResolvedValue([
+    { id: 'd1', userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15', createdAt: '2026-11-01T08:00:00Z', lastSuccessAt: '2026-11-09T08:00:00Z' },
+  ]),
+}))
+
 describe('accessibility (axe)', () => {
   test('the shell: sidebar, bottom bar, module tabs', async () => {
     const { container } = withProviders(
@@ -73,5 +86,28 @@ describe('accessibility (axe)', () => {
     const { container } = withProviders(<TransactionForm onSaved={() => {}} onCancel={() => {}} />)
     await screen.findByRole('radio', { name: /Food/ })
     expect(await violations(container)).toEqual([])
+  })
+
+  test('Settings → Notifications, switched on: switches, times, devices', async () => {
+    installFakePush({ subscribed: true })
+    try {
+      const { container } = withProviders(<NotificationsPage />)
+      await screen.findByRole('switch', { name: 'Morning task summary' })
+      await screen.findByText('iPhone · Safari')
+      expect(await violations(container)).toEqual([])
+    } finally {
+      uninstallFakePush()
+    }
+  })
+
+  test('Settings → Notifications on an iPhone in Safari: the install steps', async () => {
+    installFakePush({ ua: UA.iphone, supported: false })
+    try {
+      const { container } = withProviders(<NotificationsPage />)
+      await screen.findByText('Add IAPP to your Home Screen first')
+      expect(await violations(container)).toEqual([])
+    } finally {
+      uninstallFakePush()
+    }
   })
 })
