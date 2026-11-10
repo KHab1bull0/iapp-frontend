@@ -41,7 +41,8 @@ describe('TaskStatsPage', () => {
   test('shows the totals and every repeat type', async () => {
     api.fetchOverallStats.mockResolvedValue(STATS)
     renderPage()
-    expect(await screen.findByText('40')).toBeTruthy()
+    // The tile's number, not the chart's axis label.
+    expect(await screen.findByText('40', { selector: 'div' })).toBeTruthy()
     expect(screen.getByText('4 days')).toBeTruthy()
     const byKind = screen.getByRole('region', { name: 'By type' })
     expect(within(byKind).getAllByRole('listitem')).toHaveLength(4)

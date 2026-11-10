@@ -61,10 +61,12 @@ export function TaskStatsCard({ taskId }: { taskId: string }) {
             <PeriodToggle value={period} onChange={setPeriod} />
           </div>
           <ProgressChart
-            data={toChartPoints(data, period)}
+            data={toChartPoints(data, period, 'score')}
             bars={[{ key: 'count', label: t.stats.doneCount, color: CHART.primarySoft }]}
             height={150}
+            lineLabel={t.stats.score}
           />
+          <p className={s.note}>{t.stats.scoreRule}</p>
           <h2 className={s.groupLabel}>{t.stats.activity}</h2>
           <Heatmap days={data.daily} />
           <p className={s.note}>{t.stats.streakRule}</p>

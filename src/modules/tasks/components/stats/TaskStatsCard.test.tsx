@@ -23,13 +23,13 @@ const STATS: TaskStats = {
   firstDoneOn: '2026-09-01',
   lastDoneOn: '2026-11-06',
   daily: [
-    { day: '2026-11-04', count: 1, cumulative: 10 },
-    { day: '2026-11-05', count: 0, cumulative: 10 },
-    { day: '2026-11-06', count: 2, cumulative: 12 },
+    { day: '2026-11-04', count: 1, cumulative: 10, score: 4, missed: 0 },
+    { day: '2026-11-05', count: 0, cumulative: 10, score: 3, missed: 1 },
+    { day: '2026-11-06', count: 2, cumulative: 12, score: 5, missed: 0 },
   ],
   monthly: [
-    { month: '2026-10', count: 7, cumulative: 7 },
-    { month: '2026-11', count: 5, cumulative: 12 },
+    { month: '2026-10', count: 7, cumulative: 7, score: 6, missed: 1 },
+    { month: '2026-11', count: 5, cumulative: 12, score: 5, missed: 2 },
   ],
 }
 
@@ -45,8 +45,9 @@ describe('TaskStatsCard', () => {
   test('shows the total, this month and the streak', async () => {
     api.fetchTaskStats.mockResolvedValue(STATS)
     renderCard()
-    expect(await screen.findByText('12')).toBeTruthy()
-    expect(screen.getByText('5')).toBeTruthy()
+    // The tile's number, not the chart's axis label.
+    expect(await screen.findByText('12', { selector: 'div' })).toBeTruthy()
+    expect(screen.getByText('5', { selector: 'div' })).toBeTruthy()
     expect(screen.getByText('3 days')).toBeTruthy()
     expect(screen.getByText('Best: 7 days')).toBeTruthy()
     expect(api.fetchTaskStats).toHaveBeenCalledWith('t1', expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/))
@@ -71,8 +72,14 @@ describe('TaskStatsCard', () => {
 
   test('labels each point and keeps the running total from the server', () => {
     const daily = toChartPoints(STATS, 'daily')
-    expect(daily.map((p) => p.cumulative)).toEqual([10, 10, 12])
-    expect(daily[0].label).toBe('4 Nov')
+    expect(daily.map((p) => p.line)).toEqual([10, 10, 12])
+    // One task's chart follows the score, which drops on a missed day.
+    const scored = toChartPoints(STATS, 'daily', 'score')
+    expect(scored.map((p) => p.line)).toEqual([4, 3, 5])
+    expect(scored.map((p) => p.missed)).toEqual([0, 1, 0])
+    // A day on the axis is just its number; the tooltip has the date.
+    expect(daily[0].label).toBe('4')
+    expect(daily[0].title).toMatch(/4 Nov/)
     const monthly = toChartPoints(STATS, 'monthly')
     expect(monthly.map((p) => p.label)).toEqual(['Oct', 'Nov'])
     expect(monthly[1].title).toBe('November 2026')

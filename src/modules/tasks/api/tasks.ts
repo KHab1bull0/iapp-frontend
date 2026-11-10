@@ -66,9 +66,19 @@ export interface StatsPoint {
   cumulative: number
 }
 
+/**
+ * One task's chart line: up a point on a day done, down a point for each day
+ * it was due and not done (can go below zero). A month: as of its last day.
+ */
+export interface ScorePoint {
+  score: number
+  /** Days due and not done (one day: 0 or 1). */
+  missed: number
+}
+
 export interface TaskStats extends StatsTotals {
-  daily: (StatsPoint & { day: string })[]
-  monthly: (StatsPoint & { month: string })[]
+  daily: (StatsPoint & ScorePoint & { day: string })[]
+  monthly: (StatsPoint & ScorePoint & { month: string })[]
 }
 
 export interface OverallTaskStats extends StatsTotals {

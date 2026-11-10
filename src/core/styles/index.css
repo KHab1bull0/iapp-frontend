@@ -356,6 +356,20 @@
     box-shadow: none;
     border-radius: 0;
   }
+
+  /*
+    Charts: tapping a bar or the plot focused the chart (and its bars), which
+    drew a ring or the browser's outline around them. The tooltip is the
+    feedback there; no ring.
+  */
+  .recharts-wrapper,
+  .recharts-wrapper * {
+    outline: none;
+  }
+  .recharts-wrapper:focus-visible,
+  .recharts-wrapper :focus-visible {
+    box-shadow: none;
+  }
 }
 
 /* ---------- A form's Save/Cancel/Delete row ----------
