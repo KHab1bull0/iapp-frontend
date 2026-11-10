@@ -51,17 +51,6 @@ export function TaskRow({ task, today, done = false, onToggle, busy = false, onO
         style={swipe.dx ? { transform: `translateX(${swipe.dx}px)` } : undefined}
         {...swipe.handlers}
       >
-        {onToggle && (
-          <button
-            className={clsx(s.check, done && s.checked)}
-            onClick={() => onToggle(task)}
-            disabled={busy}
-            aria-label={done ? t.undoLabel(task.title) : t.completeLabel(task.title)}
-          >
-            <Check size={16} strokeWidth={3} className={s.tick} />
-          </button>
-        )}
-
         <button className={s.body} onClick={() => onOpen(task)}>
           <span className={s.title}>{task.title}</span>
           {(task.dueTime || repeat || due) && (
@@ -88,6 +77,18 @@ export function TaskRow({ task, today, done = false, onToggle, busy = false, onO
           >
             <ArrowRight size={16} aria-hidden />
             <span>{t.swipe.tomorrow}</span>
+          </button>
+        )}
+
+        {/* The tick at the right end, under the right thumb. */}
+        {onToggle && (
+          <button
+            className={clsx(s.check, done && s.checked)}
+            onClick={() => onToggle(task)}
+            disabled={busy}
+            aria-label={done ? t.undoLabel(task.title) : t.completeLabel(task.title)}
+          >
+            <Check size={16} strokeWidth={3} className={s.tick} />
           </button>
         )}
       </div>

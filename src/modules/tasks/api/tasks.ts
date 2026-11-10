@@ -123,15 +123,19 @@ export async function deleteTask(id: string): Promise<void> {
 /**
  * `expectedDueDate` is the due date on screen; the server refuses (409) if the
  * task has moved on since, so a repeat tap can't skip an occurrence.
+ * `doneOn` is the day it was really done, for a missed day ticked off later
+ * (its due date up to today); left out, today.
  */
 export async function completeTask(
   id: string,
   today: string,
   expectedDueDate: string | null,
+  doneOn?: string,
 ): Promise<{ task: Task; completionId: string }> {
   const { data } = await api.post<{ task: Task; completionId: string }>(`/tasks/items/${id}/complete`, {
     today,
     expectedDueDate,
+    ...(doneOn && { doneOn }),
   })
   return data
 }
