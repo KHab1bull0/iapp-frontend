@@ -6,10 +6,13 @@ import {
   BellOff,
   BellRing,
   BookOpen,
+  CalendarRange,
   Clock,
+  Flame,
   ListChecks,
   Monitor,
   RefreshCw,
+  Repeat,
   Send,
   Share,
   Smartphone,
@@ -108,6 +111,17 @@ function TimeInput({ value, label, onCommit }: { value: string; label: string; o
   )
 }
 
+type Keys<V> = { [K in keyof NotificationSettings]: NotificationSettings[K] extends V ? K : never }[keyof NotificationSettings]
+
+/** A reminder's switch and, if it fires at a time the user picks, that time. */
+interface Reminder {
+  on: Keys<boolean>
+  at?: Keys<string>
+  icon: LucideIcon
+  title: string
+  hint: string
+}
+
 function Reminders() {
   const t = useCoreT().notifications
   const qc = useQueryClient()
@@ -130,7 +144,8 @@ function Reminders() {
   })
 
   if (settings.isPending) {
-    return <Skeleton height="calc(var(--row-h) * 2)" radius="var(--radius-lg)" />
+    // About as tall as the switches it stands in for, so the page doesn't jump.
+    return <Skeleton height="calc(var(--row-h) * 5)" radius="var(--radius-lg)" />
   }
   if (settings.isError) {
     return (
@@ -141,10 +156,14 @@ function Reminders() {
   }
 
   const data = settings.data
-  const reminders = [
+  const reminders: Reminder[] = [
     { on: 'tasksDigest', at: 'tasksDigestAt', icon: ListChecks, title: t.tasksDigest, hint: t.tasksDigestHint },
+    // Each habit reminds at its own due time, so this one has no time row.
+    { on: 'habitReminders', icon: Repeat, title: t.habitReminders, hint: t.habitRemindersHint },
+    { on: 'atRiskReminder', at: 'atRiskReminderAt', icon: Flame, title: t.atRiskReminder, hint: t.atRiskReminderHint },
+    { on: 'weeklyReview', at: 'weeklyReviewAt', icon: CalendarRange, title: t.weeklyReview, hint: t.weeklyReviewHint },
     { on: 'englishReminder', at: 'englishReminderAt', icon: BookOpen, title: t.englishReminder, hint: t.englishReminderHint },
-  ] as const
+  ]
 
   return (
     <ListGroup title={t.reminders} footer={t.remindersFooter}>
@@ -157,7 +176,7 @@ function Reminders() {
           trailing={<Switch checked={data[on]} label={title} onChange={(next) => save.mutate({ [on]: next })} />}
         />,
         // The time only matters while the reminder is on (iOS Settings does the same).
-        data[on] && (
+        at && data[on] && (
           <ListRow
             key={at}
             icon={Clock}
