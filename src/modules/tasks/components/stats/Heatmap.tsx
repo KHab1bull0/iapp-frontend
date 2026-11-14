@@ -1,18 +1,28 @@
 import clsx from 'clsx'
 import { formatDay, formatMonthShort, weekdayHeaders } from '@/core/lib/format'
 import { useTasksT } from '@/modules/tasks/i18n'
-import { heatWeeks } from './heatWeeks'
+import { heatWeeks, type HeatCell, type HeatDay } from './heatWeeks'
 import s from './Heatmap.module.scss'
 
 /**
  * A calendar of the last few months, one square a day, darker the more was
- * done: gaps and runs are visible at a glance.
+ * done: gaps and runs are visible at a glance. A habit's two-minute days are
+ * lighter and its rest days carry their own neutral mark (not "missed").
  */
-export function Heatmap({ days }: { days: { day: string; count: number }[] }) {
+export function Heatmap({ days }: { days: HeatDay[] }) {
   const t = useTasksT()
   const weeks = heatWeeks(days)
   const active = days.filter((d) => d.count > 0).length
   const labels = weekdayHeaders()
+  const hasMin = days.some((d) => (d.min ?? 0) > 0)
+  const hasRest = days.some((d) => d.rest)
+
+  const title = (c: HeatCell) => {
+    const date = formatDay(c.day)
+    if (c.rest) return t.stats.cellRest(date)
+    if (c.min) return t.stats.cellMin(date)
+    return t.stats.cellLabel(date, c.count)
+  }
 
   return (
     <div className={s.wrap}>
@@ -38,7 +48,7 @@ export function Heatmap({ days }: { days: { day: string; count: number }[] }) {
               <div key={i} className={s.week}>
                 {w.map((c, j) =>
                   c ? (
-                    <span key={c.day} className={clsx(s.cell, s[`l${c.level}`])} title={t.stats.cellLabel(formatDay(c.day), c.count)} />
+                    <span key={c.day} className={clsx(s.cell, s[`l${c.level}`], c.rest && s.rest)} title={title(c)} />
                   ) : (
                     <span key={`pad-${j}`} className={s.pad} />
                   ),
@@ -54,6 +64,16 @@ export function Heatmap({ days }: { days: { day: string; count: number }[] }) {
           <span key={l} className={clsx(s.cell, s[`l${l}`])} />
         ))}
         {t.stats.more}
+        {hasMin && (
+          <span className={s.legendItem}>
+            <span className={clsx(s.cell, s.l2)} /> {t.stats.minLegend}
+          </span>
+        )}
+        {hasRest && (
+          <span className={s.legendItem}>
+            <span className={clsx(s.cell, s.l0, s.rest)} /> {t.stats.restLegend}
+          </span>
+        )}
       </div>
     </div>
   )

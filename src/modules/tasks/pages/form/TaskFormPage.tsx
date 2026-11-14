@@ -43,7 +43,7 @@ export function TaskFormPage() {
           <div className={s.state}>{t.notFound}</div>
         ) : (
           <>
-            {task && <TaskStatsCard taskId={task.id} />}
+            {task && <TaskStatsCard taskId={task.id} task={task} />}
             {/* Same as the desktop panel (TaskDialog): an overdue task's past day, ticked off. */}
             {task && <MissedDay task={task} onDone={close} />}
             {task && <hr className={st.divider} />}
