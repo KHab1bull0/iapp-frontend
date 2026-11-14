@@ -1,0 +1,244 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+// ── Check-in sheet ──────────────────────────────────────────────────────
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.choice {
+  @include row;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elev);
+  color: var(--fg-strong);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color $t-fast, background $t-fast;
+
+  &:hover:not(:disabled) { border-color: var(--primary); background: var(--hover-bg); }
+  &:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.choiceIcon {
+  @include icon-tile(var(--tile-md));
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+// Rest is neither done nor missed: a neutral tile.
+.choiceIconMuted {
+  @include icon-tile(var(--tile-md));
+  background: var(--slate-100);
+  color: var(--fg-muted);
+
+  :global(.theme-dark) & { background: var(--slate-800); }
+}
+
+.choiceText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.choiceLabel {
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 500;
+}
+
+.choiceSub {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
+// ── Celebration ─────────────────────────────────────────────────────────
+
+// Where the toasts appear (toast.module.scss), so it reads as one of them.
+.celebrationHost {
+  position: fixed;
+  top: max(24px, calc(env(safe-area-inset-top) + 8px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+}
+
+.celebration {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-md);
+  pointer-events: auto;
+  animation: celebrateIn 260ms var(--ease-spring);
+}
+
+@keyframes celebrateIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+.flame {
+  @include icon-tile(var(--tile-md));
+  background: var(--warning-soft);
+  color: var(--warning);
+  animation: flameFlicker 600ms var(--ease-spring);
+}
+
+@keyframes flameFlicker {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.15); }
+  100% { transform: none; }
+}
+
+.celebrationText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+// The old number rolls up and out as the new one rolls in.
+.count {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  overflow: hidden;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
+  font-weight: 700;
+  color: var(--fg-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.countFrom {
+  position: absolute;
+  left: 0;
+  animation: countOut 400ms var(--ease-house) forwards;
+}
+
+.countTo {
+  animation: countIn 400ms var(--ease-house);
+}
+
+@keyframes countOut {
+  from { transform: none; opacity: 1; }
+  to { transform: translateY(-100%); opacity: 0; }
+}
+
+@keyframes countIn {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.countUnit {
+  font-size: var(--fs-meta);
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+
+.vote {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.celebrationUndo {
+  @include btn-secondary;
+  @include btn-size-sm;
+}
+
+// ── Stage reached ───────────────────────────────────────────────────────
+
+.reached {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.trophy {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: $radius-pill;
+  background: var(--warning-soft);
+  color: var(--warning);
+  animation: flameFlicker 600ms var(--ease-spring);
+}
+
+.reachedTitle {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
+.reward {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.next {
+  @include surface;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.nextHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nextLabel {
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.nextCount {
+  font-size: var(--fs-meta);
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.nextReward {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
+.claim {
+  @include btn-primary;
+  @include btn-size-lg;
+  width: 100%;
+
+  &:disabled { opacity: 0.5; cursor: progress; }
+}

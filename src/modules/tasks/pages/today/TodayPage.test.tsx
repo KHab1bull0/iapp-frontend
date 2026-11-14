@@ -78,7 +78,7 @@ describe('TodayPage', () => {
   test('ticking a task completes it for today, and Undo puts it back', async () => {
     renderPage()
     fireEvent.click(await screen.findByRole('button', { name: 'Complete B' }))
-    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('b', todayYmd(), todayYmd()))
+    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('b', todayYmd(), todayYmd(), { kind: 'full' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Undo' }))
     await waitFor(() => expect(api.undoCompletion).toHaveBeenCalledWith('c1'))
   })

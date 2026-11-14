@@ -147,3 +147,78 @@
     &:hover { color: var(--fg-strong); border-color: var(--border-strong); }
   }
 }
+
+// ── Habits ──────────────────────────────────────────────────────────────
+
+// Missed last time: today decides the streak. A tint, not an alarm.
+.atRisk { background: var(--warning-soft); }
+
+// A long-press row: no text selection or iOS callout under the held finger.
+.pressable {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+// The hold was recognised: a small sink says "let go to choose".
+.held {
+  transform: scale(0.98);
+  background: var(--hover-bg);
+}
+
+.streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--warning);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.streakNum {
+  display: inline-block;
+  animation: streakPop 320ms var(--ease-spring);
+}
+
+@keyframes streakPop {
+  from { transform: translateY(40%); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.stage { font-variant-numeric: tabular-nums; }
+
+.risk {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--warning);
+  font-weight: 500;
+}
+
+// "⋯": a mouse's long-press. Visible with a pointer that hovers; on touch it
+// stays for screen readers and keyboards only (the long-press is the way).
+.more {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: color $t-fast, background $t-fast;
+
+  &:hover { color: var(--fg-strong); background: var(--hover-bg); }
+  &:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  @media (hover: none) {
+    &:not(:focus-visible) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+  }
+}

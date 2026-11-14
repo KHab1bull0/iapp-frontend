@@ -167,7 +167,9 @@ export const tasksMessages = defineMessages(
       removeStage: (n: number) => `${n}-bosqichni olib tashlash`,
       stagesOrder: "Har bir bosqich oldingisidan ko'p bo'lsin (1–1000).",
       reached: 'Erishilgan',
-      unit: (daily: boolean) => (daily ? 'kun' : 'marta'),
+      // As with unitLabel, the noun after a number doesn't change in Uzbek.
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      unit: (daily: boolean, _n = 2) => (daily ? 'kun' : 'marta'),
       streak: (n: number, daily: boolean) => `${n} ${daily ? 'kun' : 'marta'}`,
       streakLabel: (n: number, daily: boolean) => `Ketma-ket: ${n} ${daily ? 'kun' : 'marta'}`,
       stageProgress: (position: number, streak: number, days: number) => `${position}-bosqich ${streak}/${days}`,
@@ -360,7 +362,7 @@ export const tasksMessages = defineMessages(
       removeStage: (n: number) => `Remove stage ${n}`,
       stagesOrder: 'Each stage needs more than the one before (1–1000).',
       reached: 'Reached',
-      unit: (daily: boolean) => (daily ? 'days' : 'times'),
+      unit: (daily: boolean, n = 2) => (daily ? 'day' : 'time') + (n === 1 ? '' : 's'),
       streak: (n: number, daily: boolean) =>
         daily ? `${n} day${n === 1 ? '' : 's'}` : `${n} time${n === 1 ? '' : 's'}`,
       streakLabel: (n: number, daily: boolean) =>
