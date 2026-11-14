@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom'
 import type { ModuleManifest } from '@/core/modules/types'
 import { TasksHomeCard } from './TasksHomeCard'
 import { useDueCount } from './useDueCount'
-import { AllTasksPage, TaskFormPage, TaskStatsPage, TodayPage } from './pages/lazy'
+import { AllTasksPage, ReviewPage, TaskFormPage, TaskStatsPage, TodayPage } from './pages/lazy'
 import { TaskDialog } from './components/TaskDialog'
 
 export const tasks: ModuleManifest = {
@@ -21,6 +21,8 @@ export const tasks: ModuleManifest = {
     { index: true, element: <TaskStatsPage /> },
     { path: 'today', element: <TodayPage /> },
     { path: 'all', element: <AllTasksPage /> },
+    // Opened from Stats' entry card and the Sunday notification; not a tab of its own.
+    { path: 'review', element: <ReviewPage /> },
     // Where Statistics used to be, for bookmarks.
     { path: 'stats', element: <Navigate to="/tasks" replace /> },
   ],

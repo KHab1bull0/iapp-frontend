@@ -14,6 +14,7 @@ import { BarChart3, Plus, RefreshCw } from 'lucide-react'
 import { toChartPoints, type Period } from '@/modules/tasks/components/stats/points'
 import st from '@/modules/tasks/components/stats/TaskStats.module.scss'
 import { useTasksT } from '@/modules/tasks/i18n'
+import { ReviewEntryCard } from '@/modules/tasks/review/ReviewEntryCard'
 import s from '../TasksPages.module.scss'
 
 const KIND_COLORS: Record<RepeatKind, string> = {
@@ -47,6 +48,8 @@ export function TaskStatsPage() {
   if (data.total === 0) {
     return (
       <div className={s.page}>
+        {/* The week can still be reviewed (English, money) before any task is done. */}
+        <ReviewEntryCard />
         <EmptyState
           icon={BarChart3}
           title={t.stats.empty}
@@ -62,6 +65,7 @@ export function TaskStatsPage() {
 
   return (
     <div className={s.page}>
+      <ReviewEntryCard />
       <StatGrid columns={4}>
         <StatTile
           label={t.stats.total}
