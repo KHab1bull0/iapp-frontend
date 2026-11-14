@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import clsx from 'clsx'
 import { ArrowRight, Check, Flame, MoreHorizontal, Repeat, TriangleAlert } from 'lucide-react'
 import { chain, useLongPress } from '@/core/hooks/useLongPress'
@@ -50,6 +51,9 @@ export function TaskRow({
     showDue || (task.dueDate !== null && task.dueDate < today) ? dueLabel(task.dueDate, today, t) : ''
   const overdue = !done && task.dueDate !== null && task.dueDate < today
   const atRisk = !done && Boolean(habit?.atRisk)
+  // Only a streak that changes while in view pops, not every row on load.
+  const [firstStreak] = useState(habit?.streak)
+  const bumped = habit !== null && habit.streak !== firstStreak
   const more = onMore && onToggle && !done && !busy ? () => onMore(task) : undefined
 
   const swipe = useSwipe({
@@ -94,8 +98,8 @@ export function TaskRow({
               {habit && habit.streak > 0 && (
                 <span className={s.streak}>
                   <Flame size={12} aria-hidden />
-                  {/* Keyed on the number: a new streak pops in. */}
-                  <span key={habit.streak} className={s.streakNum} aria-hidden>
+                  {/* Keyed on the number: each new streak pops in again. */}
+                  <span key={habit.streak} className={clsx(bumped && s.streakNum)} aria-hidden>
                     {habit.streak}
                   </span>
                   <span className="sr-only">{t.habit.streakLabel(habit.streak, isDaily(task))}</span>

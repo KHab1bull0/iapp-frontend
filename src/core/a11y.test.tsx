@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import axe from 'axe-core'
@@ -10,6 +10,8 @@ import { AppLayout } from '@/core/layout/AppLayout'
 import { MODULES } from '@/modules/registry'
 import { tasksKeys, type Task } from '@/modules/tasks/api/tasks'
 import { TodayPage } from '@/modules/tasks/pages/today/TodayPage'
+import { TaskForm } from '@/modules/tasks/components/TaskForm'
+import { habit, progress } from '@/modules/tasks/test-data'
 import { TransactionForm } from '@/modules/finance/components/transactions/TransactionForm'
 import { NotificationsPage } from '@/pages/settings/NotificationsPage'
 import { installFakePush, uninstallFakePush, UA } from '@/test/push'
@@ -80,6 +82,26 @@ describe('accessibility (axe)', () => {
     })
     const { container } = withProviders(<TodayPage />, qc)
     await screen.findByText('Gym')
+    expect(await violations(container)).toEqual([])
+  })
+
+  test('Tasks → Today with habits: streak, stage, at risk, the check-in sheet', async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
+    qc.setQueryData(tasksKeys.today(todayYmd()), {
+      overdue: [],
+      today: [habit('read', { progress: progress({ atRisk: true }) }), task('Gym')],
+      doneToday: [{ completionId: 'c', task: habit('walk') }],
+    })
+    const { container } = withProviders(<TodayPage />, qc)
+    fireEvent.click(await screen.findByRole('button', { name: 'More ways to check in READ' }))
+    await screen.findByRole('dialog')
+    expect(await violations(container)).toEqual([])
+    expect(await violations(document.querySelector('[role=dialog]') as HTMLElement)).toEqual([])
+  })
+
+  test('the task form with the habit part open', async () => {
+    const { container } = withProviders(<TaskForm task={habit('read')} onSaved={() => {}} onCancel={() => {}} />)
+    await screen.findByLabelText('Stage 1: days')
     expect(await violations(container)).toEqual([])
   })
 

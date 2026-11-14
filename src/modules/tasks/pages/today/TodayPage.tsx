@@ -77,9 +77,9 @@ export function TodayPage() {
     />
   )
 
-  const doneRow = ({ completionId, task, kind }: (typeof allDone)[number]) => (
+  const doneRow = ({ completionId, task, kind }: (typeof allDone)[number], key = completionId) => (
     <TaskRow
-      key={completionId}
+      key={key}
       task={task}
       today={today}
       done
@@ -138,9 +138,15 @@ export function TodayPage() {
                   {habitsDone.length}/{habits.length + habitsDone.length}
                 </span>
               </div>
+              {/* One list keyed by task: a habit ticked off stays the same row, so its streak can pop.
+                  (Done once and due again today, e.g. a past day ticked: its own key.) */}
               <div className={s.list}>
-                {habits.map(row)}
-                {habitsDone.map(doneRow)}
+                {[
+                  ...habits.map(row),
+                  ...habitsDone.map((d) =>
+                    doneRow(d, habits.some((h) => h.id === d.task.id) ? d.completionId : d.task.id),
+                  ),
+                ]}
               </div>
             </section>
           )}
@@ -185,7 +191,7 @@ export function TodayPage() {
                 <h2 className={s.sectionTitle}>{m.showDone(done.length)}</h2>
                 <ChevronDown size={18} className={clsx(s.foldIcon, showDone && s.open)} aria-hidden />
               </button>
-              {showDone && <div className={s.list}>{done.map(doneRow)}</div>}
+              {showDone && <div className={s.list}>{done.map((d) => doneRow(d))}</div>}
             </section>
           )}
           </div>
