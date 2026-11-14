@@ -86,6 +86,7 @@ export function ReviewPage() {
           {/* Keyed by week: a new week starts its own draft, and the old one's pending save goes out. */}
           <ReviewQuestions key={weekStart} weekStart={weekStart} today={today} initial={week.data.answers} />
           <PastWeeks
+            today={today}
             current={current}
             open={weekStart}
             onOpen={() => top.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' })}

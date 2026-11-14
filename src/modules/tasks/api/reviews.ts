@@ -42,8 +42,13 @@ export interface ReviewListItem {
   answered: boolean
 }
 
+/**
+ * A partial save: a field left out keeps what is saved, "" (or only spaces)
+ * clears it. `today` is the device's, as the task endpoints take it.
+ */
 export interface WeekAnswersInput extends Partial<ReviewAnswers> {
   weekStart: string
+  today?: string
 }
 
 /**
@@ -53,7 +58,9 @@ export interface WeekAnswersInput extends Partial<ReviewAnswers> {
 export const reviewKeys = {
   all: ['tasks', 'review'] as const,
   week: (weekStart: string, today: string) => ['tasks', 'review', 'week', weekStart, today] as const,
-  list: ['tasks', 'review', 'list'] as const,
+  /** Prefix of every list key, for invalidation. */
+  lists: ['tasks', 'review', 'list'] as const,
+  list: (today: string) => ['tasks', 'review', 'list', today] as const,
 }
 
 export async function fetchWeek(weekStart: string, today: string): Promise<WeekReview> {
@@ -67,8 +74,8 @@ export async function saveWeek(input: WeekAnswersInput): Promise<WeekReview> {
   return data
 }
 
-/** The last 26 weeks, newest first. */
-export async function fetchReviews(): Promise<ReviewListItem[]> {
-  const { data } = await api.get<ReviewListItem[]>('/reviews')
+/** Up to 26 weeks, newest first, the current one always among them. */
+export async function fetchReviews(today: string): Promise<ReviewListItem[]> {
+  const { data } = await api.get<ReviewListItem[]>('/reviews', { params: { today } })
   return data
 }

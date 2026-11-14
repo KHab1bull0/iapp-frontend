@@ -232,6 +232,7 @@ export const coreMessages = defineMessages(
       'errors.task_moved': 'Ish allaqachon yangilangan, sahifani yangilang',
       'errors.bad_done_on': "Bajarilgan kun vazifa kunidan bugungacha bo'lishi kerak",
       'errors.latest_only': 'Faqat oxirgi bajarilganini qaytarish mumkin',
+      'errors.review_future_week': "Hali boshlanmagan haftaga xulosa yozib bo'lmaydi",
     },
   },
   {
@@ -464,6 +465,7 @@ export const coreMessages = defineMessages(
       'errors.task_moved': 'The task has moved on; refresh and try again',
       'errors.bad_done_on': 'The day it was done must be between its due date and today',
       'errors.latest_only': 'Only the latest completion can be undone',
+      'errors.review_future_week': "A week that hasn't started can't be reviewed yet",
     },
   },
 )

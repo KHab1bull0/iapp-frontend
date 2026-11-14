@@ -17,18 +17,19 @@ describe('reviews API', () => {
   })
 
   test('saveWeek PUTs the answers with their week', async () => {
-    const input = { weekStart: '2026-11-09', wentWell: 'Gym', wentBadly: null, change: 'Sleep' }
+    const input = { weekStart: '2026-11-09', today: '2026-11-14', wentWell: 'Gym' }
     expect(await saveWeek(input)).toBe('saved')
     expect(http.put).toHaveBeenCalledWith('/reviews/week', input)
   })
 
-  test('fetchReviews lists the past weeks', async () => {
-    await fetchReviews()
-    expect(http.get).toHaveBeenCalledWith('/reviews')
+  test('fetchReviews lists the weeks as of today', async () => {
+    await fetchReviews('2026-11-14')
+    expect(http.get).toHaveBeenCalledWith('/reviews', { params: { today: '2026-11-14' } })
   })
 
   test("every key sits under the tasks' key, so a task change refreshes the review too", () => {
-    for (const key of [reviewKeys.all, reviewKeys.list, reviewKeys.week('2026-11-09', '2026-11-14')]) {
+    const keys = [reviewKeys.all, reviewKeys.lists, reviewKeys.list('2026-11-14'), reviewKeys.week('2026-11-09', '2026-11-14')]
+    for (const key of keys) {
       expect(key.slice(0, 2)).toEqual([...tasksKeys.all, 'review'])
     }
   })

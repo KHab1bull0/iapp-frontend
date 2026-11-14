@@ -99,7 +99,7 @@ describe('accessibility (axe)', () => {
       finance: { income: 100, expense: 50 },
       answers: { wentWell: 'Gym', wentBadly: null, change: null },
     })
-    qc.setQueryData(reviewKeys.list, [{ weekStart: '2026-01-05', rate: 50, answered: true }])
+    qc.setQueryData(reviewKeys.list(today), [{ weekStart: '2026-01-05', rate: 50, answered: true }])
     const { container } = withProviders(<ReviewPage />, qc)
     await screen.findByLabelText('What went well?')
     expect(await violations(container)).toEqual([])

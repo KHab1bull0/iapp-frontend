@@ -13,9 +13,19 @@ import s from './Review.module.scss'
  * Weeks before the current one, newest first, each opening as `?week=`.
  * The current week is the page's default, so it isn't listed as "past".
  */
-export function PastWeeks({ current, open, onOpen }: { current: string; open: string; onOpen: () => void }) {
+export function PastWeeks({
+  today,
+  current,
+  open,
+  onOpen,
+}: {
+  today: string
+  current: string
+  open: string
+  onOpen: () => void
+}) {
   const t = useReviewT()
-  const list = useQuery({ queryKey: reviewKeys.list, queryFn: fetchReviews })
+  const list = useQuery({ queryKey: reviewKeys.list(today), queryFn: () => fetchReviews(today) })
 
   let body
   if (list.isPending) {

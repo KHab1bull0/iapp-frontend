@@ -55,7 +55,8 @@ describe('ReviewQuestions', () => {
 
     await wait(1)
     expect(api.saveWeek).toHaveBeenCalledTimes(1)
-    expect(api.saveWeek).toHaveBeenCalledWith({ weekStart: WEEK, wentWell: 'Gym', wentBadly: '', change: 'Sleep' })
+    // Partial: only the fields that changed, with the device's today.
+    expect(api.saveWeek).toHaveBeenCalledWith({ weekStart: WEEK, today: TODAY, wentWell: 'Gym', change: 'Sleep' })
     expect(screen.getByRole('status').textContent).toContain('Saved')
     // The page's week now holds what the server returned.
     expect(qc.getQueryData(reviewKeys.week(WEEK, TODAY))).toMatchObject({ answers: { wentWell: 'Gym' } })
@@ -96,6 +97,25 @@ describe('ReviewQuestions', () => {
     type('What went well?', 'Same')
     await wait(AUTOSAVE_MS)
     expect(api.saveWeek).not.toHaveBeenCalled()
+  })
+
+  test('clearing a field sends it empty, and leaves the others out', async () => {
+    renderQuestions({ wentWell: 'Gym', wentBadly: 'Late nights', change: null })
+    type("What didn't go well?", '')
+    await wait(AUTOSAVE_MS)
+    expect(api.saveWeek).toHaveBeenCalledWith({ weekStart: WEEK, today: TODAY, wentBadly: '' })
+    // The next save sends only what changed after that one.
+    type('What went well?', 'Gym, twice')
+    await wait(AUTOSAVE_MS)
+    expect(api.saveWeek).toHaveBeenLastCalledWith({ weekStart: WEEK, today: TODAY, wentWell: 'Gym, twice' })
+  })
+
+  test("the server's reason is shown when it gives one", async () => {
+    api.saveWeek.mockRejectedValueOnce({ response: { data: { message: 'errors.review_future_week' } } })
+    renderQuestions()
+    type('What went well?', 'Gym')
+    await wait(AUTOSAVE_MS)
+    expect(screen.getByRole('status').textContent).toContain("A week that hasn't started can't be reviewed yet")
   })
 
   test('a failed save says so, keeps the text and can be retried', async () => {

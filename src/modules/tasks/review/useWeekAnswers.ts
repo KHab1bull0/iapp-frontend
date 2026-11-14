@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useLang } from '@/core/i18n'
+import { apiErrorText } from '@/core/i18n/errors'
 import { reviewKeys, saveWeek, type ReviewAnswers } from '@/modules/tasks/api/reviews'
 
 export type AnswerField = keyof ReviewAnswers
@@ -19,6 +21,10 @@ const toDraft = (a: ReviewAnswers | null): Answers => ({
 
 const same = (a: Answers, b: Answers) => FIELDS.every((f) => a[f] === b[f])
 
+/** Only what changed since the last save: the PUT is partial, so the rest keeps its saved value. */
+const changed = (next: Answers, saved: Answers): Partial<Answers> =>
+  Object.fromEntries(FIELDS.filter((f) => next[f] !== saved[f]).map((f) => [f, next[f]]))
+
 /**
  * The week's three answers as the user types them, saved a moment after they
  * stop. The draft is local and only seeded once: the week's query refetches
@@ -30,8 +36,11 @@ const same = (a: Answers, b: Answers) => FIELDS.every((f) => a[f] === b[f])
  */
 export function useWeekAnswers(weekStart: string, today: string, initial: ReviewAnswers | null) {
   const qc = useQueryClient()
+  const { lang } = useLang()
   const [draft, setDraft] = useState<Answers>(() => toDraft(initial))
   const [state, setState] = useState<SaveState>('idle')
+  /** The server's reason when it has one (errors.review_future_week), else null for the generic line. */
+  const [error, setError] = useState<string | null>(null)
   const latest = useRef(draft)
   const saved = useRef(draft)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -49,17 +58,19 @@ export function useWeekAnswers(weekStart: string, today: string, initial: Review
       }
       if (alive.current) setState('saving')
       try {
-        const week = await saveWeek({ weekStart, ...next })
+        const week = await saveWeek({ weekStart, today, ...changed(next, saved.current) })
         saved.current = next
         qc.setQueryData(reviewKeys.week(weekStart, today), week)
-        void qc.invalidateQueries({ queryKey: reviewKeys.list })
+        void qc.invalidateQueries({ queryKey: reviewKeys.lists })
         // Typed on while this was in flight: that change has its own save coming.
         if (alive.current && latest.current === next) setState('saved')
-      } catch {
-        if (alive.current) setState('error')
+      } catch (err) {
+        if (!alive.current) return
+        setError(apiErrorText(err, lang, '') || null)
+        setState('error')
       }
     })
-  }, [qc, weekStart, today])
+  }, [qc, weekStart, today, lang])
 
   const update = useCallback(
     (field: AnswerField, value: string) => {
@@ -88,5 +99,5 @@ export function useWeekAnswers(weekStart: string, today: string, initial: Review
     }
   }, [flush])
 
-  return { draft, update, state, flush }
+  return { draft, update, state, error, flush }
 }

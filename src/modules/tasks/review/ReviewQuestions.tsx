@@ -9,7 +9,7 @@ import s from './Review.module.scss'
 /** Matches the server's limit, so nothing typed is cut off there. */
 const MAX = 2000
 
-function Status({ state, onRetry }: { state: SaveState; onRetry: () => void }) {
+function Status({ state, error, onRetry }: { state: SaveState; error: string | null; onRetry: () => void }) {
   const t = useReviewT().questions
   return (
     // Announced politely: "Saved" after a pause in typing, not on every key.
@@ -22,7 +22,7 @@ function Status({ state, onRetry }: { state: SaveState; onRetry: () => void }) {
       )}
       {state === 'error' && (
         <>
-          <AlertCircle size={14} aria-hidden /> {t.failed}
+          <AlertCircle size={14} aria-hidden /> {error ?? t.failed}
           <button type="button" className={s.retry} onClick={onRetry}>
             <RefreshCw size={14} aria-hidden /> {t.retry}
           </button>
@@ -47,7 +47,7 @@ export function ReviewQuestions({
 }) {
   const t = useReviewT().questions
   const id = useId()
-  const { draft, update, state, flush } = useWeekAnswers(weekStart, today, initial)
+  const { draft, update, state, error, flush } = useWeekAnswers(weekStart, today, initial)
   const fields: { key: AnswerField; label: string }[] = [
     { key: 'wentWell', label: t.wentWell },
     { key: 'wentBadly', label: t.wentBadly },
@@ -58,7 +58,7 @@ export function ReviewQuestions({
     <section className={s.card} aria-label={t.title}>
       <div className={s.cardHead}>
         <h2 className={s.cardTitle}>{t.title}</h2>
-        <Status state={state} onRetry={flush} />
+        <Status state={state} error={error} onRetry={flush} />
       </div>
       <p className={s.hint}>{t.hint}</p>
       {fields.map(({ key, label }) => (
