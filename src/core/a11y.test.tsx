@@ -28,6 +28,7 @@ async function violations(container: HTMLElement) {
 const task = (id: string): Task => ({
   id, title: id, note: null, dueDate: todayYmd(), dueTime: '09:00', repeatMode: 'none', repeatUnit: null,
   repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null, createdAt: '', updatedAt: '',
+  isHabit: false, identity: null, cue: null, minVersion: null, stages: [], progress: null,
 })
 
 function withProviders(ui: React.ReactNode, qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })) {

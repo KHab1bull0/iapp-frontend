@@ -93,6 +93,7 @@ describe('TaskForm', () => {
             id: 't1', title: 'Old', note: null, dueDate: null, dueTime: null, repeatMode: 'none',
             repeatUnit: null, repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null,
             createdAt: '', updatedAt: '',
+  isHabit: false, identity: null, cue: null, minVersion: null, stages: [], progress: null,
           }}
           onSaved={onSaved}
           onCancel={() => {}}

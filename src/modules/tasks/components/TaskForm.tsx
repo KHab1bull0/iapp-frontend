@@ -75,7 +75,7 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
     onSuccess: async () => {
       // Drop the deleted task's own query first, or refreshing it 404s and the
       // edit page flashes "not found" before closing.
-      qc.removeQueries({ queryKey: tasksKeys.one(task!.id) })
+      qc.removeQueries({ queryKey: tasksKeys.item(task!.id) })
       await qc.invalidateQueries({ queryKey: tasksKeys.all })
       toast(t.form.deleted, 'success')
       onSaved()

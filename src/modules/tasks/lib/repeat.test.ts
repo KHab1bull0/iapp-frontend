@@ -22,6 +22,7 @@ const task = (over: Partial<Task>): Task => ({
   completedAt: null,
   createdAt: '',
   updatedAt: '',
+  isHabit: false, identity: null, cue: null, minVersion: null, stages: [], progress: null,
   ...over,
 })
 

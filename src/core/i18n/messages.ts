@@ -226,6 +226,9 @@ export const coreMessages = defineMessages(
       'errors.task_moved': 'Ish allaqachon yangilangan, sahifani yangilang',
       'errors.bad_done_on': "Bajarilgan kun vazifa kunidan bugungacha bo'lishi kerak",
       'errors.latest_only': 'Faqat oxirgi bajarilganini qaytarish mumkin',
+      'errors.rest_limit': "Bu oy dam olish kunlari tugadi (oyiga 4 ta)",
+      'errors.rest_one_off': "Bir martalik vazifada dam olish kuni bo'lmaydi",
+      'errors.stage_not_reached': 'Bu bosqichga hali yetilmagan',
     },
   },
   {
@@ -452,6 +455,9 @@ export const coreMessages = defineMessages(
       'errors.task_moved': 'The task has moved on; refresh and try again',
       'errors.bad_done_on': 'The day it was done must be between its due date and today',
       'errors.latest_only': 'Only the latest completion can be undone',
+      'errors.rest_limit': 'No rest days left this month (4 a month)',
+      'errors.rest_one_off': 'A one-off task has no rest days',
+      'errors.stage_not_reached': 'This stage has not been reached yet',
     },
   },
 )
