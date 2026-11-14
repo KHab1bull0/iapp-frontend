@@ -1,0 +1,142 @@
+import { defineMessages, useMessages } from '@/core/i18n'
+
+// The weekly review's own strings: kept apart from the tasks module's i18n.ts,
+// which the habits work edits at the same time.
+export const reviewMessages = defineMessages(
+  {
+    title: 'Haftalik xulosa',
+    subtitle: "Hafta qanday o'tdi va keyingisida nimani o'zgartirasiz",
+    back: 'Tahlil',
+    week: 'Hafta',
+    prevWeek: 'Oldingi hafta',
+    nextWeek: 'Keyingi hafta',
+    loadFailed: "Haftani yuklab bo'lmadi",
+    retry: 'Qayta urinish',
+    tasks: {
+      title: 'Vazifalar',
+      rateLabel: (rate: number) => `Bajarilish: ${rate}%`,
+      doneOf: (done: number, due: number) => `${due} tadan ${done} tasi bajarildi`,
+      done: 'Bajarildi',
+      due: 'Rejada',
+      missed: "O'tkazildi",
+      rest: 'Dam olish',
+      none: "Bu haftada vazifa bo'lmagan",
+      noneSub: "Takrorlanadigan vazifa qo'shsangiz, hafta oxirida shu yerda natijasi chiqadi.",
+      add: "Vazifa qo'shish",
+    },
+    habits: {
+      title: 'Odatlar',
+      doneOf: (done: number, due: number) => `${done}/${due}`,
+      doneOfLabel: (done: number, due: number) => `${due} tadan ${done} tasi bajarildi`,
+      streak: (n: number) => `Seriya: ${n}`,
+      none: "Hali odat yo'q",
+    },
+    english: {
+      title: 'Ingliz tili',
+      answered: 'Takrorlandi',
+      remembered: 'Esladingiz',
+      added: "Qo'shildi",
+    },
+    finance: {
+      title: 'Moliya',
+      income: 'Kirim',
+      expense: 'Chiqim',
+    },
+    questions: {
+      title: 'Savollar',
+      hint: "Qisqa yozing — o'zingiz uchun. Yozganingiz o'zi saqlanadi.",
+      wentWell: "Nima yaxshi bo'ldi?",
+      wentBadly: "Nima bo'lmadi?",
+      change: "Nimani o'zgartiraman?",
+      placeholder: 'Bir-ikki gap…',
+      saving: 'Saqlanmoqda…',
+      saved: 'Saqlandi',
+      failed: "Saqlab bo'lmadi",
+      retry: 'Qayta saqlash',
+    },
+    past: {
+      title: "O'tgan haftalar",
+      empty: "O'tgan haftalar hali yo'q",
+      emptySub: "Har hafta tugagach shu yerga qo'shiladi.",
+      answered: 'Javob berilgan',
+      notAnswered: 'Javobsiz',
+      open: (range: string, rate: number) => `${range} haftasini ochish: ${rate}%`,
+      loadFailed: "Ro'yxatni yuklab bo'lmadi",
+    },
+    entry: {
+      title: 'Haftalik xulosa',
+      rate: (rate: number) => `Shu hafta: ${rate}%`,
+    },
+  },
+  {
+    title: 'Weekly review',
+    subtitle: 'How the week went, and what to change in the next one',
+    back: 'Stats',
+    week: 'Week',
+    prevWeek: 'Previous week',
+    nextWeek: 'Next week',
+    loadFailed: "Couldn't load the week",
+    retry: 'Retry',
+    tasks: {
+      title: 'Tasks',
+      rateLabel: (rate: number) => `Done: ${rate}%`,
+      doneOf: (done: number, due: number) => `${done} of ${due} done`,
+      done: 'Done',
+      due: 'Planned',
+      missed: 'Missed',
+      rest: 'Rest',
+      none: 'No tasks this week',
+      noneSub: 'Add a repeating task and its week shows up here.',
+      add: 'Add a task',
+    },
+    habits: {
+      title: 'Habits',
+      doneOf: (done: number, due: number) => `${done}/${due}`,
+      doneOfLabel: (done: number, due: number) => `${done} of ${due} done`,
+      streak: (n: number) => `Streak: ${n}`,
+      none: 'No habits yet',
+    },
+    english: {
+      title: 'English',
+      answered: 'Reviewed',
+      remembered: 'Remembered',
+      added: 'Added',
+    },
+    finance: {
+      title: 'Finance',
+      income: 'Income',
+      expense: 'Expense',
+    },
+    questions: {
+      title: 'Questions',
+      hint: 'Keep it short — it is for you. What you write saves itself.',
+      wentWell: 'What went well?',
+      wentBadly: "What didn't go well?",
+      change: 'What will I change?',
+      placeholder: 'A sentence or two…',
+      saving: 'Saving…',
+      saved: 'Saved',
+      failed: "Couldn't save",
+      retry: 'Save again',
+    },
+    past: {
+      title: 'Past weeks',
+      empty: 'No past weeks yet',
+      emptySub: 'Each week is added here as it ends.',
+      answered: 'Answered',
+      notAnswered: 'Not answered',
+      open: (range: string, rate: number) => `Open ${range}: ${rate}%`,
+      loadFailed: "Couldn't load the list",
+    },
+    entry: {
+      title: 'Weekly review',
+      rate: (rate: number) => `This week: ${rate}%`,
+    },
+  },
+)
+
+export type ReviewMessages = (typeof reviewMessages)['uz']
+
+export function useReviewT(): ReviewMessages {
+  return useMessages(reviewMessages)
+}
