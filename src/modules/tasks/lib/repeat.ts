@@ -75,3 +75,11 @@ export function byTime(tasks: Task[]): Task[] {
   const timed = tasks.filter((t) => t.dueTime).sort((a, b) => a.dueTime!.localeCompare(b.dueTime!))
   return [...timed, ...tasks.filter((t) => !t.dueTime)]
 }
+
+/**
+ * Every day, by either schedule: its streak counts days ("5 kun"). Any other
+ * repeat's streak counts occurrences ("5 marta"), as the server counts it.
+ */
+export function isDaily(task: Pick<Task, 'repeatMode' | 'repeatUnit' | 'repeatEvery'>): boolean {
+  return task.repeatMode !== 'none' && task.repeatUnit === 'day' && task.repeatEvery === 1
+}

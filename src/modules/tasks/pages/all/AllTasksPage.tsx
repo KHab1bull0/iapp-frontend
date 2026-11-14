@@ -22,8 +22,8 @@ export function AllTasksPage() {
   const toTomorrow = useMoveToTomorrow(today)
 
   const { data: tasks = [], isLoading, isError, refetch } = useQuery({
-    queryKey: tasksKeys.list('active'),
-    queryFn: () => fetchTasks('active'),
+    queryKey: tasksKeys.list('active', today),
+    queryFn: () => fetchTasks('active', today),
   })
 
   const groups = groupByDue(tasks, today, t)

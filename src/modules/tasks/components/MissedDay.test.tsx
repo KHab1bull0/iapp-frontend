@@ -23,6 +23,7 @@ const task = (over: Partial<Task> = {}): Task => ({
   completedAt: null,
   createdAt: '',
   updatedAt: '',
+  isHabit: false, identity: null, cue: null, minVersion: null, stages: [], progress: null,
   ...over,
 })
 
@@ -54,7 +55,7 @@ describe('MissedDay', () => {
     expect(day(/\D3\sNovember/).disabled).toBe(true)
     expect(day(/\D7\sNovember/).disabled).toBe(true)
     fireEvent.click(day(/\D6\sNovember/))
-    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('a', '2026-11-07', '2026-11-04', '2026-11-06'))
+    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('a', '2026-11-07', '2026-11-04', { doneOn: '2026-11-06' }))
     await waitFor(() => expect(onDone).toHaveBeenCalled())
   })
 
@@ -62,7 +63,7 @@ describe('MissedDay', () => {
     renderIt(task())
     fireEvent.click(screen.getByRole('button', { name: /Mark a past day done/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Yesterday' }))
-    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('a', '2026-11-07', '2026-11-04', '2026-11-06'))
+    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('a', '2026-11-07', '2026-11-04', { doneOn: '2026-11-06' }))
   })
 
   test('is not offered for a task that is not behind', () => {

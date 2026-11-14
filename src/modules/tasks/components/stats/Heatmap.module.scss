@@ -94,12 +94,35 @@ $label-gap: 4px;
   .l4 { background: #86EFAC; }
 }
 
+// A rest day: a neutral square with a dot, set apart from both done and empty.
+.rest {
+  position: relative;
+  background: var(--slate-200);
+  :global(.theme-dark) & { background: var(--slate-700); }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: $radius-pill;
+    background: var(--fg-muted);
+  }
+}
+
 .legend {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--fg-muted);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
 }

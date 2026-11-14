@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useToday } from '@/core/hooks/useToday'
 import { formatDate, parseApiDate } from '@/core/lib/format'
-import { fetchTaskStats, tasksKeys } from '@/modules/tasks/api/tasks'
+import { fetchTaskStats, tasksKeys, type Task } from '@/modules/tasks/api/tasks'
+import { HabitStages } from '@/modules/tasks/components/habit/HabitStages'
+import { isDaily } from '@/modules/tasks/lib/repeat'
 import { useTasksT } from '@/modules/tasks/i18n'
 import { CHART } from '@/core/lib/chartColors'
 import { ProgressChart } from './ProgressChart'
@@ -13,9 +15,16 @@ import { PeriodToggle } from './parts'
 import { toChartPoints, type Period } from './points'
 import s from './TaskStats.module.scss'
 
-/** At the top of the task editor: how often this one task has been done. */
-export function TaskStatsCard({ taskId }: { taskId: string }) {
+/**
+ * At the top of the task editor: how often this one task has been done.
+ * Given the task, a habit's stages are listed too, and a streak that isn't
+ * daily counts times instead of days.
+ */
+export function TaskStatsCard({ taskId, task }: { taskId: string; task?: Task }) {
   const t = useTasksT()
+  const habit = task?.isHabit ? task : null
+  // Before habits the editor always said days; only a task known not to be daily changes that.
+  const daily = task ? isDaily(task) : true
   const today = useToday()
   const [period, setPeriod] = useState<Period>('daily')
   const { data, isLoading, isError } = useQuery({
@@ -43,11 +52,18 @@ export function TaskStatsCard({ taskId }: { taskId: string }) {
         <StatTile label={t.stats.thisMonth} value={String(data.thisMonth)} sub={t.stats.thisMonthSub} />
         <StatTile
           label={t.stats.streak}
-          value={t.stats.streakValue(data.currentStreak)}
-          sub={t.stats.bestStreak(data.bestStreak)}
+          value={daily ? t.stats.streakValue(data.currentStreak) : t.habit.streak(data.currentStreak, false)}
+          sub={daily ? t.stats.bestStreak(data.bestStreak) : t.stats.bestTimes(data.bestStreak)}
           tone={data.currentStreak > 0 ? 'warning' : 'default'}
         />
       </StatGrid>
+
+      {habit && habit.stages.length > 0 && (
+        <div className={s.group}>
+          <h2 className={s.groupLabel}>{t.habit.stages}</h2>
+          <HabitStages task={habit} />
+        </div>
+      )}
 
       {data.total === 0 ? (
         <div className={s.empty}>

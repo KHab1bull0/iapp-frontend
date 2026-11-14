@@ -21,7 +21,7 @@ export function TaskDialog({
     <Sheet desktop="panel" open={open} onOpenChange={onOpenChange} title={task ? t.editTask : t.newTask}>
       {task && open && (
         <div className={st.editorTop}>
-          <TaskStatsCard taskId={task.id} />
+          <TaskStatsCard taskId={task.id} task={task} />
           <MissedDay task={task} onDone={() => onOpenChange(false)} />
           <hr className={st.divider} />
         </div>

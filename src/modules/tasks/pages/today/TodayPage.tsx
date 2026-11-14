@@ -8,7 +8,7 @@ import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useToday } from '@/core/hooks/useToday'
 import { formatFullDate, parseApiDate } from '@/core/lib/format'
 import { useQuickAdd } from '@/core/quickAdd/context'
-import { fetchOverallStats, fetchToday, tasksKeys } from '@/modules/tasks/api/tasks'
+import { fetchOverallStats, fetchToday, tasksKeys, type Task } from '@/modules/tasks/api/tasks'
 import { Heatmap } from '@/modules/tasks/components/stats/Heatmap'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
@@ -18,8 +18,15 @@ import { useCompleteTask, useMoveToTomorrow } from '@/modules/tasks/useCompleteT
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
 
+/** At risk first (today decides their streak), then by the clock. */
+const habitOrder = (tasks: Task[]) => {
+  const timed = byTime(tasks)
+  return [...timed.filter((t) => t.progress?.atRisk), ...timed.filter((t) => !t.progress?.atRisk)]
+}
+
 /**
- * Tasks → Today: how far through the day you are, what is due (overdue
+ * Tasks → Today: how far through the day you are, the habits on top (done
+ * ones stay there, ticked, with their streak), what else is due (overdue
  * first), and what's done, folded away. Swipe right to tick, left to put off
  * until tomorrow; the bar at the bottom adds.
  */
@@ -28,7 +35,7 @@ export function TodayPage() {
   const m = useTasksT()
   const quickAdd = useQuickAdd()
   const editor = useTaskEditor()
-  const { complete, undo, pending } = useCompleteTask(today)
+  const { complete, chooseKind, undo, pending, feedback } = useCompleteTask(today)
   const toTomorrow = useMoveToTomorrow(today)
   // Open by default: done tasks stay in view (and can be unticked) unless folded away.
   const [showDone, setShowDone] = useState(true)
@@ -45,13 +52,19 @@ export function TodayPage() {
     enabled: !isMobile,
   })
 
-  const overdue = data?.overdue ?? []
-  // Anything with a time goes first, by the clock.
-  const dueToday = byTime(data?.today ?? [])
-  const done = data?.doneToday ?? []
-  const all = overdue.length + dueToday.length + done.length
+  const allOverdue = data?.overdue ?? []
+  const allToday = data?.today ?? []
+  const allDone = data?.doneToday ?? []
+  const all = allOverdue.length + allToday.length + allDone.length
 
-  const row = (t: (typeof dueToday)[number]) => (
+  const habits = habitOrder([...allOverdue, ...allToday].filter((t) => t.isHabit))
+  const habitsDone = allDone.filter((d) => d.task.isHabit)
+  const overdue = allOverdue.filter((t) => !t.isHabit)
+  // Anything with a time goes first, by the clock.
+  const dueToday = byTime(allToday.filter((t) => !t.isHabit))
+  const done = allDone.filter((d) => !d.task.isHabit)
+
+  const row = (t: Task) => (
     <TaskRow
       key={t.id}
       task={t}
@@ -59,6 +72,19 @@ export function TodayPage() {
       busy={pending.has(t.id)}
       onToggle={complete}
       onTomorrow={toTomorrow}
+      onOpen={editor.openEdit}
+      onMore={t.isHabit ? chooseKind : undefined}
+    />
+  )
+
+  const doneRow = ({ completionId, task, kind }: (typeof allDone)[number], key = completionId) => (
+    <TaskRow
+      key={key}
+      task={task}
+      today={today}
+      done
+      rested={kind === 'rest'}
+      onToggle={() => undo(completionId)}
       onOpen={editor.openEdit}
     />
   )
@@ -80,12 +106,12 @@ export function TodayPage() {
           <aside className={s.rail}>
           {all > 0 && (
             <section className={s.summary}>
-              <ProgressRing value={done.length} max={all} label={m.progressTitle(done.length, all)} size={56}>
-                {Math.round((done.length / all) * 100)}%
+              <ProgressRing value={allDone.length} max={all} label={m.progressTitle(allDone.length, all)} size={56}>
+                {Math.round((allDone.length / all) * 100)}%
               </ProgressRing>
               <div>
                 <div className={s.summaryTitle}>
-                  {done.length === all ? m.progressAllDone : m.progressTitle(done.length, all)}
+                  {allDone.length === all ? m.progressAllDone : m.progressTitle(allDone.length, all)}
                 </div>
                 <div className={s.summarySub}>{formatFullDate(parseApiDate(today))}</div>
               </div>
@@ -103,6 +129,27 @@ export function TodayPage() {
           </aside>
 
           <div className={s.main}>
+
+          {habits.length + habitsDone.length > 0 && (
+            <section className={s.section}>
+              <div className={s.sectionHead}>
+                <h2 className={s.sectionTitle}>{m.habit.section}</h2>
+                <span className={s.count}>
+                  {habitsDone.length}/{habits.length + habitsDone.length}
+                </span>
+              </div>
+              {/* One list keyed by task: a habit ticked off stays the same row, so its streak can pop.
+                  (Done once and due again today, e.g. a past day ticked: its own key.) */}
+              <div className={s.list}>
+                {[
+                  ...habits.map(row),
+                  ...habitsDone.map((d) =>
+                    doneRow(d, habits.some((h) => h.id === d.task.id) ? d.completionId : d.task.id),
+                  ),
+                ]}
+              </div>
+            </section>
+          )}
 
           {overdue.length > 0 && (
             <section className={s.section}>
@@ -124,11 +171,11 @@ export function TodayPage() {
             </section>
           )}
 
-          {overdue.length === 0 && dueToday.length === 0 && (
+          {overdue.length === 0 && dueToday.length === 0 && habits.length === 0 && (
             <EmptyState
               icon={CircleCheckBig}
-              title={done.length > 0 ? m.home.allDone : m.nothingToday}
-              description={done.length > 0 ? m.home.allDoneSub : m.nothingTodaySub}
+              title={allDone.length > 0 ? m.home.allDone : m.nothingToday}
+              description={allDone.length > 0 ? m.home.allDoneSub : m.nothingTodaySub}
               action={{ label: m.home.addTask, icon: Plus, onClick: () => quickAdd.open('tasks.task') }}
             />
           )}
@@ -144,20 +191,7 @@ export function TodayPage() {
                 <h2 className={s.sectionTitle}>{m.showDone(done.length)}</h2>
                 <ChevronDown size={18} className={clsx(s.foldIcon, showDone && s.open)} aria-hidden />
               </button>
-              {showDone && (
-                <div className={s.list}>
-                  {done.map(({ completionId, task }) => (
-                    <TaskRow
-                      key={completionId}
-                      task={task}
-                      today={today}
-                      done
-                      onToggle={() => undo(completionId)}
-                      onOpen={editor.openEdit}
-                    />
-                  ))}
-                </div>
-              )}
+              {showDone && <div className={s.list}>{done.map((d) => doneRow(d))}</div>}
             </section>
           )}
           </div>
@@ -165,6 +199,7 @@ export function TodayPage() {
       )}
 
       {editor.dialog}
+      {feedback}
     </div>
   )
 }

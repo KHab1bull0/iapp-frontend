@@ -33,7 +33,7 @@ export function MissedDay({ task, onDone }: { task: Task; onDone: () => void }) 
   })
 
   const mark = useMutation({
-    mutationFn: (day: string) => completeTask(task.id, today, task.dueDate, day),
+    mutationFn: (day: string) => completeTask(task.id, today, task.dueDate, { doneOn: day }),
     onSuccess: ({ completionId }, day) => {
       void qc.invalidateQueries({ queryKey: tasksKeys.all })
       toast(t.missed.done(task.title, dayName(day)), 'success', {

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
+import { useToday } from '@/core/hooks/useToday'
 import { fetchTask, tasksKeys } from '@/modules/tasks/api/tasks'
 import { MissedDay } from '@/modules/tasks/components/MissedDay'
 import { TaskForm } from '@/modules/tasks/components/TaskForm'
@@ -17,14 +18,15 @@ export function TaskFormPage() {
   const t = useTasksT()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const today = useToday()
   const isEdit = Boolean(id)
 
   // Back to wherever it was opened from (Today or All tasks).
   const close = () => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/tasks'))
 
   const { data: task, isLoading, isError } = useQuery({
-    queryKey: tasksKeys.one(id ?? ''),
-    queryFn: () => fetchTask(id!),
+    queryKey: tasksKeys.one(id ?? '', today),
+    queryFn: () => fetchTask(id!, today),
     enabled: isEdit,
   })
 
@@ -41,7 +43,7 @@ export function TaskFormPage() {
           <div className={s.state}>{t.notFound}</div>
         ) : (
           <>
-            {task && <TaskStatsCard taskId={task.id} />}
+            {task && <TaskStatsCard taskId={task.id} task={task} />}
             {/* Same as the desktop panel (TaskDialog): an overdue task's past day, ticked off. */}
             {task && <MissedDay task={task} onDone={close} />}
             {task && <hr className={st.divider} />}
