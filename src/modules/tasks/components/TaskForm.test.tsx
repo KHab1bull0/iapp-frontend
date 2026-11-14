@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { todayYmd } from '@/core/lib/format'
+import { habit } from '@/modules/tasks/test-data'
 import { TaskForm } from './TaskForm'
 
 const api = vi.hoisted(() => ({ createTask: vi.fn(), updateTask: vi.fn(), deleteTask: vi.fn() }))
@@ -105,5 +106,106 @@ describe('TaskForm', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Delete' }))
     await waitFor(() => expect(api.deleteTask).toHaveBeenCalledWith('t1'))
     await waitFor(() => expect(onSaved).toHaveBeenCalled())
+  })
+})
+
+describe('TaskForm: habits', () => {
+  beforeEach(() => {
+    api.createTask.mockResolvedValue({ id: 'n' })
+    api.updateTask.mockResolvedValue({ id: 'h' })
+  })
+
+  const habitSwitch = () => screen.queryByRole('switch', { name: 'Habit' })
+
+  test('the habit switch comes with a repeat only', () => {
+    renderForm()
+    expect(habitSwitch()).toBeNull()
+    fireEvent.click(screen.getByRole('radio', { name: 'Schedule' }))
+    expect(habitSwitch()).toBeTruthy()
+    // Off: none of its fields yet.
+    expect(screen.queryByLabelText('Who are you becoming?')).toBeNull()
+  })
+
+  test('a new habit saves who, when, the two-minute version and the suggested stages', async () => {
+    renderForm()
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Read' } })
+    fireEvent.click(screen.getByRole('radio', { name: 'Schedule' }))
+    fireEvent.click(habitSwitch()!)
+    fireEvent.change(screen.getByLabelText('Who are you becoming?'), { target: { value: ' I am a reader ' } })
+    fireEvent.change(screen.getByLabelText('When / where / after what'), { target: { value: 'After dinner' } })
+    fireEvent.change(screen.getByLabelText('Two-minute version'), { target: { value: 'Read 1 page' } })
+    // Suggested 10 / 30 / 66, counted in days for a daily habit.
+    expect((screen.getByLabelText('Stage 1: days') as HTMLInputElement).value).toBe('10')
+    expect((screen.getByLabelText('Stage 2: days') as HTMLInputElement).value).toBe('30')
+    expect((screen.getByLabelText('Stage 3: days') as HTMLInputElement).value).toBe('66')
+    fireEvent.change(screen.getByLabelText('Stage 1: reward'), { target: { value: 'New mouse' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Remove stage 3' }))
+    fireEvent.click(save())
+    await waitFor(() =>
+      expect(api.createTask).toHaveBeenCalledWith(
+        expect.objectContaining({
+          repeatMode: 'schedule',
+          isHabit: true,
+          identity: 'I am a reader',
+          cue: 'After dinner',
+          minVersion: 'Read 1 page',
+          stages: [
+            { days: 10, reward: 'New mouse' },
+            { days: 30, reward: null },
+          ],
+        }),
+      ),
+    )
+  })
+
+  test('stages must go up: a stage not above the one before blocks saving', () => {
+    renderForm()
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Read' } })
+    fireEvent.click(screen.getByRole('radio', { name: 'Schedule' }))
+    fireEvent.click(habitSwitch()!)
+    expect(save().disabled).toBe(false)
+
+    const second = screen.getByLabelText('Stage 2: days')
+    fireEvent.change(second, { target: { value: '10' } })
+    expect(save().disabled).toBe(true)
+    expect(second.getAttribute('aria-invalid')).toBe('true')
+    expect(screen.getByText('Each stage needs more than the one before (1–1000).')).toBeTruthy()
+
+    fireEvent.change(second, { target: { value: '0' } })
+    expect(save().disabled).toBe(true)
+    fireEvent.change(second, { target: { value: '1001' } })
+    expect(save().disabled).toBe(true)
+    fireEvent.change(second, { target: { value: '20' } })
+    // 66 after 20 is fine again.
+    expect(save().disabled).toBe(false)
+    expect(second.getAttribute('aria-invalid')).toBeNull()
+
+    // Adding offers the next number up.
+    fireEvent.click(screen.getByRole('button', { name: 'Add a stage' }))
+    expect(Number((screen.getByLabelText('Stage 4: days') as HTMLInputElement).value)).toBeGreaterThan(66)
+  })
+
+  test('a weekly habit counts its stages in times', () => {
+    renderForm()
+    fireEvent.click(screen.getByRole('radio', { name: 'Schedule' }))
+    fireEvent.change(screen.getByLabelText('Unit'), { target: { value: 'week' } })
+    fireEvent.click(habitSwitch()!)
+    expect(screen.getByLabelText('Stage 1: times')).toBeTruthy()
+  })
+
+  test('back to a one-off, it is no longer a habit', async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <TaskForm task={habit('h')} onSaved={() => {}} onCancel={() => {}} />
+      </QueryClientProvider>,
+    )
+    // An existing habit opens with its own stages.
+    expect((screen.getByLabelText('Stage 2: days') as HTMLInputElement).value).toBe('30')
+    fireEvent.click(screen.getByRole('radio', { name: 'Once' }))
+    fireEvent.click(save())
+    await waitFor(() =>
+      expect(api.updateTask).toHaveBeenCalledWith('h', expect.objectContaining({ repeatMode: 'none', isHabit: false })),
+    )
+    expect(api.updateTask.mock.calls[0][1]).not.toHaveProperty('stages')
   })
 })

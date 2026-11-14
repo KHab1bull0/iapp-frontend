@@ -16,6 +16,9 @@ import {
   type TaskInput,
 } from '@/modules/tasks/api/tasks'
 import { useTasksT } from '@/modules/tasks/i18n'
+import { habitDraft, habitInput, invalidStageAt } from '@/modules/tasks/lib/habit'
+import { isDaily } from '@/modules/tasks/lib/repeat'
+import { HabitFields } from './HabitFields'
 import s from './TaskForm.module.scss'
 
 interface Props {
@@ -40,13 +43,16 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
   const [unit, setUnit] = useState<RepeatUnit>(task?.repeatUnit ?? 'day')
   const [every, setEvery] = useState(String(task?.repeatEvery ?? 1))
   const [weekdays, setWeekdays] = useState<number[]>(task?.repeatWeekdays ?? [])
+  const [habit, setHabit] = useState(() => habitDraft(task))
 
   const weekly = mode === 'schedule' && unit === 'week'
   const everyN = Number(every)
   const valid =
     title.trim().length > 0 &&
     (mode === 'none' || (Number.isInteger(everyN) && everyN >= 1 && everyN <= 365)) &&
-    (!weekly || weekdays.length > 0)
+    (!weekly || weekdays.length > 0) &&
+    // Stages only count for a habit, and only a repeating task is one.
+    (mode === 'none' || !habit.isHabit || invalidStageAt(habit.stages) < 0)
 
   const save = useMutation({
     mutationFn: () => {
@@ -59,6 +65,7 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
         repeatUnit: mode === 'none' ? null : unit,
         repeatEvery: mode === 'none' ? null : everyN,
         repeatWeekdays: weekly ? [...weekdays].sort((a, b) => a - b) : null,
+        ...habitInput(habit, mode !== 'none'),
       }
       return task ? updateTask(task.id, input) : createTask(input)
     },
@@ -214,6 +221,15 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
             ))}
           </div>
         </div>
+      )}
+
+      {/* A one-off can't build a streak, so the switch comes with a repeat. */}
+      {mode !== 'none' && (
+        <HabitFields
+          value={habit}
+          onChange={setHabit}
+          daily={isDaily({ repeatMode: mode, repeatUnit: unit, repeatEvery: everyN })}
+        />
       )}
 
       <label className={s.field}>
