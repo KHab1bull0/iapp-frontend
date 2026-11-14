@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { ToastHost } from '@/core/components/ui/toast'
@@ -23,7 +23,17 @@ const api = vi.hoisted(() => ({
 vi.mock('@/core/notifications/api', () => api)
 
 const KEY = 'BDxrGylovc0doQJluj-uAqzxpEHkJfyjVfondqgBadfog-sk7pdjyiIM6SHz6wFBAmN-6The2oDbxDIQbulnM8g'
-const SETTINGS = { tasksDigest: true, tasksDigestAt: '08:00', englishReminder: false, englishReminderAt: '20:00' }
+const SETTINGS = {
+  tasksDigest: true,
+  tasksDigestAt: '08:00',
+  englishReminder: false,
+  englishReminderAt: '20:00',
+  habitReminders: true,
+  atRiskReminder: true,
+  atRiskReminderAt: '19:00',
+  weeklyReview: false,
+  weeklyReviewAt: '20:00',
+}
 
 function renderPage() {
   return render(
@@ -120,6 +130,45 @@ describe('NotificationsPage', () => {
     renderPage()
     fireEvent.click(await screen.findByRole('button', { name: 'Send a test notification' }))
     expect(await screen.findByText(/didn't reach any device/)).toBeTruthy()
+  })
+
+  test('on: the habit, at-risk and weekly review reminders', async () => {
+    installFakePush({ subscribed: true })
+    renderPage()
+
+    // Habit reminders fire at each habit's own time: a switch, no time row.
+    const habits = await screen.findByRole('switch', { name: 'Habit reminders' })
+    expect(habits.getAttribute('aria-checked')).toBe('true')
+    expect(screen.queryByLabelText('Habit reminders: time')).toBeNull()
+    fireEvent.click(habits)
+    await waitFor(() => expect(api.updateSettings).toHaveBeenCalledWith({ habitReminders: false }))
+
+    expect(screen.getByRole('switch', { name: 'Streak at risk' }).getAttribute('aria-checked')).toBe('true')
+    expect((screen.getByLabelText('Streak at risk: time') as HTMLInputElement).value).toBe('19:00')
+
+    expect(screen.getByRole('switch', { name: 'Weekly review' }).getAttribute('aria-checked')).toBe('false')
+    expect(screen.queryByLabelText('Weekly review: time')).toBeNull()
+    fireEvent.click(screen.getByRole('switch', { name: 'Weekly review' }))
+    await waitFor(() => expect(api.updateSettings).toHaveBeenCalledWith({ weeklyReview: true }))
+    expect(((await screen.findByLabelText('Weekly review: time')) as HTMLInputElement).value).toBe('20:00')
+  })
+
+  test('on: a reminder time is saved once, after typing stops', async () => {
+    installFakePush({ subscribed: true })
+    renderPage()
+    const time = (await screen.findByLabelText('Streak at risk: time')) as HTMLInputElement
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    try {
+      fireEvent.change(time, { target: { value: '21:0' } })
+      fireEvent.change(time, { target: { value: '21:30' } })
+      await act(() => vi.advanceTimersByTimeAsync(799))
+      expect(api.updateSettings).not.toHaveBeenCalled()
+      await act(() => vi.advanceTimersByTimeAsync(1))
+      expect(api.updateSettings).toHaveBeenCalledTimes(1)
+      expect(api.updateSettings).toHaveBeenCalledWith({ atRiskReminderAt: '21:30' })
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   test('a failed save puts the switch back', async () => {

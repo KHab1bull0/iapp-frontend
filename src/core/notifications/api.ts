@@ -21,6 +21,14 @@ export interface NotificationSettings {
   tasksDigestAt: string
   englishReminder: boolean
   englishReminderAt: string
+  /** At each habit's own due time (the task's dueTime), so it has no time of its own here. */
+  habitReminders: boolean
+  /** A habit missed last time: one more miss ends its streak. */
+  atRiskReminder: boolean
+  atRiskReminderAt: string
+  /** Sundays: the week's summary is ready. */
+  weeklyReview: boolean
+  weeklyReviewAt: string
 }
 
 export const notificationKeys = {

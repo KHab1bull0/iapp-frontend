@@ -1,12 +1,16 @@
-import { describe, expect, test, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import type { OverallTaskStats } from '@/modules/tasks/api/tasks'
+import { todayYmd } from '@/core/lib/format'
+import { mondayOf } from '@/modules/tasks/review/week'
 import { TaskStatsPage } from './TaskStatsPage'
 
 const api = vi.hoisted(() => ({ fetchOverallStats: vi.fn() }))
 vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()), ...api }))
+const reviews = vi.hoisted(() => ({ fetchWeek: vi.fn() }))
+vi.mock('@/modules/tasks/api/reviews', async (orig) => ({ ...(await orig<object>()), ...reviews }))
 
 globalThis.ResizeObserver ??= class {
   observe() {}
@@ -38,6 +42,26 @@ function renderPage() {
 }
 
 describe('TaskStatsPage', () => {
+  beforeEach(() => {
+    reviews.fetchWeek.mockResolvedValue({ weekStart: mondayOf(todayYmd()), tasks: { done: 6, due: 8, rate: 75, missed: 2, rest: 0 } })
+  })
+
+  test("opens with the weekly review card and this week's rate", async () => {
+    api.fetchOverallStats.mockResolvedValue(STATS)
+    renderPage()
+    const card = await screen.findByRole('link', { name: /Weekly review/ })
+    expect(card.getAttribute('href')).toBe('/tasks/review')
+    await waitFor(() => expect(card.textContent).toContain('This week: 75%'))
+    expect(reviews.fetchWeek).toHaveBeenCalledWith(mondayOf(todayYmd()), todayYmd())
+  })
+
+  test('the card is there before anything is done, too', async () => {
+    api.fetchOverallStats.mockResolvedValue({ ...STATS, total: 0 })
+    renderPage()
+    expect(await screen.findByText('Nothing done yet')).toBeTruthy()
+    expect(screen.getByRole('link', { name: /Weekly review/ })).toBeTruthy()
+  })
+
   test('shows the totals and every repeat type', async () => {
     api.fetchOverallStats.mockResolvedValue(STATS)
     renderPage()

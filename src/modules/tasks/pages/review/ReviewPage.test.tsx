@@ -1,0 +1,181 @@
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { addDaysYmd, todayYmd } from '@/core/lib/format'
+import type { ReviewListItem, WeekReview } from '@/modules/tasks/api/reviews'
+import { mondayOf, weekRange } from '@/modules/tasks/review/week'
+import { ReviewPage } from './ReviewPage'
+
+const api = vi.hoisted(() => ({ fetchWeek: vi.fn(), saveWeek: vi.fn(), fetchReviews: vi.fn() }))
+vi.mock('@/modules/tasks/api/reviews', async (orig) => ({ ...(await orig<object>()), ...api }))
+
+const today = todayYmd()
+const current = mondayOf(today)
+const prev = addDaysYmd(current, -7)
+const older = addDaysYmd(current, -14)
+
+const week = (weekStart: string, over: Partial<WeekReview> = {}): WeekReview => ({
+  weekStart,
+  weekEnd: addDaysYmd(weekStart, 6),
+  tasks: { done: 9, due: 12, rate: 75, missed: 2, rest: 1 },
+  habits: [{ taskId: 't1', title: 'Read', done: 5, due: 7, streak: 12 }],
+  english: { answered: 40, remembered: 31, added: 6 },
+  finance: { income: 5000000, expense: 1250000 },
+  answers: null,
+  ...over,
+})
+
+const LIST: ReviewListItem[] = [
+  { weekStart: current, rate: 75, answered: false },
+  { weekStart: prev, rate: 60, answered: true },
+  { weekStart: older, rate: 90, answered: false },
+]
+
+function Where() {
+  return <output data-testid="where">{useLocation().search}</output>
+}
+
+function renderPage(entry = '/tasks/review') {
+  return render(
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <MemoryRouter initialEntries={[entry]}>
+        <Routes>
+          <Route
+            path="/tasks/review"
+            element={
+              <>
+                <ReviewPage />
+                <Where />
+              </>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+}
+
+const where = () => screen.getByTestId('where').textContent
+
+describe('ReviewPage', () => {
+  beforeEach(() => {
+    api.fetchWeek.mockImplementation(async (weekStart: string) => week(weekStart))
+    api.fetchReviews.mockResolvedValue(LIST)
+    api.saveWeek.mockImplementation(async (input: { weekStart: string }) => week(input.weekStart))
+  })
+  afterEach(() => vi.clearAllMocks())
+
+  test("this week's summary: the rate ring, counts, habits, English and money", async () => {
+    renderPage()
+    expect(await screen.findByRole('progressbar', { name: 'Done: 75%' })).toBeTruthy()
+    expect(api.fetchWeek).toHaveBeenCalledWith(current, today)
+    expect(screen.getByText('9 of 12 done')).toBeTruthy()
+
+    const tasks = screen.getByRole('region', { name: 'Tasks' })
+    expect(within(tasks).getByText('Missed').nextSibling?.textContent).toBe('2')
+    expect(within(tasks).getByText('Rest').nextSibling?.textContent).toBe('1')
+
+    const habits = screen.getByRole('region', { name: 'Habits' })
+    expect(within(habits).getByText('Read')).toBeTruthy()
+    expect(within(habits).getByText('5 of 7 done')).toBeTruthy()
+    expect(within(habits).getByText('Streak: 12')).toBeTruthy()
+
+    const english = screen.getByRole('region', { name: 'English' })
+    expect(within(english).getByText('31')).toBeTruthy()
+    const finance = screen.getByRole('region', { name: 'Finance' })
+    // Formatted by the core helpers: grouped, and signed so colour isn't the only cue.
+    expect(within(finance).getByText(/^\+5\s000\s000$/)).toBeTruthy()
+    expect(within(finance).getByText(/^−1\s250\s000$/)).toBeTruthy()
+  })
+
+  test('steps back a week and forward again, never past this week', async () => {
+    renderPage()
+    const next = await screen.findByRole('button', { name: 'Next week' })
+    expect((next as HTMLButtonElement).disabled).toBe(true)
+    expect(screen.getByText(weekRange(current))).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Previous week' }))
+    expect(where()).toBe(`?week=${prev}`)
+    await waitFor(() => expect(api.fetchWeek).toHaveBeenCalledWith(prev, today))
+    expect(screen.getByText(weekRange(prev))).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next week' }))
+    // Back on this week: the plain URL.
+    expect(where()).toBe('')
+    expect((screen.getByRole('button', { name: 'Next week' }) as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  test('a week still to come opens this one', async () => {
+    renderPage(`/tasks/review?week=${addDaysYmd(current, 14)}`)
+    await screen.findByRole('progressbar', { name: 'Done: 75%' })
+    expect(api.fetchWeek).toHaveBeenCalledWith(current, today)
+    expect(api.fetchWeek).not.toHaveBeenCalledWith(addDaysYmd(current, 14), today)
+  })
+
+  test('past weeks: rate and answered badge, and each opens its week', async () => {
+    renderPage()
+    const past = await screen.findByRole('region', { name: 'Past weeks' })
+    const rows = await within(past).findAllByRole('link')
+    // The current week is the page itself, not a "past" one.
+    expect(rows).toHaveLength(2)
+    expect(rows[0].textContent).toContain('60%')
+    expect(within(rows[0]).getByText('Answered')).toBeTruthy()
+    expect(within(rows[1]).getByText('Not answered')).toBeTruthy()
+
+    fireEvent.click(rows[1])
+    expect(where()).toBe(`?week=${older}`)
+    await waitFor(() => expect(api.fetchWeek).toHaveBeenCalledWith(older, today))
+    const reopened = await screen.findByRole('region', { name: 'Past weeks' })
+    expect((await within(reopened).findAllByRole('link'))[1].getAttribute('aria-current')).toBe('page')
+  })
+
+  test('opens a past week with its answers', async () => {
+    api.fetchWeek.mockImplementation(async (weekStart: string) =>
+      week(weekStart, { answers: { wentWell: 'Ran every day', wentBadly: null, change: null } }),
+    )
+    renderPage(`/tasks/review?week=${prev}`)
+    const field = (await screen.findByLabelText('What went well?')) as HTMLTextAreaElement
+    expect(field.value).toBe('Ran every day')
+    expect(api.fetchWeek).toHaveBeenCalledWith(prev, today)
+  })
+
+  test('typing saves to the week on screen', async () => {
+    renderPage(`/tasks/review?week=${prev}`)
+    fireEvent.change(await screen.findByLabelText('What will I change?'), { target: { value: 'Phone out of the bedroom' } })
+    fireEvent.blur(screen.getByLabelText('What will I change?'))
+    await waitFor(() =>
+      expect(api.saveWeek).toHaveBeenCalledWith(
+        expect.objectContaining({ weekStart: prev, change: 'Phone out of the bedroom' }),
+      ),
+    )
+  })
+
+  test('empty states: no tasks due, no habits, no past weeks', async () => {
+    api.fetchWeek.mockImplementation(async (weekStart: string) =>
+      week(weekStart, { tasks: { done: 0, due: 0, rate: 0, missed: 0, rest: 0 }, habits: [] }),
+    )
+    api.fetchReviews.mockResolvedValue([{ weekStart: current, rate: 0, answered: false }])
+    renderPage()
+    expect(await screen.findByText('No tasks this week')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Add a task' })).toBeTruthy()
+    expect(screen.getByText('No habits yet')).toBeTruthy()
+    expect(await screen.findByText('No past weeks yet')).toBeTruthy()
+  })
+
+  test('a failed load offers a retry', async () => {
+    api.fetchWeek.mockRejectedValueOnce(new Error('offline'))
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Retry' }))
+    expect(await screen.findByRole('progressbar', { name: 'Done: 75%' })).toBeTruthy()
+  })
+
+  test('speaks Uzbek', async () => {
+    localStorage.setItem('iapp-lang', 'uz')
+    renderPage()
+    expect(await screen.findByLabelText("Nima yaxshi bo'ldi?")).toBeTruthy()
+    expect(screen.getByRole('heading', { level: 1, name: 'Haftalik xulosa' })).toBeTruthy()
+    expect(screen.getByLabelText("Nima bo'lmadi?")).toBeTruthy()
+    expect(screen.getByLabelText("Nimani o'zgartiraman?")).toBeTruthy()
+  })
+})
