@@ -10,6 +10,9 @@ import { AppLayout } from '@/core/layout/AppLayout'
 import { MODULES } from '@/modules/registry'
 import { tasksKeys, type Task } from '@/modules/tasks/api/tasks'
 import { TodayPage } from '@/modules/tasks/pages/today/TodayPage'
+import { reviewKeys } from '@/modules/tasks/api/reviews'
+import { ReviewPage } from '@/modules/tasks/pages/review/ReviewPage'
+import { mondayOf } from '@/modules/tasks/review/week'
 import { TransactionForm } from '@/modules/finance/components/transactions/TransactionForm'
 import { NotificationsPage } from '@/pages/settings/NotificationsPage'
 import { installFakePush, uninstallFakePush, UA } from '@/test/push'
@@ -79,6 +82,25 @@ describe('accessibility (axe)', () => {
     })
     const { container } = withProviders(<TodayPage />, qc)
     await screen.findByText('Gym')
+    expect(await violations(container)).toEqual([])
+  })
+
+  test('Tasks → Weekly review: summary, questions, past weeks', async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
+    const today = todayYmd()
+    const week = mondayOf(today)
+    qc.setQueryData(reviewKeys.week(week, today), {
+      weekStart: week,
+      weekEnd: week,
+      tasks: { done: 3, due: 4, rate: 75, missed: 1, rest: 0 },
+      habits: [{ taskId: 't', title: 'Read', done: 3, due: 4, streak: 5 }],
+      english: { answered: 10, remembered: 8, added: 2 },
+      finance: { income: 100, expense: 50 },
+      answers: { wentWell: 'Gym', wentBadly: null, change: null },
+    })
+    qc.setQueryData(reviewKeys.list, [{ weekStart: '2026-01-05', rate: 50, answered: true }])
+    const { container } = withProviders(<ReviewPage />, qc)
+    await screen.findByLabelText('What went well?')
     expect(await violations(container)).toEqual([])
   })
 
