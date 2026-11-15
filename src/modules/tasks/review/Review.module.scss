@@ -95,7 +95,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-// ── Tasks: the ring and its four counts ───────────────────────────────────
+// ── Tasks: the ring and its three counts ──────────────────────────────────
 
 .tasksTop {
   display: flex;
@@ -120,12 +120,9 @@
 
 .figures {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin: 0;
-
-  &.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  &.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   > div {
     display: flex;
@@ -158,16 +155,7 @@
     text-overflow: ellipsis;
   }
 
-  .success { color: var(--success); }
   .danger { color: var(--danger); }
-}
-
-// English and Finance side by side once there is room.
-.pair {
-  display: grid;
-  gap: var(--section-gap);
-
-  @include bp-medium { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 // ── Habits ────────────────────────────────────────────────────────────────

@@ -114,10 +114,8 @@ describe('accessibility (axe)', () => {
     qc.setQueryData(reviewKeys.week(week, today), {
       weekStart: week,
       weekEnd: week,
-      tasks: { done: 3, due: 4, rate: 75, missed: 1, rest: 0 },
+      tasks: { done: 3, due: 4, rate: 75, missed: 1 },
       habits: [{ taskId: 't', title: 'Read', done: 3, due: 4, streak: 5 }],
-      english: { answered: 10, remembered: 8, added: 2 },
-      finance: { income: 100, expense: 50 },
       answers: { wentWell: 'Gym', wentBadly: null, change: null },
     })
     qc.setQueryData(reviewKeys.list(today), [{ weekStart: '2026-01-05', rate: 50, answered: true }])

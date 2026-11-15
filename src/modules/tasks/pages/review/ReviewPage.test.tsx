@@ -18,10 +18,8 @@ const older = addDaysYmd(current, -14)
 const week = (weekStart: string, over: Partial<WeekReview> = {}): WeekReview => ({
   weekStart,
   weekEnd: addDaysYmd(weekStart, 6),
-  tasks: { done: 9, due: 12, rate: 75, missed: 2, rest: 1 },
+  tasks: { done: 9, due: 12, rate: 75, missed: 2 },
   habits: [{ taskId: 't1', title: 'Read', done: 5, due: 7, streak: 12 }],
-  english: { answered: 40, remembered: 31, added: 6 },
-  finance: { income: 5000000, expense: 1250000 },
   answers: null,
   ...over,
 })
@@ -66,7 +64,7 @@ describe('ReviewPage', () => {
   })
   afterEach(() => vi.clearAllMocks())
 
-  test("this week's summary: the rate ring, counts, habits, English and money", async () => {
+  test("this week's summary: the rate ring, counts and habits, nothing else", async () => {
     renderPage()
     expect(await screen.findByRole('progressbar', { name: 'Done: 75%' })).toBeTruthy()
     expect(api.fetchWeek).toHaveBeenCalledWith(current, today)
@@ -74,19 +72,16 @@ describe('ReviewPage', () => {
 
     const tasks = screen.getByRole('region', { name: 'Tasks' })
     expect(within(tasks).getByText('Missed').nextSibling?.textContent).toBe('2')
-    expect(within(tasks).getByText('Rest').nextSibling?.textContent).toBe('1')
+    expect(within(tasks).queryByText('Rest')).toBeNull()
 
     const habits = screen.getByRole('region', { name: 'Habits' })
     expect(within(habits).getByText('Read')).toBeTruthy()
     expect(within(habits).getByText('5 of 7 done')).toBeTruthy()
     expect(within(habits).getByText('Streak: 12')).toBeTruthy()
 
-    const english = screen.getByRole('region', { name: 'English' })
-    expect(within(english).getByText('31')).toBeTruthy()
-    const finance = screen.getByRole('region', { name: 'Finance' })
-    // Formatted by the core helpers: grouped, and signed so colour isn't the only cue.
-    expect(within(finance).getByText(/^\+5\s000\s000$/)).toBeTruthy()
-    expect(within(finance).getByText(/^−1\s250\s000$/)).toBeTruthy()
+    // English and money have their own pages.
+    expect(screen.queryByRole('region', { name: 'English' })).toBeNull()
+    expect(screen.queryByRole('region', { name: 'Finance' })).toBeNull()
   })
 
   test('steps back a week and forward again, never past this week', async () => {
@@ -153,7 +148,7 @@ describe('ReviewPage', () => {
 
   test('empty states: no tasks due, no habits, no past weeks', async () => {
     api.fetchWeek.mockImplementation(async (weekStart: string) =>
-      week(weekStart, { tasks: { done: 0, due: 0, rate: 0, missed: 0, rest: 0 }, habits: [] }),
+      week(weekStart, { tasks: { done: 0, due: 0, rate: 0, missed: 0 }, habits: [] }),
     )
     api.fetchReviews.mockResolvedValue([{ weekStart: current, rate: 0, answered: false }])
     renderPage()
