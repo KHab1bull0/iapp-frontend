@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { todayYmd } from '@/core/lib/format'
 import { NEW, L3, group, tag, word } from '@/modules/english/test-data'
+import { loadingRegion, pending } from '@/modules/english/test-loading'
 import { ReviewPage } from './ReviewPage'
 
 const api = vi.hoisted(() => ({
@@ -222,5 +223,77 @@ describe('ReviewPage', () => {
     expect(screen.getByText('0 remembered, 1 forgot.')).toBeTruthy()
     expect(await screen.findByText('3-day streak')).toBeTruthy()
     expect(screen.getByText('4 waiting tomorrow')).toBeTruthy()
+  })
+
+  describe('while loading', () => {
+    test('the tag cards are drawn as busy placeholders while the tags load', () => {
+      api.fetchTags.mockReturnValue(pending())
+      renderPage()
+      expect(loadingRegion()).toBeTruthy()
+      expect(screen.queryByText('Nothing to memorise today')).toBeNull()
+    })
+
+    test('with tags, the chooser keeps its heading and draws the cards until groups and counts arrive', async () => {
+      api.fetchTags.mockResolvedValue([tag('t1', 'family', { count: 10, due: 3 })])
+      api.fetchGroups.mockReturnValue(pending())
+      renderPage()
+      expect(await screen.findByRole('heading', { name: 'What shall we review?' })).toBeTruthy()
+      expect(loadingRegion()).toBeTruthy()
+      expect(screen.queryByRole('link', { name: /family/ })).toBeNull()
+    })
+
+    test("a session's stack loads in the focus layout, with the way out already there", async () => {
+      api.fetchReview.mockReturnValue(pending())
+      renderPage('/english/review?tag=all')
+      const region = loadingRegion()
+      expect(within(region).getByRole('link', { name: 'End review' }).getAttribute('href')).toBe('/english')
+      // Still loading once the tags are in: the session's own placeholder.
+      await waitFor(() => expect(api.fetchReview).toHaveBeenCalled())
+      expect(loadingRegion()).toBeTruthy()
+      expect(screen.queryByRole('button', { name: 'Show' })).toBeNull()
+    })
+  })
+
+  describe('answers', () => {
+    test('a level chip pressed twice sends one answer', async () => {
+      api.answerWord.mockReturnValue(pending())
+      renderPage()
+      fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
+      const chip = screen.getByRole('button', { name: /^Three days/ })
+      fireEvent.click(chip)
+      fireEvent.click(chip)
+      fireEvent.keyDown(window, { key: '2' })
+      await waitFor(() => expect(api.answerWord).toHaveBeenCalledTimes(1))
+      expect(api.answerWord).toHaveBeenCalledWith('apple', L3.id, todayYmd())
+    })
+
+    test('while an answer is on its way the next card is up and can be answered; a ring says it is saving', async () => {
+      let saveApple!: () => void
+      api.answerWord.mockImplementation((id: string) =>
+        id === 'apple' ? new Promise((resolve) => (saveApple = () => resolve(word('apple')))) : pending(),
+      )
+      renderPage()
+      fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
+      fireEvent.click(screen.getByRole('button', { name: /^Three days/ }))
+      expect(await screen.findByText('river')).toBeTruthy()
+      expect(screen.getByRole('status').textContent).toBe('Saving…')
+      fireEvent.click(screen.getByRole('button', { name: 'Show' }))
+      const chip = screen.getByRole('button', { name: /^Three days/ })
+      expect((chip as HTMLButtonElement).disabled).toBe(false)
+      fireEvent.click(chip)
+      await waitFor(() => expect(api.answerWord).toHaveBeenCalledWith('river', L3.id, todayYmd()))
+      saveApple()
+      expect(await screen.findByRole('heading', { name: 'Well done!' })).toBeTruthy()
+    })
+
+    test('an answer that fails to save brings its card back', async () => {
+      api.answerWord.mockRejectedValue(new Error('offline'))
+      renderPage()
+      fireEvent.click(await screen.findByRole('button', { name: 'Show' }))
+      fireEvent.click(screen.getByRole('button', { name: /^Three days/ }))
+      await waitFor(() => expect(api.answerWord).toHaveBeenCalled())
+      expect(await screen.findByText('apple')).toBeTruthy()
+      expect(screen.getByText('2 to go')).toBeTruthy()
+    })
   })
 })
