@@ -29,7 +29,6 @@ export const progress = (over: Partial<HabitProgress> = {}): HabitProgress => ({
   streak: 4,
   best: 9,
   atRisk: false,
-  restLeft: 3,
   stage: { position: 1, days: 10, reward: 'New mouse' },
   total: 21,
   ...over,

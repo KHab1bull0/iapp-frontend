@@ -19,7 +19,7 @@ vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()
 
 const READ = habit('read')
 const result = (over: Partial<CompleteResult> = {}): CompleteResult => ({
-  task: { ...READ, progress: progress({ streak: 5, total: 22, restLeft: 3 }) },
+  task: { ...READ, progress: progress({ streak: 5, total: 22 }) },
   completionId: 'c1',
   streak: { current: 5, best: 9 },
   stageReached: null,
@@ -37,7 +37,7 @@ function renderPage() {
   )
 }
 
-const today = (tasks: Task[], doneToday: { completionId: string; task: Task; kind?: 'full' | 'min' | 'rest' }[] = []) =>
+const today = (tasks: Task[], doneToday: { completionId: string; task: Task; kind?: 'full' | 'min' }[] = []) =>
   api.fetchToday.mockResolvedValue({ overdue: [], today: tasks, doneToday })
 
 describe('TodayPage: habits', () => {

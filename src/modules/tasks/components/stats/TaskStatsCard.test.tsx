@@ -115,19 +115,20 @@ describe('TaskStatsCard: a habit', () => {
     expect(await within(rows[1]).findByText('Taken')).toBeTruthy()
   })
 
-  test('the heatmap marks two-minute and rest days', async () => {
+  test('the heatmap marks two-minute days', async () => {
     api.fetchTaskStats.mockResolvedValue({
       ...STATS,
       daily: [
-        { day: '2026-11-04', count: 1, cumulative: 10, score: 4, missed: 0, min: 1, rest: false },
-        { day: '2026-11-05', count: 0, cumulative: 10, score: 4, missed: 0, min: 0, rest: true },
-        { day: '2026-11-06', count: 1, cumulative: 11, score: 5, missed: 0, min: 0, rest: false },
+        { day: '2026-11-04', count: 1, cumulative: 10, score: 4, missed: 0, min: 1 },
+        { day: '2026-11-05', count: 0, cumulative: 10, score: 4, missed: 0, min: 0 },
+        { day: '2026-11-06', count: 1, cumulative: 11, score: 5, missed: 0, min: 0 },
       ],
     })
     renderCard(READ)
     expect(await screen.findByTitle(/two-minute version$/)).toBeTruthy()
-    expect(screen.getByTitle(/rest day$/)).toBeTruthy()
+    expect(screen.getByTitle(/not done$/)).toBeTruthy()
     expect(screen.getByTitle(/done 1×$/)).toBeTruthy()
+    expect(screen.queryByText('Rest')).toBeNull()
   })
 
   test('a weekly habit counts its streak in times', async () => {

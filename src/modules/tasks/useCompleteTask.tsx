@@ -56,12 +56,9 @@ export function useCompleteTask(today: string) {
   })
 
   // Say so at once; the lists catch up in the background.
-  function answer(result: CompleteResult, task: Task, kind: CompletionKind) {
+  function answer(result: CompleteResult, task: Task) {
     const undoAction = { label: m.undo, onClick: () => undo.mutate(result.completionId) }
     if (!task.isHabit) return toast(m.doneToast(task.title), 'success', undoAction)
-    if (kind === 'rest') {
-      return toast(m.habit.restToast(task.title, result.task.progress?.restLeft ?? 0), 'success', undoAction)
-    }
     const daily = isDaily(task)
     if (result.stageReached) {
       setCelebration(null)
@@ -102,9 +99,9 @@ export function useCompleteTask(today: string) {
         next.delete(task.id)
         return next
       }),
-    onSuccess: (result, { task, kind }) => {
+    onSuccess: (result, { task }) => {
       void refresh()
-      answer(result, task, kind)
+      answer(result, task)
     },
     onError: async (err) => {
       // Usually a stale copy (done elsewhere already): show the real state.

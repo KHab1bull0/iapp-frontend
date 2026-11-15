@@ -6,8 +6,6 @@ export interface HeatDay {
   count: number
   /** Completions that were the two-minute version. */
   min?: number
-  /** A planned rest day: neither done nor missed. */
-  rest?: boolean
 }
 
 export interface HeatCell {
@@ -17,8 +15,6 @@ export interface HeatCell {
   level: 0 | 1 | 2 | 3 | 4
   /** Done only in the two-minute version: drawn lighter by its level. */
   min: boolean
-  /** A rest day with nothing done: its own neutral mark, not an empty square. */
-  rest: boolean
 }
 
 /**
@@ -44,7 +40,6 @@ export function heatWeeks(days: HeatDay[]): (HeatCell | null)[][] {
         count: d.count,
         level: (w === 0 ? 0 : Math.max(1, Math.ceil((w / max) * 4))) as HeatCell['level'],
         min: (d.min ?? 0) > 0 && d.count <= (d.min ?? 0),
-        rest: Boolean(d.rest) && w === 0,
       }
     }),
   ]

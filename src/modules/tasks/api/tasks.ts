@@ -3,8 +3,8 @@ import api from '@/core/api/axios'
 export type RepeatMode = 'none' | 'schedule' | 'after_done'
 export type RepeatUnit = 'day' | 'week' | 'month'
 
-/** How a habit was checked in: in full, its two-minute version, or a planned rest day. */
-export type CompletionKind = 'full' | 'min' | 'rest'
+/** How a habit was checked in: in full, or its two-minute version. */
+export type CompletionKind = 'full' | 'min'
 
 /** A habit's milestone: a streak length to reach and the user's own, known reward for it. */
 export interface TaskStage {
@@ -27,8 +27,6 @@ export interface HabitProgress {
   best: number
   /** The last due occurrence was missed: missing today too ends the streak. */
   atRisk: boolean
-  /** Rest days left this calendar month. */
-  restLeft: number
   /** The lowest stage not yet reached; null once all are (or there are none). */
   stage: NextStage | null
   /** Every done completion (full + min): the "votes" for who you are becoming. */
@@ -94,10 +92,6 @@ export interface CompleteResult {
 export interface TodayTasks {
   overdue: Task[]
   today: Task[]
-  /**
-   * `kind` is not in the spec's contract (yet); when the server sends it, a
-   * habit rested today reads "rest day" instead of done.
-   */
   doneToday: { completionId: string; task: Task; kind?: CompletionKind }[]
 }
 
@@ -137,10 +131,9 @@ export interface ScorePoint {
   missed: number
 }
 
-/** A habit's day: how many of its completions were the two-minute version, and whether it was a rest day. */
+/** A habit's day: how many of its completions were the two-minute version. */
 export interface HabitDayPoint {
   min?: number
-  rest?: boolean
 }
 
 export interface TaskStats extends StatsTotals {

@@ -7,7 +7,7 @@ import s from './Heatmap.module.scss'
 /**
  * A calendar of the last few months, one square a day, darker the more was
  * done: gaps and runs are visible at a glance. A habit's two-minute days are
- * lighter and its rest days carry their own neutral mark (not "missed").
+ * lighter.
  */
 export function Heatmap({ days }: { days: HeatDay[] }) {
   const t = useTasksT()
@@ -15,11 +15,9 @@ export function Heatmap({ days }: { days: HeatDay[] }) {
   const active = days.filter((d) => d.count > 0).length
   const labels = weekdayHeaders()
   const hasMin = days.some((d) => (d.min ?? 0) > 0)
-  const hasRest = days.some((d) => d.rest)
 
   const title = (c: HeatCell) => {
     const date = formatDay(c.day)
-    if (c.rest) return t.stats.cellRest(date)
     if (c.min) return t.stats.cellMin(date)
     return t.stats.cellLabel(date, c.count)
   }
@@ -48,7 +46,7 @@ export function Heatmap({ days }: { days: HeatDay[] }) {
               <div key={i} className={s.week}>
                 {w.map((c, j) =>
                   c ? (
-                    <span key={c.day} className={clsx(s.cell, s[`l${c.level}`], c.rest && s.rest)} title={title(c)} />
+                    <span key={c.day} className={clsx(s.cell, s[`l${c.level}`])} title={title(c)} />
                   ) : (
                     <span key={`pad-${j}`} className={s.pad} />
                   ),
@@ -67,11 +65,6 @@ export function Heatmap({ days }: { days: HeatDay[] }) {
         {hasMin && (
           <span className={s.legendItem}>
             <span className={clsx(s.cell, s.l2)} /> {t.stats.minLegend}
-          </span>
-        )}
-        {hasRest && (
-          <span className={s.legendItem}>
-            <span className={clsx(s.cell, s.l0, s.rest)} /> {t.stats.restLegend}
           </span>
         )}
       </div>
