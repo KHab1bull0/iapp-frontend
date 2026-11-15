@@ -60,7 +60,7 @@ vi.mock('@/core/notifications/api', async (orig) => ({
   fetchPublicKey: vi.fn().mockResolvedValue('BDxrGylovc0doQJluj-uAqzxpEHkJfyjVfondqgBadfog-sk7pdjyiIM6SHz6wFBAmN-6The2oDbxDIQbulnM8g'),
   fetchSettings: vi.fn().mockResolvedValue({
     tasksDigest: true, tasksDigestAt: '08:00', englishReminder: false, englishReminderAt: '20:00',
-    habitReminders: true, atRiskReminder: true, atRiskReminderAt: '19:00', weeklyReview: true, weeklyReviewAt: '20:00',
+    habitReminders: true,
   }),
   fetchDevices: vi.fn().mockResolvedValue([
     { id: 'd1', userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15', createdAt: '2026-11-01T08:00:00Z', lastSuccessAt: '2026-11-09T08:00:00Z' },
