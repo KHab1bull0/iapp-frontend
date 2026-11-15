@@ -4,6 +4,8 @@ import { CURRENCY, formatAmount } from '@/core/lib/format'
 import type { DailySpendPoint } from '@/modules/finance/api/stats'
 import { useFinanceT } from '@/modules/finance/i18n'
 import { paceVsLast } from '@/modules/finance/lib/pace'
+import { Skeleton } from '@/core/components/ui/Skeleton'
+import { TextSkeleton } from '@/modules/finance/components/loading/Loading'
 import s from './SpendHero.module.scss'
 
 interface TipProps {
@@ -106,5 +108,31 @@ export function SpendHero({
         </>
       )}
     </section>
+  )
+}
+
+/** The spending chart before it arrives: its title, the pace line and the chart's own height. */
+export function SpendHeroSkeleton({ title }: { title: string }) {
+  const t = useFinanceT()
+  return (
+    <div className={s.hero}>
+      <div className={s.label}>{title}</div>
+      <div className={s.paceDown}>
+        <TextSkeleton width={220} />
+      </div>
+      <div className={s.chart}>
+        <Skeleton height={140} radius="var(--radius-md)" />
+      </div>
+      <div className={s.legend} aria-hidden>
+        <span>
+          <span className={s.swatch} style={{ background: CHART.primary }} />
+          {t.stats.thisMonth}
+        </span>
+        <span>
+          <span className={s.swatchDashed} />
+          {t.stats.lastMonth}
+        </span>
+      </div>
+    </div>
   )
 }

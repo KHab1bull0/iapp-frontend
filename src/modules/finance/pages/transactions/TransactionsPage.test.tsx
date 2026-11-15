@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { fetchTransactions } from '@/modules/finance/api/transactions'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { deleteTransaction, fetchTransactions, type PaginatedTransactions, type Transaction } from '@/modules/finance/api/transactions'
 import { periodRange } from '@/modules/finance/components/transactions/period'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
@@ -8,16 +8,41 @@ import { TransactionsPage } from './TransactionsPage'
 
 vi.mock('@/modules/finance/api/transactions', async (orig) => ({
   ...(await orig<object>()),
-  fetchTransactions: vi.fn().mockResolvedValue({ data: [], page: 1, hasMore: false }),
+  fetchTransactions: vi.fn(),
+  deleteTransaction: vi.fn(),
 }))
 vi.mock('@/modules/finance/api/categories', async (orig) => ({
   ...(await orig<object>()),
   fetchCategories: vi.fn().mockResolvedValue([]),
 }))
 
+function tx(id: string, note: string, amount: number): Transaction {
+  return {
+    id,
+    amount,
+    type: 'expense',
+    note,
+    date: new Date().toISOString(),
+    time: '12:00',
+    createdAt: new Date().toISOString(),
+    category: { id: 'c1', name: 'Transport', icon: '🚗', color: '#336699' },
+  }
+}
+
+function page(data: Transaction[]): PaginatedTransactions {
+  return { data, page: 1, hasMore: false, limit: 20 }
+}
+
+/** A request that answers only when the test says so. */
+function deferred<T>() {
+  let resolve!: (v: T) => void
+  const promise = new Promise<T>((r) => { resolve = r })
+  return { promise, resolve }
+}
+
 function renderPage() {
   return render(
-    <QueryClientProvider client={new QueryClient()}>
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <MemoryRouter>
         <TransactionsPage />
       </MemoryRouter>
@@ -26,7 +51,10 @@ function renderPage() {
 }
 
 describe('TransactionsPage', () => {
-  beforeEach(() => vi.mocked(fetchTransactions).mockClear())
+  beforeEach(() => {
+    vi.mocked(fetchTransactions).mockReset()
+    vi.mocked(fetchTransactions).mockResolvedValue(page([]))
+  })
 
   test('has no add button of its own: the shell "+" adds', () => {
     renderPage()
@@ -103,5 +131,70 @@ describe('TransactionsPage', () => {
         20,
       ),
     )
+  })
+})
+
+describe('TransactionsPage while loading', () => {
+  beforeEach(() => {
+    vi.mocked(fetchTransactions).mockReset()
+    vi.mocked(deleteTransaction).mockReset()
+  })
+
+  test('the first load shows day groups of rows in outline, marked busy and named', () => {
+    vi.mocked(fetchTransactions).mockReturnValue(new Promise(() => {}))
+    renderPage()
+    const label = screen.getByText('Loading transactions…')
+    const block = label.closest('[aria-busy="true"]')!
+    expect(block).toBeTruthy()
+    expect(block.querySelectorAll('[aria-hidden]').length).toBeGreaterThan(0)
+    expect(screen.queryByRole('button', { name: /^Edit:/ })).toBeNull()
+    // The filters stay usable meanwhile.
+    expect(screen.getByRole('searchbox', { name: 'Search transactions' })).toBeTruthy()
+  })
+
+  test('switching the period keeps the current list until the new one arrives', async () => {
+    const monthly = deferred<PaginatedTransactions>()
+    vi.mocked(fetchTransactions).mockImplementation((q) =>
+      q.startDate === periodRange('month', {}).startDate ? monthly.promise : Promise.resolve(page([tx('a', 'Taxi', 30000)])),
+    )
+    renderPage()
+    expect(await screen.findByText('Taxi')).toBeTruthy()
+
+    const [toolbarPeriod] = screen.getAllByRole('radiogroup', { name: 'Period' })
+    fireEvent.click(within(toolbarPeriod).getByRole('radio', { name: 'Month' }))
+    await waitFor(() =>
+      expect(fetchTransactions).toHaveBeenLastCalledWith(expect.objectContaining(periodRange('month', {})), 1, 20),
+    )
+
+    // Still the week's list, marked as updating; no skeleton in its place.
+    expect(screen.getByText('Taxi').closest('[aria-busy="true"]')).toBeTruthy()
+    expect(document.querySelector('[data-loading]')).toBeNull()
+
+    await act(async () => monthly.resolve(page([tx('b', 'Groceries', 90000)])))
+    expect(await screen.findByText('Groceries')).toBeTruthy()
+    expect(screen.queryByText('Taxi')).toBeNull()
+    expect(screen.getByText('Groceries').closest('[aria-busy="true"]')).toBeNull()
+  })
+
+  test('deleting a row disables its buttons and says so until the request settles', async () => {
+    vi.mocked(fetchTransactions).mockResolvedValue(page([tx('a', 'Taxi', 30000)]))
+    const del = deferred<void>()
+    vi.mocked(deleteTransaction).mockReturnValue(del.promise)
+    renderPage()
+    await screen.findByText('Taxi')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    const dialog = await screen.findByRole('alertdialog')
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete' }))
+
+    const pending = await screen.findByRole('button', { name: 'Deleting…' })
+    expect(pending.hasAttribute('disabled')).toBe(true)
+    expect(screen.getByRole('button', { name: /^Edit: Taxi/ }).hasAttribute('disabled')).toBe(true)
+    expect(pending.closest('[aria-busy="true"]')).toBeTruthy()
+    expect(deleteTransaction).toHaveBeenCalledOnce()
+
+    vi.mocked(fetchTransactions).mockResolvedValue(page([]))
+    await act(async () => del.resolve())
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Deleting…' })).toBeNull())
   })
 })

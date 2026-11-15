@@ -1,5 +1,13 @@
 @use '@/core/styles/mixins' as *;
 
+// The card's body stack, kept on the wrapper that carries aria-busy.
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap);
+  min-width: 0;
+}
+
 .period {
   font-size: var(--fs-meta);
   line-height: var(--lh-meta);

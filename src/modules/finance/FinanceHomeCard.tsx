@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { RefreshCw, Wallet } from 'lucide-react'
 import { HomeCard } from '@/core/components/HomeCard'
-import { Skeleton } from '@/core/components/ui/Skeleton'
 import { CURRENCY, currentMonth, formatAmount, formatMonthLong, formatSigned } from '@/core/lib/format'
 import { fetchFinanceSummary, financeSummaryKey } from './api/summary'
 import { useFinanceT } from './i18n'
+import { TextSkeleton } from './components/loading/Loading'
 import s from './FinanceHomeCard.module.scss'
 
 /** Home: this month's balance, and the income and expenses it is made of. Adding goes through the shell's "+". */
@@ -32,7 +32,8 @@ export function FinanceHomeCard() {
           </button>
         </div>
       ) : (
-        <>
+        <div className={s.body} aria-busy={!data || undefined}>
+          {!data && <span className="sr-only">{t.home.loading}</span>}
           <div>
             <div className={s.label}>{t.home.balance}</div>
             <div className={s.headline}>
@@ -43,7 +44,7 @@ export function FinanceHomeCard() {
                   formatSigned(data.totalBalance, data.totalBalance > 0 ? 'income' : 'expense')
                 )
               ) : (
-                <Skeleton width={140} height={32} />
+                <TextSkeleton width={140} />
               )}
               <span className={s.currency}>{CURRENCY}</span>
             </div>
@@ -51,14 +52,14 @@ export function FinanceHomeCard() {
           <div className={s.flows}>
             <div>
               <div className={s.label}>{t.income}</div>
-              <div className={s.income}>{data ? `+${formatAmount(data.totalIncome)}` : <Skeleton width={80} />}</div>
+              <div className={s.income}>{data ? `+${formatAmount(data.totalIncome)}` : <TextSkeleton width={80} />}</div>
             </div>
             <div>
               <div className={s.label}>{t.expense}</div>
-              <div className={s.expense}>{data ? `−${formatAmount(data.totalExpense)}` : <Skeleton width={80} />}</div>
+              <div className={s.expense}>{data ? `−${formatAmount(data.totalExpense)}` : <TextSkeleton width={80} />}</div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </HomeCard>
   )

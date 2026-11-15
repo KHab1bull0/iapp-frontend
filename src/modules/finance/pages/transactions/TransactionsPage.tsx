@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { RefreshCw } from 'lucide-react'
-import { Skeleton } from '@/core/components/ui/Skeleton'
 import { fetchTransactions, type PaginatedTransactions } from '@/modules/finance/api/transactions'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
@@ -13,33 +12,10 @@ import {
   toQuery,
   type TransactionFilterState,
 } from '@/modules/finance/components/transactions/period'
-import { TransactionList } from '@/modules/finance/components/transactions/TransactionList'
+import { TransactionList, TransactionListSkeleton } from '@/modules/finance/components/transactions/TransactionList'
+import { staleClass } from '@/modules/finance/components/loading/stale'
 import { useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionsPage.module.scss'
-
-function ListSkeleton() {
-  return (
-    <div className={s.skeletons} aria-hidden>
-      {[0, 1].map((g) => (
-        <div key={g} className={s.dayGroup}>
-          <Skeleton width={80} height={12} />
-          <div className={s.skeletonCard}>
-            {[0, 1, 2].map((i) => (
-              <div key={i} className={s.skeletonRow}>
-                <Skeleton width={36} height={36} radius={999} />
-                <div className={s.skeletonText}>
-                  <Skeleton width={`${50 + g * 15}%`} height={14} />
-                  <Skeleton width="35%" height={12} />
-                </div>
-                <Skeleton width={64} height={14} />
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
 
 export function TransactionsPage() {
   const t = useFinanceT()
@@ -63,11 +39,15 @@ export function TransactionsPage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isPlaceholderData,
   } = useInfiniteQuery<PaginatedTransactions>({
     queryKey: ['transactions', query],
     queryFn: ({ pageParam }) => fetchTransactions(query, pageParam as number, 20),
     getNextPageParam: (last) => last.hasMore ? last.page + 1 : undefined,
     initialPageParam: 1,
+    // A new period, search or filter keeps the current list on screen
+    // (dimmed) until the new one arrives, rather than flashing the skeleton.
+    placeholderData: keepPreviousData,
   })
 
   const transactions = data?.pages.flatMap((p) => p.data) ?? []
@@ -101,15 +81,19 @@ export function TransactionsPage() {
           </button>
         </div>
       ) : isLoading ? (
-        <ListSkeleton />
+        <TransactionListSkeleton />
       ) : (
-        <TransactionList
-          transactions={transactions}
-          hasMore={!!hasNextPage}
-          isFetchingMore={isFetchingNextPage}
-          onLoadMore={fetchNextPage}
-          isFiltered={Object.values(query).some(Boolean)}
-        />
+        <div className={staleClass(isPlaceholderData)} aria-busy={isPlaceholderData || undefined}>
+          {isPlaceholderData && <span className="sr-only">{t.tx.loadingList}</span>}
+          <TransactionList
+            transactions={transactions}
+            // The old list's next page belongs to the old filters.
+            hasMore={!!hasNextPage && !isPlaceholderData}
+            isFetchingMore={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+            isFiltered={Object.values(query).some(Boolean)}
+          />
+        </div>
       )}
 
     </div>

@@ -69,3 +69,12 @@
   background: var(--danger-soft);
   color: var(--danger);
 }
+
+// Being deleted: dimmed, its buttons off until the request settles.
+.deleting {
+  .catEmoji,
+  .catMeta { opacity: 0.55; }
+
+  .catEdit:disabled { opacity: 0.4; cursor: not-allowed; }
+  .catDel:disabled { cursor: progress; }
+}

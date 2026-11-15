@@ -6,6 +6,7 @@ import { createCategory, updateCategory, type Category } from '@/modules/finance
 import { toast } from '@/core/components/ui/toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/core/components/ui/dialog'
 import { useFinanceT } from '@/modules/finance/i18n'
+import { Spinner } from '@/modules/finance/components/loading/Loading'
 import s from './AddCategoryDialog.module.scss'
 import { CATEGORY_SWATCHES } from '@/core/lib/chartColors'
 
@@ -56,6 +57,7 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    if (loading) return
     if (!name.trim()) { setError(t.categories.nameRequired); return }
 
     setLoading(true); setError('')
@@ -158,8 +160,8 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
             <button type="button" className={s.btnSecondary} onClick={() => onOpenChange(false)}>
               {t.cancel}
             </button>
-            <button type="submit" className={s.btnPrimary} disabled={loading}>
-              {!isEdit && <Plus size={14} />}
+            <button type="submit" className={s.btnPrimary} disabled={loading} aria-busy={loading || undefined}>
+              {loading ? <Spinner size={14} /> : !isEdit && <Plus size={14} />}
               {isEdit ? (loading ? t.saving : t.save) : (loading ? t.categories.creating : t.categories.create)}
             </button>
           </div>

@@ -72,3 +72,21 @@
   line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
+
+// Loading: bars standing on the plot's baseline, clear of the axes the real
+// chart draws (48px of Y labels on the left, the month ticks below).
+.skeletonPlot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 8px 0 30px 48px;
+  border-bottom: 1px dashed var(--border);
+  box-sizing: border-box;
+}
+
+.skeletonPair {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 100%;
+}

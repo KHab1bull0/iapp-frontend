@@ -1,6 +1,8 @@
 import type { CategoryBreakdown } from '@/modules/finance/api/stats'
 import { CURRENCY, formatAmount } from '@/core/lib/format'
 import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
+import { Skeleton } from '@/core/components/ui/Skeleton'
+import { TextSkeleton } from '@/modules/finance/components/loading/Loading'
 import s from './CategoryBars.module.scss'
 
 const SHOWN = 6
@@ -47,5 +49,43 @@ export function CategoryBars({ data }: { data: CategoryBreakdown[] }) {
         </ul>
       )}
     </section>
+  )
+}
+
+// Longest first, as the real bars are sorted.
+const SKELETON_BARS = [100, 70, 45, 25]
+
+/** The category card before it arrives: the title, then rows of the real rows' shape. */
+export function CategoryBarsSkeleton() {
+  const t = useFinanceT()
+  return (
+    <div className={s.card}>
+      <h2 className={s.title}>{t.stats.byCategory}</h2>
+      <ul className={s.rows} aria-hidden>
+        {SKELETON_BARS.map((w, i) => (
+          <li key={i} className={s.row}>
+            <Skeleton width="var(--tile-md)" height="var(--tile-md)" radius="var(--radius-pill)" />
+            <div className={s.main}>
+              <div className={s.line}>
+                <span className={s.name}>
+                  <TextSkeleton width={96 - i * 12} />
+                </span>
+                <span className={s.amount}>
+                  <TextSkeleton width={72} />
+                </span>
+              </div>
+              <div className={s.line}>
+                <span className={s.track}>
+                  <Skeleton width={`${w}%`} height="100%" radius="inherit" />
+                </span>
+                <span className={s.pct}>
+                  <TextSkeleton width={28} />
+                </span>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

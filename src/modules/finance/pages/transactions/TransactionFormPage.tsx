@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { fetchTransaction } from '@/modules/finance/api/transactions'
-import { TransactionForm } from '@/modules/finance/components/transactions/TransactionForm'
+import { TransactionForm, TransactionFormSkeleton } from '@/modules/finance/components/transactions/TransactionForm'
 import { useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionFormPage.module.scss'
 
@@ -19,7 +19,6 @@ export function TransactionFormPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const isEdit = Boolean(id)
-
 
   const { data: transaction, isLoading, isError } = useQuery({
     queryKey: ['transaction', id],
@@ -42,9 +41,7 @@ export function TransactionFormPage() {
       <div className={s.body}>
         <div className={s.inner}>
           {isEdit && isLoading ? (
-            <div className={s.state}>
-              <div className={s.stateSub}>{t.loading}</div>
-            </div>
+            <TransactionFormSkeleton onCancel={close} />
           ) : isEdit && (isError || !transaction) ? (
             <div className={s.state}>
               <div className={s.stateTitle}>{t.tx.notFound}</div>
