@@ -1,8 +1,7 @@
-import { Suspense } from 'react'
-import { Navigate, Outlet, type RouteObject } from 'react-router-dom'
+import { Navigate, type RouteObject } from 'react-router-dom'
 import { ProtectedRoute } from '@/core/components/ProtectedRoute'
 import { LegacyRedirect } from '@/core/components/LegacyRedirect'
-import { ChunkErrorBoundary } from '@/core/components/ChunkErrorBoundary'
+import { RouteSuspense } from '@/core/components/RouteSuspense'
 import { AppLayout } from '@/core/layout/AppLayout'
 import type { ModuleManifest } from '@/core/modules/types'
 import { AuthPage } from '@/pages/auth'
@@ -34,13 +33,7 @@ export function buildRoutes(modules: ModuleManifest[]): RouteObject[] {
         ...modules
           .filter((m) => m.fullscreenRoutes)
           .map((m) => ({
-            element: (
-              <ChunkErrorBoundary>
-                <Suspense fallback={null}>
-                  <Outlet />
-                </Suspense>
-              </ChunkErrorBoundary>
-            ),
+            element: <RouteSuspense />,
             children: m.fullscreenRoutes!.map((r) => ({ ...r, path: `${m.basePath}/${r.path}` })),
           })),
         {

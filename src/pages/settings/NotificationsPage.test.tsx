@@ -73,6 +73,14 @@ describe('NotificationsPage', () => {
     expect(screen.queryByRole('button', { name: 'Turn on notifications' })).toBeNull()
   })
 
+  test('while this device is checked: a busy card shaped like the status card', async () => {
+    installFakePush()
+    const { container } = renderPage()
+    expect(container.querySelector('[aria-busy="true"]')?.textContent).toContain('Loading…')
+    await screen.findByRole('button', { name: 'Turn on notifications' })
+    expect(container.querySelector('[aria-busy="true"]')).toBeNull()
+  })
+
   test('blocked: explains where to allow it', async () => {
     installFakePush({ permission: 'denied' })
     renderPage()
@@ -118,6 +126,22 @@ describe('NotificationsPage', () => {
 
     expect(await screen.findByText('iPhone · Safari')).toBeTruthy()
     expect(screen.getByText('Nothing delivered yet')).toBeTruthy()
+  })
+
+  test('on: the reminders show a busy skeleton while they load, and the test button waits for its request', async () => {
+    installFakePush({ subscribed: true })
+    api.fetchSettings.mockReturnValue(new Promise(() => {}))
+    api.sendTest.mockReturnValue(new Promise(() => {}))
+    const { container } = renderPage()
+
+    const test = await screen.findByRole('button', { name: 'Send a test notification' })
+    const busy = container.querySelector('[aria-busy="true"]')
+    expect(busy?.textContent).toContain('Loading…')
+    expect(screen.queryByRole('switch')).toBeNull()
+
+    fireEvent.click(test)
+    const sending = (await screen.findByRole('button', { name: 'Sending…' })) as HTMLButtonElement
+    expect(sending.disabled).toBe(true)
   })
 
   test('on: a test that reached nobody says what to try', async () => {

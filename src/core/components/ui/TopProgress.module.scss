@@ -1,0 +1,41 @@
+// Above the bars and the page header, below sheets and dialogs.
+.track {
+  position: fixed;
+  top: var(--safe-top);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+  // Shown after 80ms: a page already in memory swaps in without a blink,
+  // anything slower answers the tap within ~100ms.
+  animation: appear var(--t-fast) var(--ease-house) 80ms both;
+}
+
+.bar {
+  width: 40%;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+  animation: slide 1.1s var(--ease-house) infinite;
+}
+
+@keyframes appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+// No sliding: a still, full-width bar says the same thing.
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    width: 100%;
+    opacity: 0.6;
+    animation: none;
+  }
+}

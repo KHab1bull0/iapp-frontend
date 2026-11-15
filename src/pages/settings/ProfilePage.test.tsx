@@ -57,11 +57,32 @@ describe('ProfilePage', () => {
     await waitFor(() => expect(api.updateProfile).toHaveBeenCalledWith({ displayName: 'Habibullo' }))
   })
 
-  test('the name field waits for the saved profile, so typing is never overwritten', async () => {
+  test('while the profile loads: a skeleton in its shape, and no name field to type into yet', async () => {
     api.fetchProfile.mockReturnValue(new Promise(() => {}))
+    const { container } = renderPage()
+    await waitFor(() => expect(container.querySelector('[aria-busy="true"]')).not.toBeNull())
+    expect(screen.getByText('Loading…')).toBeTruthy()
+    // Typing now would be overwritten by the saved name when it arrives.
+    expect(screen.queryByLabelText('Display name')).toBeNull()
+    expect((screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  test('the skeleton gives way to the profile', async () => {
+    const { container } = renderPage()
+    await screen.findByLabelText('Display name')
+    expect(container.querySelector('[aria-busy="true"]')).toBeNull()
+    expect(screen.queryByText('Loading…')).toBeNull()
+  })
+
+  test('Save is disabled and says so while the request runs', async () => {
+    api.updateProfile.mockReturnValue(new Promise(() => {}))
     renderPage()
     const name = (await screen.findByLabelText('Display name')) as HTMLInputElement
-    expect(name.disabled).toBe(true)
+    await waitFor(() => expect(name.disabled).toBe(false))
+    fireEvent.change(name, { target: { value: 'Habibullo' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    const saving = (await screen.findByRole('button', { name: 'Saving…' })) as HTMLButtonElement
+    expect(saving.disabled).toBe(true)
   })
 
   test('Save stays disabled until the name changes', async () => {

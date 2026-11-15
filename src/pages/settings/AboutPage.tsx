@@ -58,7 +58,7 @@ export function AboutPage() {
             */}
             <div className={s.rowSub}>{t.about.built(formatBuild(__BUILD_TIME__) ?? t.about.unknown)}</div>
           </div>
-          <button className={s.btnSecondary} onClick={handleCheckUpdate} disabled={checking}>
+          <button className={s.btnSecondary} onClick={handleCheckUpdate} disabled={checking} aria-busy={checking || undefined}>
             <RefreshCw size={14} /> {checking ? t.about.checking : t.about.check}
           </button>
         </div>

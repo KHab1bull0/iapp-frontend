@@ -27,8 +27,8 @@ import {
 } from '@/core/notifications/api'
 import { deviceName } from '@/core/notifications/device'
 import { usePushState } from '@/core/notifications/usePushState'
-import { ListGroup, ListRow } from '@/core/components/ui/List'
-import { Skeleton } from '@/core/components/ui/Skeleton'
+import { ListGroup, ListRow, ListSkeleton } from '@/core/components/ui/List'
+import { Skeleton, SkeletonGroup } from '@/core/components/ui/Skeleton'
 import { Switch } from '@/core/components/ui/Switch'
 import { toast } from '@/core/components/ui/toast'
 import { useDayLabel } from '@/core/hooks/useDayLabel'
@@ -70,6 +70,24 @@ function StatusCard({ icon: Icon, tone, title, hint, steps, children }: StatusPr
       )}
       {children && <div className={s.pushActions}>{children}</div>}
     </section>
+  )
+}
+
+/** A StatusCard while this device's push state is worked out: icon, two lines, a button. */
+function StatusSkeleton() {
+  return (
+    <SkeletonGroup className={clsx(s.card, s.settingsCard)}>
+      <div className={s.pushStatus}>
+        <Skeleton width="var(--tile-lg)" height="var(--tile-lg)" radius="var(--radius-sm)" />
+        <div className={s.statusSkeletonText}>
+          <Skeleton width="50%" height="var(--lh-title)" />
+          <Skeleton width="80%" height="var(--lh-meta)" />
+        </div>
+      </div>
+      <div className={s.pushActions}>
+        <Skeleton width={160} height="var(--control-md)" radius="var(--radius-md)" />
+      </div>
+    </SkeletonGroup>
   )
 }
 
@@ -142,8 +160,8 @@ function Reminders() {
   })
 
   if (settings.isPending) {
-    // About as tall as the switches it stands in for, so the page doesn't jump.
-    return <Skeleton height="calc(var(--row-h) * 4)" radius="var(--radius-lg)" />
+    // The heading, rows and footer it stands in for, so the page doesn't jump.
+    return <ListSkeleton title rows={4} footer />
   }
   if (settings.isError) {
     return (
@@ -248,7 +266,7 @@ export function NotificationsPage() {
   let body: ReactNode
   switch (push.state) {
     case 'loading':
-      body = <Skeleton height="calc(var(--row-h) * 2)" radius="var(--radius-lg)" />
+      body = <StatusSkeleton />
       break
     case 'error':
       body = (

@@ -40,10 +40,21 @@ atributlari `var()` ni tushunmaydi, shuning uchun bu yerda literal hex ishlatila
 | `Switch` | Darhol qo'llanadigan yoqish/o'chirish (Saqlash tugmasisiz), odatda `ListRow.trailing` da. `label` majburiy |
 | `EmptyState` | Har bir bo'sh ro'yxat yoki sahifa. `action` majburiy, agar foydalanuvchi biror narsa qo'sha olsa |
 | `Skeleton` | Yuklanishda kontent shaklida joy egallaydi |
+| `SkeletonGroup` | Bitta ko'rinishning skeletonlarini o'raydi: `aria-busy` va yashirin "Yuklanmoqda…". `delayed` — 180ms kutib chiqadi (tez yuklanishda miltillamaydi) |
+| `PageSkeleton` | Butun sahifa shakli (sarlavha + kartalar, sahifa chetlari bilan). Lazy sahifa yuklanayotganda `RouteSuspense` shuni ko'rsatadi. Props: `cards`, `header`, `label`, `delayed`, `className` |
+| `CardSkeleton`, `ListSkeleton` | Bitta karta / `ListGroup` yuklanayotganda (`ListSkeleton`: `rows`, `title`, `footer`) |
+| `TopProgress` | Ekran tepasidagi ingichka chiziq: sahifa kodi kelguncha (80ms dan keyin) |
 | `StatTile`, `StatGrid` | Bosh raqamlar qatori |
 | `ProgressBar`, `ProgressRing` | Byudjet, kunlik reja, sessiya progressi |
 | `DateField`, `Calendar` | Har qanday sana. `input[type=date]` ishlatilmaydi (brauzer formati UZ tilini bilmaydi) |
 | `Button` / `btn-*` mixinlari | Balandlik: sm 32, md 44, lg 52. Bosiladigan joy ≥ 44px |
+
+## Yuklanish (2026-11-16)
+- Lazy sahifalar `RouteSuspense` (`core/components`) ichida: fallback — `TopProgress` + `PageSkeleton`, AppLayout
+  ichida (menyular joyida qoladi). Chegara yo'l bo'yicha kalitlangan: aks holda transition eski sahifani muzlatib turadi.
+- Ilova bo'sh qolganda (`requestIdleCallback`) barcha lazy sahifalar oldindan yuklanadi (`core/lib/preload.ts`).
+- Ma'lumot kutayotgan har bir ko'rinish o'z shaklidagi skeletonni ko'rsatadi (spinner emas), balandligi
+  haqiqiy kontentga yaqin. Saqlash/yuborish tugmasi so'rov davomida `disabled` va "Saqlanmoqda…" deydi.
 
 ## Navigatsiya
 - **Mobil:** pastki menyu — Bugun · modullar · markazda "+". Ko'pi bilan 5 ta joy. 4 tadan ortiq modul bo'lsa,

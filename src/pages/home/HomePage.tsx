@@ -1,6 +1,8 @@
+import { Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { ModuleCardBoundary } from '@/core/components/ModuleCardBoundary'
 import { PageHeader } from '@/core/components/ui/PageHeader'
+import { CardSkeleton } from '@/core/components/ui/PageSkeleton'
 import { useProfile } from '@/core/hooks/useProfile'
 import { formatFullDate } from '@/core/lib/format'
 import { MODULES } from '@/modules/registry'
@@ -48,7 +50,10 @@ export function HomePage() {
         {HOME_MODULES.map(({ id, name, homeCard: Card }) =>
           Card ? (
             <ModuleCardBoundary key={id} moduleName={text(name)}>
-              <Card />
+              {/* A card whose code loads on its own holds its place, not the whole page. */}
+              <Suspense fallback={<CardSkeleton />}>
+                <Card />
+              </Suspense>
             </ModuleCardBoundary>
           ) : null,
         )}

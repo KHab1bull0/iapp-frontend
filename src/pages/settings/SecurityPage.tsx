@@ -83,7 +83,7 @@ export function SecurityPage() {
           </label>
           {pwError && <div className={s.formError} role="alert">{pwError}</div>}
           <div className={s.formActions}>
-            <button type="submit" className={s.btnPrimary} disabled={pwLoading}>
+            <button type="submit" className={s.btnPrimary} disabled={pwLoading} aria-busy={pwLoading || undefined}>
               {pwLoading ? t.common.saving : t.security.submit}
             </button>
           </div>

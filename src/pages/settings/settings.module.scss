@@ -531,3 +531,20 @@ button.backLink {
   width: calc(var(--tile-lg) * 3);
   flex-shrink: 0;
 }
+
+// The profile hero's text lines while the profile loads: same gaps as the text.
+.heroSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.statusSkeletonText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
