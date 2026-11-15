@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
 import { ChevronRight, type LucideIcon } from 'lucide-react'
+import { Skeleton, SkeletonGroup } from './Skeleton'
 import s from './List.module.scss'
 
 /** Rows grouped on one rounded surface, with an optional small heading above (iOS grouped list). */
@@ -70,4 +71,35 @@ export function ListRow({ title, subtitle, icon: Icon, iconColor, leading, value
     )
   }
   return <div className={s.row}>{content}</div>
+}
+
+interface ListSkeletonProps {
+  /** Rows to draw (default 3). */
+  rows?: number
+  /** Leave room for the group's small heading. */
+  title?: boolean
+  /** Leave room for a one-line footer under the list. */
+  footer?: boolean
+  label?: string
+}
+
+/** A ListGroup while its rows load: the same heading, surface and row heights, so nothing jumps. */
+export function ListSkeleton({ rows = 3, title, footer, label }: ListSkeletonProps) {
+  return (
+    <SkeletonGroup label={label} className={s.group}>
+      {title && <Skeleton className={s.skeletonLabel} width={96} height="var(--lh-caption)" />}
+      <div className={s.list}>
+        {Array.from({ length: rows }, (_, i) => (
+          <div key={i} className={s.row}>
+            <Skeleton width="var(--tile-md)" height="var(--tile-md)" radius="var(--radius-sm)" />
+            <span className={s.skeletonText}>
+              <Skeleton width={i % 2 ? '45%' : '60%'} height="var(--fs-ui)" />
+              <Skeleton width={i % 2 ? '65%' : '80%'} height="var(--fs-meta)" />
+            </span>
+          </div>
+        ))}
+      </div>
+      {footer && <Skeleton className={s.skeletonLabel} width="70%" height="var(--lh-caption)" />}
+    </SkeletonGroup>
+  )
 }

@@ -17,6 +17,7 @@ import { ReviewPage } from '@/modules/tasks/pages/review/ReviewPage'
 import { mondayOf } from '@/modules/tasks/review/week'
 import { TransactionForm } from '@/modules/finance/components/transactions/TransactionForm'
 import { NotificationsPage } from '@/pages/settings/NotificationsPage'
+import { RouteFallback } from '@/core/components/RouteSuspense'
 import { installFakePush, uninstallFakePush, UA } from '@/test/push'
 
 // jsdom can't compute colours (contrast is covered by styles/contrast.test.ts)
@@ -151,5 +152,10 @@ describe('accessibility (axe)', () => {
     } finally {
       uninstallFakePush()
     }
+  })
+
+  test('the loading page: skeleton and top bar', async () => {
+    const { container } = withProviders(<RouteFallback />)
+    expect(await violations(container)).toEqual([])
   })
 })

@@ -32,13 +32,37 @@ export function PageSkeleton({ cards = 3, header = true, label, delayed = true, 
         </div>
       )}
       {Array.from({ length: cards }, (_, i) => (
-        <div key={i} className={s.card}>
-          <Skeleton width="40%" height="var(--lh-title)" />
-          {Array.from({ length: LINES[i % LINES.length] }, (_, j) => (
-            <Skeleton key={j} width={j % 2 ? '70%' : '100%'} height="var(--lh-ui)" />
-          ))}
-        </div>
+        <CardShape key={i} lines={LINES[i % LINES.length]} />
       ))}
+    </SkeletonGroup>
+  )
+}
+
+/** One card's shape: a title line and a few text lines on the card surface. */
+function CardShape({ lines }: { lines: number }) {
+  return (
+    <div className={s.card}>
+      <Skeleton width="40%" height="var(--lh-title)" />
+      {Array.from({ length: lines }, (_, j) => (
+        <Skeleton key={j} width={j % 2 ? '70%' : '100%'} height="var(--lh-ui)" />
+      ))}
+    </div>
+  )
+}
+
+export interface CardSkeletonProps {
+  /** Text lines under the title line (default 3). */
+  lines?: number
+  label?: string
+  /** Wait ~180ms before showing anything (default true). */
+  delayed?: boolean
+}
+
+/** A single card while it loads (a home card, a panel): busy, with a hidden "Loading…". */
+export function CardSkeleton({ lines = 3, label, delayed = true }: CardSkeletonProps) {
+  return (
+    <SkeletonGroup label={label} delayed={delayed}>
+      <CardShape lines={lines} />
     </SkeletonGroup>
   )
 }

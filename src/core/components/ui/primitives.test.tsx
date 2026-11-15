@@ -165,3 +165,22 @@ describe('ConfirmDialog', () => {
     expect(screen.queryByRole('alertdialog')).toBeNull()
   })
 })
+
+describe('Loading skeletons', () => {
+  test('PageSkeleton: busy, read out as Loading…, and the cards asked for', async () => {
+    const { PageSkeleton } = await import('./PageSkeleton')
+    const { container } = render(<PageSkeleton cards={2} />)
+    const busy = container.querySelector('[aria-busy="true"]')!
+    expect(busy).not.toBeNull()
+    expect(screen.getByText('Loading…').className).toContain('sr-only')
+    // A header line pair, then one title line per card plus its text lines (3 + 2).
+    expect(busy.querySelectorAll('[aria-hidden]').length).toBe(2 + 2 + 3 + 2)
+  })
+
+  test('ListSkeleton: one busy group with a row per row asked for', async () => {
+    const { ListSkeleton } = await import('./List')
+    const { container } = render(<ListSkeleton rows={4} title footer label="Loading reminders" />)
+    expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(1)
+    expect(screen.getByText('Loading reminders')).toBeTruthy()
+  })
+})

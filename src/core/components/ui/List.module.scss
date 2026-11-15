@@ -98,3 +98,14 @@
   flex-shrink: 0;
   color: var(--fg-subtle);
 }
+
+// ListSkeleton: the heading and footer sit 16px in, like the real ones.
+.skeletonLabel { margin: 0 16px; }
+
+.skeletonText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
