@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, Download, FileSpreadsheet, Play, RotateCcw } from 'lucide-react'
 import { toast } from '@/core/components/ui/toast'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useToday } from '@/core/hooks/useToday'
 import {
   englishKeys,
@@ -17,6 +18,7 @@ import {
 import { buildTemplate, parseWorkbook, saveFile, type ParsedRow } from '@/modules/english/lib/excel'
 import { classify } from '@/modules/english/lib/importPlan'
 import { useEnglishT, useGroupName } from '@/modules/english/i18n'
+import { SkeletonText, Spinner } from '@/modules/english/components/Loading'
 import s from '../EnglishPages.module.scss'
 import p from './ImportPage.module.scss'
 
@@ -45,13 +47,20 @@ export function ImportPage() {
   const [dragging, setDragging] = useState(false)
 
   const groupName = useGroupName()
-  const { data: tags = [] } = useQuery({ queryKey: englishKeys.tags(today), queryFn: () => fetchTags(today) })
-  const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
+  const { data: tags = [], isLoading: tagsLoading } = useQuery({
+    queryKey: englishKeys.tags(today),
+    queryFn: () => fetchTags(today),
+  })
+  const { data: groups = [], isLoading: groupsLoading } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
   const { data: settings } = useQuery({ queryKey: englishKeys.settings, queryFn: fetchEnglishSettings })
-  const { data: words = [] } = useQuery({
+  const { data: words = [], isLoading: wordsLoading } = useQuery({
     queryKey: englishKeys.words({}),
     queryFn: () => fetchWords({}),
   })
+  // The template lists the user's tags; the preview checks rows against the
+  // vocabulary and the tags. Until those are in, each waits (busy, not wrong).
+  const templateReady = !tagsLoading && !groupsLoading
+  const planReady = !tagsLoading && !wordsLoading
 
   const rows = useMemo(() => (phase.name === 'preview' ? phase.rows : []), [phase])
   const plan = useMemo(
@@ -134,8 +143,15 @@ export function ImportPage() {
             {t.imp.step1}
           </h2>
           <p className={p.muted}>{t.imp.step1Sub}</p>
-          <button type="button" className={p.secondary} onClick={() => void download()} disabled={preparing}>
-            <Download size={16} aria-hidden /> {preparing ? t.imp.downloading : t.imp.download}
+          <button
+            type="button"
+            className={p.secondary}
+            onClick={() => void download()}
+            disabled={preparing || !templateReady}
+            aria-busy={preparing || !templateReady || undefined}
+          >
+            {preparing || !templateReady ? <Spinner /> : <Download size={16} aria-hidden />}{' '}
+            {preparing || !templateReady ? t.imp.downloading : t.imp.download}
           </button>
         </div>
       </section>
@@ -170,7 +186,7 @@ export function ImportPage() {
             <div className={p.file}>
               <FileSpreadsheet size={18} aria-hidden />
               <span className={p.fileName}>{phase.fileName}</span>
-              <button type="button" className={p.link} onClick={reset}>
+              <button type="button" className={p.link} onClick={reset} disabled={add.isPending}>
                 <RotateCcw size={14} aria-hidden /> {t.imp.another}
               </button>
             </div>
@@ -180,8 +196,10 @@ export function ImportPage() {
               className={p.primary}
               onClick={() => input.current?.click()}
               disabled={phase.name === 'reading'}
+              aria-busy={phase.name === 'reading' || undefined}
             >
-              <FileSpreadsheet size={16} aria-hidden /> {phase.name === 'reading' ? t.imp.reading : t.imp.pick}
+              {phase.name === 'reading' ? <Spinner /> : <FileSpreadsheet size={16} aria-hidden />}{' '}
+              {phase.name === 'reading' ? t.imp.reading : t.imp.pick}
             </button>
           )}
           {phase.name === 'error' && (
@@ -193,14 +211,27 @@ export function ImportPage() {
       </section>
 
       {phase.name === 'preview' && (
-        <section className={p.preview} aria-label={t.imp.ready(plan.counts.new)}>
-          <ul className={p.summary}>
-            <li className={p.good}>{t.imp.ready(plan.counts.new)}</li>
-            {plan.counts.exists > 0 && <li>{t.imp.exists(plan.counts.exists)}</li>}
-            {plan.counts.repeated > 0 && <li>{t.imp.repeated(plan.counts.repeated)}</li>}
-            {plan.counts.invalid > 0 && <li className={p.bad}>{t.imp.invalid(plan.counts.invalid)}</li>}
-          </ul>
-          {plan.newTags.length > 0 && (
+        <section
+          className={p.preview}
+          aria-label={planReady ? t.imp.ready(plan.counts.new) : t.loading}
+          aria-busy={!planReady || undefined}
+        >
+          {planReady ? (
+            <ul className={p.summary}>
+              <li className={p.good}>{t.imp.ready(plan.counts.new)}</li>
+              {plan.counts.exists > 0 && <li>{t.imp.exists(plan.counts.exists)}</li>}
+              {plan.counts.repeated > 0 && <li>{t.imp.repeated(plan.counts.repeated)}</li>}
+              {plan.counts.invalid > 0 && <li className={p.bad}>{t.imp.invalid(plan.counts.invalid)}</li>}
+            </ul>
+          ) : (
+            // The file is read; what each row will do waits for the vocabulary.
+            <div className={p.summary}>
+              <span className="sr-only">{t.loading}</span>
+              <Skeleton width={150} height={26} radius={999} />
+              <Skeleton width={190} height={26} radius={999} />
+            </div>
+          )}
+          {planReady && plan.newTags.length > 0 && (
             <p className={p.notice}>{t.imp.newTags(plan.newTags.join(', '))}</p>
           )}
 
@@ -222,7 +253,7 @@ export function ImportPage() {
                 {rows.slice(0, SHOWN).map((r, i) => {
                   const status = plan.statuses[i]
                   return (
-                    <tr key={r.line} className={status === 'new' ? undefined : p.dim}>
+                    <tr key={r.line} className={!planReady || status === 'new' ? undefined : p.dim}>
                       <td className={p.num}>{r.line}</td>
                       <td className={p.strong} lang="en">
                         {r.row.word}
@@ -233,15 +264,19 @@ export function ImportPage() {
                       </td>
                       <td>{r.row.tags?.join(', ')}</td>
                       <td>
-                        <span className={clsx(p.badge, p[status])}>
-                          {status === 'invalid'
-                            ? r.problems.map((x) => t.imp.problem[x]).join(', ')
-                            : status === 'new'
-                              ? t.imp.statusNew
-                              : status === 'exists'
-                                ? t.imp.statusExists
-                                : t.imp.statusRepeated}
-                        </span>
+                        {!planReady ? (
+                          <SkeletonText width={56} line={20} />
+                        ) : (
+                          <span className={clsx(p.badge, p[status])}>
+                            {status === 'invalid'
+                              ? r.problems.map((x) => t.imp.problem[x]).join(', ')
+                              : status === 'new'
+                                ? t.imp.statusNew
+                                : status === 'exists'
+                                  ? t.imp.statusExists
+                                  : t.imp.statusRepeated}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   )
@@ -252,16 +287,27 @@ export function ImportPage() {
           {rows.length > SHOWN && <p className={p.muted}>{t.imp.more(rows.length - SHOWN)}</p>}
 
           <div className={p.actions}>
-            <button type="button" className={p.secondary} onClick={reset}>
+            <button type="button" className={p.secondary} onClick={reset} disabled={add.isPending}>
               {t.imp.another}
             </button>
             <button
               type="button"
               className={p.primary}
-              disabled={plan.counts.new === 0 || add.isPending}
+              disabled={!planReady || plan.counts.new === 0 || add.isPending}
+              aria-busy={!planReady || add.isPending || undefined}
               onClick={() => add.mutate()}
             >
-              {add.isPending ? t.imp.submitting : t.imp.submit(plan.counts.new)}
+              {!planReady ? (
+                <>
+                  <Spinner /> {t.loading}
+                </>
+              ) : add.isPending ? (
+                <>
+                  <Spinner /> {t.imp.submitting}
+                </>
+              ) : (
+                t.imp.submit(plan.counts.new)
+              )}
             </button>
           </div>
         </section>

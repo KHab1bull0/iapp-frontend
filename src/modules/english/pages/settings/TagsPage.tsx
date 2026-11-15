@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
 import { toast } from '@/core/components/ui/toast'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useLang } from '@/core/i18n'
 import { apiErrorText } from '@/core/i18n/errors'
 import { useToday } from '@/core/hooks/useToday'
@@ -20,7 +21,9 @@ import {
 } from '@/modules/english/api/english'
 import { useEnglishT, useGroupName } from '@/modules/english/i18n'
 import { shelve } from '@/modules/english/lib/tags'
+import { Loading, SkeletonText, Spinner } from '@/modules/english/components/Loading'
 import { ConfirmDelete } from './ConfirmDelete'
+import { SettingsRowsSkeleton } from './SettingsRowsSkeleton'
 import { EnglishSettingsSubpage } from './EnglishSettingsSubpage'
 import s from '../EnglishPages.module.scss'
 import e from './EnglishSettings.module.scss'
@@ -82,12 +85,13 @@ function TagRow({ tag, groups }: { tag: Tag; groups: TagGroup[] }) {
           ))}
           <option value="">{t.settings.ungrouped}</option>
         </select>
-        <button type="submit" className={e.btnPrimary} disabled={save.isPending}>
-          {t.save}
+        <button type="submit" className={e.btnPrimary} disabled={save.isPending} aria-busy={save.isPending || undefined}>
+          {save.isPending ? <><Spinner /> {t.saving}</> : t.save}
         </button>
         <button
           type="button"
           className={e.btnGhost}
+          disabled={save.isPending}
           onClick={() => {
             setName(tag.name)
             setGroupId(tag.groupId ?? '')
@@ -104,10 +108,15 @@ function TagRow({ tag, groups }: { tag: Tag; groups: TagGroup[] }) {
     <div className={e.row}>
       <span className={e.name}>{tag.name}</span>
       <span className={e.sub}>{t.settings.words(tag.count)}</span>
-      <button className={e.iconBtn} onClick={() => setEditing(true)} aria-label={t.edit(tag.name)}>
+      <button className={e.iconBtn} onClick={() => setEditing(true)} aria-label={t.edit(tag.name)} disabled={remove.isPending}>
         <Pencil size={14} />
       </button>
-      <ConfirmDelete label={tag.name} description={t.settings.tagDeleteDesc} onConfirm={() => remove.mutate()} />
+      <ConfirmDelete
+        label={tag.name}
+        description={t.settings.tagDeleteDesc}
+        onConfirm={() => remove.mutate()}
+        pending={remove.isPending}
+      />
     </div>
   )
 }
@@ -151,10 +160,10 @@ function GroupHead({ group }: { group: TagGroup }) {
           maxLength={50}
           aria-label={t.settings.nameOf(groupName(group))}
         />
-        <button type="submit" className={e.btnPrimary} disabled={save.isPending}>
-          {t.save}
+        <button type="submit" className={e.btnPrimary} disabled={save.isPending} aria-busy={save.isPending || undefined}>
+          {save.isPending ? <><Spinner /> {t.saving}</> : t.save}
         </button>
-        <button type="button" className={e.btnGhost} onClick={() => setEditing(false)}>
+        <button type="button" className={e.btnGhost} onClick={() => setEditing(false)} disabled={save.isPending}>
           {t.cancel}
         </button>
       </form>
@@ -164,10 +173,20 @@ function GroupHead({ group }: { group: TagGroup }) {
   return (
     <div className={e.groupHead}>
       <h2 className={s.sectionTitle}>{groupName(group)}</h2>
-      <button className={e.iconBtn} onClick={() => setEditing(true)} aria-label={t.edit(groupName(group))}>
+      <button
+        className={e.iconBtn}
+        onClick={() => setEditing(true)}
+        aria-label={t.edit(groupName(group))}
+        disabled={remove.isPending}
+      >
         <Pencil size={14} />
       </button>
-      <ConfirmDelete label={groupName(group)} description={t.settings.groupDeleteDesc} onConfirm={() => remove.mutate()} />
+      <ConfirmDelete
+        label={groupName(group)}
+        description={t.settings.groupDeleteDesc}
+        onConfirm={() => remove.mutate()}
+        pending={remove.isPending}
+      />
     </div>
   )
 }
@@ -202,10 +221,41 @@ function AddTagRow({ groupId }: { groupId: string | null }) {
         maxLength={50}
         aria-label={t.settings.tagName}
       />
-      <button type="submit" className={e.btnPrimary} disabled={!name.trim() || add.isPending}>
-        {t.settings.addTag}
+      <button
+        type="submit"
+        className={e.btnPrimary}
+        disabled={!name.trim() || add.isPending}
+        aria-busy={add.isPending || undefined}
+      >
+        {add.isPending ? <><Spinner /> {t.adding}</> : t.settings.addTag}
       </button>
     </form>
+  )
+}
+
+/** The tag shelves while they load: a group's head, its rows and its add row, twice. */
+function TagShelvesSkeleton() {
+  return (
+    <Loading className={e.shelvesSkeleton}>
+      {[2, 3].map((rows, i) => (
+        <div key={i} className={s.section}>
+          <div className={e.groupHead}>
+            <span className={e.groupHeadName}>
+              <SkeletonText width={110} line={16} />
+            </span>
+            <Skeleton width="var(--control-sm)" height="var(--control-sm)" radius={8} />
+            <Skeleton width="var(--control-sm)" height="var(--control-sm)" radius={8} />
+          </div>
+          <div className={s.list}>
+            <SettingsRowsSkeleton rows={rows} />
+            <div className={e.addRow}>
+              <Skeleton className={e.inputSkeleton} height="var(--control-md)" radius={12} />
+              <Skeleton width={96} height="var(--control-md)" radius={12} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </Loading>
   )
 }
 
@@ -216,8 +266,11 @@ export function TagsPage() {
   const today = useToday()
   const refresh = useRefresh()
   const nameOfGroup = useGroupName()
-  const { data: tags = [] } = useQuery({ queryKey: englishKeys.tags(today), queryFn: () => fetchTags(today) })
-  const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
+  const { data: tags = [], isLoading: tagsLoading } = useQuery({
+    queryKey: englishKeys.tags(today),
+    queryFn: () => fetchTags(today),
+  })
+  const { data: groups = [], isLoading: groupsLoading } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
   const [groupName, setGroupName] = useState('')
 
   const addGroup = useMutation({
@@ -232,28 +285,32 @@ export function TagsPage() {
   return (
     <EnglishSettingsSubpage title={t.settings.tags} description={t.settings.tagsDesc}>
       <p className={e.help}>{t.settings.tagsHelp}</p>
-      {shelve(tags, groups, true).map((shelf) => (
-        <section
-          key={shelf.group?.id ?? 'none'}
-          className={s.section}
-          aria-label={nameOfGroup(shelf.group)}
-        >
-          {shelf.group ? (
-            <GroupHead group={shelf.group} />
-          ) : (
-            <div className={s.sectionHead}>
-              <h2 className={s.sectionTitle}>{t.settings.ungrouped}</h2>
+      {tagsLoading || groupsLoading ? (
+        <TagShelvesSkeleton />
+      ) : (
+        shelve(tags, groups, true).map((shelf) => (
+          <section
+            key={shelf.group?.id ?? 'none'}
+            className={s.section}
+            aria-label={nameOfGroup(shelf.group)}
+          >
+            {shelf.group ? (
+              <GroupHead group={shelf.group} />
+            ) : (
+              <div className={s.sectionHead}>
+                <h2 className={s.sectionTitle}>{t.settings.ungrouped}</h2>
+              </div>
+            )}
+            <div className={s.list}>
+              {shelf.tags.length === 0 && <div className={e.row}><span className={e.sub}>{t.settings.emptyGroup}</span></div>}
+              {shelf.tags.map((tag) => (
+                <TagRow key={tag.id} tag={tag} groups={groups} />
+              ))}
+              <AddTagRow groupId={shelf.group?.id ?? null} />
             </div>
-          )}
-          <div className={s.list}>
-            {shelf.tags.length === 0 && <div className={e.row}><span className={e.sub}>{t.settings.emptyGroup}</span></div>}
-            {shelf.tags.map((tag) => (
-              <TagRow key={tag.id} tag={tag} groups={groups} />
-            ))}
-            <AddTagRow groupId={shelf.group?.id ?? null} />
-          </div>
-        </section>
-      ))}
+          </section>
+        ))
+      )}
 
       <section className={s.section} aria-label={t.settings.groups}>
         <div className={s.list}>
@@ -272,8 +329,13 @@ export function TagsPage() {
               maxLength={50}
               aria-label={t.settings.groupName}
             />
-            <button type="submit" className={e.btnGhost} disabled={!groupName.trim() || addGroup.isPending}>
-              {t.settings.addGroup}
+            <button
+              type="submit"
+              className={e.btnGhost}
+              disabled={!groupName.trim() || addGroup.isPending}
+              aria-busy={addGroup.isPending || undefined}
+            >
+              {addGroup.isPending ? <><Spinner /> {t.adding}</> : t.settings.addGroup}
             </button>
           </form>
         </div>

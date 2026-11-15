@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
 import { toast } from '@/core/components/ui/toast'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useLang } from '@/core/i18n'
 import { apiErrorText } from '@/core/i18n/errors'
 import {
@@ -15,7 +16,9 @@ import {
   type Level,
 } from '@/modules/english/api/english'
 import { useEnglishT, useLevelName } from '@/modules/english/i18n'
+import { Loading, Spinner } from '@/modules/english/components/Loading'
 import { ConfirmDelete } from './ConfirmDelete'
+import { SettingsRowsSkeleton } from './SettingsRowsSkeleton'
 import { EnglishSettingsSubpage } from './EnglishSettingsSubpage'
 import s from '../EnglishPages.module.scss'
 import e from './EnglishSettings.module.scss'
@@ -74,8 +77,10 @@ function LevelRow({ level }: { level: Level }) {
             aria-label={t.settings.daysOf(label)}
           />
         )}
-        <button type="submit" className={e.btnPrimary} disabled={save.isPending}>{t.save}</button>
-        <button type="button" className={e.btnGhost} onClick={cancel}>{t.cancel}</button>
+        <button type="submit" className={e.btnPrimary} disabled={save.isPending} aria-busy={save.isPending || undefined}>
+          {save.isPending ? <><Spinner /> {t.saving}</> : t.save}
+        </button>
+        <button type="button" className={e.btnGhost} onClick={cancel} disabled={save.isPending}>{t.cancel}</button>
       </form>
     )
   }
@@ -84,7 +89,7 @@ function LevelRow({ level }: { level: Level }) {
     <div className={e.row}>
       <span className={e.name}>{label}</span>
       <span className={e.sub}>{level.locked ? t.settings.start : t.days(level.intervalDays)}</span>
-      <button className={e.iconBtn} onClick={() => setEditing(true)} aria-label={t.edit(label)}>
+      <button className={e.iconBtn} onClick={() => setEditing(true)} aria-label={t.edit(label)} disabled={remove.isPending}>
         <Pencil size={14} />
       </button>
       {!level.locked && (
@@ -92,19 +97,19 @@ function LevelRow({ level }: { level: Level }) {
           label={label}
           description={t.settings.levelDeleteDesc}
           onConfirm={() => remove.mutate()}
+          pending={remove.isPending}
         />
       )}
     </div>
   )
 }
 
-/** English settings → Levels: how long a remembered word stays away at each step. */
 /** How many words not learned yet come into review each day. */
 function NewPerDay() {
   const qc = useQueryClient()
   const { lang } = useLang()
   const t = useEnglishT()
-  const { data } = useQuery({ queryKey: englishKeys.settings, queryFn: fetchEnglishSettings })
+  const { data, isLoading } = useQuery({ queryKey: englishKeys.settings, queryFn: fetchEnglishSettings })
   const [value, setValue] = useState<string | null>(null)
   const shown = value ?? (data ? String(data.newPerDay) : '')
   const n = Number(shown)
@@ -135,18 +140,30 @@ function NewPerDay() {
           }}
         >
           <span className={e.name}>{t.settings.newPerDay}</span>
-          <input
-            className={e.daysInput}
-            type="number"
-            inputMode="numeric"
-            min={0}
-            max={500}
-            value={shown}
-            onChange={(ev) => setValue(ev.target.value)}
-            aria-label={t.settings.newPerDay}
-          />
-          <button type="submit" className={e.btnPrimary} disabled={!valid || save.isPending}>
-            {t.save}
+          {isLoading ? (
+            // The number's field, until there is a number to put in it.
+            <Loading className={e.daysInput} label={t.loading}>
+              <Skeleton height="100%" />
+            </Loading>
+          ) : (
+            <input
+              className={e.daysInput}
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={500}
+              value={shown}
+              onChange={(ev) => setValue(ev.target.value)}
+              aria-label={t.settings.newPerDay}
+            />
+          )}
+          <button
+            type="submit"
+            className={e.btnPrimary}
+            disabled={!valid || save.isPending}
+            aria-busy={save.isPending || undefined}
+          >
+            {save.isPending ? <><Spinner /> {t.saving}</> : t.save}
           </button>
         </form>
       </div>
@@ -154,12 +171,13 @@ function NewPerDay() {
   )
 }
 
+/** English settings → Levels: how long a remembered word stays away at each step. */
 export function LevelsPage() {
   const qc = useQueryClient()
   const { lang } = useLang()
   const t = useEnglishT()
   const refresh = () => qc.invalidateQueries({ queryKey: englishKeys.all })
-  const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
+  const { data: levels = [], isLoading } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
   const [levelName, setLevelName] = useState('')
   const [levelDays, setLevelDays] = useState('')
 
@@ -184,9 +202,11 @@ export function LevelsPage() {
         </div>
         <p className={e.help}>{t.settings.levelsHelp}</p>
         <div className={s.list}>
-          {levels.map((l) => (
-            <LevelRow key={l.id} level={l} />
-          ))}
+          {isLoading ? (
+            <SettingsRowsSkeleton rows={3} />
+          ) : (
+            levels.map((l) => <LevelRow key={l.id} level={l} />)
+          )}
           <form
             className={e.addRow}
             onSubmit={(ev: FormEvent) => {
@@ -196,8 +216,13 @@ export function LevelsPage() {
           >
             <input className={e.input} placeholder={t.settings.newLevel} value={levelName} onChange={(ev) => setLevelName(ev.target.value)} maxLength={50} aria-label={t.settings.levelName} />
             <input className={e.daysInput} type="number" min={1} placeholder={t.settings.daysField} value={levelDays} onChange={(ev) => setLevelDays(ev.target.value)} aria-label={t.settings.daysField} />
-            <button type="submit" className={e.btnPrimary} disabled={!levelValid || addLevel.isPending}>
-              {t.settings.addLevel}
+            <button
+              type="submit"
+              className={e.btnPrimary}
+              disabled={!levelValid || addLevel.isPending}
+              aria-busy={addLevel.isPending || undefined}
+            >
+              {addLevel.isPending ? <><Spinner /> {t.adding}</> : t.settings.addLevel}
             </button>
           </form>
         </div>

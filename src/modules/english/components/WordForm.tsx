@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { todayYmd, ymd } from '@/core/lib/format'
 import { toast } from '@/core/components/ui/toast'
 import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import {
   createWord,
   deleteWord,
@@ -19,6 +20,7 @@ import { useEnglishT, useLevelName } from '@/modules/english/i18n'
 import s from './WordForm.module.scss'
 import { DateField } from '@/core/components/ui/DateField'
 import { TagPicker } from './TagPicker'
+import { ChipsSkeleton, Loading, SkeletonText, Spinner } from './Loading'
 
 interface Props {
   word: Word | null
@@ -44,7 +46,7 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
   const [levelId, setLevelId] = useState(word?.levelId ?? '')
   const [reviewOn, setReviewOn] = useState(word?.reviewOn ?? todayYmd())
 
-  const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
+  const { data: levels = [], isLoading: levelsLoading } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
   const { data: settings } = useQuery({ queryKey: englishKeys.settings, queryFn: fetchEnglishSettings })
 
   // Moving a word to a level reschedules it as review would: today + that level's days.
@@ -97,9 +99,12 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
     onError: () => toast(t.word.deleteFailed, 'error'),
   })
 
+  // One request at a time: saving and deleting each lock the other (and Cancel).
+  const busy = save.isPending || remove.isPending
+
   function submit(e: FormEvent) {
     e.preventDefault()
-    if (valid && !save.isPending) save.mutate()
+    if (valid && !busy) save.mutate()
   }
 
   return (
@@ -175,7 +180,12 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
         />
       </label>
 
-      {levels.length > 0 && (
+      {levelsLoading ? (
+        <div className={s.field}>
+          <span className={s.label}>{t.word.level}</span>
+          <ChipsSkeleton widths={[112, 72, 104, 96]} />
+        </div>
+      ) : levels.length > 0 && (
         <div className={s.field}>
           <span className={s.label} id="word-level-label">
             {t.word.level}
@@ -230,10 +240,14 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
       <TagPicker value={tagIds} onChange={setTagIds} />
 
       <div data-form-actions>
-        {word && (
+        {word && remove.isPending ? (
+          <button type="button" className={s.btnDanger} disabled aria-busy="true">
+            <Spinner /> {t.deleting}
+          </button>
+        ) : word && (
           <ConfirmDialog
             trigger={
-              <button type="button" className={s.btnDanger}>
+              <button type="button" className={s.btnDanger} disabled={save.isPending}>
                 {t.delete}
               </button>
             }
@@ -244,13 +258,58 @@ export function WordForm({ word, onSaved, onCancel }: Props) {
             onConfirm={() => remove.mutate()}
           />
         )}
-        <button type="button" className={s.btnSecondary} onClick={onCancel}>
+        <button type="button" className={s.btnSecondary} onClick={onCancel} disabled={busy}>
           {t.cancel}
         </button>
-        <button type="submit" className={s.btnPrimary} disabled={!valid || save.isPending}>
-          {save.isPending ? t.saving : t.save}
+        <button type="submit" className={s.btnPrimary} disabled={!valid || busy} aria-busy={save.isPending || undefined}>
+          {save.isPending ? <><Spinner /> {t.saving}</> : t.save}
         </button>
       </div>
     </form>
+  )
+}
+
+/** A field's control while the word loads: the label as it will read, the box as a block. */
+function FieldSkeleton({ label, height = 'var(--control-md)', hint }: { label: string; height?: string; hint?: boolean }) {
+  return (
+    <div className={s.field}>
+      <span className={s.label}>{label}</span>
+      <Skeleton height={height} radius={12} />
+      {hint && <SkeletonText width="70%" line={16} />}
+    </div>
+  )
+}
+
+/** Two rows of text, as the textareas have: their padding and border included. */
+const TEXTAREA = 'calc(2 * var(--lh-ui) + 18px)'
+
+/**
+ * The word form while the word it edits loads: every field where it will be,
+ * labelled, and the action row at the foot, so the form fills in without moving.
+ */
+export function WordFormSkeleton() {
+  const t = useEnglishT()
+  return (
+    <Loading className={s.form}>
+      <FieldSkeleton label={t.word.word} />
+      <FieldSkeleton label={t.word.translation} />
+      <FieldSkeleton label={t.word.description} height={TEXTAREA} hint />
+      <FieldSkeleton label={t.word.note} height={TEXTAREA} />
+      <FieldSkeleton label={t.word.example} height={TEXTAREA} />
+      <div className={s.field}>
+        <span className={s.label}>{t.word.level}</span>
+        <ChipsSkeleton widths={[112, 72, 104, 96]} />
+      </div>
+      <FieldSkeleton label={t.word.memoriseOn} hint />
+      <div className={s.field}>
+        <span className={s.label}>{t.word.tags}</span>
+        <ChipsSkeleton widths={[80, 96, 64, 112]} />
+      </div>
+      <div data-form-actions>
+        <Skeleton className={s.actionSkeleton} height="var(--control-lg)" radius={12} />
+        <Skeleton className={s.actionSkeleton} height="var(--control-lg)" radius={12} />
+        <Skeleton className={s.actionSkeleton} height="var(--control-lg)" radius={12} />
+      </div>
+    </Loading>
   )
 }

@@ -136,3 +136,21 @@
 .btnDanger { @include btn-action-danger; }
 .btnSecondary { @include btn-action-secondary; }
 .btnPrimary { @include btn-action-primary; }
+
+// The action row's buttons while the word loads: the same share of the row.
+.actionSkeleton {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+// A new tag on its way: the ring beside its name.
+.chipAdding {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chipAddingStatus {
+  display: inline-flex;
+  color: var(--fg-muted);
+}

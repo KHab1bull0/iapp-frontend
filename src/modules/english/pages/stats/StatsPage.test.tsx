@@ -3,6 +3,7 @@ import { render, screen, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import type { Stats } from '@/modules/english/api/english'
+import { loadingRegion, pending } from '@/modules/english/test-loading'
 import { StatsPage } from './StatsPage'
 
 const api = vi.hoisted(() => ({ fetchStats: vi.fn() }))
@@ -52,6 +53,23 @@ function renderPage() {
 }
 
 describe('StatsPage', () => {
+  test('while the numbers load, the four cards are there with their titles, figures as placeholders', () => {
+    api.fetchStats.mockReturnValue(pending())
+    renderPage()
+    const region = loadingRegion()
+    for (const title of ['Today', 'Vocabulary', 'Last 14 days', 'Next 7 days']) {
+      expect(within(region).getByRole('heading', { name: title })).toBeTruthy()
+    }
+    expect(screen.queryByText('No words yet')).toBeNull()
+  })
+
+  test('speaks Uzbek while loading too', () => {
+    localStorage.setItem('iapp-lang', 'uz')
+    api.fetchStats.mockReturnValue(pending())
+    renderPage()
+    expect(loadingRegion('Yuklanmoqda…')).toBeTruthy()
+  })
+
   test("today's stack as a ring, what was remembered and forgot, what is left", async () => {
     api.fetchStats.mockResolvedValue(STATS)
     renderPage()

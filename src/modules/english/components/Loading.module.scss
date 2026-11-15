@@ -1,0 +1,31 @@
+// Busy controls: a small turning ring in place of the icon while a request runs.
+// The app-wide reduce-motion rule stops it turning for those who ask.
+.spin {
+  flex-shrink: 0;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// A list under a newer search: the old rows, dimmed until the new ones arrive.
+.stale {
+  opacity: 0.6;
+  transition: opacity 120ms;
+}
+
+// SkeletonText: a line box the text's height, the bar centred in it.
+.line {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
+// ChipsSkeleton: chips' spacing, as every chip row here has.
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { englishKeys, fetchWord } from '@/modules/english/api/english'
-import { WordForm } from '@/modules/english/components/WordForm'
+import { WordForm, WordFormSkeleton } from '@/modules/english/components/WordForm'
 import { useEnglishT } from '@/modules/english/i18n'
 import s from './WordFormPage.module.scss'
 
@@ -14,7 +14,6 @@ export function WordFormPage() {
   const isEdit = Boolean(id)
 
   const close = () => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/english/vocabulary'))
-
 
   const { data: word, isLoading, isError } = useQuery({
     queryKey: englishKeys.word(id ?? ''),
@@ -31,7 +30,9 @@ export function WordFormPage() {
         <h1 className={s.h1}>{isEdit ? t.word.editTitle : t.word.newTitle}</h1>
       </header>
       <div className={s.body}>
-        {isEdit && isLoading ? null : isEdit && (isError || !word) ? (
+        {isEdit && isLoading ? (
+          <WordFormSkeleton />
+        ) : isEdit && (isError || !word) ? (
           <div className={s.state}>{t.word.notFound}</div>
         ) : (
           <WordForm word={word ?? null} onSaved={close} onCancel={close} />

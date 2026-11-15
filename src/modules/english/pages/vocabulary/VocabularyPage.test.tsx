@@ -3,12 +3,55 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { NEW, L3, word, tag, group } from '@/modules/english/test-data'
+import { loadingRegion, pending } from '@/modules/english/test-loading'
 import { VocabularyPage } from './VocabularyPage'
 
 const api = vi.hoisted(() => ({ fetchWords: vi.fn(), fetchLevels: vi.fn(), fetchTags: vi.fn(), fetchGroups: vi.fn() }))
 vi.mock('@/modules/english/api/english', async (orig) => ({ ...(await orig<object>()), ...api }))
 
+function renderPage() {
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter>
+        <VocabularyPage />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+}
+
 describe('VocabularyPage', () => {
+  test('while the words load, the list is drawn as busy placeholder rows, not left blank', async () => {
+    api.fetchLevels.mockResolvedValue([NEW])
+    api.fetchTags.mockReturnValue(pending())
+    api.fetchGroups.mockResolvedValue([])
+    api.fetchWords.mockReturnValue(pending())
+    renderPage()
+    const region = loadingRegion()
+    // The same section and heading the words will fill.
+    expect(within(region).getByRole('heading', { name: 'Words' })).toBeTruthy()
+    expect(screen.queryByText('No words yet')).toBeNull()
+    // The search is usable at once.
+    expect(screen.getByRole('searchbox', { name: 'Search words' })).toBeTruthy()
+
+    // The filter sheet's chips wait as placeholders too, rather than "No tags yet".
+    fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Filters' })
+    expect(loadingRegion('Loading…', sheet)).toBeTruthy()
+    expect(within(sheet).queryByText(/No tags yet/)).toBeNull()
+  })
+
+  test('a new search keeps the last list up, busy, until its words arrive', async () => {
+    api.fetchLevels.mockResolvedValue([NEW])
+    api.fetchTags.mockResolvedValue([])
+    api.fetchGroups.mockResolvedValue([])
+    api.fetchWords.mockResolvedValueOnce([word('ticket')]).mockReturnValue(pending())
+    renderPage()
+    expect(await screen.findByText('ticket')).toBeTruthy()
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search words' }), { target: { value: 'tra' } })
+    await waitFor(() => expect(api.fetchWords).toHaveBeenCalledTimes(2))
+    expect(screen.getByText('ticket').closest('[aria-busy="true"]')).toBeTruthy()
+  })
+
   test('lists each word with its translation, level and tags', async () => {
     api.fetchLevels.mockResolvedValue([NEW, L3])
     api.fetchTags.mockResolvedValue([tag('t1', 'travel', { count: 1 }), tag('t2', 'noun', { groupId: 'g1', count: 1 })])
