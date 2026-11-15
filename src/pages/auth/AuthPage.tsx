@@ -127,7 +127,7 @@ export function AuthPage() {
 
           {error && <div className={s.authError} role="alert">{error}</div>}
 
-          <button type="submit" className={s.btnPrimary} disabled={loading}>
+          <button type="submit" className={s.btnPrimary} disabled={loading} aria-busy={loading || undefined}>
             {loading ? t.auth.wait : isLogin ? t.auth.signIn : t.auth.createAccount}
           </button>
         </form>
