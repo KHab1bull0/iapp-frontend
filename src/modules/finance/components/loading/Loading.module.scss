@@ -1,0 +1,45 @@
+// What the module's loading states share: a text-line
+// skeleton the height of the line it stands in for, the spinner in pending
+// buttons, and the dimming of figures that are being replaced.
+
+// A skeleton standing in for one line of text. The zero-width space gives it
+// the line's own height (from the font size and line height it inherits),
+// so swapping in the real text moves nothing.
+.textLine {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.textBar {
+  flex: 1;
+}
+
+.spinner {
+  flex-shrink: 0;
+  animation: spin 0.9s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// Last month's figures while this month's load: still readable, plainly
+// not final. The short delay keeps a quick refetch from flickering.
+.stale {
+  opacity: 0.55;
+  transition: opacity 150ms ease 150ms;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.fresh {
+  transition: opacity 150ms ease;
+}

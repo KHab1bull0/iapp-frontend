@@ -18,6 +18,7 @@ export const financeMessages = defineMessages(
     delete: "O'chirish",
     edit: 'Tahrirlash',
     loading: 'Yuklanmoqda…',
+    deleting: "O'chirilmoqda…",
     today: 'Bugun',
     yesterday: 'Kecha',
     stats: {
@@ -47,11 +48,13 @@ export const financeMessages = defineMessages(
       emptyMonth: "Bu oyda hali tranzaksiya yo'q",
       emptyMonthSub: "Birinchi xarajat yoki kirimni qo'shing — statistika shu yerda paydo bo'ladi.",
       categoryRow: (name: string, pct: number) => `${name}: chiqimlarning ${pct}%`,
+      loading: 'Statistika yuklanmoqda…',
     },
     home: {
       failed: "Bu oyni yuklab bo'lmadi",
       open: 'Moliyani ochish',
       balance: 'Shu oy balansi',
+      loading: 'Bu oy yuklanmoqda…',
     },
     tx: {
       add: "Tranzaksiya qo'shish",
@@ -91,6 +94,8 @@ export const financeMessages = defineMessages(
       deleteWhat: (amount: string) => `${amount} butunlay o'chiriladi.`,
       dayTotal: (amount: string) => `Kun bo'yicha: ${amount}`,
       actions: 'Amallar',
+      loadingList: 'Tranzaksiyalar yuklanmoqda…',
+      loadingOne: 'Tranzaksiya yuklanmoqda…',
     },
     filters: {
       title: 'Filtrlar',
@@ -137,6 +142,7 @@ export const financeMessages = defineMessages(
       empty: (type: string) => `Hali ${type} kategoriyasi yo'q`,
       colorLabel: (c: string) => `Rang ${c}`,
       iconLabel: (e: string) => `Belgi ${e}`,
+      loading: 'Kategoriyalar yuklanmoqda…',
     },
   },
   {
@@ -156,6 +162,7 @@ export const financeMessages = defineMessages(
     delete: 'Delete',
     edit: 'Edit',
     loading: 'Loading…',
+    deleting: 'Deleting…',
     today: 'Today',
     yesterday: 'Yesterday',
     stats: {
@@ -185,11 +192,13 @@ export const financeMessages = defineMessages(
       emptyMonth: 'No transactions this month yet',
       emptyMonthSub: 'Add your first expense or income and the statistics show up here.',
       categoryRow: (name: string, pct: number) => `${name}: ${pct}% of expenses`,
+      loading: 'Loading statistics…',
     },
     home: {
       failed: "Couldn't load this month",
       open: 'Open Finance',
       balance: "This month's balance",
+      loading: 'Loading this month…',
     },
     tx: {
       add: 'Add transaction',
@@ -229,6 +238,8 @@ export const financeMessages = defineMessages(
       deleteWhat: (amount: string) => `${amount} will be removed for good.`,
       dayTotal: (amount: string) => `Day total: ${amount}`,
       actions: 'Actions',
+      loadingList: 'Loading transactions…',
+      loadingOne: 'Loading the transaction…',
     },
     filters: {
       title: 'Filters',
@@ -276,6 +287,7 @@ export const financeMessages = defineMessages(
       empty: (type: string) => `No ${type} categories yet`,
       colorLabel: (c: string) => `Color ${c}`,
       iconLabel: (e: string) => `Icon ${e}`,
+      loading: 'Loading categories…',
     },
   },
 )

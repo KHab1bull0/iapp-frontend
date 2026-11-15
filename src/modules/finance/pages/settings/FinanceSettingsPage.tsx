@@ -13,23 +13,33 @@ import shell from '@/pages/settings/settings.module.scss'
 import rows from '@/modules/finance/components/categories/CategoryList.module.scss'
 import s from './FinanceSettingsPage.module.scss'
 import { Skeleton } from '@/core/components/ui/Skeleton'
+import { LoadingBlock, TextSkeleton } from '@/modules/finance/components/loading/Loading'
 
 type CatTab = 'expense' | 'income'
 
+const SKELETON_NAMES = [96, 72, 112, 84]
+
+/** The category rows before they arrive: the real row's four columns at its height. */
 function CategoriesSkeleton() {
+  const t = useFinanceT()
   return (
-    <div className={rows.catGrid}>
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className={rows.catCard} aria-hidden>
-          <Skeleton width={36} height={36} radius={8} />
-          <div className={s.skeletonText}>
-            <Skeleton width={80} height={14} />
-            <Skeleton width={50} height={12} />
+    <LoadingBlock label={t.categories.loading} className={rows.catGrid}>
+      {SKELETON_NAMES.map((w) => (
+        <div key={w} className={rows.catCard} aria-hidden>
+          <Skeleton width="var(--tile-md)" height="var(--tile-md)" radius="var(--radius-sm)" />
+          <div className={rows.catMeta}>
+            <div className={rows.catName}>
+              <TextSkeleton width={w} />
+            </div>
+            <div className={rows.catType}>
+              <TextSkeleton width={48} />
+            </div>
           </div>
-          <Skeleton width={32} height={32} radius={8} />
+          <Skeleton width="var(--control-sm)" height="var(--control-sm)" radius="var(--radius-sm)" />
+          <Skeleton width="var(--control-sm)" height="var(--control-sm)" radius="var(--radius-sm)" />
         </div>
       ))}
-    </div>
+    </LoadingBlock>
   )
 }
 

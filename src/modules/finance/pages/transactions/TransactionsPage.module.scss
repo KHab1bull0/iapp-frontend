@@ -26,39 +26,3 @@
   font-weight: 600;
   color: var(--fg-strong);
 }
-
-// ── Loading: the same shape as TransactionList's day groups ──────────────
-.skeletons {
-  display: flex;
-  flex-direction: column;
-  gap: var(--section-gap);
-}
-
-.dayGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  > :first-child { margin-left: 16px; }
-}
-
-.skeletonCard {
-  @include surface;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.skeletonRow {
-  @include row;
-  display: grid;
-  grid-template-columns: var(--tile-md) 1fr auto;
-
-  & + & { border-top: 1px solid var(--border); }
-}
-
-.skeletonText {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}

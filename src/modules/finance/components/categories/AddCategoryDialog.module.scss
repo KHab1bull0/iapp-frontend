@@ -143,7 +143,12 @@
 }
 
 .btnSecondary { @include btn-action-secondary; }
-.btnPrimary { @include btn-action-primary; }
+.btnPrimary {
+  @include btn-action-primary;
+
+  // Saving: waiting, not forbidden.
+  &[aria-busy='true'] { cursor: progress; }
+}
 
 // iOS zooms the page into any field under 16px when it takes focus.
 @supports (-webkit-touch-callout: none) {

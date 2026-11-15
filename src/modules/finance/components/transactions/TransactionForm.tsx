@@ -8,7 +8,9 @@ import { byRecent, rememberCategory } from '@/modules/finance/lib/recentCategori
 import { CURRENCY, todayYmd } from '@/core/lib/format'
 import { DateField } from '@/core/components/ui/DateField'
 import { SegmentedControl } from '@/core/components/ui/SegmentedControl'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { toast } from '@/core/components/ui/toast'
+import { LoadingBlock, Spinner, TextSkeleton } from '@/modules/finance/components/loading/Loading'
 import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionForm.module.scss'
 
@@ -56,11 +58,15 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: fetchCategories })
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+  })
   const options = byRecent(categories.filter((c) => c.type === type))
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    if (loading) return
     const num = Number(amount)
     if (!num || num <= 0) return setError(t.tx.invalidAmount)
     if (!categoryId) return setError(t.tx.pickCategory)
@@ -121,7 +127,12 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
 
       <div className={s.field}>
         <span className={s.fieldLabel}>{t.category}</span>
-        {options.length === 0 ? (
+        {categoriesLoading ? (
+          // Not "no categories" while they are still on their way.
+          <LoadingBlock label={t.categories.loading} className={s.chips}>
+            <CategoryChipsSkeleton />
+          </LoadingBlock>
+        ) : options.length === 0 ? (
           <p className={s.hint}>{t.tx.noCategories}</p>
         ) : (
           <div className={s.chips} role="radiogroup" aria-label={t.category}>
@@ -182,10 +193,69 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
         <button type="button" className={s.btnSecondary} onClick={onCancel}>
           {t.cancel}
         </button>
-        <button type="submit" className={s.btnPrimary} disabled={loading}>
+        <button type="submit" className={s.btnPrimary} disabled={loading} aria-busy={loading || undefined}>
+          {loading && <Spinner />}
           {loading ? t.saving : isEdit ? t.tx.saveChanges : t.save}
         </button>
       </div>
     </form>
+  )
+}
+
+const CHIP_WIDTHS = [96, 72, 112, 84, 64]
+
+/** Category chips before the categories arrive: pills of a chip's height. */
+function CategoryChipsSkeleton() {
+  return CHIP_WIDTHS.map((w) => (
+    <Skeleton key={w} width={w} height="var(--control-md)" radius="var(--radius-pill)" />
+  ))
+}
+
+/**
+ * The form while the transaction it edits loads: each field at its own
+ * height, labels already in place. Cancel works; Save waits for the data.
+ */
+export function TransactionFormSkeleton({ onCancel }: { onCancel: () => void }) {
+  const t = useFinanceT()
+  return (
+    <LoadingBlock label={t.tx.loadingOne} className={s.form}>
+      <Skeleton height="var(--control-md)" radius="var(--radius-md)" />
+
+      <div className={clsx(s.amount, s.amountSkeleton)}>
+        <TextSkeleton width={180} />
+      </div>
+
+      <div className={s.field}>
+        <span className={s.fieldLabel}>{t.category}</span>
+        <div className={s.chips} aria-hidden>
+          <CategoryChipsSkeleton />
+        </div>
+      </div>
+
+      <div className={s.formGrid}>
+        <div className={s.field}>
+          <span className={s.fieldLabel}>{t.tx.date}</span>
+          <Skeleton height="var(--control-md)" radius="var(--radius-md)" />
+        </div>
+        <div className={s.field}>
+          <span className={s.fieldLabel}>{t.tx.time}</span>
+          <Skeleton height="var(--control-md)" radius="var(--radius-md)" />
+        </div>
+      </div>
+
+      <div className={s.field}>
+        <span className={s.fieldLabel}>{t.tx.note}</span>
+        <Skeleton height="var(--control-md)" radius="var(--radius-md)" />
+      </div>
+
+      <div data-form-actions>
+        <button type="button" className={s.btnSecondary} onClick={onCancel}>
+          {t.cancel}
+        </button>
+        <button type="button" className={s.btnPrimary} disabled>
+          {t.tx.saveChanges}
+        </button>
+      </div>
+    </LoadingBlock>
   )
 }

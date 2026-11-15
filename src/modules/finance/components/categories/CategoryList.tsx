@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import clsx from 'clsx'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { deleteCategory, type Category } from '@/modules/finance/api/categories'
@@ -6,6 +7,7 @@ import { toast } from '@/core/components/ui/toast'
 import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
 import { AddCategoryDialog } from './AddCategoryDialog'
 import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
+import { Spinner } from '@/modules/finance/components/loading/Loading'
 import s from './CategoryList.module.scss'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 
@@ -16,6 +18,7 @@ function CategoryCard({ cat, onEdit }: { cat: Category; onEdit: (cat: Category) 
   const [deleting, setDeleting] = useState(false)
 
   async function handleDelete() {
+    if (deleting) return
     setDeleting(true)
     try {
       await deleteCategory(cat.id)
@@ -30,7 +33,7 @@ function CategoryCard({ cat, onEdit }: { cat: Category; onEdit: (cat: Category) 
   }
 
   return (
-    <div className={s.catCard}>
+    <div className={clsx(s.catCard, deleting && s.deleting)} aria-busy={deleting || undefined}>
       <span
         className={s.catEmoji}
         style={{ background: cat.color + '22', color: cat.color }}
@@ -43,13 +46,13 @@ function CategoryCard({ cat, onEdit }: { cat: Category; onEdit: (cat: Category) 
         <div className={s.catName}>{catName(cat.name)}</div>
         <div className={s.catType}>{t[cat.type]}</div>
       </div>
-      <button className={s.catEdit} onClick={() => onEdit(cat)} aria-label={t.edit}>
+      <button className={s.catEdit} onClick={() => onEdit(cat)} disabled={deleting} aria-label={t.edit}>
         <Pencil size={14} />
       </button>
       <ConfirmDialog
         trigger={
-          <button className={s.catDel} disabled={deleting} aria-label={t.delete}>
-            <Trash2 size={14} />
+          <button className={s.catDel} disabled={deleting} aria-label={deleting ? t.deleting : t.delete}>
+            {deleting ? <Spinner size={14} /> : <Trash2 size={14} />}
           </button>
         }
         title={t.categories.deleteTitle(catName(cat.name))}

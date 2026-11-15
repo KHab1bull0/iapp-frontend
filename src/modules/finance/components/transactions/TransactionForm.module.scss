@@ -38,6 +38,12 @@
   &::placeholder { color: var(--fg-subtle); }
 }
 
+// Loading: a bar the height of the amount's line.
+.amountSkeleton {
+  font-size: var(--fs-hero);
+  line-height: var(--lh-hero);
+}
+
 .amountSfx {
   font-size: var(--fs-body);
   font-weight: 600;
@@ -123,4 +129,9 @@
 // The action row's layout (bottom of the screen, one row) is the global
 // [data-form-actions] rule; the buttons share a size and differ by colour.
 .btnSecondary { @include btn-action-secondary; }
-.btnPrimary { @include btn-action-primary; }
+.btnPrimary {
+  @include btn-action-primary;
+
+  // Saving: waiting, not forbidden.
+  &[aria-busy='true'] { cursor: progress; }
+}

@@ -11,10 +11,10 @@
   @include bp-desktop { justify-content: flex-start; }
 }
 
-.row2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--stack-gap);
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
 }
 
 .chartGrid {

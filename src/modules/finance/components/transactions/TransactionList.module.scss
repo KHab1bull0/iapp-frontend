@@ -174,6 +174,28 @@
 .btnSecondary {
   @include btn-secondary;
   @include btn-size-md;
+
+  &:disabled { opacity: 0.6; cursor: progress; }
+}
+
+// Being deleted: dimmed and out of reach until the request settles.
+.deleting {
+  opacity: 0.55;
+
+  .txDel { opacity: 1; }
+}
+
+// ── Loading: the real row, without the interaction ──────────────────────
+.skeletonRow {
+  pointer-events: none;
+
+  .txMain { cursor: default; }
+}
+
+.skeletonDel {
+  flex-shrink: 0;
+  width: var(--control-sm);
+  height: var(--control-sm);
 }
 
 // ── Desktop: one aligned table ───────────────────────────────────────────

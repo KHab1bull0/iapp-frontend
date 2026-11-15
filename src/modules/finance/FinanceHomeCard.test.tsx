@@ -35,6 +35,7 @@ describe('FinanceHomeCard', () => {
     expect(screen.getByRole('link', { name: 'Open Finance' }).getAttribute('href')).toBe('/finance')
     // No add button of its own: "+" in the shell is the one way to add.
     expect(screen.queryByRole('button')).toBeNull()
+    expect(document.querySelector('[aria-busy="true"]')).toBeNull()
   })
 
   test('opened offline, the card waits instead of crashing', () => {
@@ -49,6 +50,8 @@ describe('FinanceHomeCard', () => {
         </QueryClientProvider>,
       )
       expect(screen.getByText("This month's balance")).toBeTruthy()
+      // Waiting is shown as waiting: busy, and named for screen readers.
+      expect(screen.getByText('Loading this month…').closest('[aria-busy="true"]')).toBeTruthy()
     } finally {
       onlineManager.setOnline(true)
     }

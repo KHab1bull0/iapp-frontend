@@ -5,6 +5,7 @@ import type { MonthPoint } from '@/modules/finance/api/stats'
 import { formatAmount, formatAxis, formatMonthShort, CURRENCY } from '@/core/lib/format'
 import { useFinanceT } from '@/modules/finance/i18n'
 import { CHART } from '@/core/lib/chartColors'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import s from './MonthlyBarChart.module.scss'
 
 // Short enough that the card reads wide rather than tall.
@@ -81,6 +82,35 @@ export function MonthlyBarChart({ data }: Props) {
           </BarChart>
         </ResponsiveContainer>
       )}
+    </div>
+  )
+}
+
+// Income and expense heights (% of the plot) for six placeholder months.
+const SKELETON_BARS: [number, number][] = [
+  [55, 40], [70, 50], [45, 60], [80, 55], [60, 35], [75, 65],
+]
+
+/** The six-month card before it arrives: the title and legend, and bars where the chart goes. */
+export function MonthlyBarChartSkeleton() {
+  const t = useFinanceT()
+  return (
+    <div className={s.card}>
+      <div className={s.cardHead}>
+        <h2 className={s.h3}>{t.stats.lastSixMonths}</h2>
+        <div className={s.barLegend}>
+          <span><span className={s.dot} style={{ background: INCOME_COLOR }} />{t.income}</span>
+          <span><span className={s.dot} style={{ background: EXPENSE_COLOR }} />{t.expense}</span>
+        </div>
+      </div>
+      <div className={s.skeletonPlot} style={{ height: CHART_HEIGHT }} aria-hidden>
+        {SKELETON_BARS.map(([a, b], i) => (
+          <div key={i} className={s.skeletonPair}>
+            <Skeleton width={12} height={`${a}%`} radius="4px 4px 0 0" />
+            <Skeleton width={12} height={`${b}%`} radius="4px 4px 0 0" />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

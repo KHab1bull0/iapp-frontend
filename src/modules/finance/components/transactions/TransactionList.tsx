@@ -11,6 +11,8 @@ import { useQuickAdd } from '@/core/quickAdd/context'
 import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
 import { useNavigate } from 'react-router-dom'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
+import { Skeleton } from '@/core/components/ui/Skeleton'
+import { LoadingBlock, Spinner, TextSkeleton } from '@/modules/finance/components/loading/Loading'
 import { AddTransactionDialog } from './AddTransactionDialog'
 import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionList.module.scss'
@@ -41,9 +43,10 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
   const [confirming, setConfirming] = useState(false)
   const qc = useQueryClient()
   // Swipe left asks to delete; the bin button is the same without a gesture.
-  const swipe = useSwipe({ onLeft: () => setConfirming(true) })
+  const swipe = useSwipe({ onLeft: () => { if (!deleting) setConfirming(true) } })
 
   async function handleDelete() {
+    if (deleting) return
     setDeleting(true)
     try {
       await deleteTransaction(tx.id)
@@ -61,7 +64,7 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
   const time = tx.time ?? tx.createdAt?.slice(11, 16) ?? ''
 
   return (
-    <div className={clsx(s.swipeWrap, swipe.dx !== 0 && s.swiping)}>
+    <div className={clsx(s.swipeWrap, swipe.dx !== 0 && s.swiping, deleting && s.deleting)} aria-busy={deleting || undefined}>
       {swipe.dx < 0 && (
         <div className={clsx(s.under, swipe.armed && s.armed)} aria-hidden>
           <Trash2 size={20} />
@@ -72,7 +75,7 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
         style={swipe.dx ? { transform: `translateX(${swipe.dx}px)` } : undefined}
         {...swipe.handlers}
       >
-        <button className={s.txMain} onClick={() => onEdit(tx)} aria-label={`${t.edit}: ${tx.note ?? catName(tx.category.name)}, ${amount}`}>
+        <button className={s.txMain} onClick={() => onEdit(tx)} disabled={deleting} aria-label={`${t.edit}: ${tx.note ?? catName(tx.category.name)}, ${amount}`}>
           <span className={s.txCat} style={{ background: `${tx.category.color}22`, color: tx.category.color }} aria-hidden>
             {tx.category.icon}
           </span>
@@ -95,8 +98,8 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
           open={confirming}
           onOpenChange={setConfirming}
           trigger={
-            <button className={s.txDel} disabled={deleting} aria-label={t.delete}>
-              <Trash2 size={16} />
+            <button className={s.txDel} disabled={deleting} aria-label={deleting ? t.deleting : t.delete}>
+              {deleting ? <Spinner /> : <Trash2 size={16} />}
             </button>
           }
           title={t.tx.deleteTitle}
@@ -169,8 +172,10 @@ export function TransactionList({
           <button
             onClick={onLoadMore}
             disabled={isFetchingMore}
+            aria-busy={isFetchingMore || undefined}
             className={s.btnSecondary}
           >
+            {isFetchingMore && <Spinner />}
             {isFetchingMore ? t.loading : t.tx.loadMore}
           </button>
         </div>
@@ -183,5 +188,63 @@ export function TransactionList({
       transaction={editing}
     />
     </>
+  )
+}
+
+// Title widths per placeholder row, so the rows don't read as one block.
+const SKELETON_GROUPS = [[55, 40, 65], [45, 60, 50]]
+
+/**
+ * The list before it arrives: day groups of rows built from the real rows'
+ * classes, so phones get the two-line rows and desktop the table columns,
+ * each at the height the real one will have.
+ */
+export function TransactionListSkeleton() {
+  const t = useFinanceT()
+  return (
+    <LoadingBlock label={t.tx.loadingList} className={s.groups}>
+      {SKELETON_GROUPS.map((rows, g) => (
+        <div key={g} className={s.dayGroup} aria-hidden>
+          <div className={s.dayHead}>
+            <span className={s.dayLabel}>
+              <TextSkeleton width={72} />
+            </span>
+            <span className={s.dayTotal}>
+              <TextSkeleton width={56} />
+            </span>
+          </div>
+          <div className={clsx(s.card, s.txList)}>
+            {rows.map((w, i) => (
+              <div key={i} className={s.swipeWrap}>
+                <div className={clsx(s.txRow, s.skeletonRow)}>
+                  <div className={s.txMain}>
+                    <Skeleton width="var(--tile-md)" height="var(--tile-md)" radius="var(--radius-pill)" />
+                    <span className={s.txMeta}>
+                      <span className={s.txTitle}>
+                        <TextSkeleton width={`${w}%`} />
+                      </span>
+                      <span className={s.txSub}>
+                        <TextSkeleton width="35%" />
+                      </span>
+                    </span>
+                    <span className={s.colCategory}>
+                      <TextSkeleton width={96} />
+                    </span>
+                    <span className={s.colTime}>
+                      <TextSkeleton width={36} />
+                    </span>
+                    <span className={s.txAmt}>
+                      <TextSkeleton width={72} />
+                    </span>
+                  </div>
+                  {/* Where each row's bin button sits. */}
+                  <span className={s.skeletonDel} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </LoadingBlock>
   )
 }
