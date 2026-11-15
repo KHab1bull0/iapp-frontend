@@ -62,12 +62,18 @@ describe('StatsPage', () => {
     expect(within(today).getByText(/2 overdue/)).toBeTruthy()
     expect(within(today).getByText('6 days in a row')).toBeTruthy()
     expect(within(today).getByRole('link', { name: 'Start review' }).getAttribute('href')).toBe('/english/review')
-
-    const accuracy = screen.getByRole('region', { name: 'Remembered' })
-    expect(within(accuracy).getByText('75%')).toBeTruthy()
   })
 
-  test('the vocabulary split by level, its growth, tags and the two weeks around today', async () => {
+  test('no accuracy ring and no growth chart', async () => {
+    api.fetchStats.mockResolvedValue(STATS)
+    renderPage()
+    await screen.findByRole('region', { name: 'Today' })
+    expect(screen.queryByRole('region', { name: 'Remembered' })).toBeNull()
+    expect(screen.queryByRole('region', { name: 'Vocabulary growth · 30 days' })).toBeNull()
+    expect(screen.queryByText('75%')).toBeNull()
+  })
+
+  test('the vocabulary split by level, tags and the two weeks around today', async () => {
     api.fetchStats.mockResolvedValue(STATS)
     renderPage()
     const vocab = await screen.findByRole('region', { name: 'Vocabulary' })
@@ -76,9 +82,6 @@ describe('StatsPage', () => {
     // Words past New have been remembered at least once.
     expect(within(vocab).getByText('30 learned · 71%')).toBeTruthy()
     expect(within(vocab).getByRole('img').getAttribute('aria-label')).toBe('New: 12 words, 29%; Three days: 30 words, 71%')
-
-    const growth = screen.getByRole('region', { name: 'Vocabulary growth · 30 days' })
-    expect(within(growth).getByText('+14 words in 30 days')).toBeTruthy()
 
     const cats = screen.getByRole('region', { name: 'Words by tag' })
     expect(within(cats).getByText('No tag')).toBeTruthy()

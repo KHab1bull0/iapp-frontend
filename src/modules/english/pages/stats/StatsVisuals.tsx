@@ -1,9 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Flame, Play } from 'lucide-react'
 import { ProgressRing } from '@/core/components/ui/Progress'
 import { CHART, GREEN_RAMP, rampSteps } from '@/core/lib/chartColors'
-import { formatShortDay } from '@/core/lib/format'
 import type { Stats } from '@/modules/english/api/english'
 import { useEnglishT, useLevelName } from '@/modules/english/i18n'
 import st from './StatsPage.module.scss'
@@ -82,53 +80,6 @@ export function TodayCard({ stats }: { stats: Stats }) {
   )
 }
 
-/** Remembering: the last 30 days' answers as a ring of the share remembered, and the split as a bar. */
-export function AccuracyCard({ stats }: { stats: Stats }) {
-  const t = useEnglishT()
-  const { remembered, forgot } = stats.accuracy
-  const answered = remembered + forgot
-  const share = pct(remembered, answered)
-
-  return (
-    <section className={st.card} aria-label={t.stats.accuracy}>
-      <h2 className={st.cardTitle}>{t.stats.accuracy}</h2>
-      <div className={v.ringRow}>
-        <ProgressRing
-          value={remembered}
-          max={answered}
-          size={112}
-          stroke={10}
-          tone="primary"
-          label={t.stats.accuracyRing(share)}
-        >
-          <span className={v.ringValue}>{answered ? `${share}%` : '—'}</span>
-        </ProgressRing>
-        <div className={v.split}>
-          <p className={st.muted}>{answered ? t.stats.accuracySub(answered) : t.stats.noAnswers}</p>
-          {answered > 0 && (
-            <>
-              <div className={v.splitBar} aria-hidden>
-                {remembered > 0 && <span className={v.good} style={{ flexGrow: remembered }} />}
-                {forgot > 0 && <span className={v.bad} style={{ flexGrow: forgot }} />}
-              </div>
-              <div className={st.legend}>
-                <span>
-                  <span className={`${st.dot} ${st.good}`} />
-                  {t.review.remembered} {remembered}
-                </span>
-                <span>
-                  <span className={`${st.dot} ${st.bad}`} />
-                  {t.review.forgot} {forgot}
-                </span>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </section>
-  )
-}
-
 /**
  * The vocabulary: how many words, and one bar split by level — New in gray,
  * then light to dark green as the gap before a word comes back grows. Words
@@ -188,65 +139,6 @@ export function VocabularyCard({ stats }: { stats: Stats }) {
           </li>
         ))}
       </ul>
-    </section>
-  )
-}
-
-function GrowthTip({ active, payload }: { active?: boolean; payload?: { payload: { date: string; total: number } }[] }) {
-  const t = useEnglishT()
-  if (!active || !payload?.length) return null
-  const p = payload[0].payload
-  return (
-    <div className={v.tip}>
-      <p className={v.tipTitle}>{formatShortDay(p.date)}</p>
-      <p>{t.stats.growthTip(p.total)}</p>
-    </div>
-  )
-}
-
-/** The vocabulary's size day by day over the last 30 days: a rising area. */
-export function GrowthCard({ growth }: { growth: Stats['growth'] }) {
-  const t = useEnglishT()
-  if (growth.length === 0) return null
-  const delta = growth[growth.length - 1].total - growth[0].total
-  return (
-    <section className={st.card} aria-label={t.stats.growth}>
-      <div className={st.cardHead}>
-        <h2 className={st.cardTitle}>{t.stats.growth}</h2>
-        <span className={st.muted}>{t.stats.growthDelta(delta)}</span>
-      </div>
-      <div className={v.chart}>
-        <ResponsiveContainer width="100%" height={160}>
-          <AreaChart data={growth} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
-            <defs>
-              <linearGradient id="english-growth" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={CHART.primary} stopOpacity={0.28} />
-                <stop offset="100%" stopColor={CHART.primary} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis
-              dataKey="date"
-              tickFormatter={formatShortDay}
-              tick={{ fontSize: 12, fill: 'var(--fg-muted)' }}
-              axisLine={false}
-              tickLine={false}
-              interval="preserveStartEnd"
-              minTickGap={32}
-            />
-            <YAxis hide domain={[0, 'auto']} />
-            <Tooltip content={<GrowthTip />} cursor={{ stroke: 'var(--border-strong)' }} />
-            <Area
-              type="monotone"
-              dataKey="total"
-              stroke={CHART.primary}
-              strokeWidth={2}
-              fill="url(#english-growth)"
-              isAnimationActive={false}
-              activeDot={{ r: 4, strokeWidth: 2, stroke: 'var(--bg-elev)' }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
     </section>
   )
 }

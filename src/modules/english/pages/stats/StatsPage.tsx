@@ -9,7 +9,7 @@ import { englishKeys, fetchStats, type Stats } from '@/modules/english/api/engli
 import { useEnglishT } from '@/modules/english/i18n'
 import s from '../EnglishPages.module.scss'
 import st from './StatsPage.module.scss'
-import { AccuracyCard, GrowthCard, TodayCard, VocabularyCard } from './StatsVisuals'
+import { TodayCard, VocabularyCard } from './StatsVisuals'
 
 /** Horizontal bars, one row per item; the count is always written beside the bar. */
 function BarRows({ title, rows }: { title: string; rows: { key: string; label: string; sub?: string; count: number }[] }) {
@@ -98,8 +98,8 @@ function Upcoming({ days }: { days: Stats['upcoming'] }) {
 
 /**
  * English → Statistics, drawn rather than listed: today's stack as a ring,
- * how well words stick, the vocabulary split by level, how it has grown, the
- * last two weeks of answers and what the next week brings.
+ * the vocabulary split by level, the last two weeks of answers and what the
+ * next week brings.
  */
 export function StatsPage() {
   const t = useEnglishT()
@@ -138,11 +138,7 @@ export function StatsPage() {
     <div className={s.page}>
       <div className={st.pair}>
         <TodayCard stats={data} />
-        <AccuracyCard stats={data} />
-      </div>
-      <div className={st.pair}>
         <VocabularyCard stats={data} />
-        <GrowthCard growth={data.growth ?? []} />
       </div>
       <div className={st.pair}>
         <Activity days={data.activity} />
