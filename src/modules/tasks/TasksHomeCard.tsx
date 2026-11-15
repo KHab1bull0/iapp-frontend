@@ -23,7 +23,7 @@ export function TasksHomeCard() {
   const today = useToday()
   const quickAdd = useQuickAdd()
   const editor = useTaskEditor()
-  const { complete, chooseKind, pending, feedback } = useCompleteTask(today)
+  const { complete, completeMin, pending, feedback } = useCompleteTask(today)
   // Same key as the Today page, so the two share one request and stay in step.
   const { data, isError } = useQuery({
     queryKey: tasksKeys.today(today),
@@ -76,7 +76,7 @@ export function TasksHomeCard() {
                 busy={pending.has(t.id)}
                 onToggle={complete}
                 onOpen={editor.openEdit}
-                onMore={t.isHabit ? chooseKind : undefined}
+                onMin={completeMin}
               />
             ))}
           </div>

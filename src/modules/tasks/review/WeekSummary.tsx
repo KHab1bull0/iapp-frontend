@@ -1,16 +1,14 @@
-import clsx from 'clsx'
 import { Flame, Plus } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { ProgressBar, ProgressRing } from '@/core/components/ui/Progress'
-import { formatSigned } from '@/core/lib/format'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import type { WeekReview } from '@/modules/tasks/api/reviews'
 import { useReviewT } from './i18n'
 import s from './Review.module.scss'
 
-function Figures({ items, className }: { items: { label: string; value: string; tone?: 'success' | 'danger' }[]; className?: string }) {
+function Figures({ items }: { items: { label: string; value: string; tone?: 'danger' }[] }) {
   return (
-    <dl className={clsx(s.figures, className)}>
+    <dl className={s.figures}>
       {items.map(({ label, value, tone }) => (
         <div key={label}>
           <dt>{label}</dt>
@@ -56,7 +54,6 @@ function TasksCard({ tasks }: { tasks: WeekReview['tasks'] }) {
               { label: t.done, value: String(tasks.done) },
               { label: t.due, value: String(tasks.due) },
               { label: t.missed, value: String(tasks.missed), tone: tasks.missed > 0 ? 'danger' : undefined },
-              { label: t.rest, value: String(tasks.rest) },
             ]}
           />
         </>
@@ -100,37 +97,12 @@ function HabitsCard({ habits }: { habits: WeekReview['habits'] }) {
   )
 }
 
-/** What the week added up to: tasks, habits, English and money. */
+/** What the week added up to: its tasks and its habits. */
 export function WeekSummary({ week }: { week: WeekReview }) {
-  const t = useReviewT()
   return (
     <>
       <TasksCard tasks={week.tasks} />
       <HabitsCard habits={week.habits} />
-      <div className={s.pair}>
-        <section className={s.card} aria-label={t.english.title}>
-          <h2 className={s.cardTitle}>{t.english.title}</h2>
-          <Figures
-            className={s.three}
-            items={[
-              { label: t.english.answered, value: String(week.english.answered) },
-              { label: t.english.remembered, value: String(week.english.remembered) },
-              { label: t.english.added, value: String(week.english.added) },
-            ]}
-          />
-        </section>
-        <section className={s.card} aria-label={t.finance.title}>
-          <h2 className={s.cardTitle}>{t.finance.title}</h2>
-          {/* Signed as well as coloured: colour alone carries no meaning. */}
-          <Figures
-            className={s.two}
-            items={[
-              { label: t.finance.income, value: formatSigned(week.finance.income, 'income'), tone: 'success' },
-              { label: t.finance.expense, value: formatSigned(week.finance.expense, 'expense'), tone: 'danger' },
-            ]}
-          />
-        </section>
-      </div>
     </>
   )
 }

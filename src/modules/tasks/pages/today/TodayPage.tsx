@@ -35,7 +35,7 @@ export function TodayPage() {
   const m = useTasksT()
   const quickAdd = useQuickAdd()
   const editor = useTaskEditor()
-  const { complete, chooseKind, undo, pending, feedback } = useCompleteTask(today)
+  const { complete, completeMin, undo, pending, feedback } = useCompleteTask(today)
   const toTomorrow = useMoveToTomorrow(today)
   // Open by default: done tasks stay in view (and can be unticked) unless folded away.
   const [showDone, setShowDone] = useState(true)
@@ -73,17 +73,16 @@ export function TodayPage() {
       onToggle={complete}
       onTomorrow={toTomorrow}
       onOpen={editor.openEdit}
-      onMore={t.isHabit ? chooseKind : undefined}
+      onMin={completeMin}
     />
   )
 
-  const doneRow = ({ completionId, task, kind }: (typeof allDone)[number], key = completionId) => (
+  const doneRow = ({ completionId, task }: (typeof allDone)[number], key = completionId) => (
     <TaskRow
       key={key}
       task={task}
       today={today}
       done
-      rested={kind === 'rest'}
       onToggle={() => undo(completionId)}
       onOpen={editor.openEdit}
     />

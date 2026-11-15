@@ -1,64 +1,6 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
-// ── Check-in sheet ──────────────────────────────────────────────────────
-
-.choices {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.choice {
-  @include row;
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-elev);
-  color: var(--fg-strong);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color $t-fast, background $t-fast;
-
-  &:hover:not(:disabled) { border-color: var(--primary); background: var(--hover-bg); }
-  &:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
-}
-
-.choiceIcon {
-  @include icon-tile(var(--tile-md));
-  background: var(--primary-soft);
-  color: var(--primary);
-}
-
-// Rest is neither done nor missed: a neutral tile.
-.choiceIconMuted {
-  @include icon-tile(var(--tile-md));
-  background: var(--slate-100);
-  color: var(--fg-muted);
-
-  :global(.theme-dark) & { background: var(--slate-800); }
-}
-
-.choiceText {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.choiceLabel {
-  font-size: var(--fs-ui);
-  line-height: var(--lh-ui);
-  font-weight: 500;
-}
-
-.choiceSub {
-  font-size: var(--fs-meta);
-  line-height: var(--lh-meta);
-  color: var(--fg-muted);
-}
-
 // ── Celebration ─────────────────────────────────────────────────────────
 
 // Where the toasts appear (toast.module.scss), so it reads as one of them.

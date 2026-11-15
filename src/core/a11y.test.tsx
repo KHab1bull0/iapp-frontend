@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import axe from 'axe-core'
@@ -60,7 +60,7 @@ vi.mock('@/core/notifications/api', async (orig) => ({
   fetchPublicKey: vi.fn().mockResolvedValue('BDxrGylovc0doQJluj-uAqzxpEHkJfyjVfondqgBadfog-sk7pdjyiIM6SHz6wFBAmN-6The2oDbxDIQbulnM8g'),
   fetchSettings: vi.fn().mockResolvedValue({
     tasksDigest: true, tasksDigestAt: '08:00', englishReminder: false, englishReminderAt: '20:00',
-    habitReminders: true, atRiskReminder: true, atRiskReminderAt: '19:00', weeklyReview: true, weeklyReviewAt: '20:00',
+    habitReminders: true,
   }),
   fetchDevices: vi.fn().mockResolvedValue([
     { id: 'd1', userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15', createdAt: '2026-11-01T08:00:00Z', lastSuccessAt: '2026-11-09T08:00:00Z' },
@@ -89,7 +89,7 @@ describe('accessibility (axe)', () => {
     expect(await violations(container)).toEqual([])
   })
 
-  test('Tasks → Today with habits: streak, stage, at risk, the check-in sheet', async () => {
+  test('Tasks → Today with habits: streak, stage, at risk, the two-minute button', async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
     qc.setQueryData(tasksKeys.today(todayYmd()), {
       overdue: [],
@@ -97,10 +97,8 @@ describe('accessibility (axe)', () => {
       doneToday: [{ completionId: 'c', task: habit('walk') }],
     })
     const { container } = withProviders(<TodayPage />, qc)
-    fireEvent.click(await screen.findByRole('button', { name: 'More ways to check in READ' }))
-    await screen.findByRole('dialog')
+    await screen.findByRole('button', { name: 'READ: two-minute version (Read 1 page)' })
     expect(await violations(container)).toEqual([])
-    expect(await violations(document.querySelector('[role=dialog]') as HTMLElement)).toEqual([])
   })
 
   test('the task form with the habit part open', async () => {
@@ -116,10 +114,8 @@ describe('accessibility (axe)', () => {
     qc.setQueryData(reviewKeys.week(week, today), {
       weekStart: week,
       weekEnd: week,
-      tasks: { done: 3, due: 4, rate: 75, missed: 1, rest: 0 },
+      tasks: { done: 3, due: 4, rate: 75, missed: 1 },
       habits: [{ taskId: 't', title: 'Read', done: 3, due: 4, streak: 5 }],
-      english: { answered: 10, remembered: 8, added: 2 },
-      finance: { income: 100, expense: 50 },
       answers: { wentWell: 'Gym', wentBadly: null, change: null },
     })
     qc.setQueryData(reviewKeys.list(today), [{ weekStart: '2026-01-05', rate: 50, answered: true }])

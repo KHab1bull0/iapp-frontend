@@ -56,6 +56,5 @@ export function useSwipe({ onRight, onLeft }: Options) {
     onPointerCancel: reset,
   }
 
-  // `cancel`: another gesture (a long-press) took this touch over; let go of it.
-  return { dx, armed: Math.abs(dx) >= THRESHOLD, handlers, cancel: reset }
+  return { dx, armed: Math.abs(dx) >= THRESHOLD, handlers }
 }

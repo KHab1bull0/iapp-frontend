@@ -3,8 +3,8 @@ import api from '@/core/api/axios'
 export type RepeatMode = 'none' | 'schedule' | 'after_done'
 export type RepeatUnit = 'day' | 'week' | 'month'
 
-/** How a habit was checked in: in full, its two-minute version, or a planned rest day. */
-export type CompletionKind = 'full' | 'min' | 'rest'
+/** How a habit was checked in: in full, or its two-minute version. */
+export type CompletionKind = 'full' | 'min'
 
 /** A habit's milestone: a streak length to reach and the user's own, known reward for it. */
 export interface TaskStage {
@@ -27,8 +27,6 @@ export interface HabitProgress {
   best: number
   /** The last due occurrence was missed: missing today too ends the streak. */
   atRisk: boolean
-  /** Rest days left this calendar month. */
-  restLeft: number
   /** The lowest stage not yet reached; null once all are (or there are none). */
   stage: NextStage | null
   /** Every done completion (full + min): the "votes" for who you are becoming. */
@@ -94,10 +92,6 @@ export interface CompleteResult {
 export interface TodayTasks {
   overdue: Task[]
   today: Task[]
-  /**
-   * `kind` is not in the spec's contract (yet); when the server sends it, a
-   * habit rested today reads "rest day" instead of done.
-   */
   doneToday: { completionId: string; task: Task; kind?: CompletionKind }[]
 }
 
@@ -107,13 +101,8 @@ export interface TasksSummary {
   doneToday: number
 }
 
-/** How a task repeats, as the stats group it. */
-export type RepeatKind = 'once' | 'daily' | 'weekly' | 'monthly'
-export const REPEAT_KINDS: RepeatKind[] = ['once', 'daily', 'weekly', 'monthly']
-
 export interface StatsTotals {
   total: number
-  thisMonth: number
   /** Days in a row with a completion, ending today (or yesterday, before today is done). */
   currentStreak: number
   bestStreak: number
@@ -121,37 +110,20 @@ export interface StatsTotals {
   lastDoneOn: string | null
 }
 
-/** One day or month: how many times it was done then, and the running total so far. */
-export interface StatsPoint {
+/** One day: how many times it was done. */
+export interface StatsDay {
+  day: string
   count: number
-  cumulative: number
 }
 
-/**
- * One task's chart line: up a point on a day done, down a point for each day
- * it was due and not done (can go below zero). A month: as of its last day.
- */
-export interface ScorePoint {
-  score: number
-  /** Days due and not done (one day: 0 or 1). */
-  missed: number
-}
-
-/** A habit's day: how many of its completions were the two-minute version, and whether it was a rest day. */
-export interface HabitDayPoint {
-  min?: number
-  rest?: boolean
-}
-
+/** One task's stats; a habit's days also say how many were the two-minute version. */
 export interface TaskStats extends StatsTotals {
-  daily: (StatsPoint & ScorePoint & HabitDayPoint & { day: string })[]
-  monthly: (StatsPoint & ScorePoint & { month: string })[]
+  daily: (StatsDay & { min?: number })[]
 }
 
+/** Every task together. */
 export interface OverallTaskStats extends StatsTotals {
-  byKind: Record<RepeatKind, number>
-  daily: (StatsPoint & Record<RepeatKind, number> & { day: string })[]
-  monthly: (StatsPoint & Record<RepeatKind, number> & { month: string })[]
+  daily: StatsDay[]
 }
 
 /**
@@ -239,7 +211,7 @@ export async function fetchTasksSummary(today: string): Promise<TasksSummary> {
   return data
 }
 
-/** Days of daily history the stats screens ask for: 17 weeks of heatmap, the last 30 also charted. */
+/** Days of daily history the stats screens ask for: 17 weeks of heatmap. */
 export const STATS_DAYS = 119
 
 export async function fetchTaskStats(id: string, today: string, days = STATS_DAYS): Promise<TaskStats> {

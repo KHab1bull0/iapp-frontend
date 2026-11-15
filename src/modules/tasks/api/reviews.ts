@@ -27,11 +27,8 @@ export interface WeekReview {
     /** 0..100: occurrences done out of those due. */
     rate: number
     missed: number
-    rest: number
   }
   habits: ReviewHabit[]
-  english: { answered: number; remembered: number; added: number }
-  finance: { income: number; expense: number }
   answers: ReviewAnswers | null
 }
 

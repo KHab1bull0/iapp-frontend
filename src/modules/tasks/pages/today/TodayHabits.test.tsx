@@ -19,7 +19,7 @@ vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()
 
 const READ = habit('read')
 const result = (over: Partial<CompleteResult> = {}): CompleteResult => ({
-  task: { ...READ, progress: progress({ streak: 5, total: 22, restLeft: 3 }) },
+  task: { ...READ, progress: progress({ streak: 5, total: 22 }) },
   completionId: 'c1',
   streak: { current: 5, best: 9 },
   stageReached: null,
@@ -37,7 +37,7 @@ function renderPage() {
   )
 }
 
-const today = (tasks: Task[], doneToday: { completionId: string; task: Task; kind?: 'full' | 'min' | 'rest' }[] = []) =>
+const today = (tasks: Task[], doneToday: { completionId: string; task: Task; kind?: 'full' | 'min' }[] = []) =>
   api.fetchToday.mockResolvedValue({ overdue: [], today: tasks, doneToday })
 
 describe('TodayPage: habits', () => {
@@ -59,6 +59,8 @@ describe('TodayPage: habits', () => {
     expect(within(section).getByText('READ')).toBeTruthy()
     expect(within(section).queryByText('CHORE')).toBeNull()
     expect(within(section).getByText('Streak: 4 days')).toBeTruthy()
+    // On screen just the count towards the next stage; the stage is spelled out for screen readers.
+    expect(within(section).getByText('4/10')).toBeTruthy()
     expect(within(section).getByText('Stage 1 4/10')).toBeTruthy()
     // Not at risk: no warning.
     expect(screen.queryByText('Get back to it today')).toBeNull()
@@ -95,44 +97,22 @@ describe('TodayPage: habits', () => {
     expect(await screen.findByText('22 times in all')).toBeTruthy()
   })
 
-  test('"⋯" offers in full, the two-minute version and a rest day', async () => {
+  test('a habit with a two-minute version has its own small button beside the tick', async () => {
+    today([READ, habit('nap', { minVersion: null })])
     renderPage()
-    fireEvent.click(await screen.findByRole('button', { name: 'More ways to check in READ' }))
-    const sheet = await screen.findByRole('dialog')
-    expect(within(sheet).getByRole('button', { name: 'In full' })).toBeTruthy()
-    expect(within(sheet).getByRole('button', { name: /Rest day \(3 left\)/ })).toBeTruthy()
-    fireEvent.click(within(sheet).getByRole('button', { name: 'Two-minute version: Read 1 page' }))
+    const min = await screen.findByRole('button', { name: 'READ: two-minute version (Read 1 page)' })
+    expect(min.textContent).toBe('Two-minute')
+    // Without one, only the tick.
+    expect(screen.getAllByText('Two-minute')).toHaveLength(1)
+    fireEvent.click(min)
     await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('read', todayYmd(), todayYmd(), { kind: 'min' }))
     // The two-minute version is done too: a vote.
     expect(await screen.findByText('+1 vote: I am a reader')).toBeTruthy()
+    // No sheet of choices any more.
+    expect(screen.queryByRole('dialog')).toBeNull()
   })
 
-  test('a rest day keeps the streak quietly and says how many are left', async () => {
-    api.completeTask.mockResolvedValue(result({ task: { ...READ, progress: progress({ restLeft: 2 }) }, streak: { current: 4, best: 9 } }))
-    renderPage()
-    fireEvent.click(await screen.findByRole('button', { name: 'More ways to check in READ' }))
-    fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: /Rest day/ }))
-    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('read', todayYmd(), todayYmd(), { kind: 'rest' }))
-    expect(await screen.findByText('“READ”: rest day. 2 left this month')).toBeTruthy()
-    expect(screen.queryByText('+1 vote: I am a reader')).toBeNull()
-  })
-
-  test('no rest days left: the choice is off; a refused rest day says why', async () => {
-    today([habit('read', { progress: progress({ restLeft: 0 }) }), habit('nap')])
-    api.completeTask.mockRejectedValue({ response: { data: { message: 'errors.rest_limit' } } })
-    renderPage()
-    fireEvent.click(await screen.findByRole('button', { name: 'More ways to check in READ' }))
-    const rest = within(await screen.findByRole('dialog')).getByRole('button', { name: /Rest day \(0 left\)/ })
-    expect((rest as HTMLButtonElement).disabled).toBe(true)
-    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' })
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
-
-    fireEvent.click(screen.getByRole('button', { name: 'More ways to check in NAP' }))
-    fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: /Rest day/ }))
-    expect(await screen.findByText('No rest days left this month (4 a month)')).toBeTruthy()
-  })
-
-  test('a long touch opens the same choices; a short tap opens the editor as before', async () => {
+  test('a short tap on the title opens the editor; a long touch does nothing special', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     try {
       renderPage()
@@ -140,26 +120,24 @@ describe('TodayPage: habits', () => {
       fireEvent.pointerDown(title, { pointerType: 'touch', pointerId: 1, clientX: 10, clientY: 10 })
       act(() => void vi.advanceTimersByTime(600))
       fireEvent.pointerUp(title, { pointerType: 'touch', pointerId: 1 })
-      fireEvent.click(title)
-      const sheet = await screen.findByRole('dialog')
-      expect(within(sheet).getByRole('button', { name: 'In full' })).toBeTruthy()
-      // The click after the hold didn't tick it either.
+      expect(screen.queryByRole('dialog')).toBeNull()
       expect(api.completeTask).not.toHaveBeenCalled()
     } finally {
       vi.useRealTimers()
     }
   })
 
-  test('done habits stay in their section, ticked; a rest day reads as one', async () => {
+  test('done habits stay in their section, ticked, without the two-minute button', async () => {
     today([], [
       { completionId: 'c7', task: habit('read', { progress: progress({ streak: 5 }) }) },
-      { completionId: 'c8', task: habit('nap'), kind: 'rest' },
+      { completionId: 'c8', task: habit('nap'), kind: 'min' },
     ])
     renderPage()
     const section = (await screen.findByRole('heading', { name: 'Habits' })).closest('section')!
     expect(within(section).getByText('2/2')).toBeTruthy()
     expect(within(section).getByRole('button', { name: 'Undo READ' })).toBeTruthy()
-    expect(within(section).getByText('Rest day')).toBeTruthy()
+    expect(within(section).getByRole('button', { name: 'Undo NAP' })).toBeTruthy()
+    expect(within(section).queryByText('Two-minute')).toBeNull()
     // Done habits don't also fill the Done group.
     expect(screen.queryByRole('heading', { name: /^Done/ })).toBeNull()
     expect(screen.getByText('Everything for today is done')).toBeTruthy()

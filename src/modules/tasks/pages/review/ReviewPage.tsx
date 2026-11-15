@@ -43,7 +43,7 @@ function WeekStepper({ weekStart, current, onChange }: { weekStart: string; curr
 }
 
 /**
- * Tasks → Weekly review: how the week went (tasks, habits, English, money),
+ * Tasks → Weekly review: how the week went (tasks and habits),
  * three short questions about it, and the weeks before. The week is in the
  * URL (`?week=`, any day of it), so a past week can be linked and reopened.
  */

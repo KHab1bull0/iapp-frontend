@@ -19,7 +19,6 @@ export const reviewMessages = defineMessages(
       done: 'Bajarildi',
       due: 'Rejada',
       missed: "O'tkazildi",
-      rest: 'Dam olish',
       none: "Bu haftada vazifa bo'lmagan",
       noneSub: "Takrorlanadigan vazifa qo'shsangiz, hafta oxirida shu yerda natijasi chiqadi.",
       add: "Vazifa qo'shish",
@@ -30,17 +29,6 @@ export const reviewMessages = defineMessages(
       doneOfLabel: (done: number, due: number) => `${due} tadan ${done} tasi bajarildi`,
       streak: (n: number) => `Seriya: ${n}`,
       none: "Hali odat yo'q",
-    },
-    english: {
-      title: 'Ingliz tili',
-      answered: 'Takrorlandi',
-      remembered: 'Esladingiz',
-      added: "Qo'shildi",
-    },
-    finance: {
-      title: 'Moliya',
-      income: 'Kirim',
-      expense: 'Chiqim',
     },
     questions: {
       title: 'Savollar',
@@ -84,7 +72,6 @@ export const reviewMessages = defineMessages(
       done: 'Done',
       due: 'Planned',
       missed: 'Missed',
-      rest: 'Rest',
       none: 'No tasks this week',
       noneSub: 'Add a repeating task and its week shows up here.',
       add: 'Add a task',
@@ -95,17 +82,6 @@ export const reviewMessages = defineMessages(
       doneOfLabel: (done: number, due: number) => `${done} of ${due} done`,
       streak: (n: number) => `Streak: ${n}`,
       none: 'No habits yet',
-    },
-    english: {
-      title: 'English',
-      answered: 'Reviewed',
-      remembered: 'Remembered',
-      added: 'Added',
-    },
-    finance: {
-      title: 'Finance',
-      income: 'Income',
-      expense: 'Expense',
     },
     questions: {
       title: 'Questions',

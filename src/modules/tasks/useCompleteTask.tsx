@@ -14,7 +14,6 @@ import {
   type Task,
 } from './api/tasks'
 import { Celebration, type CelebrationData } from './components/habit/Celebration'
-import { CheckInSheet } from './components/habit/CheckInSheet'
 import { StageSheet, type StageReached } from './components/habit/StageSheet'
 import { isDaily } from './lib/repeat'
 import { useTasksT } from './i18n'
@@ -36,8 +35,7 @@ interface Opened<T> {
  * disabled meanwhile and a double tap can't complete one twice.
  *
  * A habit answers differently: a short celebration of the streak (no
- * toast), a sheet with the reward when a stage is reached, and `chooseKind`
- * opens its other ways to check in (two-minute version, rest day). Render
+ * toast), and a sheet with the reward when a stage is reached. Render
  * `feedback` once, where the hook is used.
  */
 export function useCompleteTask(today: string) {
@@ -47,7 +45,6 @@ export function useCompleteTask(today: string) {
   const [pending, setPending] = useState<Set<string>>(new Set())
   const [celebration, setCelebration] = useState<CelebrationData | null>(null)
   const [reached, setReached] = useState<Opened<StageReached> | null>(null)
-  const [choosing, setChoosing] = useState<Opened<Task> | null>(null)
   const dismiss = useCallback(() => setCelebration(null), [])
 
   const refresh = () => qc.invalidateQueries({ queryKey: tasksKeys.all })
@@ -59,12 +56,9 @@ export function useCompleteTask(today: string) {
   })
 
   // Say so at once; the lists catch up in the background.
-  function answer(result: CompleteResult, task: Task, kind: CompletionKind) {
+  function answer(result: CompleteResult, task: Task) {
     const undoAction = { label: m.undo, onClick: () => undo.mutate(result.completionId) }
     if (!task.isHabit) return toast(m.doneToast(task.title), 'success', undoAction)
-    if (kind === 'rest') {
-      return toast(m.habit.restToast(task.title, result.task.progress?.restLeft ?? 0), 'success', undoAction)
-    }
     const daily = isDaily(task)
     if (result.stageReached) {
       setCelebration(null)
@@ -105,9 +99,9 @@ export function useCompleteTask(today: string) {
         next.delete(task.id)
         return next
       }),
-    onSuccess: (result, { task, kind }) => {
+    onSuccess: (result, { task }) => {
       void refresh()
-      answer(result, task, kind)
+      answer(result, task)
     },
     onError: async (err) => {
       // Usually a stale copy (done elsewhere already): show the real state.
@@ -119,15 +113,6 @@ export function useCompleteTask(today: string) {
   const feedback = (
     <>
       <Celebration data={celebration} onUndo={(id) => undo.mutate(id)} onDismiss={dismiss} />
-      <CheckInSheet
-        task={choosing?.data ?? null}
-        open={choosing?.open ?? false}
-        onOpenChange={(open) => setChoosing((c) => c && { ...c, open })}
-        onPick={(task, kind) => {
-          setChoosing((c) => c && { ...c, open: false })
-          complete.mutate({ task, kind })
-        }}
-      />
       <StageSheet
         data={reached?.data ?? null}
         open={reached?.open ?? false}
@@ -137,9 +122,10 @@ export function useCompleteTask(today: string) {
   )
 
   return {
-    /** The tick: in full, unless the check-in sheet chose otherwise. */
-    complete: (task: Task, kind: CompletionKind = 'full') => complete.mutate({ task, kind }),
-    chooseKind: (task: Task) => setChoosing({ data: task, open: true }),
+    /** The tick: in full. */
+    complete: (task: Task) => complete.mutate({ task, kind: 'full' }),
+    /** A habit's two-minute version, from its button on the row. */
+    completeMin: (task: Task) => complete.mutate({ task, kind: 'min' }),
     undo: undo.mutate,
     pending,
     feedback,

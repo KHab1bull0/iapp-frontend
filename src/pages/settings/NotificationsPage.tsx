@@ -6,9 +6,7 @@ import {
   BellOff,
   BellRing,
   BookOpen,
-  CalendarRange,
   Clock,
-  Flame,
   ListChecks,
   Monitor,
   RefreshCw,
@@ -145,7 +143,7 @@ function Reminders() {
 
   if (settings.isPending) {
     // About as tall as the switches it stands in for, so the page doesn't jump.
-    return <Skeleton height="calc(var(--row-h) * 5)" radius="var(--radius-lg)" />
+    return <Skeleton height="calc(var(--row-h) * 4)" radius="var(--radius-lg)" />
   }
   if (settings.isError) {
     return (
@@ -160,8 +158,6 @@ function Reminders() {
     { on: 'tasksDigest', at: 'tasksDigestAt', icon: ListChecks, title: t.tasksDigest, hint: t.tasksDigestHint },
     // Each habit reminds at its own due time, so this one has no time row.
     { on: 'habitReminders', icon: Repeat, title: t.habitReminders, hint: t.habitRemindersHint },
-    { on: 'atRiskReminder', at: 'atRiskReminderAt', icon: Flame, title: t.atRiskReminder, hint: t.atRiskReminderHint },
-    { on: 'weeklyReview', at: 'weeklyReviewAt', icon: CalendarRange, title: t.weeklyReview, hint: t.weeklyReviewHint },
     { on: 'englishReminder', at: 'englishReminderAt', icon: BookOpen, title: t.englishReminder, hint: t.englishReminderHint },
   ]
 

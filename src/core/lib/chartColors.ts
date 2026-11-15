@@ -8,19 +8,10 @@
 export const CHART = {
   /** A running total or the module's own series. */
   primary: '#16A34A',
-  /** Lighter companion to `primary`: per-day bars under its line. */
-  primarySoft: '#86EFAC',
   income: '#22C55E',
   expense: '#EF4444',
   neutral: '#94A3B8',
 } as const
-
-/**
- * Distinct series colours, in order, for things with no colour of their own
- * (repeat types, levels). Chosen to stay apart for the common colour-vision
- * deficiencies; never rely on colour alone, always label the series too.
- */
-export const SERIES = ['#3B82F6', '#F59E0B', '#EC4899', '#14B8A6', '#8B5CF6', '#94A3B8'] as const
 
 /**
  * One hue, light to dark, for ordered steps of the same thing (English review
