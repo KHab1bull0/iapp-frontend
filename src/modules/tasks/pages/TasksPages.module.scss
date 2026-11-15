@@ -36,6 +36,7 @@
   overflow: hidden;
 }
 
+// A page's loading outline: its blocks spaced as the page spaces them.
 .skeletons {
   display: flex;
   flex-direction: column;
@@ -48,6 +49,13 @@
   flex-direction: row;
   align-items: center;
   gap: 16px;
+}
+
+.summaryText {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 
 .summaryTitle {

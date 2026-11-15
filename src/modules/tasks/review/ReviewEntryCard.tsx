@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { CalendarRange, ChevronRight } from 'lucide-react'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useToday } from '@/core/hooks/useToday'
 import { fetchWeek, reviewKeys } from '@/modules/tasks/api/reviews'
 import { useReviewT } from './i18n'
@@ -13,7 +14,7 @@ export function ReviewEntryCard() {
   const today = useToday()
   const weekStart = mondayOf(today)
   // The same query the review page opens with, so it opens already filled in.
-  const { data } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: reviewKeys.week(weekStart, today),
     queryFn: () => fetchWeek(weekStart, today),
   })
@@ -25,8 +26,12 @@ export function ReviewEntryCard() {
       </span>
       <span className={s.entryText}>
         <span className={s.entryTitle}>{t.title}</span>
-        {/* Nothing until it loads (or if it fails): the card still opens the page. */}
-        {data && <span className={s.entrySub}>{t.rate(data.tasks.rate)}</span>}
+        {/* Its line held while it loads; nothing if it fails: the card still opens the page. */}
+        {data ? (
+          <span className={s.entrySub}>{t.rate(data.tasks.rate)}</span>
+        ) : (
+          isPending && <Skeleton height="var(--lh-meta)" width={96} />
+        )}
       </span>
       <ChevronRight size={18} className={s.chevron} aria-hidden />
     </Link>

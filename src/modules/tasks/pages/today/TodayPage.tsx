@@ -12,6 +12,7 @@ import { fetchOverallStats, fetchToday, tasksKeys, type Task } from '@/modules/t
 import { Heatmap } from '@/modules/tasks/components/stats/Heatmap'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
+import { HeatmapSkeleton, LoadingLabel, SectionSkeleton } from '@/modules/tasks/components/skeletons'
 import { byTime } from '@/modules/tasks/lib/repeat'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
 import { useCompleteTask, useMoveToTomorrow } from '@/modules/tasks/useCompleteTask'
@@ -22,6 +23,20 @@ import s from '../TasksPages.module.scss'
 const habitOrder = (tasks: Task[]) => {
   const timed = byTime(tasks)
   return [...timed.filter((t) => t.progress?.atRisk), ...timed.filter((t) => !t.progress?.atRisk)]
+}
+
+/** The desktop rail's activity card while it loads (CSS hides the rail card on phones). */
+function RailSkeleton() {
+  const m = useTasksT()
+  return (
+    <section className={s.railCard} aria-label={m.stats.activity} aria-busy="true">
+      <LoadingLabel />
+      <div className={s.railHead}>
+        <Skeleton height="var(--lh-title)" width={80} />
+      </div>
+      <HeatmapSkeleton />
+    </section>
+  )
 }
 
 /**
@@ -36,7 +51,7 @@ export function TodayPage() {
   const quickAdd = useQuickAdd()
   const editor = useTaskEditor()
   const { complete, completeMin, undo, pending, feedback } = useCompleteTask(today)
-  const toTomorrow = useMoveToTomorrow(today)
+  const { toTomorrow, moving } = useMoveToTomorrow(today)
   // Open by default: done tasks stay in view (and can be unticked) unless folded away.
   const [showDone, setShowDone] = useState(true)
 
@@ -46,7 +61,7 @@ export function TodayPage() {
   })
   // The side rail's activity, desktop only (shared with the Statistics page).
   const isMobile = useIsMobile()
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: tasksKeys.overallStats(today),
     queryFn: () => fetchOverallStats(today),
     enabled: !isMobile,
@@ -69,7 +84,7 @@ export function TodayPage() {
       key={t.id}
       task={t}
       today={today}
-      busy={pending.has(t.id)}
+      busy={pending.has(t.id) || moving.has(t.id)}
       onToggle={complete}
       onTomorrow={toTomorrow}
       onOpen={editor.openEdit}
@@ -83,6 +98,7 @@ export function TodayPage() {
       task={task}
       today={today}
       done
+      busy={pending.has(completionId)}
       onToggle={() => undo(completionId)}
       onOpen={editor.openEdit}
     />
@@ -96,9 +112,24 @@ export function TodayPage() {
           action={{ label: m.retry, icon: RefreshCw, onClick: () => void refetch() }}
         />
       ) : isLoading ? (
-        <div className={s.skeletons}>
-          <Skeleton height={88} radius={16} />
-          <Skeleton height={180} radius={16} />
+        // The page's own layout, in outline: the day's progress (and on wide
+        // screens the activity rail), then the habits and today's tasks.
+        <div className={s.layout} aria-busy="true">
+          <LoadingLabel />
+          <aside className={s.rail}>
+            <div className={s.summary}>
+              <Skeleton width={56} height={56} radius="var(--radius-pill)" />
+              <div className={s.summaryText}>
+                <Skeleton height="var(--lh-title)" width="60%" />
+                <Skeleton height="var(--lh-meta)" width="40%" />
+              </div>
+            </div>
+            {!isMobile && <RailSkeleton />}
+          </aside>
+          <div className={s.main}>
+            <SectionSkeleton rows={2} />
+            <SectionSkeleton rows={3} index={1} />
+          </div>
         </div>
       ) : (
         <div className={s.layout}>
@@ -108,7 +139,7 @@ export function TodayPage() {
               <ProgressRing value={allDone.length} max={all} label={m.progressTitle(allDone.length, all)} size={56}>
                 {Math.round((allDone.length / all) * 100)}%
               </ProgressRing>
-              <div>
+              <div className={s.summaryText}>
                 <div className={s.summaryTitle}>
                   {allDone.length === all ? m.progressAllDone : m.progressTitle(allDone.length, all)}
                 </div>
@@ -116,6 +147,7 @@ export function TodayPage() {
               </div>
             </section>
           )}
+          {statsLoading && <RailSkeleton />}
           {stats && stats.total > 0 && (
             <section className={s.railCard} aria-label={m.stats.activity}>
               <div className={s.railHead}>

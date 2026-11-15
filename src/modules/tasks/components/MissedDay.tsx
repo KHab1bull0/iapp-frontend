@@ -67,24 +67,29 @@ export function MissedDay({ task, onDone }: { task: Task; onDone: () => void }) 
       </button>
 
       <Sheet open={open} onOpenChange={setOpen} title={t.missed.pick} description={t.missed.pickSub}>
-        <div className={s.sheet}>
+        {/* While the day saves, the sheet waits: no second day can go out. */}
+        <div className={s.sheet} aria-busy={mark.isPending || undefined}>
           <div className={s.quick}>
             <button
               type="button"
               className={s.chip}
               disabled={mark.isPending}
+              aria-busy={(mark.isPending && mark.variables === yesterday) || undefined}
               onClick={() => mark.mutate(yesterday)}
             >
-              {t.missed.yesterday}
+              {mark.isPending && mark.variables === yesterday ? t.missed.saving : t.missed.yesterday}
             </button>
+            {mark.isPending && mark.variables !== yesterday && <span className={s.saving}>{t.missed.saving}</span>}
           </div>
-          <Calendar
-            value={null}
-            onChange={(day) => !mark.isPending && mark.mutate(day)}
-            today={today}
-            min={since}
-            max={yesterday}
-          />
+          <div className={mark.isPending ? s.waiting : undefined}>
+            <Calendar
+              value={null}
+              onChange={(day) => !mark.isPending && mark.mutate(day)}
+              today={today}
+              min={since}
+              max={yesterday}
+            />
+          </div>
         </div>
       </Sheet>
     </>

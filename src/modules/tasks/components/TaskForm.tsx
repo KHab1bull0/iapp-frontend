@@ -90,9 +90,12 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
     onError: () => toast(t.form.deleteFailed, 'error'),
   })
 
+  // One request at a time: saving and deleting each hold the other back.
+  const busy = save.isPending || remove.isPending
+
   function submit(e: FormEvent) {
     e.preventDefault()
-    if (valid && !save.isPending) save.mutate()
+    if (valid && !busy) save.mutate()
   }
 
   // Switching to a weekly schedule starts from the chosen date's weekday.
@@ -249,21 +252,33 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
         {task && (
           <ConfirmDialog
             trigger={
-              <button type="button" className={s.btnDanger}>
-                {t.form.delete}
+              <button
+                type="button"
+                className={s.btnDanger}
+                disabled={busy}
+                aria-busy={remove.isPending || undefined}
+              >
+                {remove.isPending ? t.form.deleting : t.form.delete}
               </button>
             }
             title={t.form.deleteTitle(task.title)}
             description={t.form.deleteDesc}
             confirmLabel={t.form.delete}
             cancelLabel={t.form.cancel}
-            onConfirm={() => remove.mutate()}
+            onConfirm={() => {
+              if (!busy) remove.mutate()
+            }}
           />
         )}
         <button type="button" className={s.btnSecondary} onClick={onCancel}>
           {t.form.cancel}
         </button>
-        <button type="submit" className={s.btnPrimary} disabled={!valid || save.isPending}>
+        <button
+          type="submit"
+          className={s.btnPrimary}
+          disabled={!valid || busy}
+          aria-busy={save.isPending || undefined}
+        >
           {save.isPending ? t.form.saving : t.form.save}
         </button>
       </div>

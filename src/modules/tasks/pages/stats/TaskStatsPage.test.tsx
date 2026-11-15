@@ -77,4 +77,14 @@ describe('TaskStatsPage', () => {
     expect(await screen.findByText('Jami bajarilgan')).toBeTruthy()
     expect(screen.getByRole('region', { name: 'Faollik' })).toBeTruthy()
   })
+
+  test('while the numbers load: the tiles and heatmap in outline, the review card already there', () => {
+    api.fetchOverallStats.mockReturnValue(new Promise(() => {}))
+    reviews.fetchWeek.mockReturnValue(new Promise(() => {}))
+    renderPage()
+    const busy = screen.getByText('Loading…').closest('[aria-busy="true"]')
+    expect(busy).toBeTruthy()
+    expect(screen.getByRole('link', { name: /Weekly review/ })).toBeTruthy()
+    expect(screen.queryByText('Nothing done yet')).toBeNull()
+  })
 })

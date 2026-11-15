@@ -9,6 +9,7 @@ import { useToday } from '@/core/hooks/useToday'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { fetchToday, tasksKeys } from './api/tasks'
 import { TaskRow } from './components/TaskRow'
+import { LoadingLabel, RowsSkeleton } from './components/skeletons'
 import { byTime } from './lib/repeat'
 import { useCompleteTask } from './useCompleteTask'
 import { useTaskEditor } from './useTaskEditor'
@@ -41,21 +42,27 @@ export function TasksHomeCard() {
       to="/tasks"
       linkLabel={m.home.open}
       accessory={
-        all > 0 && (
-          <ProgressRing value={done} max={all} label={m.home.progress(done, all)} size={44} stroke={5}>
-            <span className={s.ringText}>
-              {done}/{all}
-            </span>
-          </ProgressRing>
+        // The ring's place is held while the day loads.
+        !data && !isError ? (
+          <Skeleton width={44} height={44} radius="var(--radius-pill)" />
+        ) : (
+          all > 0 && (
+            <ProgressRing value={done} max={all} label={m.home.progress(done, all)} size={44} stroke={5}>
+              <span className={s.ringText}>
+                {done}/{all}
+              </span>
+            </ProgressRing>
+          )
         )
       }
     >
       {isError ? (
         <div className={s.sub}>{m.home.failed}</div>
       ) : !data ? (
-        <div className={s.skeletons}>
-          <Skeleton height={20} width="80%" />
-          <Skeleton height={20} width="60%" />
+        // Today's first rows in outline, as the TaskRows will sit.
+        <div className={s.list} aria-busy="true">
+          <LoadingLabel />
+          <RowsSkeleton count={3} />
         </div>
       ) : due.length === 0 ? (
         <EmptyState

@@ -6,7 +6,9 @@ import { fetchOverallStats, tasksKeys } from '@/modules/tasks/api/tasks'
 import { Heatmap } from '@/modules/tasks/components/stats/Heatmap'
 import { StatGrid, StatTile } from '@/core/components/ui/StatTile'
 import { EmptyState } from '@/core/components/ui/EmptyState'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useQuickAdd } from '@/core/quickAdd/context'
+import { HeatmapSkeleton, LoadingLabel, StatTileSkeleton } from '@/modules/tasks/components/skeletons'
 import st from '@/modules/tasks/components/stats/TaskStats.module.scss'
 import { useTasksT } from '@/modules/tasks/i18n'
 import { ReviewEntryCard } from '@/modules/tasks/review/ReviewEntryCard'
@@ -30,7 +32,24 @@ export function TaskStatsPage() {
     )
   }
 
-  if (isLoading || !data) return <div className={s.page} />
+  if (isLoading || !data) {
+    // The page in outline. The review card loads on its own, so it is the real one.
+    return (
+      <div className={s.page} aria-busy="true">
+        <ReviewEntryCard />
+        <LoadingLabel />
+        <StatGrid columns={2}>
+          <StatTileSkeleton />
+          <StatTileSkeleton />
+        </StatGrid>
+        <div className={st.card}>
+          <Skeleton height="var(--lh-title)" width={80} />
+          <HeatmapSkeleton />
+          <Skeleton height="var(--lh-caption)" width="60%" />
+        </div>
+      </div>
+    )
+  }
 
   if (data.total === 0) {
     return (

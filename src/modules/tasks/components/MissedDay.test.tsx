@@ -70,4 +70,16 @@ describe('MissedDay', () => {
     renderIt(task({ dueDate: '2026-11-07' }))
     expect(screen.queryByRole('button', { name: /Mark a past day done/ })).toBeNull()
   })
+
+  test('while the day saves: the chip says so, and nothing else can go out', async () => {
+    api.completeTask.mockReturnValue(new Promise(() => {}))
+    renderIt(task())
+    fireEvent.click(screen.getByRole('button', { name: /Mark a past day done/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Yesterday' }))
+    const chip = (await screen.findByRole('button', { name: 'Saving…' })) as HTMLButtonElement
+    expect(chip.disabled).toBe(true)
+    expect(chip.getAttribute('aria-busy')).toBe('true')
+    fireEvent.click(screen.getByRole('gridcell', { name: /\D5\sNovember/ }))
+    expect(api.completeTask).toHaveBeenCalledTimes(1)
+  })
 })

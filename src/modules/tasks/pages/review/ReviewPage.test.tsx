@@ -93,7 +93,8 @@ describe('ReviewPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Previous week' }))
     expect(where()).toBe(`?week=${prev}`)
     await waitFor(() => expect(api.fetchWeek).toHaveBeenCalledWith(prev, today))
-    expect(screen.getByText(weekRange(prev))).toBeTruthy()
+    // The stepper names it (the past weeks list, which stays on screen, does too).
+    expect(within(screen.getByRole('group', { name: 'Week' })).getByText(weekRange(prev))).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Next week' }))
     // Back on this week: the plain URL.
@@ -156,6 +157,37 @@ describe('ReviewPage', () => {
     expect(screen.getByRole('button', { name: 'Add a task' })).toBeTruthy()
     expect(screen.getByText('No habits yet')).toBeTruthy()
     expect(await screen.findByText('No past weeks yet')).toBeTruthy()
+  })
+
+  test('first load: the page in outline under its heading and stepper', () => {
+    api.fetchWeek.mockReturnValue(new Promise(() => {}))
+    api.fetchReviews.mockReturnValue(new Promise(() => {}))
+    renderPage()
+    expect(screen.getByText('Loading the week…').closest('[aria-busy="true"]')).toBeTruthy()
+    expect(screen.queryByLabelText('What went well?')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Previous week' })).toBeTruthy()
+    const past = screen.getByRole('region', { name: 'Past weeks' })
+    expect(past.getAttribute('aria-busy')).toBe('true')
+    expect(within(past).getByText('Loading past weeks…')).toBeTruthy()
+  })
+
+  test('stepping keeps the week on screen, quieter and out of reach, until the next one lands', async () => {
+    renderPage()
+    await screen.findByRole('progressbar', { name: 'Done: 75%' })
+    let resolve!: (w: WeekReview) => void
+    api.fetchWeek.mockImplementationOnce(() => new Promise((r) => (resolve = r)))
+    fireEvent.click(screen.getByRole('button', { name: 'Previous week' }))
+
+    // The week before, not outlines: its numbers and questions stay, inert, while the next loads.
+    const busy = (await screen.findByText('Loading the week…')).closest('[aria-busy="true"]')
+    expect(busy).toBeTruthy()
+    expect(screen.getByRole('progressbar', { name: 'Done: 75%' })).toBeTruthy()
+    expect(screen.getByLabelText('What went well?').closest('[inert]')).toBeTruthy()
+
+    resolve(week(prev, { tasks: { done: 3, due: 6, rate: 50, missed: 3 } }))
+    expect(await screen.findByRole('progressbar', { name: 'Done: 50%' })).toBeTruthy()
+    expect(screen.queryByText('Loading the week…')).toBeNull()
+    expect(screen.getByLabelText('What went well?').closest('[inert]')).toBeNull()
   })
 
   test('a failed load offers a retry', async () => {

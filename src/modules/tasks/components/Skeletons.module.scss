@@ -1,0 +1,85 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+// Loading shapes for the tasks module. Each one takes the size of what it
+// stands in for (the same row, tile, card padding and line heights), so the
+// page doesn't move when the data arrives. The shimmer itself is the shared
+// Skeleton's; the app-wide reduced-motion rule stops it.
+
+// A TaskRow: title and meta lines, the round tick on the right.
+.row {
+  @include row;
+  background: var(--bg-elev);
+
+  & + & { border-top: 1px solid var(--border); }
+}
+
+.rowText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--lh-meta);
+  padding: 0 4px;
+}
+
+// A StatTile: label, the big value, its sub line.
+.tile {
+  @include surface;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--card-pad);
+}
+
+.tileValue { margin-top: 8px; }
+.tileSub { margin-top: 4px; }
+
+// The Heatmap's geometry (Heatmap.module.scss): a month row, 7 rows of
+// 13px squares 3px apart and the scroller's 4px; then the legend.
+.heatmap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.heatLegend { align-self: flex-end; }
+
+// A form field: its label, then the control.
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.action {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+// Data kept on screen while the next lot loads (the review's week stepper):
+// a little quieter, so it reads as "on its way", not frozen.
+.stale {
+  opacity: 0.6;
+  transition: opacity $t-base;
+}

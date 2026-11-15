@@ -11,6 +11,7 @@ export const reviewMessages = defineMessages(
     prevWeek: 'Oldingi hafta',
     nextWeek: 'Keyingi hafta',
     loadFailed: "Haftani yuklab bo'lmadi",
+    loading: 'Hafta yuklanmoqda…',
     retry: 'Qayta urinish',
     tasks: {
       title: 'Vazifalar',
@@ -50,6 +51,7 @@ export const reviewMessages = defineMessages(
       notAnswered: 'Javobsiz',
       open: (range: string, rate: number) => `${range} haftasini ochish: ${rate}%`,
       loadFailed: "Ro'yxatni yuklab bo'lmadi",
+      loading: "Ro'yxat yuklanmoqda…",
     },
     entry: {
       title: 'Haftalik xulosa',
@@ -64,6 +66,7 @@ export const reviewMessages = defineMessages(
     prevWeek: 'Previous week',
     nextWeek: 'Next week',
     loadFailed: "Couldn't load the week",
+    loading: 'Loading the week…',
     retry: 'Retry',
     tasks: {
       title: 'Tasks',
@@ -103,6 +106,7 @@ export const reviewMessages = defineMessages(
       notAnswered: 'Not answered',
       open: (range: string, rate: number) => `Open ${range}: ${rate}%`,
       loadFailed: "Couldn't load the list",
+      loading: 'Loading past weeks…',
     },
     entry: {
       title: 'Weekly review',

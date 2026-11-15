@@ -62,9 +62,10 @@ export function StageSheet({
             type="button"
             className={s.claim}
             disabled={claim.isPending}
+            aria-busy={claim.isPending || undefined}
             onClick={() => claim.mutate(data.stage.id)}
           >
-            <Gift size={18} aria-hidden /> {t.habit.claim}
+            <Gift size={18} aria-hidden /> {claim.isPending ? t.habit.claiming : t.habit.claim}
           </button>
         ) : (
           <button type="button" className={s.claim} onClick={() => onOpenChange(false)}>

@@ -69,9 +69,11 @@ export function HabitStages({ task }: { task: Task }) {
                   type="button"
                   className={s.claim}
                   disabled={claim.isPending}
+                  aria-busy={(claim.isPending && claim.variables === st.id) || undefined}
                   onClick={() => claim.mutate(st.id)}
                 >
-                  <Gift size={14} aria-hidden /> {t.habit.claim}
+                  <Gift size={14} aria-hidden />{' '}
+                  {claim.isPending && claim.variables === st.id ? t.habit.claiming : t.habit.claim}
                 </button>
               ) : st.reachedAt ? (
                 <span className={s.claimed}>{t.habit.reached}</span>

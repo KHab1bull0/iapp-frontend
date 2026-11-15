@@ -23,6 +23,22 @@ function haptic() {
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate?.(10)
 }
 
+/** The ids whose request is in flight: added on start, dropped once it settles. */
+function useInFlight() {
+  const [ids, setIds] = useState<Set<string>>(new Set())
+  const add = useCallback((id: string) => setIds((p) => new Set(p).add(id)), [])
+  const drop = useCallback(
+    (id: string) =>
+      setIds((p) => {
+        const next = new Set(p)
+        next.delete(id)
+        return next
+      }),
+    [],
+  )
+  return { ids, add, drop }
+}
+
 /** A sheet's content stays after it closes, so it doesn't empty while sliding away. */
 interface Opened<T> {
   data: T
@@ -31,8 +47,9 @@ interface Opened<T> {
 
 /**
  * Ticking a task off, with an Undo toast, shared by Today and the home card.
- * `pending` holds tasks whose completion is being saved, so their tick is
- * disabled meanwhile and a double tap can't complete one twice.
+ * `pending` holds tasks whose completion is being saved (by task id) and
+ * completions being undone (by completion id), so their tick is disabled
+ * meanwhile and a double tap can't complete or undo one twice.
  *
  * A habit answers differently: a short celebration of the streak (no
  * toast), and a sheet with the reward when a stage is reached. Render
@@ -42,7 +59,7 @@ export function useCompleteTask(today: string) {
   const m = useTasksT()
   const { lang } = useLang()
   const qc = useQueryClient()
-  const [pending, setPending] = useState<Set<string>>(new Set())
+  const { ids: pending, add, drop } = useInFlight()
   const [celebration, setCelebration] = useState<CelebrationData | null>(null)
   const [reached, setReached] = useState<Opened<StageReached> | null>(null)
   const dismiss = useCallback(() => setCelebration(null), [])
@@ -51,6 +68,8 @@ export function useCompleteTask(today: string) {
 
   const undo = useMutation({
     mutationFn: (completionId: string) => undoCompletion(completionId),
+    onMutate: add,
+    onSettled: (_r, _e, completionId) => drop(completionId),
     onSuccess: refresh,
     onError: () => toast(m.undoFailed, 'error'),
   })
@@ -91,14 +110,9 @@ export function useCompleteTask(today: string) {
       completeTask(task.id, today, task.dueDate, { kind }),
     onMutate: ({ task }) => {
       haptic()
-      setPending((p) => new Set(p).add(task.id))
+      add(task.id)
     },
-    onSettled: (_r, _e, { task }) =>
-      setPending((p) => {
-        const next = new Set(p)
-        next.delete(task.id)
-        return next
-      }),
+    onSettled: (_r, _e, { task }) => drop(task.id),
     onSuccess: (result, { task }) => {
       void refresh()
       answer(result, task)
@@ -126,20 +140,30 @@ export function useCompleteTask(today: string) {
     complete: (task: Task) => complete.mutate({ task, kind: 'full' }),
     /** A habit's two-minute version, from its button on the row. */
     completeMin: (task: Task) => complete.mutate({ task, kind: 'min' }),
-    undo: undo.mutate,
+    /** Unticks a completion; a second call while one is on its way does nothing. */
+    undo: (completionId: string) => {
+      if (!pending.has(completionId)) undo.mutate(completionId)
+    },
     pending,
     feedback,
   }
 }
 
-/** Swipe left on a row: put the task off until tomorrow, with Undo. */
+/**
+ * Swipe left on a row: put the task off until tomorrow, with Undo. `moving`
+ * holds the tasks being moved, so their row waits rather than taking another
+ * swipe or tick meanwhile.
+ */
 export function useMoveToTomorrow(today: string) {
   const m = useTasksT()
   const qc = useQueryClient()
   const refresh = () => qc.invalidateQueries({ queryKey: tasksKeys.all })
+  const { ids: moving, add, drop } = useInFlight()
 
   const move = useMutation({
     mutationFn: ({ task, to }: { task: Task; to: string | null }) => updateTask(task.id, { dueDate: to }),
+    onMutate: ({ task }) => add(task.id),
+    onSettled: (_r, _e, { task }) => drop(task.id),
     onSuccess: async (_r, { task, to }) => {
       await refresh()
       if (to === addDaysYmd(today, 1)) {
@@ -152,5 +176,10 @@ export function useMoveToTomorrow(today: string) {
     onError: () => toast(m.swipe.moveFailed, 'error'),
   })
 
-  return (task: Task) => move.mutate({ task, to: addDaysYmd(today, 1) })
+  return {
+    toTomorrow: (task: Task) => {
+      if (!moving.has(task.id)) move.mutate({ task, to: addDaysYmd(today, 1) })
+    },
+    moving,
+  }
 }
