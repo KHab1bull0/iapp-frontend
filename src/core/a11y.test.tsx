@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import axe from 'axe-core'
@@ -89,7 +89,7 @@ describe('accessibility (axe)', () => {
     expect(await violations(container)).toEqual([])
   })
 
-  test('Tasks → Today with habits: streak, stage, at risk, the check-in sheet', async () => {
+  test('Tasks → Today with habits: streak, stage, at risk, the two-minute button', async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
     qc.setQueryData(tasksKeys.today(todayYmd()), {
       overdue: [],
@@ -97,10 +97,8 @@ describe('accessibility (axe)', () => {
       doneToday: [{ completionId: 'c', task: habit('walk') }],
     })
     const { container } = withProviders(<TodayPage />, qc)
-    fireEvent.click(await screen.findByRole('button', { name: 'More ways to check in READ' }))
-    await screen.findByRole('dialog')
+    await screen.findByRole('button', { name: 'READ: two-minute version (Read 1 page)' })
     expect(await violations(container)).toEqual([])
-    expect(await violations(document.querySelector('[role=dialog]') as HTMLElement)).toEqual([])
   })
 
   test('the task form with the habit part open', async () => {

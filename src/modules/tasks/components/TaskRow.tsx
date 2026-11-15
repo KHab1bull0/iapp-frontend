@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import clsx from 'clsx'
-import { ArrowRight, Check, Flame, MoreHorizontal, Repeat, TriangleAlert } from 'lucide-react'
-import { chain, useLongPress } from '@/core/hooks/useLongPress'
+import { ArrowRight, Check, Flame, Repeat, TriangleAlert } from 'lucide-react'
 import { useSwipe } from '@/core/hooks/useSwipe'
 import type { Task } from '@/modules/tasks/api/tasks'
 import { describeRepeat, dueLabel, isDaily } from '@/modules/tasks/lib/repeat'
@@ -23,12 +22,10 @@ interface Props {
   /** Show "Tomorrow", "3 days overdue"… (All tasks); Today's own sections say it already. */
   showDue?: boolean
   /**
-   * A habit's other ways to check in (two-minute version, rest day): a
-   * long-press on touch, the "⋯" button with a mouse. The tick stays one tap = in full.
+   * A habit with a two-minute version: a small button beside the tick that
+   * checks it in that way. The tick stays one tap = in full.
    */
-  onMore?: (task: Task) => void
-  /** Done today as a rest day, not as done. */
-  rested?: boolean
+  onMin?: (task: Task) => void
 }
 
 export function TaskRow({
@@ -40,8 +37,7 @@ export function TaskRow({
   onOpen,
   onTomorrow,
   showDue = false,
-  onMore,
-  rested = false,
+  onMin,
 }: Props) {
   const t = useTasksT()
   const habit = task.isHabit ? task.progress : null
@@ -54,23 +50,13 @@ export function TaskRow({
   // Only a streak that changes while in view pops, not every row on load.
   const [firstStreak] = useState(habit?.streak)
   const bumped = habit !== null && habit.streak !== firstStreak
-  const more = onMore && onToggle && !done && !busy ? () => onMore(task) : undefined
+  const min = habit && task.minVersion && onMin && onToggle && !done ? () => onMin(task) : undefined
 
   const swipe = useSwipe({
     onRight: onToggle && !done && !busy ? () => onToggle(task) : undefined,
     onLeft: onTomorrow && !done ? () => onTomorrow(task) : undefined,
   })
-  // Held still: the sheet's choices. A held finger that then moves no longer swipes.
-  const press = useLongPress({ onLongPress: more, onHold: swipe.cancel })
-  const gestures = {
-    onPointerDown: chain(swipe.handlers.onPointerDown, press.handlers.onPointerDown),
-    onPointerMove: chain(swipe.handlers.onPointerMove, press.handlers.onPointerMove),
-    onPointerUp: chain(swipe.handlers.onPointerUp, press.handlers.onPointerUp),
-    onPointerCancel: chain(swipe.handlers.onPointerCancel, press.handlers.onPointerCancel),
-    onClickCapture: press.handlers.onClickCapture,
-    onContextMenu: press.handlers.onContextMenu,
-  }
-  const meta = task.dueTime || repeat || due || habit || rested
+  const meta = task.dueTime || repeat || due || habit
 
   return (
     <div className={clsx(s.wrap, swipe.dx !== 0 && s.swiping)}>
@@ -85,9 +71,9 @@ export function TaskRow({
         </div>
       )}
       <div
-        className={clsx(s.row, done && s.done, atRisk && s.atRisk, more && s.pressable, press.held && s.held)}
+        className={clsx(s.row, done && s.done, atRisk && s.atRisk)}
         style={swipe.dx ? { transform: `translateX(${swipe.dx}px)` } : undefined}
-        {...gestures}
+        {...swipe.handlers}
       >
         <button className={s.body} onClick={() => onOpen(task)}>
           <span className={s.title}>{task.title}</span>
@@ -106,14 +92,20 @@ export function TaskRow({
                 </span>
               )}
               {habit?.stage && (
-                <span className={s.stage}>{t.habit.stageProgress(habit.stage.position, habit.streak, habit.stage.days)}</span>
+                <span className={s.stage}>
+                  <span aria-hidden>
+                    {habit.streak}/{habit.stage.days}
+                  </span>
+                  <span className="sr-only">
+                    {t.habit.stageProgress(habit.stage.position, habit.streak, habit.stage.days)}
+                  </span>
+                </span>
               )}
               {atRisk && (
                 <span className={s.risk}>
                   <TriangleAlert size={12} aria-hidden /> {t.habit.atRisk}
                 </span>
               )}
-              {rested && <span>{t.habit.rested}</span>}
               {repeat && (
                 <span className={s.repeat}>
                   <Repeat size={12} aria-hidden /> {repeat}
@@ -137,17 +129,17 @@ export function TaskRow({
           </button>
         )}
 
-        {/* A mouse can't long-press: the same choices behind a visible button. */}
-        {more && (
+        {/* A hard day: the two-minute version, one tap, next to the tick. */}
+        {min && (
           <button
             type="button"
-            className={s.more}
-            onClick={more}
-            title={t.habit.more(task.title)}
-            aria-label={t.habit.more(task.title)}
-            aria-haspopup="dialog"
+            className={s.min}
+            onClick={min}
+            disabled={busy}
+            title={task.minVersion ?? undefined}
+            aria-label={t.habit.minLabel(task.title, task.minVersion ?? '')}
           >
-            <MoreHorizontal size={18} aria-hidden />
+            {t.habit.minButton}
           </button>
         )}
 
