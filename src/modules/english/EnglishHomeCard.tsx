@@ -8,6 +8,7 @@ import { useToday } from '@/core/hooks/useToday'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { englishKeys, fetchReview, fetchStats } from './api/english'
 import { useEnglishT } from './i18n'
+import { Loading } from './components/Loading'
 import s from './EnglishHomeCard.module.scss'
 
 /** Home: how many words wait, one tap into review, and the streak to keep. */
@@ -46,7 +47,9 @@ export function EnglishHomeCard() {
       {isError ? (
         <div className={s.sub}>{t.home.failed}</div>
       ) : !data ? (
-        <Skeleton height={48} radius={14} />
+        <Loading>
+          <Skeleton height={48} radius={14} />
+        </Loading>
       ) : n === 0 ? (
         <EmptyState
           compact

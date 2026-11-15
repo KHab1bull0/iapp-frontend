@@ -257,3 +257,14 @@
 
 // Where the next page of words is drawn, a little before the list ends.
 .sentinel { height: 1px; }
+
+// A placeholder row while the list loads: the row's shape, nothing to press.
+.rowSkeleton {
+  cursor: default;
+  pointer-events: none;
+}
+
+.badgeSkeleton {
+  flex-shrink: 0;
+  margin-top: 2px;
+}

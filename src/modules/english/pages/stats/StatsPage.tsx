@@ -2,13 +2,16 @@ import clsx from 'clsx'
 import { useQuery } from '@tanstack/react-query'
 import { BookOpen, Plus, RefreshCw } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { useToday } from '@/core/hooks/useToday'
 import { formatDay, formatWeekday } from '@/core/lib/format'
 import { englishKeys, fetchStats, type Stats } from '@/modules/english/api/english'
 import { useEnglishT } from '@/modules/english/i18n'
+import { Loading, SkeletonText } from '@/modules/english/components/Loading'
 import s from '../EnglishPages.module.scss'
 import st from './StatsPage.module.scss'
+import v from './StatsVisuals.module.scss'
 import { TodayCard, VocabularyCard } from './StatsVisuals'
 
 /** Horizontal bars, one row per item; the count is always written beside the bar. */
@@ -96,6 +99,88 @@ function Upcoming({ days }: { days: Stats['upcoming'] }) {
   )
 }
 
+/** Placeholder columns: a skyline of different heights, as days with answers would be. */
+const COLUMN_HEIGHTS = [30, 55, 20, 70, 45, 60, 25, 80, 50, 35, 65, 40, 75, 55]
+
+/** A legend-like list of rows: swatch, label, value. */
+function FactsSkeleton({ rows }: { rows: number }) {
+  return (
+    <ul className={v.facts}>
+      {Array.from({ length: rows }, (_, i) => (
+        <li key={i}>
+          <Skeleton width={10} height={10} radius={3} />
+          <span className={v.factLabel}>
+            <SkeletonText width={`${70 - i * 12}%`} line={20} />
+          </span>
+          <SkeletonText width={24} line={20} />
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function ColumnsSkeleton({ heights, wide }: { heights: number[]; wide?: boolean }) {
+  return (
+    <ol className={clsx(st.columns, wide && st.wide)}>
+      {heights.map((h, i) => (
+        <li key={i} className={st.column}>
+          {wide && <SkeletonText width={12} line={16} />}
+          <span className={st.stack}>
+            <Skeleton height={`${h}%`} radius="4px 4px 0 0" />
+          </span>
+          <SkeletonText width={16} line={16} />
+        </li>
+      ))}
+    </ol>
+  )
+}
+
+/**
+ * Statistics while they load: the same four cards in the same grid, each
+ * headed by its real title, the figures as blocks.
+ */
+function StatsSkeleton() {
+  const t = useEnglishT()
+  return (
+    <Loading className={s.page}>
+      <div className={st.pair}>
+        <section className={st.card}>
+          <div className={st.cardHead}>
+            <h2 className={st.cardTitle}>{t.stats.today}</h2>
+          </div>
+          <div className={v.ringRow}>
+            <Skeleton width={112} height={112} radius="50%" />
+            <FactsSkeleton rows={3} />
+          </div>
+          <Skeleton width={160} height="var(--control-md)" radius={12} />
+        </section>
+        <section className={st.card}>
+          <div className={st.cardHead}>
+            <h2 className={st.cardTitle}>{t.stats.vocabulary}</h2>
+            <SkeletonText width={80} line={18} />
+          </div>
+          <SkeletonText width={120} line={40} />
+          <SkeletonText width="45%" line={18} className={v.learned} />
+          <Skeleton height={14} radius={4} />
+          <FactsSkeleton rows={2} />
+        </section>
+      </div>
+      <div className={st.pair}>
+        <section className={st.card}>
+          <div className={st.cardHead}>
+            <h2 className={st.cardTitle}>{t.stats.activity}</h2>
+          </div>
+          <ColumnsSkeleton heights={COLUMN_HEIGHTS} />
+        </section>
+        <section className={st.card}>
+          <h2 className={st.cardTitle}>{t.stats.upcoming}</h2>
+          <ColumnsSkeleton heights={COLUMN_HEIGHTS.slice(0, 7)} wide />
+        </section>
+      </div>
+    </Loading>
+  )
+}
+
 /**
  * English → Statistics, drawn rather than listed: today's stack as a ring,
  * the vocabulary split by level, the last two weeks of answers and what the
@@ -118,7 +203,7 @@ export function StatsPage() {
     )
   }
 
-  if (isLoading || !data) return <div className={s.page} />
+  if (isLoading || !data) return <StatsSkeleton />
 
   if (data.total === 0) {
     return (

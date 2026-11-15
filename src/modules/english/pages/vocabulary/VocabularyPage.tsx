@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { BookOpen, Check, FileSpreadsheet, Plus, RefreshCw, Search, SlidersHorizontal } from 'lucide-react'
 import { Sheet } from '@/core/components/ui/Sheet'
 import { EmptyState } from '@/core/components/ui/EmptyState'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { useToday } from '@/core/hooks/useToday'
 import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
@@ -20,11 +21,54 @@ import { reviewLabel } from '@/modules/english/lib/review'
 import { useWordEditor } from '@/modules/english/useWordEditor'
 import { useEnglishT, useGroupName, useLevelName } from '@/modules/english/i18n'
 import { shelve } from '@/modules/english/lib/tags'
+import { ChipsSkeleton, Loading, SkeletonText } from '@/modules/english/components/Loading'
+import l from '@/modules/english/components/Loading.module.scss'
 import s from '../EnglishPages.module.scss'
 import v from './VocabularyPage.module.scss'
 
 /** One empty list, so "no data yet" is the same value every render. */
 const NO_WORDS: Word[] = []
+
+/** Widths for the placeholder rows, so they read as words of different lengths. */
+const ROW_WIDTHS = ['42%', '58%', '36%', '64%', '48%', '40%']
+
+/** The word list while it loads: the same section, surface and rows, as blocks. */
+function VocabularySkeleton() {
+  const t = useEnglishT()
+  return (
+    <Loading className={s.section}>
+      <div className={s.sectionHead}>
+        <h2 className={s.sectionTitle}>{t.vocab.words}</h2>
+        <SkeletonText width={24} line={16} />
+      </div>
+      <div className={s.list}>
+        {ROW_WIDTHS.map((w, i) => (
+          <div key={i} className={clsx(v.row, v.rowSkeleton)}>
+            <span className={v.top}>
+              <SkeletonText width={w} line={24} />
+              <Skeleton width={64} height={18} radius={999} className={v.badgeSkeleton} />
+            </span>
+            <SkeletonText width="55%" line={20} />
+            <span className={v.foot}>
+              <SkeletonText width={88} line={16} />
+              <SkeletonText width={56} line={16} />
+            </span>
+          </div>
+        ))}
+      </div>
+    </Loading>
+  )
+}
+
+/** The filter sheet's tag chips while the tags load: a shelf's name and its chips. */
+function FilterChipsSkeleton() {
+  return (
+    <div className={v.shelf}>
+      <SkeletonText width={96} line={16} />
+      <ChipsSkeleton widths={[72, 96, 64, 88, 80]} />
+    </div>
+  )
+}
 
 /** English → Vocabulary: every word, with its level and the day it comes up. */
 export function VocabularyPage() {
@@ -46,14 +90,19 @@ export function VocabularyPage() {
   const search = useDebouncedValue(filters.search, 300)
   const query = { ...filters, search: search?.trim() || undefined }
 
-  const { data: words = NO_WORDS, isLoading, isError, refetch } = useQuery({
+  // A new search keeps the last list up (dimmed) until its words arrive, rather than blanking it.
+  const { data: words = NO_WORDS, isLoading, isError, isPlaceholderData, refetch } = useQuery({
     queryKey: englishKeys.words(query),
     queryFn: () => fetchWords(query),
+    placeholderData: keepPreviousData,
   })
   const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
   const groupName = useGroupName()
-  const { data: tags = [] } = useQuery({ queryKey: englishKeys.tags(today), queryFn: () => fetchTags(today) })
-  const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
+  const { data: tags = [], isLoading: tagsLoading } = useQuery({
+    queryKey: englishKeys.tags(today),
+    queryFn: () => fetchTags(today),
+  })
+  const { data: groups = [], isLoading: groupsLoading } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
   const tagNames = new Map(tags.map((tg) => [tg.id, tg.name]))
 
   const levelName = (id: string | null) => {
@@ -116,7 +165,9 @@ export function VocabularyPage() {
 
       {isError ? (
         <EmptyState title={t.vocab.failed} action={{ label: t.retry, icon: RefreshCw, onClick: () => void refetch() }} />
-      ) : isLoading ? null : words.length === 0 ? (
+      ) : isLoading ? (
+        <VocabularySkeleton />
+      ) : words.length === 0 ? (
         <EmptyState
           icon={filtered ? Search : BookOpen}
           title={filtered ? t.vocab.noMatch : t.vocab.empty}
@@ -125,7 +176,7 @@ export function VocabularyPage() {
           secondary={filtered ? undefined : { label: t.imp.open, icon: FileSpreadsheet, to: '/english/import' }}
         />
       ) : (
-        <section className={s.section}>
+        <section className={clsx(s.section, isPlaceholderData && l.stale)} aria-busy={isPlaceholderData || undefined}>
           <div className={s.sectionHead}>
             <h2 className={s.sectionTitle}>{t.vocab.words}</h2>
             <span className={s.count}>{words.length}</span>
@@ -189,7 +240,9 @@ export function VocabularyPage() {
         <div className={v.filterBody}>
           <span className={v.filterLabel}>{t.vocab.tagFilter}</span>
           {tags.length > 0 && <p className={v.filterHint}>{t.vocab.filtersHint}</p>}
-          {tags.length === 0 ? (
+          {tagsLoading || groupsLoading ? (
+            <FilterChipsSkeleton />
+          ) : tags.length === 0 ? (
             <p className={v.filterEmpty}>{t.vocab.noTags}</p>
           ) : (
             shelve(tags, groups).map((shelf) => (

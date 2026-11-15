@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import clsx from 'clsx'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Flame, Layers, Plus, RefreshCw, Sparkles, Tag as TagIcon, Volume2, X } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { ProgressBar } from '@/core/components/ui/Progress'
 import { SegmentedControl } from '@/core/components/ui/SegmentedControl'
 import { useToday } from '@/core/hooks/useToday'
@@ -27,10 +28,14 @@ import { useEnglishT, useGroupName, useLevelName } from '@/modules/english/i18n'
 import { shelve } from '@/modules/english/lib/tags'
 import { useExtraNew } from '@/modules/english/lib/extraNew'
 import { frontSide, loadDirection, saveDirection, type Direction } from '@/modules/english/lib/direction'
+import { Loading, SkeletonText, Spinner } from '@/modules/english/components/Loading'
 import s from '../EnglishPages.module.scss'
 import r from './ReviewPage.module.scss'
 
 type Result = 'remembered' | 'forgot'
+
+/** Every answer in flight shares this key, so the last one to settle can refresh the lot. */
+const ANSWER_KEY = ['english', 'answer'] as const
 
 const canSpeak = () => typeof window !== 'undefined' && 'speechSynthesis' in window
 
@@ -59,8 +64,12 @@ export function ReviewPage() {
     queryKey: englishKeys.tags(today, extraNew),
     queryFn: () => fetchTags(today, extraNew),
   })
+  // Asked for alongside the tags rather than after them: the session needs
+  // the levels for its card and chips, and finds them on their way.
+  useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
 
-  if (isLoading) return null
+  // A tag in the address means a session; else most likely the tag cards.
+  if (isLoading) return tag ? <SessionSkeleton /> : <ChooserSkeleton />
   // The tag cards come first once a tag has words; until then, straight in.
   const worn = (tags ?? []).some((tg) => tg.count > 0)
   if (!tag && worn) return <TagChooser tags={tags ?? []} />
@@ -82,15 +91,28 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
   const [direction, setDirection] = useState<Direction>(loadDirection)
   // This session's answers, for the progress bar and the summary.
   const [answered, setAnswered] = useState<Record<Result, number>>({ remembered: 0, forgot: 0 })
+  // Words whose answer is on its way: kept off the stack even if a refetch
+  // lands before the server has them, and never sent twice. The ref guards
+  // clicks and keys that come before the next render; the state draws.
+  const sending = useRef(new Set<string>())
+  const [inFlight, setInFlight] = useState<ReadonlySet<string>>(() => new Set())
+  const track = (id: string, on: boolean) => {
+    if (on) sending.current.add(id)
+    else sending.current.delete(id)
+    setInFlight(new Set(sending.current))
+  }
 
   // "20 more today": extra new words on top of the daily number.
   const [extraNew, addExtraNew] = useExtraNew(today)
   const stackKey = englishKeys.review(today, tagId, extraNew)
-  const { data: stack = [], isLoading, isError, refetch } = useQuery({
+  const { data: fetched = [], isLoading: stackLoading, isError, refetch } = useQuery({
     queryKey: stackKey,
     queryFn: () => fetchReview(today, tagId, extraNew),
   })
-  const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
+  const stack = inFlight.size ? fetched.filter((w) => !inFlight.has(w.id)) : fetched
+  const { data: levels = [], isLoading: levelsLoading } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
+  // The card needs its level and the chips every level: wait for both.
+  const isLoading = stackLoading || levelsLoading
   const { data: settings } = useQuery({ queryKey: englishKeys.settings, queryFn: fetchEnglishSettings })
   const perDay = settings?.newPerDay || 20
 
@@ -100,22 +122,27 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
     return level.intervalDays > from ? 'remembered' : 'forgot'
   }
   const answer = useMutation({
+    mutationKey: ANSWER_KEY,
     mutationFn: ({ word, level }: { word: Word; level: Level }) => answerWord(word.id, level.id, today),
-    // Take the card off the stack straight away, so the next one shows at once
-    // (and hidden) instead of the answered one coming back while the request runs.
-    onMutate: ({ word, level }) => {
-      const result = resultOf(word, level)
-      setAnswered((a) => ({ ...a, [result]: a[result] + 1 }))
+    onSuccess: (_saved, { word }) => {
+      // A refetch that raced the answer may have put the word back; it is done.
       qc.setQueryData<Word[]>(stackKey, (stack) => stack?.filter((w) => w.id !== word.id))
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: englishKeys.all }),
-    onError: async (_e, { word, level }) => {
+    onError: (_e, { word, level }) => {
       const result = resultOf(word, level)
       setAnswered((a) => ({ ...a, [result]: a[result] - 1 }))
-      await refetch()
+      // Not saved: the card comes back on top, to answer again.
+      qc.setQueryData<Word[]>(stackKey, (stack) => (stack && !stack.some((w) => w.id === word.id) ? [word, ...stack] : stack))
       toast(t.review.saveFailed, 'error')
     },
+    onSettled: async (_d, _e, { word }) => {
+      track(word.id, false)
+      // Only the last answer still out refreshes: an earlier refetch would
+      // bring back words whose answers the server hasn't got yet.
+      if (qc.isMutating({ mutationKey: ANSWER_KEY }) === 1) await qc.invalidateQueries({ queryKey: englishKeys.all })
+    },
   })
+  const saving = inFlight.size > 0
 
   const current = stack[0]
   const side = current ? frontSide(direction, current.id) : 'en'
@@ -142,8 +169,18 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
     <MoreNewWords queued={summary.queued} perDay={perDay} onAdd={addExtraNew} />
   )
 
+  // The next card shows at once (and hidden): the answered one leaves the
+  // stack before the request goes, and the next can be answered while it runs.
   const choose = (target: Level | undefined) => {
-    if (current && revealed && target && !answer.isPending) answer.mutate({ word: current, level: target })
+    if (!current || !revealed || !target || sending.current.has(current.id)) return
+    const word = current
+    track(word.id, true)
+    const result = resultOf(word, target)
+    setAnswered((a) => ({ ...a, [result]: a[result] + 1 }))
+    // A fetch already under way would land with the word still in it.
+    void qc.cancelQueries({ queryKey: stackKey })
+    qc.setQueryData<Word[]>(stackKey, (stack) => stack?.filter((w) => w.id !== word.id))
+    answer.mutate({ word, level: target })
   }
 
   useEffect(() => {
@@ -169,7 +206,7 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
     )
   }
 
-  if (isLoading) return <div className={s.page} />
+  if (isLoading) return <SessionSkeleton />
 
   if (sessionOver) {
     return (
@@ -180,7 +217,12 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
           </div>
           <h1 className={r.summaryTitle}>{t.review.doneTitle}</h1>
           <p className={r.summarySub}>{t.review.doneSub(answered.remembered, answered.forgot)}</p>
-          {stats && (
+          {!stats ? (
+            <Loading className={r.summaryFacts}>
+              <Skeleton width={120} height={26} radius={999} />
+              <SkeletonText width={150} line={26} />
+            </Loading>
+          ) : (
             <div className={r.summaryFacts}>
               {stats.streak > 0 && (
                 <span className={r.streak}>
@@ -238,7 +280,16 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
           <X size={22} />
         </Link>
         <ProgressBar className={r.bar} value={done} max={total} label={t.review.progress(done, total)} />
-        <span className={r.toGo}>{t.review.toGo(stack.length)}</span>
+        <span className={r.toGo}>
+          {/* Answers still on their way: a small ring, never a wait. */}
+          {saving && (
+            <span className={r.saving} role="status">
+              <Spinner size={14} />
+              <span className="sr-only">{t.saving}</span>
+            </span>
+          )}
+          {t.review.toGo(stack.length)}
+        </span>
       </header>
 
       <div className={r.mode}>
@@ -355,7 +406,8 @@ function ReviewSession({ tagId, tagName }: { tagId?: string; tagName?: string })
                     key={l.id}
                     type="button"
                     className={clsx(r.chip, l.locked && r.chipAgain, isCurrent && r.chipCurrent)}
-                    disabled={answer.isPending}
+                    // No disabling needed: an answered card leaves on the press,
+                    // and choose() ignores a word whose answer is on its way.
                     onClick={() => choose(l)}
                     aria-label={t.review.levelChip(levelLabel(l), when)}
                     aria-keyshortcuts={i < 9 ? String(i + 1) : undefined}
@@ -390,16 +442,19 @@ function TagChooser({ tags }: { tags: Tag[] }) {
   const today = useToday()
   const navigate = useNavigate()
   const groupName = useGroupName()
-  const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
+  const { data: groups = [], isLoading: groupsLoading } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
   const [extraNew, addExtraNew] = useExtraNew(today)
-  const { data: all = [] } = useQuery({
+  const { data: all = [], isLoading: allLoading } = useQuery({
     queryKey: englishKeys.review(today, undefined, extraNew),
     queryFn: () => fetchReview(today, undefined, extraNew),
   })
-  const { data: summary } = useQuery({
+  const { data: summary, isLoading: summaryLoading } = useQuery({
     queryKey: ['english', 'summary', today, extraNew],
     queryFn: () => fetchSummary(today, extraNew),
   })
+  // The shelves need the groups, "All" its count and the banner the queue:
+  // until all three are in, the cards' shapes (so none of them moves).
+  const loading = groupsLoading || allLoading || summaryLoading
   const { data: settings } = useQuery({ queryKey: englishKeys.settings, queryFn: fetchEnglishSettings })
   // Words still waiting beyond what today already brings.
   const waiting = summary ? summary.queued - summary.newLeft : 0
@@ -434,12 +489,17 @@ function TagChooser({ tags }: { tags: Tag[] }) {
     )
   }
 
+  const head = (
+    <header className={r.chooserHead}>
+      <h1 className={r.chooserTitle}>{t.review.pickTag}</h1>
+      <p className={r.chooserSub}>{t.review.pickTagSub}</p>
+    </header>
+  )
+  if (loading) return <ChooserSkeleton head={head} cards={tags.filter((tg) => tg.count > 0).length} />
+
   return (
     <div className={s.page}>
-      <header className={r.chooserHead}>
-        <h1 className={r.chooserTitle}>{t.review.pickTag}</h1>
-        <p className={r.chooserSub}>{t.review.pickTagSub}</p>
-      </header>
+      {head}
       {waiting > 0 && <MoreNewWords queued={waiting} perDay={settings?.newPerDay || 20} onAdd={addExtraNew} />}
       <div className={r.tagGrid}>{card('all', t.review.allTags, all.length, null, '/english/review?tag=all', Layers)}</div>
       {shelve(
@@ -483,5 +543,82 @@ function MoreNewWords({ queued, perDay, onAdd }: { queued: number; perDay: numbe
         ))}
       </div>
     </section>
+  )
+}
+
+/** A tag card's shape: the icon tile, then its name, today's count and the total. */
+function TagCardSkeleton({ total = true }: { total?: boolean }) {
+  return (
+    <div className={clsx(r.tagCard, r.tagCardSkeleton)}>
+      <Skeleton className={r.skIcon} width="var(--tile-md)" height="var(--tile-md)" radius={10} />
+      <SkeletonText className={r.skName} width="70%" line={20} />
+      <SkeletonText className={r.skDue} width="55%" line={18} />
+      {total && <SkeletonText className={r.skTotal} width="40%" line={16} />}
+    </div>
+  )
+}
+
+/**
+ * The tag cards while they load: "All", then a shelf of cards. Given the real
+ * heading once the tag cards are certain; bars in its place before that.
+ */
+function ChooserSkeleton({ head, cards = 3 }: { head?: ReactNode; cards?: number }) {
+  return (
+    <Loading className={s.page}>
+      {head ?? (
+        <header className={r.chooserHead}>
+          <SkeletonText width="min(60%, 280px)" line={32} />
+          <SkeletonText width="min(90%, 420px)" line={20} />
+        </header>
+      )}
+      <div className={r.tagGrid}>
+        <TagCardSkeleton total={false} />
+      </div>
+      <section className={s.section}>
+        <div className={s.sectionHead}>
+          <SkeletonText width={96} line={16} />
+        </div>
+        <div className={r.tagGrid}>
+          {Array.from({ length: Math.min(Math.max(cards, 1), 6) }, (_, i) => (
+            <TagCardSkeleton key={i} />
+          ))}
+        </div>
+      </section>
+    </Loading>
+  )
+}
+
+/**
+ * A session while its stack loads, in the focus layout it opens in: the top
+ * bar (the way out already works), the direction switch, the card and the
+ * Show button.
+ */
+function SessionSkeleton() {
+  const t = useEnglishT()
+  return (
+    <Loading className={r.focus}>
+      <header className={r.top}>
+        <Link to="/english" className={r.close} aria-label={t.review.close}>
+          <X size={22} />
+        </Link>
+        <Skeleton className={r.bar} height={8} radius={999} />
+        <SkeletonText width={56} line={18} />
+      </header>
+      <div className={r.mode}>
+        <Skeleton width={216} height="var(--control-sm)" radius={12} />
+      </div>
+      <div className={r.stage}>
+        <div className={clsx(r.card, r.cardSkeleton)}>
+          <Skeleton className={r.skLevel} width={72} height={24} radius={999} />
+          <SkeletonText width="45%" line={48} />
+          <SkeletonText width="65%" line={24} />
+          <SkeletonText width={150} line={18} />
+        </div>
+      </div>
+      <footer className={r.bottom}>
+        <Skeleton height="var(--control-lg)" radius={12} />
+        <p className={r.keys}>{t.review.keys}</p>
+      </footer>
+    </Loading>
   )
 }

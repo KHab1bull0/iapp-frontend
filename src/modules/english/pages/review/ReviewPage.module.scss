@@ -531,3 +531,31 @@
   font-weight: 600;
   color: var(--primary);
 }
+
+// ── Loading: the same shapes, as blocks ──
+.tagCardSkeleton {
+  pointer-events: none;
+}
+
+.skIcon { grid-area: icon; align-self: start; }
+.skName { grid-area: name; }
+.skDue { grid-area: due; }
+.skTotal { grid-area: total; }
+
+.cardSkeleton {
+  cursor: default;
+}
+
+.skLevel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+
+// Answers on their way, beside "n to go".
+.saving {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-right: 6px;
+  color: var(--fg-muted);
+}

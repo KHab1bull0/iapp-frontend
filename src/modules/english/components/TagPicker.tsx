@@ -8,6 +8,7 @@ import { createTag, englishKeys, fetchGroups, fetchTags } from '@/modules/englis
 import { useEnglishT, useGroupName } from '@/modules/english/i18n'
 import { shelve } from '@/modules/english/lib/tags'
 import s from './WordForm.module.scss'
+import { ChipsSkeleton, Spinner } from './Loading'
 
 interface Props {
   value: string[]
@@ -27,8 +28,12 @@ export function TagPicker({ value, onChange }: Props) {
   const [adding, setAdding] = useState(false)
   const [name, setName] = useState('')
 
-  const { data: tags = [] } = useQuery({ queryKey: englishKeys.tags(today), queryFn: () => fetchTags(today) })
-  const { data: groups = [] } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
+  const { data: tags = [], isLoading: tagsLoading } = useQuery({
+    queryKey: englishKeys.tags(today),
+    queryFn: () => fetchTags(today),
+  })
+  const { data: groups = [], isLoading: groupsLoading } = useQuery({ queryKey: englishKeys.groups, queryFn: fetchGroups })
+  const loading = tagsLoading || groupsLoading
   const shelves = shelve(tags, groups)
 
   const toggle = (id: string) => onChange(value.includes(id) ? value.filter((x) => x !== id) : [...value, id])
@@ -62,7 +67,9 @@ export function TagPicker({ value, onChange }: Props) {
         {t.word.tags}
       </span>
       <div className={s.shelves} role="group" aria-labelledby="word-tags-label">
-        {shelves.map((shelf) => (
+        {/* Until the tags and their groups are in, chips' shapes (no shelf that then splits in two). */}
+        {loading && <ChipsSkeleton widths={[80, 96, 64, 112]} />}
+        {!loading && shelves.map((shelf) => (
           <div key={shelf.group?.id ?? 'none'} className={s.shelf}>
             {shelves.length > 1 && <span className={s.shelfName}>{groupName(shelf.group)}</span>}
             <div className={s.chips}>
@@ -86,19 +93,28 @@ export function TagPicker({ value, onChange }: Props) {
         ))}
         <div className={s.chips}>
           {adding ? (
-            <input
-              className={s.chipInput}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={onKey}
-              onBlur={() => !name.trim() && setAdding(false)}
-              maxLength={50}
-              placeholder={t.word.newTag}
-              aria-label={t.word.newTag}
-              autoFocus
-              autoCapitalize="none"
-              disabled={add.isPending}
-            />
+            <span className={s.chipAdding}>
+              <input
+                className={s.chipInput}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={onKey}
+                onBlur={() => !name.trim() && setAdding(false)}
+                maxLength={50}
+                placeholder={t.word.newTag}
+                aria-label={t.word.newTag}
+                autoFocus
+                autoCapitalize="none"
+                disabled={add.isPending}
+                aria-busy={add.isPending || undefined}
+              />
+              {add.isPending && (
+                <span role="status" className={s.chipAddingStatus}>
+                  <Spinner size={14} />
+                  <span className="sr-only">{t.adding}</span>
+                </span>
+              )}
+            </span>
           ) : (
             <button type="button" className={clsx(s.chip, s.chipAdd)} onClick={() => setAdding(true)}>
               <Plus size={14} aria-hidden /> {t.word.addTag}

@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { addDaysYmd, formatDay, todayYmd, ymd } from '@/core/lib/format'
 import { L3, NEW, group, tag, word } from '@/modules/english/test-data'
+import { loadingRegion, pending } from '@/modules/english/test-loading'
 import { WordForm } from './WordForm'
 
 const api = vi.hoisted(() => ({
@@ -152,5 +153,56 @@ describe('WordForm', () => {
     fireEvent.click(await within(levels).findByRole('radio', { name: 'Not learned' }))
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(api.updateWord).toHaveBeenCalledWith('w2', expect.objectContaining({ levelId: null })))
+  })
+
+  test('levels and tags load as chip placeholders under their labels', () => {
+    api.fetchLevels.mockReturnValue(pending())
+    api.fetchTags.mockReturnValue(pending())
+    renderForm()
+    expect(screen.getByText('Level')).toBeTruthy()
+    expect(screen.queryByRole('radiogroup', { name: 'Level' })).toBeNull()
+    expect(loadingRegion()).toBeTruthy()
+    const tags = screen.getByRole('group', { name: 'Tags' })
+    expect(loadingRegion('Loading…', tags)).toBeTruthy()
+  })
+
+  test('saving: the button says so and is disabled, and so is Cancel; one request only', async () => {
+    api.createWord.mockReturnValue(pending())
+    renderForm()
+    await screen.findByRole('radiogroup', { name: 'Level' })
+    fireEvent.change(screen.getByLabelText('Word'), { target: { value: 'apple' } })
+    fireEvent.change(screen.getByLabelText('Translation'), { target: { value: 'olma' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    const busy = await screen.findByRole('button', { name: 'Saving…' })
+    expect((busy as HTMLButtonElement).disabled).toBe(true)
+    expect(busy.getAttribute('aria-busy')).toBe('true')
+    expect((screen.getByRole('button', { name: 'Cancel' }) as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.submit(busy.closest('form')!)
+    expect(api.createWord).toHaveBeenCalledTimes(1)
+  })
+
+  test('deleting: the button says so and the form cannot be saved meanwhile', async () => {
+    api.deleteWord.mockReturnValue(pending())
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <WordForm word={word('w1')} onSaved={() => {}} onCancel={() => {}} />
+      </QueryClientProvider>,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }))
+    const busy = await screen.findByRole('button', { name: 'Deleting…' })
+    expect((busy as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  test('a new tag on its way: its field is busy, with a ring', async () => {
+    api.createTag.mockReturnValue(pending())
+    renderForm()
+    fireEvent.click(await screen.findByRole('button', { name: 'Add tag' }))
+    const input = screen.getByLabelText('New tag')
+    fireEvent.change(input, { target: { value: 'kitchen' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect((await screen.findByRole('status')).textContent).toBe('Adding…')
+    expect((input as HTMLInputElement).disabled).toBe(true)
   })
 })
