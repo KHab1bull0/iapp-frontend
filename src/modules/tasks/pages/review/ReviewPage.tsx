@@ -1,19 +1,21 @@
 import { useRef } from 'react'
+import clsx from 'clsx'
 import { useSearchParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
 import { BackButton } from '@/core/components/BackButton'
 import { EmptyState } from '@/core/components/ui/EmptyState'
-import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useToday } from '@/core/hooks/useToday'
 import { addDaysYmd } from '@/core/lib/format'
 import { fetchWeek, reviewKeys } from '@/modules/tasks/api/reviews'
 import { PastWeeks } from '@/modules/tasks/review/PastWeeks'
 import { ReviewQuestions } from '@/modules/tasks/review/ReviewQuestions'
+import { QuestionsSkeleton, WeekSummarySkeleton } from '@/modules/tasks/review/skeletons'
 import { WeekSummary } from '@/modules/tasks/review/WeekSummary'
 import { useReviewT } from '@/modules/tasks/review/i18n'
 import { mondayOf, weekFromParam, weekRange } from '@/modules/tasks/review/week'
 import r from '@/modules/tasks/review/Review.module.scss'
+import k from '@/modules/tasks/components/Skeletons.module.scss'
 // Shell styles (back link, page heading), as the module settings pages use them.
 import shell from '@/pages/settings/settings.module.scss'
 import s from '../TasksPages.module.scss'
@@ -58,7 +60,13 @@ export function ReviewPage() {
   const week = useQuery({
     queryKey: reviewKeys.week(weekStart, today),
     queryFn: () => fetchWeek(weekStart, today),
+    // Stepping to another week keeps this one on screen, quieter, until the
+    // next one arrives: the page never blanks into outlines between weeks.
+    placeholderData: keepPreviousData,
   })
+  const stale = week.isPlaceholderData
+  // The week whose numbers and answers are on screen: the one before, while stepping.
+  const shown = stale ? (week.data?.weekStart ?? weekStart) : weekStart
 
   // Replaced, not pushed: Back leaves the review rather than stepping back through weeks.
   const goTo = (next: string) => setParams(next >= current ? {} : { week: next }, { replace: true })
@@ -68,23 +76,25 @@ export function ReviewPage() {
     body = (
       <EmptyState title={t.loadFailed} action={{ label: t.retry, icon: RefreshCw, onClick: () => void week.refetch() }} />
     )
-  } else if (week.isPending) {
-    body = (
-      <div className={r.skeletons} aria-hidden>
-        <Skeleton height={180} radius="var(--radius-lg)" />
-        <Skeleton height={120} radius="var(--radius-lg)" />
-        <Skeleton height={240} radius="var(--radius-lg)" />
-      </div>
-    )
   } else {
+    // First load: the page in outline. Stepping: the week before stays, quieter
+    // and out of reach (its answers are that week's, not this one's) until this one lands.
+    const busy = week.isPending || stale
     body = (
-      <div className={r.layout}>
-        <div className={r.main}>
-          <WeekSummary week={week.data} />
+      <div className={r.layout} aria-busy={busy || undefined}>
+        {busy && <span className="sr-only">{t.loading}</span>}
+        <div className={clsx(r.main, stale && k.stale)} inert={stale}>
+          {week.isPending ? <WeekSummarySkeleton /> : <WeekSummary week={week.data} />}
         </div>
         <div className={r.side}>
-          {/* Keyed by week: a new week starts its own draft, and the old one's pending save goes out. */}
-          <ReviewQuestions key={weekStart} weekStart={weekStart} today={today} initial={week.data.answers} />
+          {week.isPending ? (
+            <QuestionsSkeleton />
+          ) : (
+            <div className={clsx(stale && k.stale)} inert={stale}>
+              {/* Keyed by week: a new week starts its own draft, and the old one's pending save goes out. */}
+              <ReviewQuestions key={shown} weekStart={shown} today={today} initial={week.data.answers} />
+            </div>
+          )}
           <PastWeeks
             today={today}
             current={current}

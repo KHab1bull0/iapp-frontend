@@ -102,4 +102,36 @@ describe('TaskStatsCard: a habit', () => {
     expect(await screen.findByText('3 times')).toBeTruthy()
     expect(screen.getByText('Best: 7 times')).toBeTruthy()
   })
+
+  test('while the numbers load: the card in outline, with the stages already there', () => {
+    api.fetchTaskStats.mockReturnValue(new Promise(() => {}))
+    renderCard(READ)
+    const card = screen.getByRole('region', { name: 'Task statistics' })
+    expect(card.getAttribute('aria-busy')).toBe('true')
+    expect(within(card).getByText('Loading…')).toBeTruthy()
+    expect(within(card).getByRole('heading', { name: 'Stages' })).toBeTruthy()
+    expect(within(card).queryByText('Best: 7 days')).toBeNull()
+  })
+
+  test('taking a reward from the list: that button says it is saving, and all of them wait', async () => {
+    const twoToTake = habit('read', {
+      stages: [
+        { id: 's1', position: 1, days: 3, reward: 'Coffee', reachedAt: '2026-11-01', claimedAt: null },
+        { id: 's2', position: 2, days: 4, reward: 'New mouse', reachedAt: '2026-11-05', claimedAt: null },
+      ],
+      progress: progress({ streak: 4, stage: null }),
+    })
+    api.fetchTaskStats.mockResolvedValue(STATS)
+    api.claimStage.mockReturnValue(new Promise(() => {}))
+    renderCard(twoToTake)
+    const [first, second] = await screen.findAllByRole('button', { name: 'I took my reward' })
+    fireEvent.click(first)
+    await waitFor(() => expect(first.textContent).toContain('Saving…'))
+    expect(first.getAttribute('aria-busy')).toBe('true')
+    expect((first as HTMLButtonElement).disabled).toBe(true)
+    expect((second as HTMLButtonElement).disabled).toBe(true)
+    expect(second.getAttribute('aria-busy')).toBeNull()
+    fireEvent.click(first)
+    expect(api.claimStage).toHaveBeenCalledTimes(1)
+  })
 })

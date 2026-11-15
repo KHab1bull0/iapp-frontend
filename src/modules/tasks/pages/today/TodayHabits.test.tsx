@@ -167,6 +167,25 @@ describe('TodayPage: habits', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
   })
 
+  test('taking the reward says it is saving and takes one tap only', async () => {
+    api.completeTask.mockResolvedValue(
+      result({
+        streak: { current: 10, best: 10 },
+        stageReached: { id: 'read-s1', position: 1, days: 10, reward: 'New mouse' },
+      }),
+    )
+    api.claimStage.mockReturnValue(new Promise(() => {}))
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Complete READ' }))
+    const sheet = await screen.findByRole('dialog', { name: 'You reached stage 1!' })
+    fireEvent.click(within(sheet).getByRole('button', { name: 'I took my reward' }))
+    const pending = (await within(sheet).findByRole('button', { name: 'Saving…' })) as HTMLButtonElement
+    expect(pending.disabled).toBe(true)
+    expect(pending.getAttribute('aria-busy')).toBe('true')
+    fireEvent.click(pending)
+    expect(api.claimStage).toHaveBeenCalledTimes(1)
+  })
+
   describe('the streak counts days for a daily habit, times for any other', () => {
     test('in Uzbek', async () => {
       localStorage.setItem('iapp-lang', 'uz')

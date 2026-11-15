@@ -5,7 +5,8 @@ import { useToday } from '@/core/hooks/useToday'
 import { fetchTask, tasksKeys } from '@/modules/tasks/api/tasks'
 import { MissedDay } from '@/modules/tasks/components/MissedDay'
 import { TaskForm } from '@/modules/tasks/components/TaskForm'
-import { TaskStatsCard } from '@/modules/tasks/components/stats/TaskStatsCard'
+import { TaskStatsCard, TaskStatsSkeleton } from '@/modules/tasks/components/stats/TaskStatsCard'
+import { LoadingLabel, TaskFormSkeleton } from '@/modules/tasks/components/skeletons'
 import { useTasksT } from '@/modules/tasks/i18n'
 import st from '@/modules/tasks/components/stats/TaskStats.module.scss'
 import s from './TaskFormPage.module.scss'
@@ -29,6 +30,7 @@ export function TaskFormPage() {
     queryFn: () => fetchTask(id!, today),
     enabled: isEdit,
   })
+  const loading = isEdit && isLoading
 
   return (
     <div className={s.page}>
@@ -38,8 +40,16 @@ export function TaskFormPage() {
         </button>
         <h1 className={s.h1}>{isEdit ? t.editTask : t.newTask}</h1>
       </header>
-      <div className={s.body}>
-        {isEdit && isLoading ? null : isEdit && (isError || !task) ? (
+      <div className={s.body} aria-busy={loading || undefined}>
+        {loading ? (
+          // The editor in outline: the task's stats, the divider, the form and its action row.
+          <>
+            <LoadingLabel />
+            <TaskStatsSkeleton />
+            <hr className={st.divider} />
+            <TaskFormSkeleton />
+          </>
+        ) : isEdit && (isError || !task) ? (
           <div className={s.state}>{t.notFound}</div>
         ) : (
           <>

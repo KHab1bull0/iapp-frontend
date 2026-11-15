@@ -6,6 +6,7 @@ import { useToday } from '@/core/hooks/useToday'
 import { fetchTasks, tasksKeys } from '@/modules/tasks/api/tasks'
 import { groupByDue } from '@/modules/tasks/lib/repeat'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
+import { LoadingLabel, SectionSkeleton } from '@/modules/tasks/components/skeletons'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
 import { useMoveToTomorrow } from '@/modules/tasks/useCompleteTask'
 import { useTasksT } from '@/modules/tasks/i18n'
@@ -19,7 +20,7 @@ export function AllTasksPage() {
   const today = useToday()
   const t = useTasksT()
   const editor = useTaskEditor()
-  const toTomorrow = useMoveToTomorrow(today)
+  const { toTomorrow, moving } = useMoveToTomorrow(today)
 
   const { data: tasks = [], isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.list('active', today),
@@ -32,7 +33,14 @@ export function AllTasksPage() {
     <div className={s.page}>
       {isError ? (
         <EmptyState title={t.loadFailed} action={{ label: t.retry, icon: RefreshCw, onClick: () => void refetch() }} />
-      ) : isLoading ? null : groups.length === 0 ? (
+      ) : isLoading ? (
+        // Groups by when they're due, in outline; no ticks here, as on the real rows.
+        <div className={s.skeletons} aria-busy="true">
+          <LoadingLabel />
+          <SectionSkeleton rows={3} tick={false} />
+          <SectionSkeleton rows={2} tick={false} index={1} />
+        </div>
+      ) : groups.length === 0 ? (
         <EmptyState icon={ListTodo} title={t.noTasks} description={t.noTasksSub} />
       ) : (
         groups.map((g) => (
@@ -48,6 +56,7 @@ export function AllTasksPage() {
                   task={task}
                   today={today}
                   showDue={g.key !== 'today' && g.key !== 'none'}
+                  busy={moving.has(task.id)}
                   onTomorrow={toTomorrow}
                   onOpen={editor.openEdit}
                 />

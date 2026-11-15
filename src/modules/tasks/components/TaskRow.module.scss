@@ -56,6 +56,9 @@
   &:active { transform: scale(0.88); }
   &:disabled { cursor: progress; }
 
+  // On its way to the server: a soft pulse, so a slow network doesn't look stuck.
+  &[aria-busy='true'] { animation: pending 900ms ease-in-out infinite alternate; }
+
   .tick {
     opacity: 0;
     transform: scale(0.4);
@@ -144,8 +147,17 @@
     .row:hover &,
     &:focus-visible { opacity: 1; }
 
-    &:hover { color: var(--fg-strong); border-color: var(--border-strong); }
+    &:hover:not(:disabled) { color: var(--fg-strong); border-color: var(--border-strong); }
+    &:disabled { cursor: progress; }
   }
+}
+
+// A row whose request is on its way: its text dims a little until the answer.
+.busy .body { opacity: 0.7; transition: opacity $t-fast; }
+
+@keyframes pending {
+  from { opacity: 1; }
+  to { opacity: 0.55; }
 }
 
 // ── Habits ──────────────────────────────────────────────────────────────

@@ -14,7 +14,10 @@ interface Props {
   done?: boolean
   /** Omit where tasks can't be ticked (All tasks): no check is shown. */
   onToggle?: (task: Task) => void
-  /** While its completion is being saved, so a second tap can't complete it twice. */
+  /**
+   * While a request about it is on its way (ticking, unticking, moving): its
+   * buttons and swipes wait, so a second tap can't send it twice.
+   */
   busy?: boolean
   onOpen: (task: Task) => void
   /** Swipe left: move to tomorrow. The edit sheet's date is the non-gesture way to do the same. */
@@ -54,7 +57,7 @@ export function TaskRow({
 
   const swipe = useSwipe({
     onRight: onToggle && !done && !busy ? () => onToggle(task) : undefined,
-    onLeft: onTomorrow && !done ? () => onTomorrow(task) : undefined,
+    onLeft: onTomorrow && !done && !busy ? () => onTomorrow(task) : undefined,
   })
   const meta = task.dueTime || repeat || due || habit
 
@@ -71,7 +74,7 @@ export function TaskRow({
         </div>
       )}
       <div
-        className={clsx(s.row, done && s.done, atRisk && s.atRisk)}
+        className={clsx(s.row, done && s.done, atRisk && s.atRisk, busy && s.busy)}
         style={swipe.dx ? { transform: `translateX(${swipe.dx}px)` } : undefined}
         {...swipe.handlers}
       >
@@ -121,6 +124,7 @@ export function TaskRow({
             type="button"
             className={s.hoverAction}
             onClick={() => onTomorrow(task)}
+            disabled={busy}
             title={t.swipe.tomorrow}
             aria-label={`${task.title}: ${t.swipe.tomorrow}`}
           >
@@ -149,6 +153,7 @@ export function TaskRow({
             className={clsx(s.check, done && s.checked)}
             onClick={() => onToggle(task)}
             disabled={busy}
+            aria-busy={busy || undefined}
             aria-label={done ? t.undoLabel(task.title) : t.completeLabel(task.title)}
           >
             <Check size={16} strokeWidth={3} className={s.tick} />

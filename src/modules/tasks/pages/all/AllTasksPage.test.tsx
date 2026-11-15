@@ -31,4 +31,19 @@ describe('AllTasksPage', () => {
     expect(api.fetchTasks).toHaveBeenCalledWith('active', todayYmd())
     expect(api.fetchTasks).not.toHaveBeenCalledWith('done', expect.anything())
   })
+
+  test('the groups in outline, without ticks, while the tasks load', () => {
+    api.fetchTasks.mockReturnValue(new Promise(() => {}))
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <AllTasksPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    const busy = screen.getByText('Loading…').closest('[aria-busy="true"]')
+    expect(busy).toBeTruthy()
+    // Not the empty state: nothing says "no tasks" before the list is known.
+    expect(screen.queryByText('No tasks yet')).toBeNull()
+  })
 })

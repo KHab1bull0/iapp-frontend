@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { ToastHost } from '@/core/components/ui/toast'
@@ -11,6 +11,7 @@ const api = vi.hoisted(() => ({
   fetchToday: vi.fn(),
   completeTask: vi.fn(),
   undoCompletion: vi.fn(),
+  updateTask: vi.fn(),
   fetchOverallStats: vi.fn(),
 }))
 vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()), ...api }))
@@ -118,5 +119,52 @@ describe('TodayPage', () => {
     expect(screen.getByRole('heading', { name: 'Bugun' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Bajarilganlar (1)' })).toBeTruthy()
     expect(screen.getByText('Har kuni')).toBeTruthy()
+  })
+
+  test('the page in outline while the day loads, then the day in its place', async () => {
+    let resolve!: (v: unknown) => void
+    api.fetchToday.mockReturnValue(new Promise((r) => (resolve = r)))
+    renderPage()
+    const busy = screen.getAllByText('Loading…')[0].closest('[aria-busy="true"]')
+    expect(busy).toBeTruthy()
+    // Shapes, not words: no section headings and no rows until the day is in.
+    expect(screen.queryByRole('heading', { name: 'Today' })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^Complete / })).toBeNull()
+
+    resolve({ overdue: [], today: [t('b')], doneToday: [] })
+    expect(await screen.findByRole('heading', { name: 'Today' })).toBeTruthy()
+    await waitFor(() => expect(document.querySelector('[aria-busy="true"]')).toBeNull())
+    expect(screen.queryByText('Loading…')).toBeNull()
+  })
+
+  test("the activity rail holds its place while its numbers load", async () => {
+    api.fetchOverallStats.mockReturnValue(new Promise(() => {}))
+    renderPage()
+    await screen.findByRole('heading', { name: 'Today' })
+    const rail = screen.getByRole('region', { name: 'Activity' })
+    expect(rail.getAttribute('aria-busy')).toBe('true')
+    expect(within(rail).getByText('Loading…')).toBeTruthy()
+  })
+
+  test('unticking waits for its request: the done tick is disabled meanwhile', async () => {
+    api.undoCompletion.mockReturnValue(new Promise(() => {}))
+    renderPage()
+    const untick = (await screen.findByRole('button', { name: 'Undo C' })) as HTMLButtonElement
+    fireEvent.click(untick)
+    await waitFor(() => expect(untick.disabled).toBe(true))
+    expect(untick.getAttribute('aria-busy')).toBe('true')
+    fireEvent.click(untick)
+    expect(api.undoCompletion).toHaveBeenCalledTimes(1)
+  })
+
+  test('moving a task to tomorrow holds its row until the move is saved', async () => {
+    api.updateTask.mockReturnValue(new Promise(() => {}))
+    renderPage()
+    const later = (await screen.findByRole('button', { name: 'B: Tomorrow' })) as HTMLButtonElement
+    fireEvent.click(later)
+    await waitFor(() => expect(later.disabled).toBe(true))
+    expect((screen.getByRole('button', { name: 'Complete B' }) as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.click(later)
+    expect(api.updateTask).toHaveBeenCalledTimes(1)
   })
 })

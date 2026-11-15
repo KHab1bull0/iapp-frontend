@@ -9,12 +9,6 @@
   color: var(--fg-muted);
 }
 
-.skeletons {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .overdue {
   font-size: var(--fs-meta);
   font-weight: 600;

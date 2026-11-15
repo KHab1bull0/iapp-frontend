@@ -59,6 +59,22 @@
   gap: 8px;
 }
 
+// A day picked on the calendar, on its way: said beside the chip.
+.saving {
+  display: inline-flex;
+  align-items: center;
+  height: var(--control-sm);
+  font-size: var(--fs-meta);
+  color: var(--fg-muted);
+}
+
+// The calendar while a day saves: quieter, and its days can't be tapped again.
+.waiting {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: progress;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
@@ -73,5 +89,5 @@
   font-weight: 500;
   cursor: pointer;
 
-  &:disabled { opacity: 0.5; cursor: default; }
+  &:disabled { opacity: 0.5; cursor: progress; }
 }

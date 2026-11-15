@@ -21,7 +21,10 @@ function renderForm() {
 const save = () => screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement
 
 describe('TaskForm', () => {
-  beforeEach(() => api.createTask.mockResolvedValue({ id: 'n' }))
+  // A block, not an arrow's value: a function returned from beforeEach runs as its teardown.
+  beforeEach(() => {
+    api.createTask.mockResolvedValue({ id: 'n' })
+  })
 
   test('needs a title, and a new task defaults to today with no repeat', async () => {
     const { onSaved } = renderForm()
@@ -34,6 +37,18 @@ describe('TaskForm', () => {
       ),
     )
     await waitFor(() => expect(onSaved).toHaveBeenCalled())
+  })
+
+  test('saving says so and goes out once, however often Save is pressed', async () => {
+    api.createTask.mockReturnValue(new Promise(() => {}))
+    renderForm()
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Call mum' } })
+    fireEvent.click(save())
+    const saving = (await screen.findByRole('button', { name: 'Saving…' })) as HTMLButtonElement
+    expect(saving.disabled).toBe(true)
+    expect(saving.getAttribute('aria-busy')).toBe('true')
+    fireEvent.submit(saving.closest('form')!)
+    expect(api.createTask).toHaveBeenCalledTimes(1)
   })
 
   test('after done: every N units', async () => {

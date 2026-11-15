@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Check, ChevronRight, RefreshCw } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
-import { Skeleton } from '@/core/components/ui/Skeleton'
 import { fetchReviews, reviewKeys } from '@/modules/tasks/api/reviews'
 import { useReviewT } from './i18n'
+import { PastWeeksSkeleton } from './skeletons'
 import { weekRange } from './week'
 import s from './Review.module.scss'
 
@@ -29,7 +29,12 @@ export function PastWeeks({
 
   let body
   if (list.isPending) {
-    body = <Skeleton height="calc(var(--row-h-sm) * 3)" radius="var(--radius-lg)" />
+    body = (
+      <>
+        <span className="sr-only">{t.past.loading}</span>
+        <PastWeeksSkeleton />
+      </>
+    )
   } else if (list.isError) {
     body = (
       <EmptyState
@@ -75,7 +80,7 @@ export function PastWeeks({
   }
 
   return (
-    <section className={s.section} aria-label={t.past.title}>
+    <section className={s.section} aria-label={t.past.title} aria-busy={list.isPending || undefined}>
       <h2 className={s.sectionLabel}>{t.past.title}</h2>
       {body}
     </section>
