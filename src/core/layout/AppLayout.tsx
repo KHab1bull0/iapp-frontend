@@ -1,6 +1,6 @@
-import { Suspense, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import clsx from 'clsx'
-import { Outlet, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { BottomNav } from './BottomNav'
 import { ModuleTabs } from './ModuleTabs'
@@ -8,7 +8,7 @@ import { useHideOnScroll } from '@/core/hooks/useHideOnScroll'
 import { CommandPalette } from './CommandPalette'
 import { DesktopTopBar } from './DesktopTopBar'
 import { ShortcutsDialog } from './ShortcutsDialog'
-import { ChunkErrorBoundary } from '@/core/components/ChunkErrorBoundary'
+import { RouteSuspense } from '@/core/components/RouteSuspense'
 import { activeModule, isModulePage } from '@/core/modules/registry-utils'
 import type { ModuleManifest } from '@/core/modules/types'
 import { QuickAddProvider } from '@/core/quickAdd/QuickAddProvider'
@@ -89,11 +89,8 @@ export function AppLayout({ modules }: AppLayoutProps) {
             {active && active.pages.length > 1 && (onModulePage || onModuleSettings) && (
               <ModuleTabs module={active} hidden={barsHidden} />
             )}
-            <ChunkErrorBoundary key={pathname}>
-              <Suspense fallback={null}>
-                <Outlet />
-              </Suspense>
-            </ChunkErrorBoundary>
+            {/* Inside the shell, so the sidebar and bars stay put while a page loads. */}
+            <RouteSuspense />
           </div>
 
           <BottomNav modules={modules} hidden={barsHidden} />

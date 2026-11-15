@@ -1,0 +1,22 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+// Same column, edges and gaps as a real page (the page mixin), so nothing
+// moves sideways when the page replaces it.
+.page {
+  @include page;
+  // The PageHeader title: the large phone title, the smaller desktop one.
+  --ps-title-h: var(--lh-display);
+
+  @include bp-desktop { --ps-title-h: var(--lh-h1); }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card {
+  @include card;
+}

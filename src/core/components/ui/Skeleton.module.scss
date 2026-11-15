@@ -13,3 +13,14 @@
   from { background-position: 100% 0; }
   to { background-position: -100% 0; }
 }
+
+// Invisible for the first 180ms: a quick load never shows the grey at all.
+// Reduced motion keeps the delay (it is not motion) and drops the fade.
+.delayed {
+  animation: appear var(--t-fast) var(--ease-house) 180ms both;
+}
+
+@keyframes appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
