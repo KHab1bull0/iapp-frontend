@@ -7,20 +7,12 @@
   @include card;
 }
 
-.cardHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
 // The heading of a card on the Statistics page.
 .cardTitle {
   @include card-title;
 }
 
-// A group inside one card (the task editor's "Progress", "Activity"): its
+// A group inside one card (the task editor's "Stages", "Activity"): its
 // parts sit close, the groups further apart, so they don't run together.
 .group {
   display: flex;
@@ -31,77 +23,6 @@
 
 .groupLabel {
   @include section-label;
-}
-
-.chart {
-  width: 100%;
-  min-width: 0;
-}
-
-// The progress chart: the total's axis fixed on the left, the days beside it
-// scrolling sideways when they don't all fit.
-.chartRow {
-  display: flex;
-  width: 100%;
-  min-width: 0;
-}
-
-.chartScroll {
-  flex: 1;
-  min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar { display: none; }
-}
-
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--fg);
-
-  > span { display: inline-flex; align-items: center; gap: 8px; }
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-}
-
-// Floats over the chart, so it alone has a shadow.
-.tooltip {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 8px 12px;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  box-shadow: 0 4px 12px rgba(15, 17, 23, 0.08);
-  font-variant-numeric: tabular-nums;
-
-  p { margin: 0; }
-}
-
-.tooltipTitle {
-  font-weight: 600;
-  color: var(--fg-strong);
-}
-
-.tooltipMissed {
-  color: var(--danger);
-}
-
-.tooltipTotal {
-  color: var(--fg);
 }
 
 // Same type as the shared EmptyState, sized to sit inside a card.
@@ -122,55 +43,6 @@
   font-size: var(--fs-meta);
   line-height: var(--lh-meta);
   color: var(--fg-muted);
-}
-
-// Horizontal bars: completions per repeat type.
-.rows {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.row {
-  display: grid;
-  grid-template-columns: minmax(90px, 30%) 1fr 40px;
-  align-items: center;
-  gap: 12px;
-  font-size: var(--fs-meta);
-  line-height: var(--lh-meta);
-}
-
-.rowLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--fg);
-  min-width: 0;
-}
-
-.track {
-  height: 8px;
-  border-radius: $radius-pill;
-  background: var(--slate-100);
-  overflow: hidden;
-
-  :global(.theme-dark) & { background: var(--slate-800); }
-}
-
-.bar {
-  display: block;
-  height: 100%;
-  border-radius: $radius-pill;
-}
-
-.rowValue {
-  text-align: right;
-  font-weight: 600;
-  color: var(--fg-strong);
-  font-variant-numeric: tabular-nums;
 }
 
 .note {

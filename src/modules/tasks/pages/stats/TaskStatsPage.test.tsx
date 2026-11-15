@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import type { OverallTaskStats } from '@/modules/tasks/api/tasks'
@@ -12,23 +12,13 @@ vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()
 const reviews = vi.hoisted(() => ({ fetchWeek: vi.fn() }))
 vi.mock('@/modules/tasks/api/reviews', async (orig) => ({ ...(await orig<object>()), ...reviews }))
 
-globalThis.ResizeObserver ??= class {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-} as unknown as typeof ResizeObserver
-
-const kinds = { once: 0, daily: 0, weekly: 0, monthly: 0 }
 const STATS: OverallTaskStats = {
   total: 40,
-  thisMonth: 9,
   currentStreak: 4,
   bestStreak: 10,
   firstDoneOn: '2026-08-01',
   lastDoneOn: '2026-11-06',
-  byKind: { once: 6, daily: 25, weekly: 8, monthly: 1 },
-  daily: [{ day: '2026-11-06', count: 3, cumulative: 40, ...kinds, daily: 2, once: 1 }],
-  monthly: [{ month: '2026-11', count: 9, cumulative: 40, ...kinds, daily: 9 }],
+  daily: [{ day: '2026-11-06', count: 3 }],
 }
 
 function renderPage() {
@@ -43,7 +33,7 @@ function renderPage() {
 
 describe('TaskStatsPage', () => {
   beforeEach(() => {
-    reviews.fetchWeek.mockResolvedValue({ weekStart: mondayOf(todayYmd()), tasks: { done: 6, due: 8, rate: 75, missed: 2, rest: 0 } })
+    reviews.fetchWeek.mockResolvedValue({ weekStart: mondayOf(todayYmd()), tasks: { done: 6, due: 8, rate: 75, missed: 2 } })
   })
 
   test("opens with the weekly review card and this week's rate", async () => {
@@ -62,17 +52,16 @@ describe('TaskStatsPage', () => {
     expect(screen.getByRole('link', { name: /Weekly review/ })).toBeTruthy()
   })
 
-  test('shows the totals and every repeat type', async () => {
+  test('shows the streak and the total, then the heatmap: no chart, no breakdown by type', async () => {
     api.fetchOverallStats.mockResolvedValue(STATS)
     renderPage()
-    // The tile's number, not the chart's axis label.
     expect(await screen.findByText('40', { selector: 'div' })).toBeTruthy()
     expect(screen.getByText('4 days')).toBeTruthy()
-    const byKind = screen.getByRole('region', { name: 'By type' })
-    expect(within(byKind).getAllByRole('listitem')).toHaveLength(4)
-    expect(within(byKind).getByText('Daily')).toBeTruthy()
-    expect(within(byKind).getByText('25')).toBeTruthy()
-    expect(screen.getByRole('region', { name: 'Progress' })).toBeTruthy()
+    expect(screen.getByText('Best: 10 days')).toBeTruthy()
+    expect(screen.getByRole('region', { name: 'Activity' })).toBeTruthy()
+    expect(screen.queryByRole('region', { name: 'By type' })).toBeNull()
+    expect(screen.queryByRole('region', { name: 'Progress' })).toBeNull()
+    expect(screen.queryByRole('radiogroup')).toBeNull()
   })
 
   test('says so when nothing was done', async () => {
@@ -86,6 +75,6 @@ describe('TaskStatsPage', () => {
     api.fetchOverallStats.mockResolvedValue(STATS)
     renderPage()
     expect(await screen.findByText('Jami bajarilgan')).toBeTruthy()
-    expect(screen.getByRole('region', { name: "Turlari bo'yicha" })).toBeTruthy()
+    expect(screen.getByRole('region', { name: 'Faollik' })).toBeTruthy()
   })
 })

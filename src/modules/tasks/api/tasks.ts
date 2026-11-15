@@ -101,13 +101,8 @@ export interface TasksSummary {
   doneToday: number
 }
 
-/** How a task repeats, as the stats group it. */
-export type RepeatKind = 'once' | 'daily' | 'weekly' | 'monthly'
-export const REPEAT_KINDS: RepeatKind[] = ['once', 'daily', 'weekly', 'monthly']
-
 export interface StatsTotals {
   total: number
-  thisMonth: number
   /** Days in a row with a completion, ending today (or yesterday, before today is done). */
   currentStreak: number
   bestStreak: number
@@ -115,36 +110,20 @@ export interface StatsTotals {
   lastDoneOn: string | null
 }
 
-/** One day or month: how many times it was done then, and the running total so far. */
-export interface StatsPoint {
+/** One day: how many times it was done. */
+export interface StatsDay {
+  day: string
   count: number
-  cumulative: number
 }
 
-/**
- * One task's chart line: up a point on a day done, down a point for each day
- * it was due and not done (can go below zero). A month: as of its last day.
- */
-export interface ScorePoint {
-  score: number
-  /** Days due and not done (one day: 0 or 1). */
-  missed: number
-}
-
-/** A habit's day: how many of its completions were the two-minute version. */
-export interface HabitDayPoint {
-  min?: number
-}
-
+/** One task's stats; a habit's days also say how many were the two-minute version. */
 export interface TaskStats extends StatsTotals {
-  daily: (StatsPoint & ScorePoint & HabitDayPoint & { day: string })[]
-  monthly: (StatsPoint & ScorePoint & { month: string })[]
+  daily: (StatsDay & { min?: number })[]
 }
 
+/** Every task together. */
 export interface OverallTaskStats extends StatsTotals {
-  byKind: Record<RepeatKind, number>
-  daily: (StatsPoint & Record<RepeatKind, number> & { day: string })[]
-  monthly: (StatsPoint & Record<RepeatKind, number> & { month: string })[]
+  daily: StatsDay[]
 }
 
 /**
@@ -232,7 +211,7 @@ export async function fetchTasksSummary(today: string): Promise<TasksSummary> {
   return data
 }
 
-/** Days of daily history the stats screens ask for: 17 weeks of heatmap, the last 30 also charted. */
+/** Days of daily history the stats screens ask for: 17 weeks of heatmap. */
 export const STATS_DAYS = 119
 
 export async function fetchTaskStats(id: string, today: string, days = STATS_DAYS): Promise<TaskStats> {
