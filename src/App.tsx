@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, useRoutes } from 'react-router-dom'
 import { AuthProvider } from '@/core/contexts/AuthContext'
@@ -7,6 +7,7 @@ import { LanguageProvider } from '@/core/i18n'
 import { ToastHost } from '@/core/components/ui/toast'
 import { MODULES } from '@/modules/registry'
 import { buildRoutes } from '@/routes'
+import { canPreload, preloadRoutes, whenIdle } from '@/core/lib/preload'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,13 @@ function ModuleProviders({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
+  // Once the first screen is up and the browser has a quiet moment, fetch the
+  // other pages' code too: later navigations then open without a wait.
+  useEffect(() => {
+    if (!canPreload()) return
+    return whenIdle(() => preloadRoutes(routes))
+  }, [])
+
   return (
     <LanguageProvider>
       <ThemeProvider>
