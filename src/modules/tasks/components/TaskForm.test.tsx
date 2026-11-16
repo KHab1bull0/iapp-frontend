@@ -57,6 +57,20 @@ describe('TaskForm', () => {
     )
   })
 
+  test('repeat is one row of dropdowns: every N and the unit only when it repeats', () => {
+    renderForm()
+    const kind = screen.getByLabelText('Kind') as HTMLSelectElement
+    expect(kind.tagName).toBe('SELECT')
+    expect(screen.queryByLabelText('Every')).toBeNull()
+    expect(screen.queryByLabelText('Unit')).toBeNull()
+    fireEvent.change(kind, { target: { value: 'schedule' } })
+    const unit = screen.getByLabelText('Unit') as HTMLSelectElement
+    expect(unit.tagName).toBe('SELECT')
+    // All three side by side in the same row.
+    expect(unit.parentElement).toBe(kind.parentElement)
+    expect(screen.getByLabelText('Every').parentElement).toBe(kind.parentElement)
+  })
+
   test('saving says so and goes out once, however often Save is pressed', async () => {
     api.createTask.mockReturnValue(new Promise(() => {}))
     renderForm()
@@ -72,7 +86,7 @@ describe('TaskForm', () => {
   test('after done: every N units', async () => {
     renderForm()
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Wash the car' } })
-    fireEvent.click(screen.getByRole('radio', { name: 'Interval' }))
+    fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'after_done' } })
     fireEvent.change(screen.getByLabelText('Every'), { target: { value: '10' } })
     fireEvent.click(save())
     await waitFor(() =>
@@ -95,7 +109,7 @@ describe('TaskForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Date: Today' }))
     fireEvent.click(screen.getByRole('button', { name: 'Tomorrow' }))
     expect(screen.getByRole('button', { name: 'Date: Tomorrow' })).toBeTruthy()
-    fireEvent.click(screen.getByRole('radio', { name: 'Schedule' }))
+    fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'schedule' } })
     fireEvent.change(screen.getByLabelText('Unit'), { target: { value: 'week' } })
     const days = screen.getByRole('group', { name: 'Weekdays' })
     const start = within(days).getByRole('checkbox', { name: NAMES[wd] })
@@ -153,7 +167,7 @@ describe('TaskForm: habits', () => {
   test('the habit switch comes with a repeat only', () => {
     renderForm()
     expect(habitSwitch()).toBeNull()
-    fireEvent.click(screen.getByRole('radio', { name: 'Schedule' }))
+    fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'schedule' } })
     expect(habitSwitch()).toBeTruthy()
     // Off: none of its fields yet.
     expect(screen.queryByLabelText('Who are you becoming?')).toBeNull()
@@ -162,7 +176,7 @@ describe('TaskForm: habits', () => {
   test('a new habit saves who, when, the two-minute version and the suggested stages', async () => {
     renderForm()
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Read' } })
-    fireEvent.click(screen.getByRole('radio', { name: 'Schedule' }))
+    fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'schedule' } })
     fireEvent.click(habitSwitch()!)
     fireEvent.change(screen.getByLabelText('Who are you becoming?'), { target: { value: ' I am a reader ' } })
     fireEvent.change(screen.getByLabelText('When / where / after what'), { target: { value: 'After dinner' } })
@@ -194,7 +208,7 @@ describe('TaskForm: habits', () => {
   test('stages must go up: a stage not above the one before blocks saving', () => {
     renderForm()
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Read' } })
-    fireEvent.click(screen.getByRole('radio', { name: 'Schedule' }))
+    fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'schedule' } })
     fireEvent.click(habitSwitch()!)
     expect(save().disabled).toBe(false)
 
@@ -220,7 +234,7 @@ describe('TaskForm: habits', () => {
 
   test('a weekly habit counts its stages in times', () => {
     renderForm()
-    fireEvent.click(screen.getByRole('radio', { name: 'Schedule' }))
+    fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'schedule' } })
     fireEvent.change(screen.getByLabelText('Unit'), { target: { value: 'week' } })
     fireEvent.click(habitSwitch()!)
     expect(screen.getByLabelText('Stage 1: times')).toBeTruthy()
@@ -234,7 +248,7 @@ describe('TaskForm: habits', () => {
     )
     // An existing habit opens with its own stages.
     expect((screen.getByLabelText('Stage 2: days') as HTMLInputElement).value).toBe('30')
-    fireEvent.click(screen.getByRole('radio', { name: 'Once' }))
+    fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'none' } })
     fireEvent.click(save())
     await waitFor(() =>
       expect(api.updateTask).toHaveBeenCalledWith('h', expect.objectContaining({ repeatMode: 'none', isHabit: false })),

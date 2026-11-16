@@ -67,6 +67,7 @@ export const tasksMessages = defineMessages(
         schedule: { label: 'Jadval', hint: "Belgilangan kunlarda, kalendar kabi. O'tkazib yuborilgan kunlar to'planmaydi." },
         after_done: { label: 'Interval', hint: 'Oxirgi marta bajargan kuningizdan hisoblanadi.' },
       },
+      kind: 'Turi',
       every: 'Har',
       unit: 'Birlik',
       // Uzbek nouns don't change after a number (3 kun), so the count isn't used.
@@ -246,6 +247,7 @@ export const tasksMessages = defineMessages(
         schedule: { label: 'Schedule', hint: 'On fixed days, like a calendar. Missed days are not queued.' },
         after_done: { label: 'Interval', hint: 'Counted from the day you last did it.' },
       },
+      kind: 'Kind',
       every: 'Every',
       unit: 'Unit',
       unitLabel: (unit: RepeatUnit, n: number) => (n === 1 ? unit : `${unit}s`),

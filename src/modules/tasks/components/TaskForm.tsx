@@ -170,55 +170,49 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
         <span className={s.hint}>{t.form.noDateHint}</span>
       )}
 
+      {/* Repeat in one row: the kind, then (if it repeats) every N and the unit. */}
       <div className={s.field}>
         <span className={s.label}>{t.form.repeat}</span>
-        <div className={s.segments} role="radiogroup" aria-label={t.form.repeat}>
-          {MODES.map((m) => (
-            <button
-              key={m}
-              type="button"
-              role="radio"
-              aria-checked={mode === m}
-              className={clsx(s.segment, mode === m && s.active)}
-              onClick={() => chooseMode(m)}
-            >
-              {t.form.modes[m].label}
-            </button>
-          ))}
+        <div className={clsx(s.repeatRow, mode === 'none' && s.repeatOnce)}>
+          <select
+            className={s.input}
+            value={mode}
+            onChange={(e) => chooseMode(e.target.value as RepeatMode)}
+            aria-label={t.form.kind}
+          >
+            {MODES.map((m) => (
+              <option key={m} value={m}>
+                {t.form.modes[m].label}
+              </option>
+            ))}
+          </select>
+          {mode !== 'none' && (
+            <>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={365}
+                className={s.input}
+                value={every}
+                onChange={(e) => setEvery(e.target.value)}
+                aria-label={t.form.every}
+              />
+              <select
+                className={s.input}
+                value={unit}
+                onChange={(e) => chooseUnit(e.target.value as RepeatUnit)}
+                aria-label={t.form.unit}
+              >
+                <option value="day">{t.form.unitLabel('day', everyN)}</option>
+                <option value="week">{t.form.unitLabel('week', everyN)}</option>
+                <option value="month">{t.form.unitLabel('month', everyN)}</option>
+              </select>
+            </>
+          )}
         </div>
         <span className={s.hint}>{t.form.modes[mode].hint}</span>
       </div>
-
-      {mode !== 'none' && (
-        <div className={s.row}>
-          <label className={s.field}>
-            <span className={s.label}>{t.form.every}</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={365}
-              className={s.input}
-              value={every}
-              onChange={(e) => setEvery(e.target.value)}
-              aria-label={t.form.every}
-            />
-          </label>
-          <label className={s.field}>
-            <span className={s.label}>{t.form.unit}</span>
-            <select
-              className={s.input}
-              value={unit}
-              onChange={(e) => chooseUnit(e.target.value as RepeatUnit)}
-              aria-label={t.form.unit}
-            >
-              <option value="day">{t.form.unitLabel('day', everyN)}</option>
-              <option value="week">{t.form.unitLabel('week', everyN)}</option>
-              <option value="month">{t.form.unitLabel('month', everyN)}</option>
-            </select>
-          </label>
-        </div>
-      )}
 
       {weekly && (
         <div className={s.field}>
