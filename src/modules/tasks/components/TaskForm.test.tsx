@@ -173,13 +173,19 @@ describe('TaskForm: habits', () => {
     expect(screen.queryByLabelText('Who are you becoming?')).toBeNull()
   })
 
-  test('a new habit saves who, when, the two-minute version and the suggested stages', async () => {
+  test('a new habit saves who, the two-minute version and the suggested stages', async () => {
     renderForm()
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Read' } })
     fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'schedule' } })
     fireEvent.click(habitSwitch()!)
     fireEvent.change(screen.getByLabelText('Who are you becoming?'), { target: { value: ' I am a reader ' } })
-    fireEvent.change(screen.getByLabelText('When / where / after what'), { target: { value: 'After dinner' } })
+    // No cue field any more; the habit's text fields grow like the title.
+    expect(screen.queryByLabelText('When / where / after what')).toBeNull()
+    for (const name of ['Who are you becoming?', 'Two-minute version', 'Stage 1: reward']) {
+      const field = screen.getByLabelText(name) as HTMLTextAreaElement
+      expect(field.tagName).toBe('TEXTAREA')
+      expect(field.rows).toBe(1)
+    }
     fireEvent.change(screen.getByLabelText('Two-minute version'), { target: { value: 'Read 1 page' } })
     // Suggested 10 / 30 / 66, counted in days for a daily habit.
     expect((screen.getByLabelText('Stage 1: days') as HTMLInputElement).value).toBe('10')
@@ -194,7 +200,7 @@ describe('TaskForm: habits', () => {
           repeatMode: 'schedule',
           isHabit: true,
           identity: 'I am a reader',
-          cue: 'After dinner',
+          cue: null,
           minVersion: 'Read 1 page',
           stages: [
             { days: 10, reward: 'New mouse' },

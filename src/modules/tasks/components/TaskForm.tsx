@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
+import { GrowingInput } from '@/core/components/ui/GrowingInput'
 import { useAutosize } from '@/core/hooks/useAutosize'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { todayYmd } from '@/core/lib/format'
@@ -38,7 +39,6 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
   const qc = useQueryClient()
   const [title, setTitle] = useState(task?.title ?? '')
   const [note, setNote] = useState(task?.note ?? '')
-  const titleRef = useAutosize(title)
   const noteRef = useAutosize(note)
   const [dueDate, setDueDate] = useState(task ? (task.dueDate ?? '') : todayYmd())
   const [dueTime, setDueTime] = useState(task?.dueTime ?? '')
@@ -126,22 +126,12 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
     <form className={s.form} onSubmit={submit}>
       <label className={s.field}>
         <span className={s.label}>{t.form.title}</span>
-        {/* A textarea so a long title wraps and stays readable; it is still one line of text. */}
-        <textarea
-          ref={titleRef}
+        {/* Wraps instead of hiding a long title; still one line of text, Enter saves. */}
+        <GrowingInput
           className={clsx(s.input, s.textarea)}
           value={title}
-          // A title has no line breaks: pasted ones become spaces.
-          onChange={(e) => setTitle(e.target.value.replace(/\s*\n+\s*/g, ' '))}
-          onKeyDown={(e) => {
-            // Enter saves, as it did in the one-line field.
-            if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-              e.preventDefault()
-              e.currentTarget.form?.requestSubmit()
-            }
-          }}
+          onChange={setTitle}
           maxLength={200}
-          rows={1}
           placeholder={t.form.titlePlaceholder}
           aria-label={t.form.title}
           autoFocus={!task}

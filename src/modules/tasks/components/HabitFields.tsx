@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import clsx from 'clsx'
 import { Check, Plus, X } from 'lucide-react'
+import { GrowingInput } from '@/core/components/ui/GrowingInput'
 import { Switch } from '@/core/components/ui/Switch'
 import { useTasksT } from '@/modules/tasks/i18n'
 import {
@@ -24,8 +25,9 @@ interface Props {
 
 /**
  * The task form's habit part (a repeating task only): the switch, then who
- * it makes you, when it happens, the two-minute version for a hard day, and
- * the stages with the rewards the user picks for themselves.
+ * it makes you, the two-minute version for a hard day, and the stages with
+ * the rewards the user picks for themselves. (A habit's cue is no longer
+ * edited here; one already saved is kept as it is.)
  */
 export function HabitFields({ value, onChange, daily }: Props) {
   const t = useTasksT()
@@ -55,13 +57,6 @@ export function HabitFields({ value, onChange, daily }: Props) {
             value={value.identity}
             maxLength={120}
             onChange={(identity) => set({ identity })}
-          />
-          <TextField
-            label={t.habit.cue}
-            placeholder={t.habit.cuePlaceholder}
-            value={value.cue}
-            maxLength={200}
-            onChange={(cue) => set({ cue })}
           />
           <TextField
             label={t.habit.minVersion}
@@ -96,10 +91,10 @@ function TextField({
   return (
     <label className={f.field}>
       <span className={f.label}>{label}</span>
-      <input
-        className={f.input}
+      <GrowingInput
+        className={clsx(f.input, f.textarea)}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={onChange}
         maxLength={maxLength}
         placeholder={placeholder}
         aria-label={label}
@@ -173,10 +168,10 @@ function StagesEditor({
                     {t.habit.unit(daily)}
                   </span>
                 </span>
-                <input
-                  className={f.input}
+                <GrowingInput
+                  className={clsx(f.input, f.textarea)}
                   value={st.reward}
-                  onChange={(e) => update(st.key, { reward: e.target.value })}
+                  onChange={(reward) => update(st.key, { reward })}
                   maxLength={200}
                   placeholder={t.habit.rewardPlaceholder}
                   aria-label={t.habit.stageReward(n)}
