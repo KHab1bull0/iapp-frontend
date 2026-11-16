@@ -1,23 +1,34 @@
 @use '@/core/styles/variables' as *;
 
 // The grid's own geometry: 13px squares 3px apart (like the 2-3px inside a
-// segmented control, the gap is below the spacing scale on purpose).
-$cell: 13px;
-$gap: 3px;
-// Weekday column wide enough for "Wed" at caption size, then the 4px gap to
-// the grid: month labels start 32px in, over the first week.
-$label-w: 28px;
-$label-gap: 4px;
-
+// segmented control, the gap is below the spacing scale on purpose); 11px and
+// 2px when compact. The weekday column is wide enough for "Wed" at caption size.
 .wrap {
+  --cell: 13px;
+  --gap: 3px;
+  --label-w: 28px;
+  --label-gap: 4px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+
+  &.compact {
+    --cell: 11px;
+    --gap: 2px;
+  }
+}
+
+.frame {
+  display: flex;
+  gap: var(--label-gap);
+  min-width: 0;
 }
 
 // Wide on phones: scrolls sideways, newest weeks in view (rtl trick keeps
-// the scroll pinned to the right end).
+// the scroll pinned to the right end). The weekday names sit outside it.
 .scroller {
+  flex: 1;
+  min-width: 0;
   overflow-x: auto;
   direction: rtl;
   padding-bottom: 4px;
@@ -27,13 +38,15 @@ $label-gap: 4px;
 
 .months {
   display: flex;
-  gap: $gap;
-  margin-left: $label-w + $label-gap;
+  gap: var(--gap);
+  width: max-content;
   height: var(--lh-caption);
+  // Same step as the weekday column's first gap, so the rows line up.
+  margin-bottom: var(--gap);
 }
 
 .month {
-  width: $cell;
+  width: var(--cell);
   flex-shrink: 0;
   overflow: visible;
   white-space: nowrap;
@@ -42,41 +55,40 @@ $label-gap: 4px;
   color: var(--fg-muted);
 }
 
-.body {
-  display: flex;
-  gap: $label-gap;
-  width: max-content;
-}
-
 .weekdays {
   display: grid;
-  grid-template-rows: repeat(7, $cell);
-  gap: $gap;
-  width: $label-w;
+  // The first row lines up with the month labels above the grid.
+  grid-template-rows: var(--lh-caption) repeat(7, var(--cell));
+  row-gap: var(--gap);
+  flex-shrink: 0;
+  width: var(--label-w);
   font-size: var(--fs-caption);
-  line-height: $cell;
+  line-height: var(--cell);
   color: var(--fg-muted);
+
+  &::before { content: ''; }
 }
 
 .grid {
   display: flex;
-  gap: $gap;
+  gap: var(--gap);
+  width: max-content;
 }
 
 .week {
   display: grid;
-  grid-template-rows: repeat(7, $cell);
-  gap: $gap;
+  grid-template-rows: repeat(7, var(--cell));
+  gap: var(--gap);
 }
 
 .cell {
   display: inline-block;
-  width: $cell;
-  height: $cell;
+  width: var(--cell);
+  height: var(--cell);
   border-radius: 3px;
 }
 
-.pad { width: $cell; height: $cell; }
+.pad { width: var(--cell); height: var(--cell); }
 
 .l0 {
   background: var(--slate-100);

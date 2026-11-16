@@ -109,7 +109,7 @@ export function TaskStatsCard({ taskId, task }: { taskId: string; task?: Task })
       ) : (
         <div className={s.group}>
           <h2 className={s.groupLabel}>{t.stats.activity}</h2>
-          <Heatmap days={data.daily} />
+          <Heatmap days={data.daily} compact />
           <p className={s.note}>{t.stats.streakRule}</p>
         </div>
       )}

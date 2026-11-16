@@ -7,9 +7,10 @@ import s from './Heatmap.module.scss'
 /**
  * A calendar of the last few months, one square a day, darker the more was
  * done: gaps and runs are visible at a glance. A habit's two-minute days are
- * lighter.
+ * lighter. `compact` (a task's editor, a narrow panel) uses smaller squares so
+ * the whole range fits beside the weekday names without scrolling.
  */
-export function Heatmap({ days }: { days: HeatDay[] }) {
+export function Heatmap({ days, compact = false }: { days: HeatDay[]; compact?: boolean }) {
   const t = useTasksT()
   const weeks = heatWeeks(days)
   const active = days.filter((d) => d.count > 0).length
@@ -23,23 +24,24 @@ export function Heatmap({ days }: { days: HeatDay[] }) {
   }
 
   return (
-    <div className={s.wrap}>
-      <div className={s.scroller}>
-        <div className={s.months} aria-hidden>
-          {weeks.map((w, i) => {
-            const first = w.find((c) => c && c.day.endsWith('-01')) ?? (i === 0 ? w.find(Boolean) : undefined)
-            return (
-              <span key={i} className={s.month}>
-                {first ? formatMonthShort(first.day.slice(0, 7)) : ''}
-              </span>
-            )
-          })}
+    <div className={clsx(s.wrap, compact && s.compact)}>
+      <div className={s.frame}>
+        {/* Outside the scroller, so the weekday names stay in view however far it scrolls. */}
+        <div className={s.weekdays} aria-hidden>
+          {labels.map((l, i) => (
+            <span key={l}>{i % 2 === 0 ? l : ''}</span>
+          ))}
         </div>
-        <div className={s.body}>
-          <div className={s.weekdays} aria-hidden>
-            {labels.map((l, i) => (
-              <span key={l}>{i % 2 === 0 ? l : ''}</span>
-            ))}
+        <div className={s.scroller}>
+          <div className={s.months} aria-hidden>
+            {weeks.map((w, i) => {
+              const first = w.find((c) => c && c.day.endsWith('-01')) ?? (i === 0 ? w.find(Boolean) : undefined)
+              return (
+                <span key={i} className={s.month}>
+                  {first ? formatMonthShort(first.day.slice(0, 7)) : ''}
+                </span>
+              )
+            })}
           </div>
           <div className={s.grid} role="img" aria-label={t.stats.activityLabel(active, weeks.length)}>
             {weeks.map((w, i) => (
