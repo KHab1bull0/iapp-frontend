@@ -79,6 +79,12 @@
   cursor: pointer;
 }
 
+.foldEnd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .foldIcon {
   color: var(--fg-muted);
   transition: transform $t-base var(--ease-house);

@@ -15,12 +15,13 @@ export function PastSection({ count, children }: { count: number; children: Reac
   if (count === 0) return null
   return (
     <section className={s.section}>
+      {/* Laid out like the other sections' heads: the name on the left, the count (and the fold arrow) on the right. */}
       <button type="button" className={s.foldHead} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        <span className={s.sectionHead}>
-          <h2 className={s.sectionTitle}>{t.groups.past}</h2>
+        <h2 className={s.sectionTitle}>{t.groups.past}</h2>
+        <span className={s.foldEnd}>
           <span className={s.count}>{count}</span>
+          <ChevronDown size={18} className={clsx(s.foldIcon, open && s.open)} aria-hidden />
         </span>
-        <ChevronDown size={18} className={clsx(s.foldIcon, open && s.open)} aria-hidden />
       </button>
       {open && <div className={s.list}>{children}</div>}
     </section>
