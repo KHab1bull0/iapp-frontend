@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import clsx from 'clsx'
 import { formatDay, formatMonthShort, weekdayHeaders } from '@/core/lib/format'
 import { useTasksT } from '@/modules/tasks/i18n'
@@ -16,6 +17,13 @@ export function Heatmap({ days, compact = false }: { days: HeatDay[]; compact?: 
   const active = days.filter((d) => d.count > 0).length
   const labels = weekdayHeaders()
   const hasMin = days.some((d) => (d.min ?? 0) > 0)
+  const scroller = useRef<HTMLDivElement>(null)
+
+  // Open on the newest weeks when the range is wider than the card.
+  useLayoutEffect(() => {
+    const el = scroller.current
+    if (el) el.scrollLeft = el.scrollWidth
+  }, [weeks.length])
 
   const title = (c: HeatCell) => {
     const date = formatDay(c.day)
@@ -32,7 +40,7 @@ export function Heatmap({ days, compact = false }: { days: HeatDay[]; compact?: 
             <span key={l}>{i % 2 === 0 ? l : ''}</span>
           ))}
         </div>
-        <div className={s.scroller}>
+        <div ref={scroller} className={s.scroller}>
           <div className={s.months} aria-hidden>
             {weeks.map((w, i) => {
               const first = w.find((c) => c && c.day.endsWith('-01')) ?? (i === 0 ? w.find(Boolean) : undefined)

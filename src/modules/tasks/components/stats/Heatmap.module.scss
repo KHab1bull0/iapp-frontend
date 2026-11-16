@@ -2,11 +2,10 @@
 
 // The grid's own geometry: 13px squares 3px apart (like the 2-3px inside a
 // segmented control, the gap is below the spacing scale on purpose); 11px and
-// 2px when compact. The weekday column is wide enough for "Wed" at caption size.
+// 2px when compact.
 .wrap {
   --cell: 13px;
   --gap: 3px;
-  --label-w: 28px;
   --label-gap: 4px;
   display: flex;
   flex-direction: column;
@@ -24,16 +23,14 @@
   min-width: 0;
 }
 
-// Wide on phones: scrolls sideways, newest weeks in view (rtl trick keeps
-// the scroll pinned to the right end). The weekday names sit outside it.
+// When the months don't fit, the grid scrolls sideways; it opens on the
+// newest weeks (Heatmap scrolls it to the end). Left-aligned when it fits,
+// right beside the weekday names. The weekday names sit outside it.
 .scroller {
   flex: 1;
   min-width: 0;
   overflow-x: auto;
-  direction: rtl;
   padding-bottom: 4px;
-
-  > * { direction: ltr; }
 }
 
 .months {
@@ -61,7 +58,8 @@
   grid-template-rows: var(--lh-caption) repeat(7, var(--cell));
   row-gap: var(--gap);
   flex-shrink: 0;
-  width: var(--label-w);
+  // Only as wide as the longest name ("Du", "Wed"), so the grid starts close by.
+  width: max-content;
   font-size: var(--fs-caption);
   line-height: var(--cell);
   color: var(--fg-muted);
