@@ -224,15 +224,6 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
         </div>
       )}
 
-      {/* A one-off can't build a streak, so the switch comes with a repeat. */}
-      {mode !== 'none' && (
-        <HabitFields
-          value={habit}
-          onChange={setHabit}
-          daily={isDaily({ repeatMode: mode, repeatUnit: unit, repeatEvery: everyN })}
-        />
-      )}
-
       <label className={s.field}>
         <span className={s.label}>{t.form.note}</span>
         <textarea
@@ -246,6 +237,15 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
           aria-label={t.form.note}
         />
       </label>
+
+      {/* A one-off can't build a streak, so the switch comes with a repeat. */}
+      {mode !== 'none' && (
+        <HabitFields
+          value={habit}
+          onChange={setHabit}
+          daily={isDaily({ repeatMode: mode, repeatUnit: unit, repeatEvery: everyN })}
+        />
+      )}
 
       <div data-form-actions>
         {task && (
