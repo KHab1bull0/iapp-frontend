@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
+import { useAutosize } from '@/core/hooks/useAutosize'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { todayYmd } from '@/core/lib/format'
 import { DateField } from '@/core/components/ui/DateField'
@@ -37,6 +38,8 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
   const qc = useQueryClient()
   const [title, setTitle] = useState(task?.title ?? '')
   const [note, setNote] = useState(task?.note ?? '')
+  const titleRef = useAutosize(title)
+  const noteRef = useAutosize(note)
   const [dueDate, setDueDate] = useState(task ? (task.dueDate ?? '') : todayYmd())
   const [dueTime, setDueTime] = useState(task?.dueTime ?? '')
   const [mode, setMode] = useState<RepeatMode>(task?.repeatMode ?? 'none')
@@ -123,11 +126,22 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
     <form className={s.form} onSubmit={submit}>
       <label className={s.field}>
         <span className={s.label}>{t.form.title}</span>
-        <input
-          className={s.input}
+        {/* A textarea so a long title wraps and stays readable; it is still one line of text. */}
+        <textarea
+          ref={titleRef}
+          className={clsx(s.input, s.textarea)}
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          // A title has no line breaks: pasted ones become spaces.
+          onChange={(e) => setTitle(e.target.value.replace(/\s*\n+\s*/g, ' '))}
+          onKeyDown={(e) => {
+            // Enter saves, as it did in the one-line field.
+            if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+              e.preventDefault()
+              e.currentTarget.form?.requestSubmit()
+            }
+          }}
           maxLength={200}
+          rows={1}
           placeholder={t.form.titlePlaceholder}
           aria-label={t.form.title}
           autoFocus={!task}
@@ -238,11 +252,12 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
       <label className={s.field}>
         <span className={s.label}>{t.form.note}</span>
         <textarea
+          ref={noteRef}
           className={clsx(s.input, s.textarea)}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           maxLength={1000}
-          rows={2}
+          rows={1}
           placeholder={t.form.optional}
           aria-label={t.form.note}
         />

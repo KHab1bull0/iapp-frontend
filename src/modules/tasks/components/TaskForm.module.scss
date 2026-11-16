@@ -57,9 +57,13 @@
 }
 
 .textarea {
-  height: auto;
+  // Grows with its text (useAutosize): one row tall like the other fields,
+  // never a scrollbar, no resize handle.
+  min-height: var(--control-md);
   padding: 8px 12px;
-  resize: vertical;
+  line-height: var(--lh-ui);
+  resize: none;
+  overflow: hidden;
 }
 
 .segments {

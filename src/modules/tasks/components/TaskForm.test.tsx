@@ -39,6 +39,24 @@ describe('TaskForm', () => {
     await waitFor(() => expect(onSaved).toHaveBeenCalled())
   })
 
+  test('title and note are one-row textareas; the title keeps to one line and Enter saves', async () => {
+    renderForm()
+    const title = screen.getByLabelText('Title') as HTMLTextAreaElement
+    const note = screen.getByLabelText('Note') as HTMLTextAreaElement
+    expect(title.tagName).toBe('TEXTAREA')
+    expect(title.rows).toBe(1)
+    expect(note.tagName).toBe('TEXTAREA')
+    expect(note.rows).toBe(1)
+    // Pasted line breaks become spaces.
+    fireEvent.change(title, { target: { value: 'Call\nmum' } })
+    expect(title.value).toBe('Call mum')
+    // Enter saves instead of adding a line; Shift+Enter is left alone.
+    fireEvent.keyDown(title, { key: 'Enter' })
+    await waitFor(() =>
+      expect(api.createTask).toHaveBeenCalledWith(expect.objectContaining({ title: 'Call mum' })),
+    )
+  })
+
   test('saving says so and goes out once, however often Save is pressed', async () => {
     api.createTask.mockReturnValue(new Promise(() => {}))
     renderForm()
