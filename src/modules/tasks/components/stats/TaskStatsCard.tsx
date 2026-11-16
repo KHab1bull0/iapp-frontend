@@ -56,7 +56,7 @@ export function TaskStatsSkeleton() {
 
 /**
  * At the top of the task editor: the streak (and the best one), how many
- * times it was done in all, a habit's stages, and the heatmap. A streak that
+ * times it was done in all, the heatmap, then a habit's stages. A streak that
  * isn't daily counts times instead of days.
  *
  * While the numbers load, the same card in outline. The stages don't wait
@@ -97,8 +97,6 @@ export function TaskStatsCard({ taskId, task }: { taskId: string; task?: Task })
         <TilesSkeleton />
       )}
 
-      <Stages habit={habit} />
-
       {!data ? (
         <ActivitySkeleton />
       ) : data.total === 0 ? (
@@ -113,6 +111,8 @@ export function TaskStatsCard({ taskId, task }: { taskId: string; task?: Task })
           <p className={s.note}>{t.stats.streakRule}</p>
         </div>
       )}
+
+      <Stages habit={habit} />
     </section>
   )
 }
