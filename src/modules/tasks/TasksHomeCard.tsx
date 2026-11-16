@@ -31,7 +31,7 @@ export function TasksHomeCard() {
     queryFn: () => fetchToday(today),
   })
 
-  const due = data ? [...data.overdue, ...byTime(data.today)] : []
+  const due = data ? byTime(data.today) : []
   const done = data?.doneToday.length ?? 0
   const all = due.length + done
 
@@ -73,7 +73,6 @@ export function TasksHomeCard() {
         />
       ) : (
         <>
-          {data.overdue.length > 0 && <div className={s.overdue}>{m.home.overdue(data.overdue.length)}</div>}
           <div className={s.list}>
             {due.slice(0, PREVIEW).map((t) => (
               <TaskRow

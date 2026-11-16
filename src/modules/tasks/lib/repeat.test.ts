@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import type { Task } from '@/modules/tasks/api/tasks'
-import { describeRepeat, dueLabel, groupByDue } from './repeat'
+import { describeRepeat, dueLabel, groupByDue, pastTasks } from './repeat'
 import { tasksMessages } from '@/modules/tasks/i18n'
 
 const en = tasksMessages.en
@@ -66,8 +66,8 @@ describe('dueLabel', () => {
     expect(dueLabel(null, TODAY, en)).toBe('No date')
     expect(dueLabel(TODAY, TODAY, en)).toBe('Today')
     expect(dueLabel('2026-10-31', TODAY, en)).toBe('Tomorrow')
-    expect(dueLabel('2026-10-29', TODAY, en)).toBe('1 day overdue')
-    expect(dueLabel('2026-10-25', TODAY, en)).toBe('5 days overdue')
+    // A past day plainly, never "N days late".
+    expect(dueLabel('2026-10-25', TODAY, en)).toBe('25 Oct')
     expect(dueLabel('2026-11-03', TODAY, en)).toBe('Tue')
   })
 })
@@ -85,13 +85,22 @@ describe('groupByDue', () => {
       TODAY,
       en,
     )
+    // A task whose day passed is left out unless asked for.
     expect(groups.map((g) => [g.label, g.tasks.map((t) => t.id)])).toEqual([
-      ['Overdue', ['late']],
       ['Today', ['today']],
       ['This week', ['week']],
       ['Later', ['later']],
       ['No date', ['none']],
     ])
+  })
+
+  test('pastTasks: the ones whose day passed, oldest first', () => {
+    const tasks = [
+      task({ id: 'late', dueDate: '2026-10-20' }),
+      task({ id: 'older', dueDate: '2026-10-01' }),
+      task({ id: 'today', dueDate: TODAY }),
+    ]
+    expect(pastTasks(tasks, TODAY).map((x) => x.id)).toEqual(['older', 'late'])
   })
 })
 
@@ -108,7 +117,6 @@ describe('in Uzbek', () => {
     expect(describeRepeat(task({ repeatMode: 'after_done', repeatUnit: 'day', repeatEvery: 10 }), uz)).toBe(
       'Bajarilgandan 10 kun keyin',
     )
-    expect(dueLabel('2026-10-25', TODAY, uz)).toBe('5 kun kechikdi')
     expect(dueLabel('2026-10-31', TODAY, uz)).toBe('Ertaga')
     expect(groupByDue([task({ dueDate: TODAY })], TODAY, uz)[0].label).toBe('Bugun')
   })

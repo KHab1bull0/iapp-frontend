@@ -1,10 +1,10 @@
-import clsx from 'clsx'
 import { useQuery } from '@tanstack/react-query'
 import { ListTodo, RefreshCw } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { useToday } from '@/core/hooks/useToday'
 import { fetchTasks, tasksKeys } from '@/modules/tasks/api/tasks'
-import { groupByDue } from '@/modules/tasks/lib/repeat'
+import { groupByDue, pastTasks } from '@/modules/tasks/lib/repeat'
+import { PastSection } from '@/modules/tasks/components/PastSection'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { LoadingLabel, SectionSkeleton } from '@/modules/tasks/components/skeletons'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
@@ -28,6 +28,8 @@ export function AllTasksPage() {
   })
 
   const groups = groupByDue(tasks, today, t)
+  // Tasks whose day passed: folded away at the very end (no red overdue pile).
+  const past = pastTasks(tasks, today)
 
   return (
     <div className={s.page}>
@@ -46,7 +48,7 @@ export function AllTasksPage() {
         groups.map((g) => (
           <section key={g.key} className={s.section}>
             <div className={s.sectionHead}>
-              <h2 className={clsx(s.sectionTitle, g.key === 'overdue' && s.danger)}>{g.label}</h2>
+              <h2 className={s.sectionTitle}>{g.label}</h2>
               <span className={s.count}>{g.tasks.length}</span>
             </div>
             <div className={s.list}>
@@ -64,6 +66,21 @@ export function AllTasksPage() {
             </div>
           </section>
         ))
+      )}
+      {!isLoading && !isError && (
+        <PastSection count={past.length}>
+          {past.map((task) => (
+            <TaskRow
+              key={task.id}
+              task={task}
+              today={today}
+              showDue
+              busy={moving.has(task.id)}
+              onTomorrow={toTomorrow}
+              onOpen={editor.openEdit}
+            />
+          ))}
+        </PastSection>
       )}
       {editor.dialog}
     </div>

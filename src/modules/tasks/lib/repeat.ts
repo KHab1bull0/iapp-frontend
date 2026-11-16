@@ -30,13 +30,13 @@ export function describeRepeat(task: Task, t: TasksMessages): string {
   return repeatEvery === 1 ? t.repeat.everyOne(repeatUnit) : t.repeat.everyN(repeatEvery, repeatUnit)
 }
 
-/** "Today", "Tomorrow", "3 days overdue", a weekday this week, or the date. */
+/** "Today", "Tomorrow", a weekday this week, or the date (a past one plainly, never "N days late"). */
 export function dueLabel(dueDate: string | null, today: string, t: TasksMessages): string {
   if (!dueDate) return t.due.noDate
   const diff = daysBetween(today, dueDate)
+  if (diff < 0) return formatShortDay(dueDate)
   if (diff === 0) return t.due.today
   if (diff === 1) return t.due.tomorrow
-  if (diff < 0) return t.due.overdue(-diff)
   const [y, m, d] = dueDate.split('-').map(Number)
   const date = new Date(y, m - 1, d)
   if (diff < 7) return t.repeat.weekdays[date.getDay()]
@@ -44,17 +44,18 @@ export function dueLabel(dueDate: string | null, today: string, t: TasksMessages
 }
 
 export interface TaskGroup {
-  key: 'overdue' | 'today' | 'tomorrow' | 'week' | 'later' | 'none'
+  key: 'today' | 'tomorrow' | 'week' | 'later' | 'none'
   label: string
   tasks: Task[]
 }
 
-const GROUPS: TaskGroup['key'][] = ['overdue', 'today', 'tomorrow', 'week', 'later', 'none']
+const GROUPS: TaskGroup['key'][] = ['today', 'tomorrow', 'week', 'later', 'none']
 
-function groupOf(task: Task, today: string): TaskGroup['key'] {
+/** A task whose day has passed is "past": not in any group (see pastTasks). */
+function groupOf(task: Task, today: string): TaskGroup['key'] | 'past' {
   if (!task.dueDate) return 'none'
   const diff = daysBetween(today, task.dueDate)
-  if (diff < 0) return 'overdue'
+  if (diff < 0) return 'past'
   if (diff === 0) return 'today'
   if (diff === 1) return 'tomorrow'
   if (diff < 7) return 'week'
@@ -68,6 +69,13 @@ export function groupByDue(tasks: Task[], today: string, t: TasksMessages): Task
     label: t.groups[key],
     tasks: tasks.filter((task) => groupOf(task, today) === key),
   })).filter((g) => g.tasks.length > 0)
+}
+
+/** Tasks whose day has already passed, oldest first: the folded "earlier days" at the end. */
+export function pastTasks(tasks: Task[], today: string): Task[] {
+  return tasks
+    .filter((task) => groupOf(task, today) === 'past')
+    .sort((a, b) => a.dueDate!.localeCompare(b.dueDate!))
 }
 
 /** Tasks with a time first, earliest at the top; untimed ones after, in their order. */

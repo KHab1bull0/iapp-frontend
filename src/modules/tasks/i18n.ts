@@ -21,7 +21,6 @@ export const tasksMessages = defineMessages(
     retry: 'Qayta urinish',
     loadFailed: "Vazifalarni yuklab bo'lmadi",
     loading: 'Yuklanmoqda…',
-    overdue: 'Kechikkan',
     today: 'Bugun',
     done: 'Bajarilgan',
     nothingToday: "Bugun vazifa yo'q",
@@ -46,7 +45,6 @@ export const tasksMessages = defineMessages(
     home: {
       failed: "Bugungi vazifalarni yuklab bo'lmadi",
       due: (n: number) => `Bugun ${n} ta vazifa`,
-      overdue: (n: number) => `${n} ta kechikkan`,
       open: "Vazifalarni ochish",
       progress: (done: number, all: number) => `Bugun ${all} tadan ${done} tasi bajarildi`,
       allDone: 'Bugungi hamma ish bajarildi',
@@ -102,7 +100,6 @@ export const tasksMessages = defineMessages(
       noDate: 'Sanasiz',
       today: 'Bugun',
       tomorrow: 'Ertaga',
-      overdue: (n: number) => `${n} kun kechikdi`,
     },
     swipe: {
       done: 'Bajarildi',
@@ -112,7 +109,6 @@ export const tasksMessages = defineMessages(
     },
     progressTitle: (done: number, all: number) => `${all} tadan ${done} tasi bajarildi`,
     progressAllDone: 'Bugun hammasi bajarildi',
-    showDone: (n: number) => `Bajarilganlar (${n})`,
     stats: {
       title: 'Statistika',
       region: 'Vazifa statistikasi',
@@ -181,7 +177,7 @@ export const tasksMessages = defineMessages(
       allReached: 'Hamma bosqichlarga yetdingiz.',
     },
     groups: {
-      overdue: 'Kechikkan',
+      past: 'Bajarilmagan',
       today: 'Bugun',
       tomorrow: 'Ertaga',
       week: 'Shu hafta',
@@ -199,7 +195,6 @@ export const tasksMessages = defineMessages(
     retry: 'Retry',
     loadFailed: 'Failed to load tasks',
     loading: 'Loading…',
-    overdue: 'Overdue',
     today: 'Today',
     done: 'Done',
     nothingToday: 'Nothing due today',
@@ -224,7 +219,6 @@ export const tasksMessages = defineMessages(
     home: {
       failed: "Couldn't load today's tasks",
       due: (n: number) => `${n} due today`,
-      overdue: (n: number) => `${n} overdue`,
       open: 'Open Tasks',
       progress: (done: number, all: number) => `${done} of ${all} done today`,
       allDone: 'Everything for today is done',
@@ -279,7 +273,6 @@ export const tasksMessages = defineMessages(
       noDate: 'No date',
       today: 'Today',
       tomorrow: 'Tomorrow',
-      overdue: (n: number) => `${n} day${n === 1 ? '' : 's'} overdue`,
     },
     swipe: {
       done: 'Done',
@@ -289,7 +282,6 @@ export const tasksMessages = defineMessages(
     },
     progressTitle: (done: number, all: number) => `${done} of ${all} done`,
     progressAllDone: 'All done for today',
-    showDone: (n: number) => `Done (${n})`,
     stats: {
       title: 'Statistics',
       region: 'Task statistics',
@@ -358,7 +350,7 @@ export const tasksMessages = defineMessages(
       allReached: 'You reached every stage.',
     },
     groups: {
-      overdue: 'Overdue',
+      past: 'Not done',
       today: 'Today',
       tomorrow: 'Tomorrow',
       week: 'This week',

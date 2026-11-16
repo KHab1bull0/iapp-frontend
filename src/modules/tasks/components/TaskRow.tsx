@@ -22,7 +22,7 @@ interface Props {
   onOpen: (task: Task) => void
   /** Swipe left: move to tomorrow. The edit sheet's date is the non-gesture way to do the same. */
   onTomorrow?: (task: Task) => void
-  /** Show "Tomorrow", "3 days overdue"… (All tasks); Today's own sections say it already. */
+  /** Show "Tomorrow", a weekday… (All tasks); Today's own sections say it already. */
   showDue?: boolean
   /**
    * A habit with a two-minute version: a small button beside the tick that
@@ -46,9 +46,8 @@ export function TaskRow({
   const habit = task.isHabit ? task.progress : null
   // A habit's line is its streak and stage; the editor still says how it repeats.
   const repeat = habit ? '' : describeRepeat(task, t)
-  const due =
-    showDue || (task.dueDate !== null && task.dueDate < today) ? dueLabel(task.dueDate, today, t) : ''
-  const overdue = !done && task.dueDate !== null && task.dueDate < today
+  // No red "N days late": a day already passed simply isn't mentioned.
+  const due = showDue ? dueLabel(task.dueDate, today, t) : ''
   const atRisk = !done && Boolean(habit?.atRisk)
   // Only a streak that changes while in view pops, not every row on load.
   const [firstStreak] = useState(habit?.streak)
@@ -83,7 +82,7 @@ export function TaskRow({
           {meta && (
             <span className={s.meta}>
               {task.dueTime && <span className={s.time}>{task.dueTime}</span>}
-              {due && !habit && <span className={clsx(overdue && s.overdue)}>{due}</span>}
+              {due && !habit && <span>{due}</span>}
               {habit && habit.streak > 0 && (
                 <span className={s.streak}>
                   <Flame size={12} aria-hidden />

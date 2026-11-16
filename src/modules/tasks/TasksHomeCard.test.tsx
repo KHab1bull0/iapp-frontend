@@ -16,7 +16,7 @@ const t = (id: string, title: string): Task => ({
 })
 
 describe('TasksHomeCard', () => {
-  test('lists what is due, overdue first, with a tick for each and the progress of the day', () => {
+  test("lists the day's tasks with a tick for each and the progress of the day; past ones stay out", () => {
     const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
     qc.setQueryData(tasksKeys.today(todayYmd()), {
       overdue: [t('a', 'Pay rent')],
@@ -30,14 +30,13 @@ describe('TasksHomeCard', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    expect(screen.getByText('1 overdue')).toBeTruthy()
+    expect(screen.queryByText('Pay rent')).toBeNull()
     expect(screen.getAllByRole('button', { name: /^Complete / }).map((b) => b.getAttribute('aria-label'))).toEqual([
-      'Complete Pay rent',
       'Complete Gym',
       'Complete Read',
       'Complete Call mum',
     ])
-    expect(screen.getByRole('progressbar', { name: '0 of 4 done today' })).toBeTruthy()
+    expect(screen.getByRole('progressbar', { name: '0 of 3 done today' })).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Open Tasks' }).getAttribute('href')).toBe('/tasks')
   })
 

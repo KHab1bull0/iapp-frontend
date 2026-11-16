@@ -22,7 +22,6 @@
 .sectionTitle {
   @include section-label;
 
-  &.danger { color: var(--danger); }
 }
 
 .count {

@@ -57,23 +57,28 @@ describe('TodayPage', () => {
     api.fetchOverallStats.mockResolvedValue({ total: 0, daily: [], currentStreak: 0 })
   })
 
-  test('shows overdue first, then today, with done tasks tucked away', async () => {
+  test("shows today and what's done; earlier days folded away at the end, without red", async () => {
     renderPage()
-    expect(await screen.findByRole('heading', { name: 'Overdue' })).toBeTruthy()
-    expect(screen.getByRole('heading', { name: 'Today' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Today' })).toBeTruthy()
+    expect(screen.getByText('09:30')).toBeTruthy()
+    // Done is a plain group, not folded.
+    expect(screen.getByRole('heading', { name: 'Done' })).toBeTruthy()
+    expect(screen.getByText('C')).toBeTruthy()
+    expect(screen.queryByRole('heading', { name: 'Overdue' })).toBeNull()
+    // Earlier days: last on the page, folded by default.
+    const fold = screen.getByRole('button', { name: /Not done/ })
+    expect(fold.getAttribute('aria-expanded')).toBe('false')
+    expect(screen.queryByText('A')).toBeNull()
+    fireEvent.click(fold)
     expect(screen.getByText('A')).toBeTruthy()
     expect(screen.getByText('Every day')).toBeTruthy()
-    expect(screen.getByText('09:30')).toBeTruthy()
-    // Done is its own group, open by default; it can be folded away.
-    expect(screen.getByRole('heading', { name: 'Done (1)' })).toBeTruthy()
-    expect(screen.getByText('C')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Done (1)' }))
-    expect(screen.queryByText('C')).toBeNull()
+    fireEvent.click(fold)
+    expect(screen.queryByText('A')).toBeNull()
   })
 
   test('shows how far through the day you are', async () => {
     renderPage()
-    expect(await screen.findByRole('progressbar', { name: '1 of 3 done' })).toBeTruthy()
+    expect(await screen.findByRole('progressbar', { name: '1 of 2 done' })).toBeTruthy()
   })
 
   test('ticking a task completes it for today, and Undo puts it back', async () => {
@@ -115,9 +120,9 @@ describe('TodayPage', () => {
   test('reads Uzbek when Uzbek is chosen', async () => {
     localStorage.setItem('iapp-lang', 'uz')
     renderPage()
-    expect(await screen.findByRole('heading', { name: 'Kechikkan' })).toBeTruthy()
-    expect(screen.getByRole('heading', { name: 'Bugun' })).toBeTruthy()
-    expect(screen.getByRole('heading', { name: 'Bajarilganlar (1)' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Bugun' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Bajarilgan' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: /Bajarilmagan/ }))
     expect(screen.getByText('Har kuni')).toBeTruthy()
   })
 

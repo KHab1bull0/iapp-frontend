@@ -9,12 +9,6 @@
   color: var(--fg-muted);
 }
 
-.overdue {
-  font-size: var(--fs-meta);
-  font-weight: 600;
-  color: var(--danger);
-}
-
 // Rows sit flush in the card, separated by hairlines.
 .list {
   margin: 0 -8px;

@@ -1,7 +1,5 @@
-import { useState } from 'react'
-import clsx from 'clsx'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronDown, CircleCheckBig, Plus, RefreshCw } from 'lucide-react'
+import { CircleCheckBig, Plus, RefreshCw } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { ProgressRing } from '@/core/components/ui/Progress'
 import { Skeleton } from '@/core/components/ui/Skeleton'
@@ -14,6 +12,7 @@ import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { HeatmapSkeleton, LoadingLabel, SectionSkeleton } from '@/modules/tasks/components/skeletons'
 import { byTime } from '@/modules/tasks/lib/repeat'
+import { PastSection } from '@/modules/tasks/components/PastSection'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
 import { useCompleteTask, useMoveToTomorrow } from '@/modules/tasks/useCompleteTask'
 import { useTasksT } from '@/modules/tasks/i18n'
@@ -41,8 +40,9 @@ function RailSkeleton() {
 
 /**
  * Tasks → Today: how far through the day you are, the habits on top (done
- * ones stay there, ticked, with their streak), what else is due (overdue
- * first), and what's done, folded away. Swipe right to tick, left to put off
+ * ones stay there, ticked, with their streak), what else is due, and what's
+ * done. No red overdue list: a task whose day passed is due today (a one-off
+ * just drops out). Swipe right to tick, left to put off
  * until tomorrow; the bar at the bottom adds.
  */
 export function TodayPage() {
@@ -52,8 +52,6 @@ export function TodayPage() {
   const editor = useTaskEditor()
   const { complete, completeMin, undo, pending, feedback } = useCompleteTask(today)
   const { toTomorrow, moving } = useMoveToTomorrow(today)
-  // Open by default: done tasks stay in view (and can be unticked) unless folded away.
-  const [showDone, setShowDone] = useState(true)
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.today(today),
@@ -67,16 +65,16 @@ export function TodayPage() {
     enabled: !isMobile,
   })
 
-  const allOverdue = data?.overdue ?? []
-  const allToday = data?.today ?? []
+  const allDue = data?.today ?? []
+  // Days that passed stay passed: folded away at the end, without red.
+  const past = data?.overdue ?? []
   const allDone = data?.doneToday ?? []
-  const all = allOverdue.length + allToday.length + allDone.length
+  const all = allDue.length + allDone.length
 
-  const habits = habitOrder([...allOverdue, ...allToday].filter((t) => t.isHabit))
+  const habits = habitOrder(allDue.filter((t) => t.isHabit))
   const habitsDone = allDone.filter((d) => d.task.isHabit)
-  const overdue = allOverdue.filter((t) => !t.isHabit)
   // Anything with a time goes first, by the clock.
-  const dueToday = byTime(allToday.filter((t) => !t.isHabit))
+  const dueToday = byTime(allDue.filter((t) => !t.isHabit))
   const done = allDone.filter((d) => !d.task.isHabit)
 
   const row = (t: Task) => (
@@ -89,6 +87,20 @@ export function TodayPage() {
       onTomorrow={toTomorrow}
       onOpen={editor.openEdit}
       onMin={completeMin}
+    />
+  )
+
+  // A past task with its day shown plainly, so it reads as "from earlier".
+  const pastRow = (t: Task) => (
+    <TaskRow
+      key={t.id}
+      task={t}
+      today={today}
+      showDue
+      busy={pending.has(t.id) || moving.has(t.id)}
+      onToggle={complete}
+      onTomorrow={toTomorrow}
+      onOpen={editor.openEdit}
     />
   )
 
@@ -182,16 +194,6 @@ export function TodayPage() {
             </section>
           )}
 
-          {overdue.length > 0 && (
-            <section className={s.section}>
-              <div className={s.sectionHead}>
-                <h2 className={clsx(s.sectionTitle, s.danger)}>{m.overdue}</h2>
-                <span className={s.count}>{overdue.length}</span>
-              </div>
-              <div className={s.list}>{overdue.map(row)}</div>
-            </section>
-          )}
-
           {dueToday.length > 0 && (
             <section className={s.section}>
               <div className={s.sectionHead}>
@@ -202,7 +204,7 @@ export function TodayPage() {
             </section>
           )}
 
-          {overdue.length === 0 && dueToday.length === 0 && habits.length === 0 && (
+          {dueToday.length === 0 && habits.length === 0 && (
             <EmptyState
               icon={CircleCheckBig}
               title={allDone.length > 0 ? m.home.allDone : m.nothingToday}
@@ -213,18 +215,16 @@ export function TodayPage() {
 
           {done.length > 0 && (
             <section className={s.section}>
-              <button
-                type="button"
-                className={s.foldHead}
-                aria-expanded={showDone}
-                onClick={() => setShowDone((v) => !v)}
-              >
-                <h2 className={s.sectionTitle}>{m.showDone(done.length)}</h2>
-                <ChevronDown size={18} className={clsx(s.foldIcon, showDone && s.open)} aria-hidden />
-              </button>
-              {showDone && <div className={s.list}>{done.map((d) => doneRow(d))}</div>}
+              <div className={s.sectionHead}>
+                <h2 className={s.sectionTitle}>{m.done}</h2>
+                <span className={s.count}>{done.length}</span>
+              </div>
+              <div className={s.list}>{done.map((d) => doneRow(d))}</div>
             </section>
           )}
+
+          {/* Earlier days, at the very end and folded away. */}
+          <PastSection count={past.length}>{past.map(pastRow)}</PastSection>
           </div>
         </div>
       )}
