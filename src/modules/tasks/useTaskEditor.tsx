@@ -8,7 +8,7 @@ import { TaskDialog } from './components/TaskDialog'
  * Add and edit: a page of its own on phones (/tasks/new, /tasks/:id/edit),
  * a panel over the current page on desktop. Render `dialog` once.
  */
-export function useTaskEditor() {
+export function useTaskEditor({ onDeleted }: { onDeleted?: () => void } = {}) {
   const isMobile = useIsMobile()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -20,11 +20,15 @@ export function useTaskEditor() {
       setTask(null)
       setOpen(true)
     },
+    /** A row's tap: the task's own page (details and record), on every screen. */
+    openDetail(t: Task) {
+      navigate(`/tasks/${t.id}`)
+    },
     openEdit(t: Task) {
       if (isMobile) return navigate(`/tasks/${t.id}/edit`)
       setTask(t)
       setOpen(true)
     },
-    dialog: <TaskDialog open={open} onOpenChange={setOpen} task={task} />,
+    dialog: <TaskDialog open={open} onOpenChange={setOpen} task={task} onDeleted={onDeleted} />,
   }
 }

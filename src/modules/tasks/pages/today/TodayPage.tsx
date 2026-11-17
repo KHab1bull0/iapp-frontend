@@ -85,7 +85,7 @@ export function TodayPage() {
       busy={pending.has(t.id) || moving.has(t.id)}
       onToggle={complete}
       onTomorrow={toTomorrow}
-      onOpen={editor.openEdit}
+      onOpen={editor.openDetail}
       onMin={completeMin}
     />
   )
@@ -100,7 +100,7 @@ export function TodayPage() {
       busy={pending.has(t.id) || moving.has(t.id)}
       onToggle={complete}
       onTomorrow={toTomorrow}
-      onOpen={editor.openEdit}
+      onOpen={editor.openDetail}
     />
   )
 
@@ -112,7 +112,7 @@ export function TodayPage() {
       done
       busy={pending.has(completionId)}
       onToggle={() => undo(completionId)}
-      onOpen={editor.openEdit}
+      onOpen={editor.openDetail}
     />
   )
 

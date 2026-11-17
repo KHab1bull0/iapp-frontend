@@ -27,6 +27,8 @@ interface Props {
   task: Task | null
   onSaved: () => void
   onCancel: () => void
+  /** After a delete; defaults to onSaved. The task's own page can't be gone back to then. */
+  onDeleted?: () => void
 }
 
 const MODES: RepeatMode[] = ['none', 'schedule', 'after_done']
@@ -34,7 +36,7 @@ const MODES: RepeatMode[] = ['none', 'schedule', 'after_done']
 // Monday first, as people plan their week.
 const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0]
 
-export function TaskForm({ task, onSaved, onCancel }: Props) {
+export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
   const t = useTasksT()
   const qc = useQueryClient()
   const [title, setTitle] = useState(task?.title ?? '')
@@ -88,7 +90,7 @@ export function TaskForm({ task, onSaved, onCancel }: Props) {
       qc.removeQueries({ queryKey: tasksKeys.item(task!.id) })
       await qc.invalidateQueries({ queryKey: tasksKeys.all })
       toast(t.form.deleted, 'success')
-      onSaved()
+      ;(onDeleted ?? onSaved)()
     },
     onError: () => toast(t.form.deleteFailed, 'error'),
   })

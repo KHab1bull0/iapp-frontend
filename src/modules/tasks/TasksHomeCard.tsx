@@ -81,7 +81,7 @@ export function TasksHomeCard() {
                 today={today}
                 busy={pending.has(t.id)}
                 onToggle={complete}
-                onOpen={editor.openEdit}
+                onOpen={editor.openDetail}
                 onMin={completeMin}
               />
             ))}

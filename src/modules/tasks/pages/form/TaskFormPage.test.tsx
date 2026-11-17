@@ -38,31 +38,23 @@ function renderPage() {
   )
 }
 
-// Phones edit a task on this page, not in the desktop panel: the past-day tick must be here too.
 describe('TaskFormPage', () => {
-  test('an overdue task offers to mark a past day done', async () => {
+  test("holds only the form: the task's record and the past-day tick are on its own page", async () => {
     api.fetchTask.mockResolvedValue(task(addDaysYmd(todayYmd(), -2)))
-    api.fetchTaskStats.mockReturnValue(new Promise(() => {}))
     renderPage()
-    expect(await screen.findByRole('button', { name: /Mark a past day done/ })).toBeTruthy()
-  })
-
-  test('a task due today does not', async () => {
-    api.fetchTask.mockResolvedValue(task(todayYmd()))
-    api.fetchTaskStats.mockReturnValue(new Promise(() => {}))
-    renderPage()
-    expect(await screen.findByText('Edit task')).toBeTruthy()
+    expect(await screen.findByLabelText('Title')).toBeTruthy()
+    expect(screen.queryByRole('region', { name: 'Task statistics' })).toBeNull()
     expect(screen.queryByRole('button', { name: /Mark a past day done/ })).toBeNull()
+    expect(api.fetchTaskStats).not.toHaveBeenCalled()
   })
 
-  test('while the task loads: the editor in outline, not a blank page', async () => {
+  test('while the task loads: the form in outline, not a blank page', async () => {
     let resolve!: (v: Task) => void
     api.fetchTask.mockReturnValue(new Promise((r) => (resolve = r)))
     api.fetchTaskStats.mockReturnValue(new Promise(() => {}))
     renderPage()
     const busy = screen.getByText('Loading…').closest('[aria-busy="true"]')
     expect(busy).toBeTruthy()
-    expect(screen.getByRole('region', { name: 'Task statistics' })).toBeTruthy()
     expect(screen.queryByLabelText('Title')).toBeNull()
 
     resolve(task(todayYmd()))

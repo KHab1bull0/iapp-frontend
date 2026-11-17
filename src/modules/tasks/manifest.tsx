@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom'
 import type { ModuleManifest } from '@/core/modules/types'
 import { TasksHomeCard } from './TasksHomeCard'
 import { useDueCount } from './useDueCount'
-import { AllTasksPage, ReviewPage, TaskFormPage, TaskStatsPage, TodayPage } from './pages/lazy'
+import { AllTasksPage, ReviewPage, TaskDetailPage, TaskFormPage, TaskStatsPage, TodayPage } from './pages/lazy'
 import { TaskDialog } from './components/TaskDialog'
 
 export const tasks: ModuleManifest = {
@@ -30,6 +30,8 @@ export const tasks: ModuleManifest = {
   fullscreenRoutes: [
     { path: 'new', element: <TaskFormPage /> },
     { path: ':id/edit', element: <TaskFormPage /> },
+    // One task in full (opened from a row): its details and its record.
+    { path: ':id', element: <TaskDetailPage /> },
   ],
   homeCard: TasksHomeCard,
   quickAdd: [{ id: 'tasks.task', label: { uz: 'Vazifa', en: 'Task' }, icon: CircleCheck, to: '/tasks/new', Editor: TaskDialog }],

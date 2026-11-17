@@ -5,3 +5,4 @@ export const AllTasksPage = lazy(() => import('./all').then((m) => ({ default: m
 export const TaskFormPage = lazy(() => import('./form').then((m) => ({ default: m.TaskFormPage })))
 export const TaskStatsPage = lazy(() => import('./stats').then((m) => ({ default: m.TaskStatsPage })))
 export const ReviewPage = lazy(() => import('./review').then((m) => ({ default: m.ReviewPage })))
+export const TaskDetailPage = lazy(() => import('./detail').then((m) => ({ default: m.TaskDetailPage })))

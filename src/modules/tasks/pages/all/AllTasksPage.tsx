@@ -60,7 +60,7 @@ export function AllTasksPage() {
                   showDue={g.key !== 'today' && g.key !== 'none'}
                   busy={moving.has(task.id)}
                   onTomorrow={toTomorrow}
-                  onOpen={editor.openEdit}
+                  onOpen={editor.openDetail}
                 />
               ))}
             </div>
@@ -77,7 +77,7 @@ export function AllTasksPage() {
               showDue
               busy={moving.has(task.id)}
               onTomorrow={toTomorrow}
-              onOpen={editor.openEdit}
+              onOpen={editor.openDetail}
             />
           ))}
         </PastSection>

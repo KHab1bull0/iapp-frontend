@@ -3,12 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useToday } from '@/core/hooks/useToday'
 import { fetchTask, tasksKeys } from '@/modules/tasks/api/tasks'
-import { MissedDay } from '@/modules/tasks/components/MissedDay'
 import { TaskForm } from '@/modules/tasks/components/TaskForm'
-import { TaskStatsCard, TaskStatsSkeleton } from '@/modules/tasks/components/stats/TaskStatsCard'
 import { LoadingLabel, TaskFormSkeleton } from '@/modules/tasks/components/skeletons'
 import { useTasksT } from '@/modules/tasks/i18n'
-import st from '@/modules/tasks/components/stats/TaskStats.module.scss'
 import s from './TaskFormPage.module.scss'
 
 /**
@@ -42,23 +39,22 @@ export function TaskFormPage() {
       </header>
       <div className={s.body} aria-busy={loading || undefined}>
         {loading ? (
-          // The editor in outline: the task's stats, the divider, the form and its action row.
+          // The form in outline, with its action row.
           <>
             <LoadingLabel />
-            <TaskStatsSkeleton />
-            <hr className={st.divider} />
             <TaskFormSkeleton />
           </>
         ) : isEdit && (isError || !task) ? (
           <div className={s.state}>{t.notFound}</div>
         ) : (
-          <>
-            {task && <TaskStatsCard taskId={task.id} task={task} />}
-            {/* Same as the desktop panel (TaskDialog): an overdue task's past day, ticked off. */}
-            {task && <MissedDay task={task} onDone={close} />}
-            {task && <hr className={st.divider} />}
-            <TaskForm task={task ?? null} onSaved={close} onCancel={close} />
-          </>
+          // Only the form: the task's record lives on its own page (TaskDetailPage).
+          <TaskForm
+            task={task ?? null}
+            onSaved={close}
+            onCancel={close}
+            // The task's own page is gone too: back to the list.
+            onDeleted={() => navigate('/tasks', { replace: true })}
+          />
         )}
       </div>
     </div>

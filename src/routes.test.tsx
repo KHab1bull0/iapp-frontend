@@ -27,6 +27,13 @@ describe('buildRoutes', () => {
     expect(elementTypes('/finance/transactions/abc-123/edit', [finance])).not.toContain(AppLayout)
   })
 
+  test("a task's own page is full-screen, and the module's named pages still win over it", () => {
+    expect(elementTypes('/tasks/abc-123', [tasks])).not.toContain(AppLayout)
+    for (const path of ['/tasks', '/tasks/stats', '/tasks/all', '/tasks/review']) {
+      expect(elementTypes(path, [tasks])).toContain(AppLayout)
+    }
+  })
+
   test('finance overview and list render inside the shell', () => {
     expect(elementTypes('/finance', [finance])).toContain(AppLayout)
     expect(elementTypes('/finance/transactions', [finance])).toContain(AppLayout)
