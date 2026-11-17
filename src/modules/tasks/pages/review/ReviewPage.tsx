@@ -109,7 +109,7 @@ export function ReviewPage() {
   return (
     <div className={s.page} ref={top}>
       {/* Back to wherever it was opened from: Stats, or a notification (then Stats). */}
-      <BackButton fallback="/tasks" className={shell.backLink} label={t.back} />
+      <BackButton fallback="/tasks/stats" className={shell.backLink} label={t.back} />
       <header className={shell.pageHead}>
         <div>
           <h1 className={shell.h1}>{t.title}</h1>

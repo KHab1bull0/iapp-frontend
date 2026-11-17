@@ -12,19 +12,19 @@ export const tasks: ModuleManifest = {
   icon: ListChecks,
   basePath: '/tasks',
   pages: [
-    // Statistics first, as in Finance and English: opening a module shows where it stands.
-    { label: { uz: 'Tahlil', en: 'Stats' }, path: '/tasks', icon: BarChart3, end: true },
-    { label: { uz: 'Bugun', en: 'Today' }, path: '/tasks/today', icon: CalendarCheck, useBadge: useDueCount },
+    // Today first and opened by default: the module is used mostly to tick things off.
+    { label: { uz: 'Bugun', en: 'Today' }, path: '/tasks', icon: CalendarCheck, end: true, useBadge: useDueCount },
+    { label: { uz: 'Tahlil', en: 'Stats' }, path: '/tasks/stats', icon: BarChart3 },
     { label: { uz: 'Vazifalar', en: 'Tasks' }, path: '/tasks/all', icon: ListTodo },
   ],
   routes: [
-    { index: true, element: <TaskStatsPage /> },
-    { path: 'today', element: <TodayPage /> },
+    { index: true, element: <TodayPage /> },
+    { path: 'stats', element: <TaskStatsPage /> },
+    // Where Today used to be: old bookmarks and the notifications' links.
+    { path: 'today', element: <Navigate to="/tasks" replace /> },
     { path: 'all', element: <AllTasksPage /> },
     // Opened from Stats' entry card and the Sunday notification; not a tab of its own.
     { path: 'review', element: <ReviewPage /> },
-    // Where Statistics used to be, for bookmarks.
-    { path: 'stats', element: <Navigate to="/tasks" replace /> },
   ],
   // Phones add/edit on these pages; desktop opens the panel instead.
   fullscreenRoutes: [
