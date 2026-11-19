@@ -22,6 +22,9 @@ interface Props {
   showDue?: boolean
 }
 
+/** Longest name a row shows; the rest is cut with "…". */
+const MAX_TITLE = 15
+
 export function TaskRow({
   task,
   today,
@@ -32,26 +35,32 @@ export function TaskRow({
   showDue = false,
 }: Props) {
   const t = useTasksT()
-  const habit = task.isHabit ? task.progress : null
-  // A habit's line is its chip; the editor still says how it repeats.
-  const repeat = habit ? '' : describeRepeat(task, t)
+  const repeat = describeRepeat(task, t)
   // No red "N days late": a day already passed simply isn't mentioned.
   const due = showDue ? dueLabel(task.dueDate, today, t) : ''
+  // The list shows a short name; the task's own page and the editor show it whole.
+  const chars = Array.from(task.title)
+  const short = chars.length > MAX_TITLE ? `${chars.slice(0, MAX_TITLE).join('')}…` : task.title
 
-  const meta = task.isHabit || task.dueTime || repeat || due
+  const meta = task.dueTime || repeat || due
 
   return (
     <div className={s.wrap}>
       {/* The tick is the one way to mark it done: no swipe. */}
       <div className={clsx(s.row, done && s.done, busy && s.busy)}>
         <button className={s.body} onClick={() => onOpen(task)}>
-          <span className={s.title}>{task.title}</span>
+          <span className={s.titleLine}>
+            <span className={s.title}>
+              {short}
+              {short !== task.title && <span className="sr-only"> ({task.title})</span>}
+            </span>
+            {/* Habits sit among the other tasks, told apart by this chip beside the name. */}
+            {task.isHabit && <span className={s.habitChip}>{t.habit.label}</span>}
+          </span>
           {meta && (
             <span className={s.meta}>
-              {/* Habits sit among the other tasks, told apart by this chip. */}
-              {task.isHabit && <span className={s.habitChip}>{t.habit.label}</span>}
               {task.dueTime && <span className={s.time}>{task.dueTime}</span>}
-              {due && !habit && <span>{due}</span>}
+              {due && <span>{due}</span>}
               {repeat && (
                 <span className={s.repeat}>
                   <Repeat size={12} aria-hidden /> {repeat}

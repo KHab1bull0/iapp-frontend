@@ -65,7 +65,15 @@
   cursor: pointer;
 }
 
+.titleLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .title {
+  min-width: 0;
   font-size: var(--fs-ui);
   line-height: var(--lh-ui);
   font-weight: 500;
@@ -90,7 +98,7 @@
   color: var(--fg-muted);
 }
 
-// "Habit": a small tinted pill at the start of the line under the title.
+// "Habit": a small tinted pill beside the name.
 .habitChip {
   display: inline-flex;
   align-items: center;
@@ -102,7 +110,7 @@
   font-size: 11px;
   font-weight: 600;
   line-height: 1;
-  align-self: center;
+  flex-shrink: 0;
 }
 
 .time { font-variant-numeric: tabular-nums; font-weight: 500; color: var(--fg); }

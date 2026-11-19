@@ -103,6 +103,15 @@ describe('TodayPage: habits', () => {
     expect(screen.getByText('Everything for today is done')).toBeTruthy()
   })
 
+  test('a long name is cut at 15 characters, with the chip right beside it', async () => {
+    today([habit('read', { title: 'Brush teeth before bed every night' })])
+    renderPage()
+    const name = await screen.findByText(/^Brush teeth bef…/)
+    // The whole name is still there for screen readers.
+    expect(name.textContent).toBe('Brush teeth bef… (Brush teeth before bed every night)')
+    expect(name.nextElementSibling?.textContent).toBe('Habit')
+  })
+
   test('in Uzbek the chip says Odat', async () => {
     localStorage.setItem('iapp-lang', 'uz')
     today([habit('read'), habit('gym', { repeatUnit: 'week', repeatWeekdays: [1, 3] })])
