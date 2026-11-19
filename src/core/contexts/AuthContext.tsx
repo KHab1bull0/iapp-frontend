@@ -1,10 +1,13 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   useCallback,
   type ReactNode,
 } from 'react'
+import { isAxiosError } from 'axios'
+import api from '@/core/api/axios'
 import { clearApiCache } from '@/core/lib/pwa'
 import { forgetDevicePush } from '@/core/notifications/push'
 
@@ -59,6 +62,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // sign in on the same phone could read the previous user's balances.
     void clearApiCache()
   }, [])
+
+  // The server refused the session (its user is gone): sign out, so the app
+  // goes to sign-in instead of showing empty pages. /auth/* answers 401 for
+  // a wrong password too, which is not the session's fault.
+  useEffect(() => {
+    const id = api.interceptors.response.use(undefined, (err: unknown) => {
+      if (isAxiosError(err) && err.response?.status === 401 && !err.config?.url?.startsWith('/auth/')) {
+        logout()
+      }
+      return Promise.reject(err)
+    })
+    return () => api.interceptors.response.eject(id)
+  }, [logout])
 
   return (
     <AuthContext.Provider

@@ -4,7 +4,10 @@ import { MemoryRouter } from 'react-router-dom'
 import { AuthProvider } from '@/core/contexts/AuthContext'
 import { AuthPage } from './AuthPage'
 
-const http = vi.hoisted(() => ({ post: vi.fn() }))
+const http = vi.hoisted(() => ({
+  post: vi.fn(),
+  interceptors: { response: { use: vi.fn(), eject: vi.fn() } },
+}))
 vi.mock('@/core/api/axios', () => ({ default: http }))
 
 describe('AuthPage', () => {

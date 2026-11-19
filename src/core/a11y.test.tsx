@@ -60,8 +60,8 @@ vi.mock('@/modules/finance/api/categories', async (orig) => ({
 vi.mock('@/modules/tasks/api/groups', async (orig) => ({
   ...(await orig<object>()),
   fetchGroups: vi.fn().mockResolvedValue([
-    { id: 'g1', name: 'Work', createdAt: '' },
-    { id: 'g2', name: 'Home', createdAt: '' },
+    { id: 'g1', name: 'Work', color: '#3b82f6', createdAt: '' },
+    { id: 'g2', name: 'Home', color: '#10b981', createdAt: '' },
   ]),
 }))
 
@@ -118,7 +118,7 @@ describe('accessibility (axe)', () => {
     expect(await violations(container)).toEqual([])
   })
 
-  test('Tasks → Today split by group', async () => {
+  test('Tasks → Today, rows marked by group colour', async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
     qc.setQueryData(tasksKeys.today(todayYmd()), {
       overdue: [],
@@ -126,7 +126,7 @@ describe('accessibility (axe)', () => {
       doneToday: [],
     })
     const { container } = withProviders(<TodayPage />, qc)
-    await screen.findByRole('group', { name: 'Home' })
+    await screen.findByText('Gym')
     expect(await violations(container)).toEqual([])
   })
 
