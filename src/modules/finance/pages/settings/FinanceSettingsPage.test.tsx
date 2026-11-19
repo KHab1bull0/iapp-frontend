@@ -199,4 +199,16 @@ describe('FinanceSettingsPage: parent categories', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(updateCategory).toHaveBeenCalledWith('c1', expect.objectContaining({ parentId: 'p1' })))
   })
+
+  test('tapping the type that is already chosen keeps the parent', async () => {
+    vi.mocked(updateCategory).mockResolvedValue(GAS)
+    renderPage()
+    const home = await screen.findByRole('group', { name: 'Home bills' })
+    fireEvent.click(within(home).getByRole('button', { name: 'Edit' }))
+    const dialog = await screen.findByRole('dialog')
+    expect((within(dialog).getByLabelText('Parent category') as HTMLSelectElement).value).toBe('p1')
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Expense' }))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(updateCategory).toHaveBeenCalledWith('c2', expect.objectContaining({ parentId: 'p1' })))
+  })
 })

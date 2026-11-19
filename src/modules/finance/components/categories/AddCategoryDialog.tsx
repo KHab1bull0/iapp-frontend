@@ -92,7 +92,7 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
           <div className={s.tabs}>
             {TYPE_TABS.map((value) => (
               <button
-                key={value} type="button" onClick={() => { setType(value); setParentId(null) }}
+                key={value} type="button" onClick={() => { if (value !== type) { setType(value); setParentId(null) } }}
                 className={clsx(s.tab, type === value && s.active)}
               >
                 {t[value]}
