@@ -182,6 +182,13 @@ describe('TransactionFormPage: parent categories', () => {
     expect(screen.queryByRole('radio', { checked: true, name: /Taxi|Gas|Power/ })).toBeNull()
   })
 
+  test("categories show even while parents haven't come (or never do)", async () => {
+    vi.mocked(fetchCategoryParents).mockReturnValue(new Promise(() => {}))
+    renderAt('/finance/transactions/new')
+    expect(await screen.findByRole('radio', { name: /Taxi/ })).toBeTruthy()
+    expect(screen.getByRole('radio', { name: /Gas/ })).toBeTruthy()
+  })
+
   test('a parent with no categories is not offered', async () => {
     renderAt('/finance/transactions/new')
     await openParent()

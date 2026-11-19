@@ -64,7 +64,8 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
     queryKey: ['categories'],
     queryFn: fetchCategories,
   })
-  const { data: parents = [], isLoading: parentsLoading } = useQuery({
+  // Parents only group the chips: categories don't wait for them (nor break without them).
+  const { data: parents = [] } = useQuery({
     queryKey: categoryParentsKey,
     queryFn: fetchCategoryParents,
   })
@@ -133,7 +134,7 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
 
       <div className={s.field}>
         <span className={s.fieldLabel}>{t.category}</span>
-        {categoriesLoading || parentsLoading ? (
+        {categoriesLoading ? (
           // Not "no categories" while they are still on their way.
           <LoadingBlock label={t.categories.loading} className={s.chips}>
             <CategoryChipsSkeleton />
