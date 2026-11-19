@@ -16,7 +16,7 @@ import s from './TaskDetailPage.module.scss'
 /**
  * One task in full: what it is (title, note, when, how it repeats, the habit's
  * who), ticking off a past day, and its record
- * (streak, total, activity, stages). Editing is a step away, behind the
+ * (streak, total, activity). Editing is a step away, behind the
  * pencil; the editor itself holds only the form.
  */
 export function TaskDetailPage() {

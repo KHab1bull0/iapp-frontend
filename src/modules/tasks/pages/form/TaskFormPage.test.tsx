@@ -23,7 +23,7 @@ const task = (dueDate: string): Task => ({
   completedAt: null,
   createdAt: '',
   updatedAt: '',
-  isHabit: false, identity: null, cue: null, stages: [], progress: null,
+  isHabit: false, identity: null, cue: null, progress: null,
 })
 
 function renderPage() {

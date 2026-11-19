@@ -26,7 +26,6 @@ const task = (over: Partial<Task> = {}): Task => ({
   isHabit: true,
   identity: 'I am a reader',
   cue: null,
-  stages: [],
   progress: null,
   ...over,
 })

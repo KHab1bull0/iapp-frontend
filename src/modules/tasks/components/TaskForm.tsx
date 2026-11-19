@@ -18,8 +18,7 @@ import {
   type TaskInput,
 } from '@/modules/tasks/api/tasks'
 import { useTasksT } from '@/modules/tasks/i18n'
-import { habitDraft, habitInput, invalidStageAt } from '@/modules/tasks/lib/habit'
-import { isDaily } from '@/modules/tasks/lib/repeat'
+import { habitDraft, habitInput } from '@/modules/tasks/lib/habit'
 import { HabitFields } from './HabitFields'
 import s from './TaskForm.module.scss'
 
@@ -55,9 +54,7 @@ export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
   const valid =
     title.trim().length > 0 &&
     (mode === 'none' || (Number.isInteger(everyN) && everyN >= 1 && everyN <= 365)) &&
-    (!weekly || weekdays.length > 0) &&
-    // Stages only count for a habit, and only a repeating task is one.
-    (mode === 'none' || !habit.isHabit || invalidStageAt(habit.stages) < 0)
+    (!weekly || weekdays.length > 0)
 
   const save = useMutation({
     mutationFn: () => {
@@ -241,13 +238,7 @@ export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
       </label>
 
       {/* A one-off can't build a streak, so the switch comes with a repeat. */}
-      {mode !== 'none' && (
-        <HabitFields
-          value={habit}
-          onChange={setHabit}
-          daily={isDaily({ repeatMode: mode, repeatUnit: unit, repeatEvery: everyN })}
-        />
-      )}
+      {mode !== 'none' && <HabitFields value={habit} onChange={setHabit} />}
 
       <div data-form-actions>
         {task && (

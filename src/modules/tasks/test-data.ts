@@ -19,7 +19,6 @@ export const task = (id: string, over: Partial<Task> = {}): Task => ({
   isHabit: false,
   identity: null,
   cue: null,
-  stages: [],
   progress: null,
   ...over,
 })
@@ -28,7 +27,6 @@ export const progress = (over: Partial<HabitProgress> = {}): HabitProgress => ({
   streak: 4,
   best: 9,
   atRisk: false,
-  stage: { position: 1, days: 10, reward: 'New mouse' },
   total: 21,
   ...over,
 })
@@ -41,10 +39,6 @@ export const habit = (id: string, over: Partial<Task> = {}): Task =>
     repeatEvery: 1,
     isHabit: true,
     identity: 'I am a reader',
-    stages: [
-      { id: `${id}-s1`, position: 1, days: 10, reward: 'New mouse', reachedAt: null, claimedAt: null },
-      { id: `${id}-s2`, position: 2, days: 30, reward: 'A book', reachedAt: null, claimedAt: null },
-    ],
     progress: progress(),
     ...over,
   })

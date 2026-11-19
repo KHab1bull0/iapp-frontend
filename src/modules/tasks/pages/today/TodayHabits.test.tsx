@@ -12,7 +12,6 @@ const api = vi.hoisted(() => ({
   fetchToday: vi.fn(),
   completeTask: vi.fn(),
   undoCompletion: vi.fn(),
-  claimStage: vi.fn(),
   fetchOverallStats: vi.fn(),
 }))
 vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()), ...api }))
@@ -22,7 +21,6 @@ const result = (over: Partial<CompleteResult> = {}): CompleteResult => ({
   task: { ...READ, progress: progress({ streak: 5, total: 22 }) },
   completionId: 'c1',
   streak: { current: 5, best: 9 },
-  stageReached: null,
   ...over,
 })
 
@@ -45,11 +43,10 @@ describe('TodayPage: habits', () => {
     today([task('chore'), READ])
     api.completeTask.mockResolvedValue(result())
     api.undoCompletion.mockResolvedValue(READ)
-    api.claimStage.mockResolvedValue({})
     api.fetchOverallStats.mockResolvedValue({ total: 0, daily: [], currentStreak: 0 })
   })
 
-  test('habits get their own section on top, with the streak and the stage', async () => {
+  test('habits get their own section on top, with the streak', async () => {
     renderPage()
     const habits = await screen.findByRole('heading', { name: 'Habits' })
     const todayHead = screen.getByRole('heading', { name: 'Today' })
@@ -59,9 +56,8 @@ describe('TodayPage: habits', () => {
     expect(within(section).getByText('READ')).toBeTruthy()
     expect(within(section).queryByText('CHORE')).toBeNull()
     expect(within(section).getByText('Streak: 4 days')).toBeTruthy()
-    // On screen just the count towards the next stage; the stage is spelled out for screen readers.
-    expect(within(section).getByText('4/10')).toBeTruthy()
-    expect(within(section).getByText('Stage 1 4/10')).toBeTruthy()
+    // Just the streak: no count towards anything further.
+    expect(within(section).queryByText('4/10')).toBeNull()
     // Not at risk: no warning.
     expect(screen.queryByText('Get back to it today')).toBeNull()
   })
@@ -128,49 +124,6 @@ describe('TodayPage: habits', () => {
     expect(screen.getByText('Everything for today is done')).toBeTruthy()
   })
 
-  test('reaching a stage: a sheet with the reward, the claim, and the next stage at once', async () => {
-    api.completeTask.mockResolvedValue(
-      result({
-        streak: { current: 10, best: 10 },
-        stageReached: { id: 'read-s1', position: 1, days: 10, reward: 'New mouse' },
-        task: { ...READ, progress: progress({ streak: 10, stage: { position: 2, days: 30, reward: 'A book' } }) },
-      }),
-    )
-    renderPage()
-    fireEvent.click(await screen.findByRole('button', { name: 'Complete READ' }))
-    const sheet = await screen.findByRole('dialog', { name: 'You reached stage 1!' })
-    expect(within(sheet).getByText('Your reward: New mouse')).toBeTruthy()
-    expect(within(sheet).getByText('Next stage: Stage 2')).toBeTruthy()
-    expect(within(sheet).getByText('10/30')).toBeTruthy()
-    expect(within(sheet).getByText('Reward: A book')).toBeTruthy()
-    // Instead of the small celebration, not on top of it.
-    expect(screen.queryByText('+1 vote: I am a reader')).toBeNull()
-
-    fireEvent.click(within(sheet).getByRole('button', { name: 'I took my reward' }))
-    await waitFor(() => expect(api.claimStage).toHaveBeenCalledWith('read-s1', expect.anything()))
-    expect(await screen.findByText('Enjoy it!')).toBeTruthy()
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
-  })
-
-  test('taking the reward says it is saving and takes one tap only', async () => {
-    api.completeTask.mockResolvedValue(
-      result({
-        streak: { current: 10, best: 10 },
-        stageReached: { id: 'read-s1', position: 1, days: 10, reward: 'New mouse' },
-      }),
-    )
-    api.claimStage.mockReturnValue(new Promise(() => {}))
-    renderPage()
-    fireEvent.click(await screen.findByRole('button', { name: 'Complete READ' }))
-    const sheet = await screen.findByRole('dialog', { name: 'You reached stage 1!' })
-    fireEvent.click(within(sheet).getByRole('button', { name: 'I took my reward' }))
-    const pending = (await within(sheet).findByRole('button', { name: 'Saving…' })) as HTMLButtonElement
-    expect(pending.disabled).toBe(true)
-    expect(pending.getAttribute('aria-busy')).toBe('true')
-    fireEvent.click(pending)
-    expect(api.claimStage).toHaveBeenCalledTimes(1)
-  })
-
   describe('the streak counts days for a daily habit, times for any other', () => {
     test('in Uzbek', async () => {
       localStorage.setItem('iapp-lang', 'uz')
@@ -182,7 +135,6 @@ describe('TodayPage: habits', () => {
       expect(await screen.findByText('Ketma-ket: 4 kun')).toBeTruthy()
       expect(screen.getByText('Ketma-ket: 6 marta')).toBeTruthy()
       expect(screen.getByRole('heading', { name: 'Odatlar' })).toBeTruthy()
-      expect(screen.getByText('1-bosqich 4/10')).toBeTruthy()
     })
 
     test('in English, every second day is not daily', async () => {

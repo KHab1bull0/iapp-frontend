@@ -141,7 +141,7 @@ describe('TaskForm', () => {
             id: 't1', title: 'Old', note: null, dueDate: null, dueTime: null, repeatMode: 'none',
             repeatUnit: null, repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null,
             createdAt: '', updatedAt: '',
-  isHabit: false, identity: null, cue: null, stages: [], progress: null,
+  isHabit: false, identity: null, cue: null, progress: null,
           }}
           onSaved={onSaved}
           onCancel={() => {}}
@@ -173,27 +173,21 @@ describe('TaskForm: habits', () => {
     expect(screen.queryByLabelText('Who are you becoming?')).toBeNull()
   })
 
-  test('a new habit saves who and the suggested stages', async () => {
+  test('a new habit asks only who it makes you, and saves it', async () => {
     renderForm()
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Read' } })
     fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'schedule' } })
     fireEvent.click(habitSwitch()!)
-    fireEvent.change(screen.getByLabelText('Who are you becoming?'), { target: { value: ' I am a reader ' } })
-    // No cue field any more; the habit's text fields grow like the title.
-    expect(screen.queryByLabelText('When / where / after what')).toBeNull()
-    // No two-minute version either.
-    expect(screen.queryByLabelText('Two-minute version')).toBeNull()
-    for (const name of ['Who are you becoming?', 'Stage 1: reward']) {
-      const field = screen.getByLabelText(name) as HTMLTextAreaElement
-      expect(field.tagName).toBe('TEXTAREA')
-      expect(field.rows).toBe(1)
-    }
-    // Suggested 10 / 30 / 66, counted in days for a daily habit.
-    expect((screen.getByLabelText('Stage 1: days') as HTMLInputElement).value).toBe('10')
-    expect((screen.getByLabelText('Stage 2: days') as HTMLInputElement).value).toBe('30')
-    expect((screen.getByLabelText('Stage 3: days') as HTMLInputElement).value).toBe('66')
-    fireEvent.change(screen.getByLabelText('Stage 1: reward'), { target: { value: 'New mouse' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Remove stage 3' }))
+    const who = screen.getByLabelText('Who are you becoming?') as HTMLTextAreaElement
+    // The habit's text field grows like the title.
+    expect(who.tagName).toBe('TEXTAREA')
+    expect(who.rows).toBe(1)
+    fireEvent.change(who, { target: { value: ' I am a reader ' } })
+    // Nothing else under the switch: no cue, no two-minute version, no stages.
+    const group = habitSwitch()!.closest('div[class]')!.parentElement!
+    expect(within(group).getAllByRole('textbox')).toHaveLength(1)
+    expect(within(group).queryByRole('spinbutton')).toBeNull()
+    expect(within(group).queryByRole('button')).toBeNull()
     fireEvent.click(save())
     await waitFor(() =>
       expect(api.createTask).toHaveBeenCalledWith(
@@ -202,48 +196,10 @@ describe('TaskForm: habits', () => {
           isHabit: true,
           identity: 'I am a reader',
           cue: null,
-          stages: [
-            { days: 10, reward: 'New mouse' },
-            { days: 30, reward: null },
-          ],
         }),
       ),
     )
-  })
-
-  test('stages must go up: a stage not above the one before blocks saving', () => {
-    renderForm()
-    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Read' } })
-    fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'schedule' } })
-    fireEvent.click(habitSwitch()!)
-    expect(save().disabled).toBe(false)
-
-    const second = screen.getByLabelText('Stage 2: days')
-    fireEvent.change(second, { target: { value: '10' } })
-    expect(save().disabled).toBe(true)
-    expect(second.getAttribute('aria-invalid')).toBe('true')
-    expect(screen.getByText('Each stage needs more than the one before (1–1000).')).toBeTruthy()
-
-    fireEvent.change(second, { target: { value: '0' } })
-    expect(save().disabled).toBe(true)
-    fireEvent.change(second, { target: { value: '1001' } })
-    expect(save().disabled).toBe(true)
-    fireEvent.change(second, { target: { value: '20' } })
-    // 66 after 20 is fine again.
-    expect(save().disabled).toBe(false)
-    expect(second.getAttribute('aria-invalid')).toBeNull()
-
-    // Adding offers the next number up.
-    fireEvent.click(screen.getByRole('button', { name: 'Add a stage' }))
-    expect(Number((screen.getByLabelText('Stage 4: days') as HTMLInputElement).value)).toBeGreaterThan(66)
-  })
-
-  test('a weekly habit counts its stages in times', () => {
-    renderForm()
-    fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'schedule' } })
-    fireEvent.change(screen.getByLabelText('Unit'), { target: { value: 'week' } })
-    fireEvent.click(habitSwitch()!)
-    expect(screen.getByLabelText('Stage 1: times')).toBeTruthy()
+    expect(api.createTask.mock.calls[0][0]).not.toHaveProperty('stages')
   })
 
   test('back to a one-off, it is no longer a habit', async () => {
@@ -252,8 +208,8 @@ describe('TaskForm: habits', () => {
         <TaskForm task={habit('h')} onSaved={() => {}} onCancel={() => {}} />
       </QueryClientProvider>,
     )
-    // An existing habit opens with its own stages.
-    expect((screen.getByLabelText('Stage 2: days') as HTMLInputElement).value).toBe('30')
+    // An existing habit opens with its own who.
+    expect((screen.getByLabelText('Who are you becoming?') as HTMLTextAreaElement).value).toBe('I am a reader')
     fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'none' } })
     fireEvent.click(save())
     await waitFor(() =>

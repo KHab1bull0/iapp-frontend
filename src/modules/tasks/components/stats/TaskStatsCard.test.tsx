@@ -1,11 +1,11 @@
 import { describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { Task, TaskStats } from '@/modules/tasks/api/tasks'
 import { habit, progress } from '@/modules/tasks/test-data'
 import { TaskStatsCard } from './TaskStatsCard'
 
-const api = vi.hoisted(() => ({ fetchTaskStats: vi.fn(), claimStage: vi.fn() }))
+const api = vi.hoisted(() => ({ fetchTaskStats: vi.fn() }))
 vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()), ...api }))
 
 const STATS: TaskStats = {
@@ -53,32 +53,7 @@ describe('TaskStatsCard', () => {
 })
 
 describe('TaskStatsCard: a habit', () => {
-  const READ = habit('read', {
-    stages: [
-      { id: 's1', position: 1, days: 3, reward: 'Coffee', reachedAt: '2026-11-01', claimedAt: '2026-11-01' },
-      { id: 's2', position: 2, days: 4, reward: 'New mouse', reachedAt: '2026-11-05', claimedAt: null },
-      { id: 's3', position: 3, days: 10, reward: 'A book', reachedAt: null, claimedAt: null },
-      { id: 's4', position: 4, days: 30, reward: null, reachedAt: null, claimedAt: null },
-    ],
-    progress: progress({ streak: 4, stage: { position: 3, days: 10, reward: 'A book' } }),
-  })
-
-  test('lists the stages: taken, to take (claimed here), next with progress, ahead', async () => {
-    api.fetchTaskStats.mockResolvedValue(STATS)
-    api.claimStage.mockResolvedValue({})
-    renderCard(READ)
-    const list = (await screen.findByRole('heading', { name: 'Stages' })).parentElement!
-    const rows = within(list).getAllByRole('listitem')
-    expect(rows).toHaveLength(4)
-    expect(within(rows[0]).getByText('Taken')).toBeTruthy()
-    expect(within(rows[2]).getByRole('progressbar', { name: 'Stage 3 4/10' })).toBeTruthy()
-    expect(within(rows[2]).getByText('4/10')).toBeTruthy()
-    expect(within(rows[3]).getByText('Stage 4 · 30 days')).toBeTruthy()
-
-    fireEvent.click(within(rows[1]).getByRole('button', { name: 'I took my reward' }))
-    await waitFor(() => expect(api.claimStage).toHaveBeenCalledWith('s2', expect.anything()))
-    expect(await within(rows[1]).findByText('Taken')).toBeTruthy()
-  })
+  const READ = habit('read', { progress: progress({ streak: 4 }) })
 
   test('the heatmap titles each day', async () => {
     api.fetchTaskStats.mockResolvedValue({
@@ -101,35 +76,12 @@ describe('TaskStatsCard: a habit', () => {
     expect(screen.getByText('Best: 7 times')).toBeTruthy()
   })
 
-  test('while the numbers load: the card in outline, with the stages already there', () => {
+  test('while the numbers load: the card in outline', () => {
     api.fetchTaskStats.mockReturnValue(new Promise(() => {}))
     renderCard(READ)
     const card = screen.getByRole('region', { name: 'Task statistics' })
     expect(card.getAttribute('aria-busy')).toBe('true')
     expect(within(card).getByText('Loading…')).toBeTruthy()
-    expect(within(card).getByRole('heading', { name: 'Stages' })).toBeTruthy()
     expect(within(card).queryByText('Best: 7 days')).toBeNull()
-  })
-
-  test('taking a reward from the list: that button says it is saving, and all of them wait', async () => {
-    const twoToTake = habit('read', {
-      stages: [
-        { id: 's1', position: 1, days: 3, reward: 'Coffee', reachedAt: '2026-11-01', claimedAt: null },
-        { id: 's2', position: 2, days: 4, reward: 'New mouse', reachedAt: '2026-11-05', claimedAt: null },
-      ],
-      progress: progress({ streak: 4, stage: null }),
-    })
-    api.fetchTaskStats.mockResolvedValue(STATS)
-    api.claimStage.mockReturnValue(new Promise(() => {}))
-    renderCard(twoToTake)
-    const [first, second] = await screen.findAllByRole('button', { name: 'I took my reward' })
-    fireEvent.click(first)
-    await waitFor(() => expect(first.textContent).toContain('Saving…'))
-    expect(first.getAttribute('aria-busy')).toBe('true')
-    expect((first as HTMLButtonElement).disabled).toBe(true)
-    expect((second as HTMLButtonElement).disabled).toBe(true)
-    expect(second.getAttribute('aria-busy')).toBeNull()
-    fireEvent.click(first)
-    expect(api.claimStage).toHaveBeenCalledTimes(1)
   })
 })

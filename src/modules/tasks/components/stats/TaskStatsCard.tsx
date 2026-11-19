@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useToday } from '@/core/hooks/useToday'
 import { formatDate, parseApiDate } from '@/core/lib/format'
 import { fetchTaskStats, tasksKeys, type Task } from '@/modules/tasks/api/tasks'
-import { HabitStages } from '@/modules/tasks/components/habit/HabitStages'
 import { isDaily } from '@/modules/tasks/lib/repeat'
 import { useTasksT } from '@/modules/tasks/i18n'
 import { StatGrid, StatTile } from '@/core/components/ui/StatTile'
@@ -10,18 +9,6 @@ import { Skeleton } from '@/core/components/ui/Skeleton'
 import { HeatmapSkeleton, LoadingLabel, StatTileSkeleton } from '@/modules/tasks/components/skeletons'
 import { Heatmap } from './Heatmap'
 import s from './TaskStats.module.scss'
-
-/** A habit's stages. They come with the task, so they show while the numbers load too. */
-function Stages({ habit }: { habit: Task | null }) {
-  const t = useTasksT()
-  if (!habit || habit.stages.length === 0) return null
-  return (
-    <div className={s.group}>
-      <h2 className={s.groupLabel}>{t.habit.stages}</h2>
-      <HabitStages task={habit} />
-    </div>
-  )
-}
 
 function TilesSkeleton() {
   return (
@@ -56,16 +43,13 @@ export function TaskStatsSkeleton() {
 
 /**
  * At the top of the task editor: the streak (and the best one), how many
- * times it was done in all, the heatmap, then a habit's stages. A streak that
- * isn't daily counts times instead of days.
+ * times it was done in all, and the heatmap. A streak that isn't daily
+ * counts times instead of days.
  *
- * While the numbers load, the same card in outline. The stages don't wait
- * (they come with the task) and keep their place, so a claim started
- * meanwhile carries on.
+ * While the numbers load, the same card in outline.
  */
 export function TaskStatsCard({ taskId, task }: { taskId: string; task?: Task }) {
   const t = useTasksT()
-  const habit = task?.isHabit ? task : null
   // Before habits the editor always said days; only a task known not to be daily changes that.
   const daily = task ? isDaily(task) : true
   const today = useToday()
@@ -111,8 +95,6 @@ export function TaskStatsCard({ taskId, task }: { taskId: string; task?: Task })
           <p className={s.note}>{t.stats.streakRule}</p>
         </div>
       )}
-
-      <Stages habit={habit} />
     </section>
   )
 }

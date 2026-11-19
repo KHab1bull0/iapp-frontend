@@ -38,7 +38,7 @@ export function TaskRow({
 }: Props) {
   const t = useTasksT()
   const habit = task.isHabit ? task.progress : null
-  // A habit's line is its streak and stage; the editor still says how it repeats.
+  // A habit's line is its streak; the editor still says how it repeats.
   const repeat = habit ? '' : describeRepeat(task, t)
   // No red "N days late": a day already passed simply isn't mentioned.
   const due = showDue ? dueLabel(task.dueDate, today, t) : ''
@@ -84,16 +84,6 @@ export function TaskRow({
                     {habit.streak}
                   </span>
                   <span className="sr-only">{t.habit.streakLabel(habit.streak, isDaily(task))}</span>
-                </span>
-              )}
-              {habit?.stage && (
-                <span className={s.stage}>
-                  <span aria-hidden>
-                    {habit.streak}/{habit.stage.days}
-                  </span>
-                  <span className="sr-only">
-                    {t.habit.stageProgress(habit.stage.position, habit.streak, habit.stage.days)}
-                  </span>
                 </span>
               )}
               {atRisk && (

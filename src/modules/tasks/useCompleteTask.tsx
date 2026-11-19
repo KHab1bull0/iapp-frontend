@@ -13,7 +13,6 @@ import {
   type Task,
 } from './api/tasks'
 import { Celebration, type CelebrationData } from './components/habit/Celebration'
-import { StageSheet, type StageReached } from './components/habit/StageSheet'
 import { isDaily } from './lib/repeat'
 import { useTasksT } from './i18n'
 
@@ -38,21 +37,14 @@ function useInFlight() {
   return { ids, add, drop }
 }
 
-/** A sheet's content stays after it closes, so it doesn't empty while sliding away. */
-interface Opened<T> {
-  data: T
-  open: boolean
-}
-
 /**
  * Ticking a task off, with an Undo toast, shared by Today and the home card.
  * `pending` holds tasks whose completion is being saved (by task id) and
  * completions being undone (by completion id), so their tick is disabled
  * meanwhile and a double tap can't complete or undo one twice.
  *
- * A habit answers differently: a short celebration of the streak (no
- * toast), and a sheet with the reward when a stage is reached. Render
- * `feedback` once, where the hook is used.
+ * A habit answers differently: a short celebration of the streak instead
+ * of the toast. Render `feedback` once, where the hook is used.
  */
 export function useCompleteTask(today: string) {
   const m = useTasksT()
@@ -60,7 +52,6 @@ export function useCompleteTask(today: string) {
   const qc = useQueryClient()
   const { ids: pending, add, drop } = useInFlight()
   const [celebration, setCelebration] = useState<CelebrationData | null>(null)
-  const [reached, setReached] = useState<Opened<StageReached> | null>(null)
   const dismiss = useCallback(() => setCelebration(null), [])
 
   const refresh = () => qc.invalidateQueries({ queryKey: tasksKeys.all })
@@ -77,28 +68,13 @@ export function useCompleteTask(today: string) {
   function answer(result: CompleteResult, task: Task) {
     const undoAction = { label: m.undo, onClick: () => undo.mutate(result.completionId) }
     if (!task.isHabit) return toast(m.doneToast(task.title), 'success', undoAction)
-    const daily = isDaily(task)
-    if (result.stageReached) {
-      setCelebration(null)
-      setReached({
-        open: true,
-        data: {
-          title: task.title,
-          stage: result.stageReached,
-          streak: result.streak.current,
-          daily,
-          next: result.task.progress?.stage ?? null,
-        },
-      })
-      return
-    }
     const total = result.task.progress?.total
     setCelebration({
       id: Date.now(),
       title: task.title,
       from: task.progress?.streak ?? 0,
       to: result.streak.current,
-      daily,
+      daily: isDaily(task),
       line: task.identity ? m.habit.vote(task.identity) : total ? m.habit.total(total) : null,
       completionId: result.completionId,
     })
@@ -122,16 +98,7 @@ export function useCompleteTask(today: string) {
     },
   })
 
-  const feedback = (
-    <>
-      <Celebration data={celebration} onUndo={(id) => undo.mutate(id)} onDismiss={dismiss} />
-      <StageSheet
-        data={reached?.data ?? null}
-        open={reached?.open ?? false}
-        onOpenChange={(open) => setReached((r) => r && { ...r, open })}
-      />
-    </>
-  )
+  const feedback = <Celebration data={celebration} onUndo={(id) => undo.mutate(id)} onDismiss={dismiss} />
 
   return {
     /** The tick. */

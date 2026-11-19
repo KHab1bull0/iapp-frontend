@@ -12,7 +12,7 @@
   @include card-title;
 }
 
-// A group inside one card (the task editor's "Stages", "Activity"): its
+// A group inside one card (the task editor's "Activity"): its
 // parts sit close, the groups further apart, so they don't run together.
 .group {
   display: flex;

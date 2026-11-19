@@ -3,29 +3,12 @@ import api from '@/core/api/axios'
 export type RepeatMode = 'none' | 'schedule' | 'after_done'
 export type RepeatUnit = 'day' | 'week' | 'month'
 
-/** A habit's milestone: a streak length to reach and the user's own, known reward for it. */
-export interface TaskStage {
-  id: string
-  /** 1-based, in order of `days`. */
-  position: number
-  /** The streak length that reaches it. */
-  days: number
-  reward: string | null
-  reachedAt: string | null
-  claimedAt: string | null
-}
-
-/** The next stage to reach, as `progress` names it. */
-export type NextStage = Pick<TaskStage, 'position' | 'days' | 'reward'>
-
 /** A habit's standing on the day asked for (the `today` param). */
 export interface HabitProgress {
   streak: number
   best: number
   /** The last due occurrence was missed: missing today too ends the streak. */
   atRisk: boolean
-  /** The lowest stage not yet reached; null once all are (or there are none). */
-  stage: NextStage | null
   /** Every done completion (full + min): the "votes" for who you are becoming. */
   total: number
 }
@@ -53,8 +36,6 @@ export interface Task {
   identity: string | null
   /** When/where/after what: "after dinner, in the kitchen". */
   cue: string | null
-  /** Ordered by position. */
-  stages: TaskStage[]
   /** Habits only; null for every other task. */
   progress: HabitProgress | null
 }
@@ -71,16 +52,12 @@ export interface TaskInput {
   isHabit?: boolean
   identity?: string | null
   cue?: string | null
-  /** Replaces the list; at most 10, strictly increasing days (1..1000). */
-  stages?: { days: number; reward?: string | null }[]
 }
 
 export interface CompleteResult {
   task: Task
   completionId: string
   streak: { current: number; best: number }
-  /** Set on the completion that reached a stage: the reward is due. */
-  stageReached: Pick<TaskStage, 'id' | 'position' | 'days' | 'reward'> | null
 }
 
 export interface TodayTasks {
@@ -183,12 +160,6 @@ export async function completeTask(
     expectedDueDate,
     ...(doneOn && { doneOn }),
   })
-  return data
-}
-
-/** "I took my reward": marks a reached stage claimed. */
-export async function claimStage(id: string): Promise<TaskStage> {
-  const { data } = await api.post<TaskStage>(`/tasks/stages/${id}/claim`)
   return data
 }
 

@@ -34,7 +34,7 @@ async function violations(container: HTMLElement) {
 const task = (id: string): Task => ({
   id, title: id, note: null, dueDate: todayYmd(), dueTime: '09:00', repeatMode: 'none', repeatUnit: null,
   repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null, createdAt: '', updatedAt: '',
-  isHabit: false, identity: null, cue: null, stages: [], progress: null,
+  isHabit: false, identity: null, cue: null, progress: null,
 })
 
 function withProviders(ui: React.ReactNode, qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })) {
@@ -90,7 +90,7 @@ describe('accessibility (axe)', () => {
     expect(await violations(container)).toEqual([])
   })
 
-  test('Tasks → Today with habits: streak, stage, at risk', async () => {
+  test('Tasks → Today with habits: streak, at risk', async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
     qc.setQueryData(tasksKeys.today(todayYmd()), {
       overdue: [],
@@ -104,7 +104,7 @@ describe('accessibility (axe)', () => {
 
   test('the task form with the habit part open', async () => {
     const { container } = withProviders(<TaskForm task={habit('read')} onSaved={() => {}} onCancel={() => {}} />)
-    await screen.findByLabelText('Stage 1: days')
+    await screen.findByLabelText('Who are you becoming?')
     expect(await violations(container)).toEqual([])
   })
 

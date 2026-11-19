@@ -30,7 +30,7 @@ const t = (id: string, over: Partial<Task> = {}): Task => ({
   completedAt: null,
   createdAt: '',
   updatedAt: '',
-  isHabit: false, identity: null, cue: null, stages: [], progress: null,
+  isHabit: false, identity: null, cue: null, progress: null,
   ...over,
 })
 
