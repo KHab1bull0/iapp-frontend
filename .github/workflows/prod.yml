@@ -69,7 +69,10 @@ jobs:
             if [ "$(docker inspect -f '{{.Image}}' iapp_front)" != "$(docker image inspect -f '{{.Id}}' "$IMAGE")" ]; then
               echo "iapp_front is not running the new image"; exit 1
             fi
-            docker image prune -f
+            # Tidying only: the other repo's deploy may be pruning at the same
+            # moment ("a prune operation is already running"), which must not
+            # fail a deploy that already succeeded.
+            docker image prune -f || echo "prune skipped"
 
       - name: Log Success
         run: echo "Frontend deployed successfully"
