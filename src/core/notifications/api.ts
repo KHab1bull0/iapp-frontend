@@ -16,19 +16,21 @@ export interface PushDevice {
 }
 
 export interface NotificationSettings {
-  /** Hourly pushes of today's tasks that have no time. */
+  /** "HH:MM", the user's local time: every periodic reminder comes from here… */
+  activeFrom: string
+  /** …until here, both included. Never before activeFrom (the server answers 400 errors.bad_hours). */
+  activeUntil: string
+  /** Hourly pushes of today's tasks that have no time, within the active hours. */
   tasksDigest: boolean
-  /** "HH:MM", the user's local time: the first hourly push… */
-  tasksDigestAt: string
-  /** …and the last, both included. Never before tasksDigestAt. */
-  tasksDigestUntil: string
-  englishReminder: boolean
-  englishReminderAt: string
   /**
    * Timed tasks: each one is pushed its own remindBefore minutes ahead of its
    * dueTime, so there is no time here. The name is from when only habits did this.
    */
   habitReminders: boolean
+  /** Every 3 hours within the active hours, only while words wait for review. */
+  englishReminder: boolean
+  /** Every 3 hours within the active hours: a nudge to log spending. */
+  financeReminder: boolean
 }
 
 export const notificationKeys = {

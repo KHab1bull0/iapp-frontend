@@ -60,8 +60,8 @@ vi.mock('@/core/notifications/api', async (orig) => ({
   ...(await orig<object>()),
   fetchPublicKey: vi.fn().mockResolvedValue('BDxrGylovc0doQJluj-uAqzxpEHkJfyjVfondqgBadfog-sk7pdjyiIM6SHz6wFBAmN-6The2oDbxDIQbulnM8g'),
   fetchSettings: vi.fn().mockResolvedValue({
-    tasksDigest: true, tasksDigestAt: '08:00', tasksDigestUntil: '21:00', englishReminder: false, englishReminderAt: '20:00',
-    habitReminders: true,
+    activeFrom: '08:00', activeUntil: '21:00', tasksDigest: true, habitReminders: true, englishReminder: false,
+    financeReminder: true,
   }),
   fetchDevices: vi.fn().mockResolvedValue([
     { id: 'd1', userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15', createdAt: '2026-11-01T08:00:00Z', lastSuccessAt: '2026-11-09T08:00:00Z' },
@@ -135,7 +135,7 @@ describe('accessibility (axe)', () => {
     installFakePush({ subscribed: true })
     try {
       const { container } = withProviders(<NotificationsPage />)
-      await screen.findByRole('switch', { name: 'Tasks: hourly reminder' })
+      await screen.findByRole('switch', { name: 'Tasks: Hourly reminder' })
       await screen.findByText('iPhone · Safari')
       expect(await violations(container)).toEqual([])
     } finally {

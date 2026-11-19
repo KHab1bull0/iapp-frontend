@@ -14,6 +14,7 @@ import {
   Send,
   Share,
   Smartphone,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react'
 import {
@@ -129,13 +130,10 @@ function TimeInput({ value, label, onCommit }: { value: string; label: string; o
 
 type Keys<V> = { [K in keyof NotificationSettings]: NotificationSettings[K] extends V ? K : never }[keyof NotificationSettings]
 
-/** A reminder's switch and, if it fires at times the user picks, those times (each its own row). */
-interface Reminder {
-  on: Keys<boolean>
-  times?: { key: Keys<string>; label: string }[]
-  icon: LucideIcon
+/** One module's reminders, each a switch: when they come is the shared active hours above. */
+interface Group {
   title: string
-  hint: string
+  switches: { key: Keys<boolean>; icon: LucideIcon; title: string; hint: string }[]
 }
 
 function Reminders() {
@@ -161,7 +159,7 @@ function Reminders() {
 
   if (settings.isPending) {
     // The heading, rows and footer it stands in for, so the page doesn't jump.
-    return <ListSkeleton title rows={4} footer />
+    return <ListSkeleton title rows={3} />
   }
   if (settings.isError) {
     return (
@@ -172,59 +170,75 @@ function Reminders() {
   }
 
   const data = settings.data
-  const reminders: Reminder[] = [
+  const groups: Group[] = [
     {
-      on: 'tasksDigest',
-      // The first and the last hourly push.
-      times: [
-        { key: 'tasksDigestAt', label: t.from },
-        { key: 'tasksDigestUntil', label: t.until },
+      title: t.tasks,
+      switches: [
+        { key: 'tasksDigest', icon: ListChecks, title: t.tasksDigest, hint: t.tasksDigestHint },
+        // Each task reminds by its own time and its own "remind before".
+        { key: 'habitReminders', icon: Repeat, title: t.habitReminders, hint: t.habitRemindersHint },
       ],
-      icon: ListChecks,
-      title: t.tasksDigest,
-      hint: t.tasksDigestHint,
     },
-    // Each task reminds by its own time and its own "remind before", so this one has no time row.
-    { on: 'habitReminders', icon: Repeat, title: t.habitReminders, hint: t.habitRemindersHint },
     {
-      on: 'englishReminder',
-      times: [{ key: 'englishReminderAt', label: t.time }],
-      icon: BookOpen,
-      title: t.englishReminder,
-      hint: t.englishReminderHint,
+      title: t.english,
+      switches: [{ key: 'englishReminder', icon: BookOpen, title: t.englishReminder, hint: t.englishReminderHint }],
+    },
+    {
+      title: t.finance,
+      switches: [{ key: 'financeReminder', icon: Wallet, title: t.financeReminder, hint: t.financeReminderHint }],
     },
   ]
 
-  // The server refuses an hourly window that ends before it starts; say why here instead.
-  function saveTime(key: Keys<string>, value: string) {
+  // The server refuses a window that ends before it starts; say why here instead.
+  function saveTime(key: 'activeFrom' | 'activeUntil', value: string) {
     const next = { ...data, [key]: value }
-    if (next.tasksDigestUntil < next.tasksDigestAt) toast(t.rangeInvalid, 'error')
+    if (next.activeUntil < next.activeFrom) toast(t.rangeInvalid, 'error')
     else save.mutate({ [key]: value })
   }
 
+  const hours = [
+    { key: 'activeFrom', label: t.from },
+    { key: 'activeUntil', label: t.until },
+  ] as const
+
   return (
-    <ListGroup title={t.reminders} footer={t.remindersFooter}>
-      {reminders.flatMap(({ on, times = [], icon, title, hint }) => [
-        <ListRow
-          key={on}
-          icon={icon}
-          title={title}
-          subtitle={hint}
-          trailing={<Switch checked={data[on]} label={title} onChange={(next) => save.mutate({ [on]: next })} />}
-        />,
-        // The times only matter while the reminder is on (iOS Settings does the same).
-        ...(data[on]
-          ? times.map(({ key, label }) => (
-              <ListRow
-                key={key}
-                icon={Clock}
-                title={label}
-                trailing={<TimeInput value={data[key]} label={t.timeOf(title, label)} onCommit={(v) => saveTime(key, v)} />}
-              />
-            ))
-          : []),
-      ])}
-    </ListGroup>
+    <>
+      <ListGroup title={t.general}>
+        <ListRow icon={Clock} title={t.activeHours} subtitle={t.activeHoursHint} />
+        {hours.map(({ key, label }) => (
+          <ListRow
+            key={key}
+            title={label}
+            trailing={
+              <TimeInput value={data[key]} label={t.labelOf(t.activeHours, label)} onCommit={(v) => saveTime(key, v)} />
+            }
+          />
+        ))}
+      </ListGroup>
+      {groups.map((group, i) => (
+        <ListGroup
+          key={group.title}
+          title={group.title}
+          footer={i === groups.length - 1 ? t.remindersFooter : undefined}
+        >
+          {group.switches.map(({ key, icon, title, hint }) => (
+            <ListRow
+              key={key}
+              icon={icon}
+              title={title}
+              subtitle={hint}
+              trailing={
+                <Switch
+                  checked={data[key]}
+                  label={t.labelOf(group.title, title)}
+                  onChange={(next) => save.mutate({ [key]: next })}
+                />
+              }
+            />
+          ))}
+        </ListGroup>
+      ))}
+    </>
   )
 }
 
