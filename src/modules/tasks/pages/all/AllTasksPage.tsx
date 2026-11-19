@@ -15,8 +15,9 @@ import s from '../TasksPages.module.scss'
 
 /**
  * Tasks → All tasks: every planned task, by the group it is put in (each
- * soonest due first), to plan and edit. Until any task has a group, by when
- * it is next due instead. Ticking happens on Today, once a task's day has come.
+ * soonest due first, days passed included), to plan and edit. Every group
+ * shows, even one with no tasks yet; with no groups at all, by when each is
+ * next due instead. Ticking happens on Today, once a task's day has come.
  */
 export function AllTasksPage() {
   const today = useToday()
@@ -30,11 +31,11 @@ export function AllTasksPage() {
 
   const { data: taskGroups = [] } = useQuery({ queryKey: tasksKeys.groups, queryFn: fetchGroups })
 
-  // Tasks whose day passed: folded away at the very end (no red overdue pile).
-  const past = pastTasks(tasks, today)
-  const pastIds = new Set(past.map((task) => task.id))
-  // The server sends them soonest due first, so each group keeps that order.
-  const byUserGroup = byGroup(tasks.filter((task) => !pastIds.has(task.id)), taskGroups, t.group.none)
+  // The server sends them soonest due first, so each group keeps that order:
+  // a task whose day passed stays in its group, at the top, with its date.
+  const byUserGroup = byGroup(tasks, taskGroups, t.group.none, { keepEmpty: true })
+  // With no groups, the ones whose day passed fold away at the very end (no red overdue pile).
+  const past = byUserGroup ? [] : pastTasks(tasks, today)
   // A group's tasks fall on different days, so each row says when; a due section already does.
   const groups = byUserGroup
     ? byUserGroup.map((g) => ({ ...g, showDue: true }))

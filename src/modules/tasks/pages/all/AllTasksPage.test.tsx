@@ -68,4 +68,37 @@ describe('AllTasksPage', () => {
     // Not by when they're due any more.
     expect(screen.queryByRole('heading', { name: 'Today' })).toBeNull()
   })
+
+  test('with groups in use, a task whose day passed stays in its group: no "Not done" section', async () => {
+    groupsApi.fetchGroups.mockResolvedValueOnce([{ id: 'g1', name: 'Ish', createdAt: '' }])
+    api.fetchTasks.mockResolvedValue([t('old', '2020-01-01', 'g1'), t('a', todayYmd(), 'g1')])
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <AllTasksPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    const ish = (await screen.findByRole('heading', { name: 'Ish' })).closest('section')!
+    expect(ish.textContent).toContain('OLD')
+    expect(screen.queryByText('Not done')).toBeNull()
+  })
+
+  test('a group with no tasks yet still shows, empty', async () => {
+    groupsApi.fetchGroups.mockResolvedValueOnce([
+      { id: 'g1', name: 'Ish', createdAt: '' },
+      { id: 'g2', name: 'Uy', createdAt: '' },
+    ])
+    api.fetchTasks.mockResolvedValue([t('a', todayYmd())])
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <AllTasksPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    expect(await screen.findByRole('heading', { name: 'Ish' })).toBeTruthy()
+    const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
+    expect(headings).toEqual(['Ish', 'Uy', 'No group'])
+  })
 })
