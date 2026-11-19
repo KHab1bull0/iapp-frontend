@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import clsx from 'clsx'
-import { ArrowRight, Check, Flame, Repeat, TriangleAlert } from 'lucide-react'
+import { Check, Flame, Repeat, TriangleAlert } from 'lucide-react'
 import { useSwipe } from '@/core/hooks/useSwipe'
 import type { Task } from '@/modules/tasks/api/tasks'
 import { describeRepeat, dueLabel, isDaily } from '@/modules/tasks/lib/repeat'
@@ -15,13 +15,11 @@ interface Props {
   /** Omit where tasks can't be ticked (All tasks): no check is shown. */
   onToggle?: (task: Task) => void
   /**
-   * While a request about it is on its way (ticking, unticking, moving): its
+   * While a request about it is on its way (ticking, unticking): its
    * buttons and swipes wait, so a second tap can't send it twice.
    */
   busy?: boolean
   onOpen: (task: Task) => void
-  /** Swipe left: move to tomorrow. The edit sheet's date is the non-gesture way to do the same. */
-  onTomorrow?: (task: Task) => void
   /** Show "Tomorrow", a weekday… (All tasks); Today's own sections say it already. */
   showDue?: boolean
 }
@@ -33,7 +31,6 @@ export function TaskRow({
   onToggle,
   busy = false,
   onOpen,
-  onTomorrow,
   showDue = false,
 }: Props) {
   const t = useTasksT()
@@ -49,7 +46,6 @@ export function TaskRow({
 
   const swipe = useSwipe({
     onRight: onToggle && !done && !busy ? () => onToggle(task) : undefined,
-    onLeft: onTomorrow && !done && !busy ? () => onTomorrow(task) : undefined,
   })
   const meta = task.dueTime || repeat || due || habit
 
@@ -58,11 +54,6 @@ export function TaskRow({
       {swipe.dx > 0 && (
         <div className={clsx(s.under, s.underDone, swipe.armed && s.armed)} aria-hidden>
           <Check size={20} strokeWidth={3} /> {t.swipe.done}
-        </div>
-      )}
-      {swipe.dx < 0 && (
-        <div className={clsx(s.under, s.underLater, swipe.armed && s.armed)} aria-hidden>
-          {t.swipe.tomorrow} <ArrowRight size={20} />
         </div>
       )}
       <div
@@ -99,21 +90,6 @@ export function TaskRow({
             </span>
           )}
         </button>
-
-        {/* Pointer devices: the swipe's actions as buttons, shown on hover or focus. */}
-        {onTomorrow && !done && (
-          <button
-            type="button"
-            className={s.hoverAction}
-            onClick={() => onTomorrow(task)}
-            disabled={busy}
-            title={t.swipe.tomorrow}
-            aria-label={`${task.title}: ${t.swipe.tomorrow}`}
-          >
-            <ArrowRight size={16} aria-hidden />
-            <span>{t.swipe.tomorrow}</span>
-          </button>
-        )}
 
 
         {/* The tick at the right end, under the right thumb. */}

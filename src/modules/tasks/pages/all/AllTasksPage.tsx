@@ -8,7 +8,6 @@ import { PastSection } from '@/modules/tasks/components/PastSection'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { LoadingLabel, SectionSkeleton } from '@/modules/tasks/components/skeletons'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
-import { useMoveToTomorrow } from '@/modules/tasks/useCompleteTask'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
 
@@ -20,7 +19,6 @@ export function AllTasksPage() {
   const today = useToday()
   const t = useTasksT()
   const editor = useTaskEditor()
-  const { toTomorrow, moving } = useMoveToTomorrow(today)
 
   const { data: tasks = [], isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.list('active', today),
@@ -58,8 +56,6 @@ export function AllTasksPage() {
                   task={task}
                   today={today}
                   showDue={g.key !== 'today' && g.key !== 'none'}
-                  busy={moving.has(task.id)}
-                  onTomorrow={toTomorrow}
                   onOpen={editor.openDetail}
                 />
               ))}
@@ -75,8 +71,6 @@ export function AllTasksPage() {
               task={task}
               today={today}
               showDue
-              busy={moving.has(task.id)}
-              onTomorrow={toTomorrow}
               onOpen={editor.openDetail}
             />
           ))}

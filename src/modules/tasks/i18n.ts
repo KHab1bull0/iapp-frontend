@@ -104,9 +104,6 @@ export const tasksMessages = defineMessages(
     },
     swipe: {
       done: 'Bajarildi',
-      tomorrow: 'Ertaga',
-      moved: (title: string) => `“${title}” ertaga ko'chirildi`,
-      moveFailed: "Ko'chirib bo'lmadi",
     },
     progressTitle: (done: number, all: number) => `${all} tadan ${done} tasi bajarildi`,
     progressAllDone: 'Bugun hammasi bajarildi',
@@ -248,9 +245,6 @@ export const tasksMessages = defineMessages(
     },
     swipe: {
       done: 'Done',
-      tomorrow: 'Tomorrow',
-      moved: (title: string) => `“${title}” moved to tomorrow`,
-      moveFailed: 'Could not move the task',
     },
     progressTitle: (done: number, all: number) => `${done} of ${all} done`,
     progressAllDone: 'All done for today',

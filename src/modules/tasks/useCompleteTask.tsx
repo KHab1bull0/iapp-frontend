@@ -3,12 +3,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from '@/core/components/ui/toast'
 import { useLang } from '@/core/i18n'
 import { apiErrorText } from '@/core/i18n/errors'
-import { addDaysYmd } from '@/core/lib/format'
 import {
   completeTask,
   tasksKeys,
   undoCompletion,
-  updateTask,
   type CompleteResult,
   type Task,
 } from './api/tasks'
@@ -112,37 +110,3 @@ export function useCompleteTask(today: string) {
   }
 }
 
-/**
- * Swipe left on a row: put the task off until tomorrow, with Undo. `moving`
- * holds the tasks being moved, so their row waits rather than taking another
- * swipe or tick meanwhile.
- */
-export function useMoveToTomorrow(today: string) {
-  const m = useTasksT()
-  const qc = useQueryClient()
-  const refresh = () => qc.invalidateQueries({ queryKey: tasksKeys.all })
-  const { ids: moving, add, drop } = useInFlight()
-
-  const move = useMutation({
-    mutationFn: ({ task, to }: { task: Task; to: string | null }) => updateTask(task.id, { dueDate: to }),
-    onMutate: ({ task }) => add(task.id),
-    onSettled: (_r, _e, { task }) => drop(task.id),
-    onSuccess: async (_r, { task, to }) => {
-      await refresh()
-      if (to === addDaysYmd(today, 1)) {
-        toast(m.swipe.moved(task.title), 'success', {
-          label: m.undo,
-          onClick: () => move.mutate({ task, to: task.dueDate }),
-        })
-      }
-    },
-    onError: () => toast(m.swipe.moveFailed, 'error'),
-  })
-
-  return {
-    toTomorrow: (task: Task) => {
-      if (!moving.has(task.id)) move.mutate({ task, to: addDaysYmd(today, 1) })
-    },
-    moving,
-  }
-}

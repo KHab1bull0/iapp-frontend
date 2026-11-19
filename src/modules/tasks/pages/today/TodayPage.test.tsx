@@ -162,14 +162,4 @@ describe('TodayPage', () => {
     expect(api.undoCompletion).toHaveBeenCalledTimes(1)
   })
 
-  test('moving a task to tomorrow holds its row until the move is saved', async () => {
-    api.updateTask.mockReturnValue(new Promise(() => {}))
-    renderPage()
-    const later = (await screen.findByRole('button', { name: 'B: Tomorrow' })) as HTMLButtonElement
-    fireEvent.click(later)
-    await waitFor(() => expect(later.disabled).toBe(true))
-    expect((screen.getByRole('button', { name: 'Complete B' }) as HTMLButtonElement).disabled).toBe(true)
-    fireEvent.click(later)
-    expect(api.updateTask).toHaveBeenCalledTimes(1)
-  })
 })

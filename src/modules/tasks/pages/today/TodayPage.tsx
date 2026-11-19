@@ -14,7 +14,7 @@ import { HeatmapSkeleton, LoadingLabel, SectionSkeleton } from '@/modules/tasks/
 import { byTime } from '@/modules/tasks/lib/repeat'
 import { PastSection } from '@/modules/tasks/components/PastSection'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
-import { useCompleteTask, useMoveToTomorrow } from '@/modules/tasks/useCompleteTask'
+import { useCompleteTask } from '@/modules/tasks/useCompleteTask'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
 
@@ -42,8 +42,8 @@ function RailSkeleton() {
  * Tasks → Today: how far through the day you are, the habits on top (done
  * ones stay there, ticked, with their streak), what else is due, and what's
  * done. No red overdue list: a task whose day passed is due today (a one-off
- * just drops out). Swipe right to tick, left to put off
- * until tomorrow; the bar at the bottom adds.
+ * just drops out). Swipe right to tick; a task is
+ * either done or not, never put off. "+" adds.
  */
 export function TodayPage() {
   const today = useToday()
@@ -51,7 +51,6 @@ export function TodayPage() {
   const quickAdd = useQuickAdd()
   const editor = useTaskEditor()
   const { complete, undo, pending, feedback } = useCompleteTask(today)
-  const { toTomorrow, moving } = useMoveToTomorrow(today)
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.today(today),
@@ -82,9 +81,8 @@ export function TodayPage() {
       key={t.id}
       task={t}
       today={today}
-      busy={pending.has(t.id) || moving.has(t.id)}
+      busy={pending.has(t.id)}
       onToggle={complete}
-      onTomorrow={toTomorrow}
       onOpen={editor.openDetail}
     />
   )
@@ -96,9 +94,8 @@ export function TodayPage() {
       task={t}
       today={today}
       showDue
-      busy={pending.has(t.id) || moving.has(t.id)}
+      busy={pending.has(t.id)}
       onToggle={complete}
-      onTomorrow={toTomorrow}
       onOpen={editor.openDetail}
     />
   )
