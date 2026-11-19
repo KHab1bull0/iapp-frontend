@@ -3,8 +3,10 @@ import { Search, ChevronDown } from 'lucide-react'
 import type { Category } from '@/modules/finance/api/categories'
 import { PeriodFilter } from './PeriodFilter'
 import type { TransactionFilterState } from './period'
-import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
+import { useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionFilters.module.scss'
+import { CategoryOptions } from './CategoryOptions'
+import { categoryFilterValue, withCategoryFilter } from '@/modules/finance/lib/categoryFilter'
 
 interface Props {
   filters: TransactionFilterState
@@ -16,7 +18,6 @@ const TYPE_OPTIONS = [{ value: '' as const }, { value: 'income' as const }, { va
 
 export function TransactionFilters({ filters, onChange, categories }: Props) {
   const t = useFinanceT()
-  const catName = useCategoryName()
   return (
     <div className={s.filterBar}>
       <div className={s.tabs}>
@@ -52,13 +53,10 @@ export function TransactionFilters({ filters, onChange, categories }: Props) {
       <div className={s.filterCat}>
         <select
           className={s.input}
-          value={filters.categoryId ?? 'all'}
-          onChange={(e) => onChange({ ...filters, categoryId: e.target.value === 'all' ? undefined : e.target.value })}
+          value={categoryFilterValue(filters)}
+          onChange={(e) => onChange(withCategoryFilter(filters, e.target.value))}
         >
-          <option value="all">{t.allCategories}</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.icon} {catName(c.name)}</option>
-          ))}
+          <CategoryOptions categories={categories} />
         </select>
         <span className={s.selectChev}><ChevronDown size={15} /></span>
       </div>

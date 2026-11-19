@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { deleteTransaction, fetchTransactions, type PaginatedTransactions, type Transaction } from '@/modules/finance/api/transactions'
+import { fetchCategories } from '@/modules/finance/api/categories'
+import { fetchCategoryParents } from '@/modules/finance/api/categoryParents'
 import { periodRange } from '@/modules/finance/components/transactions/period'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
@@ -14,6 +16,10 @@ vi.mock('@/modules/finance/api/transactions', async (orig) => ({
 vi.mock('@/modules/finance/api/categories', async (orig) => ({
   ...(await orig<object>()),
   fetchCategories: vi.fn().mockResolvedValue([]),
+}))
+vi.mock('@/modules/finance/api/categoryParents', async (orig) => ({
+  ...(await orig<object>()),
+  fetchCategoryParents: vi.fn().mockResolvedValue([]),
 }))
 
 function tx(id: string, note: string, amount: number): Transaction {
@@ -196,5 +202,38 @@ describe('TransactionsPage while loading', () => {
     vi.mocked(fetchTransactions).mockResolvedValue(page([]))
     await act(async () => del.resolve())
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Deleting…' })).toBeNull())
+  })
+})
+
+describe('TransactionsPage: parent categories', () => {
+  const HOME = { id: 'p1', name: 'Home bills', type: 'expense' as const, color: '#3b82f6', icon: '🏠', createdAt: '' }
+  const GAS = { id: 'c2', name: 'Gas', type: 'expense' as const, icon: '🔥', color: '#f97316', parentId: 'p1' }
+  const TAXI = { id: 'c1', name: 'Taxi', type: 'expense' as const, icon: '🚕', color: '#336699', parentId: null }
+
+  beforeEach(() => {
+    vi.mocked(fetchTransactions).mockReset()
+    vi.mocked(fetchCategories).mockResolvedValue([TAXI, GAS])
+    vi.mocked(fetchCategoryParents).mockResolvedValue([HOME])
+  })
+
+  test('filtering by a parent sends parentId, a category sends categoryId', async () => {
+    vi.mocked(fetchTransactions).mockResolvedValue(page([]))
+    renderPage()
+    const select = screen.getByRole('combobox', { name: 'Category' }) as HTMLSelectElement
+    await waitFor(() => expect(within(select).getByRole('option', { name: /All of Home bills/ })).toBeTruthy())
+    fireEvent.change(select, { target: { value: 'p:p1' } })
+    await waitFor(() =>
+      expect(fetchTransactions).toHaveBeenLastCalledWith(expect.objectContaining({ parentId: 'p1', categoryId: undefined }), 1, 20),
+    )
+    fireEvent.change(select, { target: { value: 'c2' } })
+    await waitFor(() =>
+      expect(fetchTransactions).toHaveBeenLastCalledWith(expect.objectContaining({ categoryId: 'c2', parentId: undefined }), 1, 20),
+    )
+  })
+
+  test("a parent's category shows the parent's name beside it", async () => {
+    vi.mocked(fetchTransactions).mockResolvedValue(page([{ ...tx('a', 'Bill', 90000), category: GAS }]))
+    renderPage()
+    expect((await screen.findAllByText(/Gas · Home bills/)).length).toBeGreaterThan(0)
   })
 })

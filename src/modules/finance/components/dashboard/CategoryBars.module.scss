@@ -1,3 +1,4 @@
+@use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
 .card {
@@ -104,3 +105,39 @@
   line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
+
+/** A parent: the whole row toggles its categories open and closed. */
+.parentRow {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+
+  &:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+}
+
+.chev {
+  flex-shrink: 0;
+  color: var(--fg-muted);
+  transition: transform $t-fast;
+}
+
+.chevOpen { transform: rotate(180deg); }
+
+/** A parent's categories, indented under it. */
+.children {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0 0 0 12px;
+  border-left: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.subIcon { transform: scale(0.85); }

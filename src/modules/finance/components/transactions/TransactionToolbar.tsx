@@ -3,8 +3,10 @@ import type { Category } from '@/modules/finance/api/categories'
 import { advancedFilterCount } from './filterCount'
 import { PeriodFilter } from './PeriodFilter'
 import type { TransactionFilterState } from './period'
-import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
+import { useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionToolbar.module.scss'
+import { CategoryOptions } from './CategoryOptions'
+import { categoryFilterValue, withCategoryFilter } from '@/modules/finance/lib/categoryFilter'
 
 interface Props {
   filters: TransactionFilterState
@@ -19,7 +21,6 @@ interface Props {
  */
 export function TransactionToolbar({ filters, onChange, categories, onOpenFilters }: Props) {
   const t = useFinanceT()
-  const catName = useCategoryName()
   const more = advancedFilterCount(filters)
 
   return (
@@ -41,18 +42,11 @@ export function TransactionToolbar({ filters, onChange, categories, onOpenFilter
         <div className={s.category}>
           <select
             className={s.select}
-            value={filters.categoryId ?? 'all'}
-            onChange={(e) =>
-              onChange({ ...filters, categoryId: e.target.value === 'all' ? undefined : e.target.value })
-            }
+            value={categoryFilterValue(filters)}
+            onChange={(e) => onChange(withCategoryFilter(filters, e.target.value))}
             aria-label={t.category}
           >
-            <option value="all">{t.allCategories}</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.icon} {catName(c.name)}
-              </option>
-            ))}
+            <CategoryOptions categories={categories} />
           </select>
           <ChevronDown size={15} className={s.chevron} />
         </div>

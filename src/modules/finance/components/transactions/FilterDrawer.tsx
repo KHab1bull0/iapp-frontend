@@ -5,8 +5,10 @@ import { X, Search, ChevronDown } from 'lucide-react'
 import type { Category } from '@/modules/finance/api/categories'
 import { PeriodFilter } from './PeriodFilter'
 import { DEFAULT_FILTERS, type TransactionFilterState } from './period'
-import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
+import { useFinanceT } from '@/modules/finance/i18n'
 import s from './FilterDrawer.module.scss'
+import { CategoryOptions } from './CategoryOptions'
+import { categoryFilterValue, withCategoryFilter } from '@/modules/finance/lib/categoryFilter'
 
 interface Props {
   open: boolean
@@ -20,7 +22,6 @@ const TYPE_OPTIONS = [{ value: '' as const }, { value: 'income' as const }, { va
 
 export function FilterDrawer({ open, onClose, filters, onApply, categories }: Props) {
   const t = useFinanceT()
-  const catName = useCategoryName()
   const [draft, setDraft] = useState<TransactionFilterState>(filters)
 
   // Start from the current filters each time the drawer opens. Done while
@@ -114,20 +115,13 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
             <div className={s.inputWrap} style={{ position: 'relative' }}>
               <select
                 className={clsx(s.input, s.select)}
-                value={draft.categoryId ?? 'all'}
-                onChange={(e) =>
-                  setDraft((d) => ({
-                    ...d,
-                    categoryId: e.target.value === 'all' ? undefined : e.target.value,
-                  }))
-                }
+                value={categoryFilterValue(draft)}
+                onChange={(e) => {
+                  const value = e.target.value
+                  setDraft((d) => withCategoryFilter(d, value))
+                }}
               >
-                <option value="all">{t.allCategories}</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.icon} {catName(c.name)}
-                  </option>
-                ))}
+                <CategoryOptions categories={categories} />
               </select>
               <span className={s.selectChev}>
                 <ChevronDown size={15} />

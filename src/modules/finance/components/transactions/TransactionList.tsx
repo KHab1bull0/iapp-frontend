@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import clsx from 'clsx'
 import { Plus, Trash2, Wallet } from 'lucide-react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { categoryParentsKey, fetchCategoryParents } from '@/modules/finance/api/categoryParents'
 import { deleteTransaction, type Transaction } from '@/modules/finance/api/transactions'
 import { formatSigned, formatDay, formatAmount, parseApiDate, CURRENCY } from '@/core/lib/format'
 import { toast } from '@/core/components/ui/toast'
@@ -39,6 +40,9 @@ function groupByDate(transactions: Transaction[]): [string, Transaction[]][] {
 function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transaction) => void }) {
   const t = useFinanceT()
   const catName = useCategoryName()
+  const { data: parents = [] } = useQuery({ queryKey: categoryParentsKey, queryFn: fetchCategoryParents })
+  const parent = tx.category.parentId ? parents.find((p) => p.id === tx.category.parentId) : undefined
+  const categoryLabel = parent ? `${catName(tx.category.name)} · ${parent.name}` : catName(tx.category.name)
   const [deleting, setDeleting] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const qc = useQueryClient()
@@ -82,14 +86,14 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
           <span className={s.txMeta}>
             <span className={s.txTitle}>{tx.note ?? catName(tx.category.name)}</span>
             <span className={s.txSub}>
-              {tx.note ? `${catName(tx.category.name)} · ` : ''}
+              {tx.note ? `${categoryLabel} · ` : parent ? `${parent.name} · ` : ''}
               {time}
             </span>
           </span>
           {/* Desktop table columns; phones fold these into the line above. */}
           <span className={s.colCategory}>
             <span className={s.dot} style={{ background: tx.category.color }} aria-hidden />
-            {catName(tx.category.name)}
+            {categoryLabel}
           </span>
           <span className={s.colTime}>{time}</span>
           <span className={clsx(s.txAmt, tx.type === 'income' ? s.amtIn : s.amtOut)}>{formatSigned(tx.amount, tx.type)}</span>

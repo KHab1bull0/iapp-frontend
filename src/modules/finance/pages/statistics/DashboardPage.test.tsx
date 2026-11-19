@@ -116,3 +116,33 @@ describe('Statistics page while loading', () => {
     expect(screen.getByRole('button', { name: 'Retry' })).toBeTruthy()
   })
 })
+
+describe('DashboardPage: parent categories', () => {
+  test('a parent bar opens to its categories and closes', async () => {
+    vi.mocked(fetchDashboard).mockReset()
+    vi.mocked(fetchDashboard).mockResolvedValue({
+      ...STATS,
+      categoryBreakdown: [
+        {
+          kind: 'parent', categoryId: 'p1', name: 'Home bills', color: '#3b82f6', icon: '🏠', type: 'expense', total: 150000, percentage: 60,
+          children: [
+            { categoryId: 'c3', name: 'Power', color: '#eab308', icon: '⚡', type: 'expense', total: 100000, percentage: 40 },
+            { categoryId: 'c2', name: 'Gas', color: '#f97316', icon: '🔥', type: 'expense', total: 50000, percentage: 20 },
+          ],
+        },
+        { kind: 'category', categoryId: 'c1', name: 'Taxi', color: '#336699', icon: '🚕', type: 'expense', total: 100000, percentage: 40 },
+      ],
+    })
+    renderPage()
+    const parent = await screen.findByRole('button', { name: /Home bills/ })
+    expect(parent.getAttribute('aria-expanded')).toBe('false')
+    expect(screen.queryByText('Power')).toBeNull()
+    fireEvent.click(parent)
+    expect(parent.getAttribute('aria-expanded')).toBe('true')
+    expect(screen.getByText('Power')).toBeTruthy()
+    expect(screen.getByText('Gas')).toBeTruthy()
+    fireEvent.click(parent)
+    expect(screen.queryByText('Power')).toBeNull()
+    expect(screen.getByText('Taxi')).toBeTruthy()
+  })
+})
