@@ -24,11 +24,6 @@ interface Props {
   onTomorrow?: (task: Task) => void
   /** Show "Tomorrow", a weekday… (All tasks); Today's own sections say it already. */
   showDue?: boolean
-  /**
-   * A habit with a two-minute version: a small button beside the tick that
-   * checks it in that way. The tick stays one tap = in full.
-   */
-  onMin?: (task: Task) => void
 }
 
 export function TaskRow({
@@ -40,7 +35,6 @@ export function TaskRow({
   onOpen,
   onTomorrow,
   showDue = false,
-  onMin,
 }: Props) {
   const t = useTasksT()
   const habit = task.isHabit ? task.progress : null
@@ -52,7 +46,6 @@ export function TaskRow({
   // Only a streak that changes while in view pops, not every row on load.
   const [firstStreak] = useState(habit?.streak)
   const bumped = habit !== null && habit.streak !== firstStreak
-  const min = habit && task.minVersion && onMin && onToggle && !done ? () => onMin(task) : undefined
 
   const swipe = useSwipe({
     onRight: onToggle && !done && !busy ? () => onToggle(task) : undefined,
@@ -132,19 +125,6 @@ export function TaskRow({
           </button>
         )}
 
-        {/* A hard day: the two-minute version, one tap, next to the tick. */}
-        {min && (
-          <button
-            type="button"
-            className={s.min}
-            onClick={min}
-            disabled={busy}
-            title={task.minVersion ?? undefined}
-            aria-label={t.habit.minLabel(task.title, task.minVersion ?? '')}
-          >
-            {t.habit.minButton}
-          </button>
-        )}
 
         {/* The tick at the right end, under the right thumb. */}
         {onToggle && (

@@ -50,7 +50,7 @@ export function TodayPage() {
   const m = useTasksT()
   const quickAdd = useQuickAdd()
   const editor = useTaskEditor()
-  const { complete, completeMin, undo, pending, feedback } = useCompleteTask(today)
+  const { complete, undo, pending, feedback } = useCompleteTask(today)
   const { toTomorrow, moving } = useMoveToTomorrow(today)
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -86,7 +86,6 @@ export function TodayPage() {
       onToggle={complete}
       onTomorrow={toTomorrow}
       onOpen={editor.openDetail}
-      onMin={completeMin}
     />
   )
 

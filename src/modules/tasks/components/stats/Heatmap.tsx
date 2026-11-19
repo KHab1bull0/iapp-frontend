@@ -7,8 +7,7 @@ import s from './Heatmap.module.scss'
 
 /**
  * A calendar of the last few months, one square a day, darker the more was
- * done: gaps and runs are visible at a glance. A habit's two-minute days are
- * lighter. `compact` (a task's editor, a narrow panel) uses smaller squares so
+ * done: gaps and runs are visible at a glance. `compact` (a task's editor, a narrow panel) uses smaller squares so
  * the whole range fits beside the weekday names without scrolling.
  */
 export function Heatmap({ days, compact = false }: { days: HeatDay[]; compact?: boolean }) {
@@ -16,7 +15,6 @@ export function Heatmap({ days, compact = false }: { days: HeatDay[]; compact?: 
   const weeks = heatWeeks(days)
   const active = days.filter((d) => d.count > 0).length
   const labels = weekdayHeaders()
-  const hasMin = days.some((d) => (d.min ?? 0) > 0)
   const scroller = useRef<HTMLDivElement>(null)
 
   // Open on the newest weeks when the range is wider than the card.
@@ -25,11 +23,7 @@ export function Heatmap({ days, compact = false }: { days: HeatDay[]; compact?: 
     if (el) el.scrollLeft = el.scrollWidth
   }, [weeks.length])
 
-  const title = (c: HeatCell) => {
-    const date = formatDay(c.day)
-    if (c.min) return t.stats.cellMin(date)
-    return t.stats.cellLabel(date, c.count)
-  }
+  const title = (c: HeatCell) => t.stats.cellLabel(formatDay(c.day), c.count)
 
   return (
     <div className={clsx(s.wrap, compact && s.compact)}>
@@ -72,11 +66,6 @@ export function Heatmap({ days, compact = false }: { days: HeatDay[]; compact?: 
           <span key={l} className={clsx(s.cell, s[`l${l}`])} />
         ))}
         {t.stats.more}
-        {hasMin && (
-          <span className={s.legendItem}>
-            <span className={clsx(s.cell, s.l2)} /> {t.stats.minLegend}
-          </span>
-        )}
       </div>
     </div>
   )

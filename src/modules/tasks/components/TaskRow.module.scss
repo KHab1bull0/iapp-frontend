@@ -193,24 +193,3 @@
   font-weight: 500;
 }
 
-// The two-minute version: a quiet pill beside the tick, only on a habit that has one.
-.min {
-  @include touch-target(4px);
-  flex-shrink: 0;
-  height: var(--control-sm);
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: $radius-pill;
-  background: var(--bg-elev);
-  color: var(--fg);
-  font: inherit;
-  font-size: var(--fs-meta);
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: color $t-fast, border-color $t-fast, background $t-fast;
-
-  &:hover:not(:disabled) { color: var(--fg-strong); border-color: var(--primary); }
-  &:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-  &:disabled { opacity: 0.5; cursor: progress; }
-}

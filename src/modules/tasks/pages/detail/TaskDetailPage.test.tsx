@@ -26,7 +26,6 @@ const task = (over: Partial<Task> = {}): Task => ({
   isHabit: true,
   identity: 'I am a reader',
   cue: null,
-  minVersion: 'Read 1 page',
   stages: [],
   progress: null,
   ...over,
@@ -55,7 +54,6 @@ describe('TaskDetailPage', () => {
     expect(screen.getByText('21:00')).toBeTruthy()
     expect(screen.getByText('Every day')).toBeTruthy()
     expect(screen.getByText('I am a reader')).toBeTruthy()
-    expect(screen.getByText('Read 1 page')).toBeTruthy()
     expect(screen.getByRole('region', { name: 'Task statistics' })).toBeTruthy()
   })
 

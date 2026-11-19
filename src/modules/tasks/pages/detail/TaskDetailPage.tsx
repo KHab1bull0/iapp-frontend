@@ -15,7 +15,7 @@ import s from './TaskDetailPage.module.scss'
 
 /**
  * One task in full: what it is (title, note, when, how it repeats, the habit's
- * who and two-minute version), ticking off a past day, and its record
+ * who), ticking off a past day, and its record
  * (streak, total, activity, stages). Editing is a step away, behind the
  * pencil; the editor itself holds only the form.
  */
@@ -42,7 +42,6 @@ export function TaskDetailPage() {
         [t.form.time, task.dueTime],
         [t.form.repeat, repeat || t.form.modes.none.label],
         [t.habit.identity, task.isHabit ? task.identity : null],
-        [t.habit.minVersion, task.isHabit ? task.minVersion : null],
       ].filter(([, v]) => v) as [string, string][])
     : []
 

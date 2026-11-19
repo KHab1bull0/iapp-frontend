@@ -30,7 +30,7 @@ const t = (id: string, over: Partial<Task> = {}): Task => ({
   completedAt: null,
   createdAt: '',
   updatedAt: '',
-  isHabit: false, identity: null, cue: null, minVersion: null, stages: [], progress: null,
+  isHabit: false, identity: null, cue: null, stages: [], progress: null,
   ...over,
 })
 
@@ -84,7 +84,7 @@ describe('TodayPage', () => {
   test('ticking a task completes it for today, and Undo puts it back', async () => {
     renderPage()
     fireEvent.click(await screen.findByRole('button', { name: 'Complete B' }))
-    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('b', todayYmd(), todayYmd(), { kind: 'full' }))
+    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('b', todayYmd(), todayYmd()))
     fireEvent.click(await screen.findByRole('button', { name: 'Undo' }))
     await waitFor(() => expect(api.undoCompletion).toHaveBeenCalledWith('c1'))
   })

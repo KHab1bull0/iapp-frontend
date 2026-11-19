@@ -10,7 +10,6 @@ import {
   undoCompletion,
   updateTask,
   type CompleteResult,
-  type CompletionKind,
   type Task,
 } from './api/tasks'
 import { Celebration, type CelebrationData } from './components/habit/Celebration'
@@ -106,8 +105,7 @@ export function useCompleteTask(today: string) {
   }
 
   const complete = useMutation({
-    mutationFn: ({ task, kind }: { task: Task; kind: CompletionKind }) =>
-      completeTask(task.id, today, task.dueDate, { kind }),
+    mutationFn: ({ task }: { task: Task }) => completeTask(task.id, today, task.dueDate),
     onMutate: ({ task }) => {
       haptic()
       add(task.id)
@@ -136,10 +134,8 @@ export function useCompleteTask(today: string) {
   )
 
   return {
-    /** The tick: in full. */
-    complete: (task: Task) => complete.mutate({ task, kind: 'full' }),
-    /** A habit's two-minute version, from its button on the row. */
-    completeMin: (task: Task) => complete.mutate({ task, kind: 'min' }),
+    /** The tick. */
+    complete: (task: Task) => complete.mutate({ task }),
     /** Unticks a completion; a second call while one is on its way does nothing. */
     undo: (completionId: string) => {
       if (!pending.has(completionId)) undo.mutate(completionId)

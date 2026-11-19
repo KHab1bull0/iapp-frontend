@@ -19,7 +19,6 @@ export interface HabitDraft {
   isHabit: boolean
   identity: string
   cue: string
-  minVersion: string
   stages: StageDraft[]
 }
 
@@ -36,7 +35,6 @@ export function habitDraft(task: Task | null): HabitDraft {
     isHabit: task?.isHabit ?? false,
     identity: task?.identity ?? '',
     cue: task?.cue ?? '',
-    minVersion: task?.minVersion ?? '',
     stages: (task?.stages ?? []).map((s) => stageDraft(s.days, s.reward ?? '', s.reachedAt ? s.days : null)),
   }
 }
@@ -62,7 +60,6 @@ export function habitInput(d: HabitDraft, repeats: boolean): Partial<TaskInput> 
     isHabit: true,
     identity: d.identity.trim() || null,
     cue: d.cue.trim() || null,
-    minVersion: d.minVersion.trim() || null,
     stages: d.stages.map((s) => ({ days: Number(s.days), reward: s.reward.trim() || null })),
   }
 }

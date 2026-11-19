@@ -12,7 +12,7 @@ vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()
 const t = (id: string, dueDate: string | null): Task => ({
   id, title: id.toUpperCase(), note: null, dueDate, dueTime: null, repeatMode: 'none', repeatUnit: null,
   repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null, createdAt: '', updatedAt: '',
-  isHabit: false, identity: null, cue: null, minVersion: null, stages: [], progress: null,
+  isHabit: false, identity: null, cue: null, stages: [], progress: null,
 })
 
 describe('AllTasksPage', () => {

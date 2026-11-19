@@ -3,9 +3,6 @@ import api from '@/core/api/axios'
 export type RepeatMode = 'none' | 'schedule' | 'after_done'
 export type RepeatUnit = 'day' | 'week' | 'month'
 
-/** How a habit was checked in: in full, or its two-minute version. */
-export type CompletionKind = 'full' | 'min'
-
 /** A habit's milestone: a streak length to reach and the user's own, known reward for it. */
 export interface TaskStage {
   id: string
@@ -56,8 +53,6 @@ export interface Task {
   identity: string | null
   /** When/where/after what: "after dinner, in the kitchen". */
   cue: string | null
-  /** The two-minute version for a hard day: "read 1 page". */
-  minVersion: string | null
   /** Ordered by position. */
   stages: TaskStage[]
   /** Habits only; null for every other task. */
@@ -76,7 +71,6 @@ export interface TaskInput {
   isHabit?: boolean
   identity?: string | null
   cue?: string | null
-  minVersion?: string | null
   /** Replaces the list; at most 10, strictly increasing days (1..1000). */
   stages?: { days: number; reward?: string | null }[]
 }
@@ -92,7 +86,7 @@ export interface CompleteResult {
 export interface TodayTasks {
   overdue: Task[]
   today: Task[]
-  doneToday: { completionId: string; task: Task; kind?: CompletionKind }[]
+  doneToday: { completionId: string; task: Task }[]
 }
 
 export interface TasksSummary {
@@ -116,9 +110,9 @@ export interface StatsDay {
   count: number
 }
 
-/** One task's stats; a habit's days also say how many were the two-minute version. */
+/** One task's stats. */
 export interface TaskStats extends StatsTotals {
-  daily: (StatsDay & { min?: number })[]
+  daily: StatsDay[]
 }
 
 /** Every task together. */
@@ -176,21 +170,18 @@ export async function deleteTask(id: string): Promise<void> {
  * `expectedDueDate` is the due date on screen; the server refuses (409) if the
  * task has moved on since, so a repeat tap can't skip an occurrence.
  * `doneOn` is the day it was really done, for a missed day ticked off later
- * (its due date up to today); left out, today. `kind` is how a habit was
- * checked in; left out, in full.
+ * (its due date up to today); left out, today.
  */
 export async function completeTask(
   id: string,
   today: string,
   expectedDueDate: string | null,
-  { doneOn, kind }: { doneOn?: string; kind?: CompletionKind } = {},
+  { doneOn }: { doneOn?: string } = {},
 ): Promise<CompleteResult> {
   const { data } = await api.post<CompleteResult>(`/tasks/items/${id}/complete`, {
     today,
     expectedDueDate,
     ...(doneOn && { doneOn }),
-    // Full is the server's default: a plain tick sends the same body as before habits.
-    ...(kind && kind !== 'full' && { kind }),
   })
   return data
 }

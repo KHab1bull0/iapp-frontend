@@ -141,7 +141,7 @@ describe('TaskForm', () => {
             id: 't1', title: 'Old', note: null, dueDate: null, dueTime: null, repeatMode: 'none',
             repeatUnit: null, repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null,
             createdAt: '', updatedAt: '',
-  isHabit: false, identity: null, cue: null, minVersion: null, stages: [], progress: null,
+  isHabit: false, identity: null, cue: null, stages: [], progress: null,
           }}
           onSaved={onSaved}
           onCancel={() => {}}
@@ -173,7 +173,7 @@ describe('TaskForm: habits', () => {
     expect(screen.queryByLabelText('Who are you becoming?')).toBeNull()
   })
 
-  test('a new habit saves who, the two-minute version and the suggested stages', async () => {
+  test('a new habit saves who and the suggested stages', async () => {
     renderForm()
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Read' } })
     fireEvent.change(screen.getByLabelText('Kind'), { target: { value: 'schedule' } })
@@ -181,12 +181,13 @@ describe('TaskForm: habits', () => {
     fireEvent.change(screen.getByLabelText('Who are you becoming?'), { target: { value: ' I am a reader ' } })
     // No cue field any more; the habit's text fields grow like the title.
     expect(screen.queryByLabelText('When / where / after what')).toBeNull()
-    for (const name of ['Who are you becoming?', 'Two-minute version', 'Stage 1: reward']) {
+    // No two-minute version either.
+    expect(screen.queryByLabelText('Two-minute version')).toBeNull()
+    for (const name of ['Who are you becoming?', 'Stage 1: reward']) {
       const field = screen.getByLabelText(name) as HTMLTextAreaElement
       expect(field.tagName).toBe('TEXTAREA')
       expect(field.rows).toBe(1)
     }
-    fireEvent.change(screen.getByLabelText('Two-minute version'), { target: { value: 'Read 1 page' } })
     // Suggested 10 / 30 / 66, counted in days for a daily habit.
     expect((screen.getByLabelText('Stage 1: days') as HTMLInputElement).value).toBe('10')
     expect((screen.getByLabelText('Stage 2: days') as HTMLInputElement).value).toBe('30')
@@ -201,7 +202,6 @@ describe('TaskForm: habits', () => {
           isHabit: true,
           identity: 'I am a reader',
           cue: null,
-          minVersion: 'Read 1 page',
           stages: [
             { days: 10, reward: 'New mouse' },
             { days: 30, reward: null },

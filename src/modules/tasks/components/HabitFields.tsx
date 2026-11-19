@@ -25,7 +25,7 @@ interface Props {
 
 /**
  * The task form's habit part (a repeating task only): the switch, then who
- * it makes you, the two-minute version for a hard day, and the stages with
+ * it makes you, and the stages with
  * the rewards the user picks for themselves. (A habit's cue is no longer
  * edited here; one already saved is kept as it is.)
  */
@@ -57,14 +57,6 @@ export function HabitFields({ value, onChange, daily }: Props) {
             value={value.identity}
             maxLength={120}
             onChange={(identity) => set({ identity })}
-          />
-          <TextField
-            label={t.habit.minVersion}
-            placeholder={t.habit.minVersionPlaceholder}
-            hint={t.habit.minVersionHint}
-            value={value.minVersion}
-            maxLength={120}
-            onChange={(minVersion) => set({ minVersion })}
           />
           <StagesEditor stages={value.stages} onChange={(stages) => set({ stages })} daily={daily} />
         </>

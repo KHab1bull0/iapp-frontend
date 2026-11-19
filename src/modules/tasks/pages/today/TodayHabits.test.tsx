@@ -37,7 +37,7 @@ function renderPage() {
   )
 }
 
-const today = (tasks: Task[], doneToday: { completionId: string; task: Task; kind?: 'full' | 'min' }[] = []) =>
+const today = (tasks: Task[], doneToday: { completionId: string; task: Task }[] = []) =>
   api.fetchToday.mockResolvedValue({ overdue: [], today: tasks, doneToday })
 
 describe('TodayPage: habits', () => {
@@ -77,7 +77,7 @@ describe('TodayPage: habits', () => {
   test('the tick is one tap in full, then the streak ticks up with the vote, and Undo still works', async () => {
     renderPage()
     fireEvent.click(await screen.findByRole('button', { name: 'Complete READ' }))
-    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('read', todayYmd(), todayYmd(), { kind: 'full' }))
+    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('read', todayYmd(), todayYmd()))
 
     const status = await screen.findByRole('status')
     await within(status).findByText('+1 vote: I am a reader')
@@ -97,20 +97,6 @@ describe('TodayPage: habits', () => {
     expect(await screen.findByText('22 times in all')).toBeTruthy()
   })
 
-  test('a habit with a two-minute version has its own small button beside the tick', async () => {
-    today([READ, habit('nap', { minVersion: null })])
-    renderPage()
-    const min = await screen.findByRole('button', { name: 'READ: two-minute version (Read 1 page)' })
-    expect(min.textContent).toBe('Two-minute')
-    // Without one, only the tick.
-    expect(screen.getAllByText('Two-minute')).toHaveLength(1)
-    fireEvent.click(min)
-    await waitFor(() => expect(api.completeTask).toHaveBeenCalledWith('read', todayYmd(), todayYmd(), { kind: 'min' }))
-    // The two-minute version is done too: a vote.
-    expect(await screen.findByText('+1 vote: I am a reader')).toBeTruthy()
-    // No sheet of choices any more.
-    expect(screen.queryByRole('dialog')).toBeNull()
-  })
 
   test('a short tap on the title opens the editor; a long touch does nothing special', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
@@ -127,17 +113,16 @@ describe('TodayPage: habits', () => {
     }
   })
 
-  test('done habits stay in their section, ticked, without the two-minute button', async () => {
+  test('done habits stay in their section, ticked', async () => {
     today([], [
       { completionId: 'c7', task: habit('read', { progress: progress({ streak: 5 }) }) },
-      { completionId: 'c8', task: habit('nap'), kind: 'min' },
+      { completionId: 'c8', task: habit('nap') },
     ])
     renderPage()
     const section = (await screen.findByRole('heading', { name: 'Habits' })).closest('section')!
     expect(within(section).getByText('2/2')).toBeTruthy()
     expect(within(section).getByRole('button', { name: 'Undo READ' })).toBeTruthy()
     expect(within(section).getByRole('button', { name: 'Undo NAP' })).toBeTruthy()
-    expect(within(section).queryByText('Two-minute')).toBeNull()
     // Done habits don't also fill the Done group.
     expect(screen.queryByRole('heading', { name: /^Done/ })).toBeNull()
     expect(screen.getByText('Everything for today is done')).toBeTruthy()
