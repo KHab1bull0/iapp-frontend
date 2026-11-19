@@ -54,16 +54,16 @@ describe('TaskDetailPage', () => {
     expect(screen.getByText('Every day')).toBeTruthy()
     expect(screen.getByText('I am a reader')).toBeTruthy()
     // The day it started.
-    expect(screen.getByText('Started')).toBeTruthy()
-    expect(screen.getByText(/2026/)).toBeTruthy()
+    expect(screen.getByText('Started').nextElementSibling?.textContent).toMatch(/2026/)
     expect(screen.getByRole('region', { name: 'Task statistics' })).toBeTruthy()
   })
 
-  test('offers to mark a past day done when the task is behind', async () => {
-    api.fetchTask.mockResolvedValue(task({ dueDate: addDaysYmd(todayYmd(), -2) }))
+  test('the calendar of days done is always there, whether the task is behind or not', async () => {
+    api.fetchTask.mockResolvedValue(task({ dueDate: addDaysYmd(todayYmd(), 3) }))
     api.fetchTaskStats.mockReturnValue(new Promise(() => {}))
     renderPage()
-    expect(await screen.findByRole('button', { name: /Mark a past day done/ })).toBeTruthy()
+    expect(await screen.findByRole('region', { name: 'Days done' })).toBeTruthy()
+    expect(screen.getByRole('grid')).toBeTruthy()
   })
 
   test('Edit opens the editor', async () => {

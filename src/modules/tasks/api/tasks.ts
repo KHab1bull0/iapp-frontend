@@ -163,6 +163,18 @@ export async function completeTask(
   return data
 }
 
+/** The task's calendar: `day` (up to today) done. */
+export async function markDay(id: string, day: string, today: string): Promise<Task> {
+  const { data } = await api.post<Task>(`/tasks/items/${id}/days/${day}`, null, { params: { today } })
+  return data
+}
+
+/** The task's calendar: `day` not done. */
+export async function unmarkDay(id: string, day: string, today: string): Promise<Task> {
+  const { data } = await api.delete<Task>(`/tasks/items/${id}/days/${day}`, { params: { today } })
+  return data
+}
+
 export async function undoCompletion(completionId: string): Promise<Task> {
   const { data } = await api.post<Task>(`/tasks/completions/${completionId}/undo`)
   return data

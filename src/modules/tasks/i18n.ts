@@ -34,14 +34,10 @@ export const tasksMessages = defineMessages(
     undo: 'Qaytarish',
     undoFailed: "Qaytarib bo'lmadi",
     completeFailed: "Vazifani bajarib bo'lmadi",
-    missed: {
-      title: "O'tgan kunni belgilash",
-      since: (day: string) => `${day} dan beri belgilanmagan`,
-      pick: 'Bajargan kuningizni tanlang',
-      pickSub: "Statistikada o'sha kunga yoziladi. Undan oldingi kunlar bajarilmagan bo'lib qoladi.",
-      yesterday: 'Kecha',
-      saving: 'Saqlanmoqda…',
-      done: (title: string, day: string) => `“${title}” ${day} kuni bajarildi`,
+    days: {
+      title: 'Bajarilgan kunlar',
+      hint: 'Kunni bosib belgilang',
+      failed: "Saqlab bo'lmadi",
     },
     home: {
       failed: "Bugungi vazifalarni yuklab bo'lmadi",
@@ -164,14 +160,10 @@ export const tasksMessages = defineMessages(
     undo: 'Undo',
     undoFailed: 'Could not undo',
     completeFailed: 'Could not complete the task',
-    missed: {
-      title: 'Mark a past day done',
-      since: (day: string) => `Not ticked since ${day}`,
-      pick: 'Pick the day you did it',
-      pickSub: 'Counted on that day in your stats. Days before it stay not done.',
-      yesterday: 'Yesterday',
-      saving: 'Saving…',
-      done: (title: string, day: string) => `“${title}” done on ${day}`,
+    days: {
+      title: 'Days done',
+      hint: 'Tap a day to mark it',
+      failed: "Couldn't save",
     },
     home: {
       failed: "Couldn't load today's tasks",

@@ -30,7 +30,8 @@
   color: var(--fg);
   cursor: pointer;
 
-  &:hover { background: var(--icon-btn-hover); }
+  &:hover:not(:disabled) { background: var(--icon-btn-hover); }
+  &:disabled { color: var(--fg-subtle); cursor: default; }
 }
 
 .grid {
@@ -64,6 +65,8 @@
   &:disabled { color: var(--fg-subtle); cursor: default; }
 
   &.today { box-shadow: inset 0 0 0 1.5px var(--primary); color: var(--primary); font-weight: 600; }
+
+  &.busy { opacity: 0.6; cursor: progress; }
 
   &.selected,
   &.selected:hover {

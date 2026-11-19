@@ -4,7 +4,7 @@ import { ArrowLeft, Pencil } from 'lucide-react'
 import { useToday } from '@/core/hooks/useToday'
 import { formatDate } from '@/core/lib/format'
 import { fetchTask, tasksKeys } from '@/modules/tasks/api/tasks'
-import { MissedDay } from '@/modules/tasks/components/MissedDay'
+import { DoneDays } from '@/modules/tasks/components/DoneDays'
 import { TaskStatsCard, TaskStatsSkeleton } from '@/modules/tasks/components/stats/TaskStatsCard'
 import { LoadingLabel } from '@/modules/tasks/components/skeletons'
 import { Skeleton } from '@/core/components/ui/Skeleton'
@@ -16,7 +16,8 @@ import s from './TaskDetailPage.module.scss'
 
 /**
  * One task in full: what it is (title, note, when, how it repeats, the habit's
- * who, the day it started), ticking off a past day, and its record
+ * who, the day it started), its record, and the calendar of the days it was
+ * done, where a tap marks a day done or not
  * (its activity and days done). Editing is a step away, behind the
  * pencil; the editor itself holds only the form.
  */
@@ -90,8 +91,8 @@ export function TaskDetailPage() {
                 ))}
               </dl>
             </section>
-            {/* A past day ticked off stays on this page: its record above updates. */}
-            <MissedDay task={task} onDone={() => {}} />
+            {/* Always open: tap a day to mark it done or not done. */}
+            <DoneDays task={task} />
           </>
         )}
       </div>
