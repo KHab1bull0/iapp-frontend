@@ -62,17 +62,19 @@ export function TaskDetailPage() {
         {isLoading ? (
           <>
             <LoadingLabel />
+            <TaskStatsSkeleton />
             <section className={s.info}>
               <Skeleton height={28} width="60%" />
               <Skeleton height={16} width="80%" />
               <Skeleton height={64} radius={12} />
             </section>
-            <TaskStatsSkeleton />
           </>
         ) : isError || !task ? (
           <div className={shell.state}>{t.notFound}</div>
         ) : (
           <>
+            {/* The record first: it is what this page is opened for. */}
+            <TaskStatsCard taskId={task.id} task={task} />
             <section className={s.info} aria-label={t.detail.title}>
               <h2 className={s.title}>{task.title}</h2>
               {task.note && <p className={s.note}>{task.note}</p>}
@@ -85,9 +87,8 @@ export function TaskDetailPage() {
                 ))}
               </dl>
             </section>
-            {/* A past day ticked off stays on this page: its record updates below. */}
+            {/* A past day ticked off stays on this page: its record above updates. */}
             <MissedDay task={task} onDone={() => {}} />
-            <TaskStatsCard taskId={task.id} task={task} />
           </>
         )}
       </div>
