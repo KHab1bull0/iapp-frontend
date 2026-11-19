@@ -8,16 +8,16 @@ export interface TaskGroup {
   createdAt: string
 }
 
-/** 8 muted palette colours a group can carry (Tailwind-300 range). */
+/** The 8 ready colours a group can carry; any other #rrggbb can be picked too. */
 export const GROUP_COLORS = [
-  '#94a3b8', // slate
-  '#86efac', // green
-  '#93c5fd', // blue
-  '#fca5a5', // red
-  '#fdba74', // orange
-  '#c4b5fd', // violet
-  '#f9a8d4', // pink
-  '#67e8f9', // cyan
+  '#64748b', // slate
+  '#10b981', // green
+  '#3b82f6', // blue
+  '#ef4444', // red
+  '#f97316', // orange
+  '#8b5cf6', // violet
+  '#ec4899', // pink
+  '#06b6d4', // cyan
 ] as const
 
 /** Oldest first: the order the editor's chips and Today's parts follow. */

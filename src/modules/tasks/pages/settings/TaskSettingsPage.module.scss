@@ -141,6 +141,25 @@ form.row {
   transform: scale(1.1);
 }
 
+/** Any-colour swatch: a rainbow ring over the native colour input, which fills it invisibly. */
+.swatchCustom {
+  position: relative;
+  background: conic-gradient(#ef4444, #f97316, #eab308, #10b981, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #ef4444);
+
+  &:focus-within { outline: 2px solid var(--primary); outline-offset: 2px; }
+}
+
+.colorInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
 /** "No colour" swatch: outlined circle with a diagonal slash. */
 .swatchNone {
   background: var(--bg-elev);

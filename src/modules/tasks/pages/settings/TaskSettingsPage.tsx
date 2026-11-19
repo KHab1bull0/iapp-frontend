@@ -37,27 +37,44 @@ interface ColorPickerProps {
 }
 
 function ColorPicker({ value, onChange }: ColorPickerProps) {
+  const t = useTasksT()
+  const ready = (GROUP_COLORS as readonly string[]).includes(value?.toLowerCase() ?? '')
+  const custom = value !== null && !ready
   return (
-    <div className={s.colorPicker} role="group" aria-label="Rang">
+    <div className={s.colorPicker} role="group" aria-label={t.settings.color}>
       {/* "No colour" swatch: a struck-through circle */}
       <button
         type="button"
         className={`${s.swatch} ${s.swatchNone} ${value === null ? s.swatchSelected : ''}`}
         onClick={() => onChange(null)}
         aria-pressed={value === null}
-        aria-label="Rangsiz"
+        aria-label={t.settings.noColor}
       />
       {GROUP_COLORS.map((c) => (
         <button
           key={c}
           type="button"
-          className={`${s.swatch} ${value === c ? s.swatchSelected : ''}`}
+          className={`${s.swatch} ${value?.toLowerCase() === c ? s.swatchSelected : ''}`}
           style={{ background: c }}
           onClick={() => onChange(c)}
-          aria-pressed={value === c}
+          aria-pressed={value?.toLowerCase() === c}
           aria-label={c}
         />
       ))}
+      {/* Any colour: the system picker; a rainbow until one is picked, then that colour. */}
+      <label
+        className={`${s.swatch} ${s.swatchCustom} ${custom ? s.swatchSelected : ''}`}
+        style={custom ? { background: value } : undefined}
+        title={t.settings.customColor}
+      >
+        <input
+          type="color"
+          className={s.colorInput}
+          value={value ?? GROUP_COLORS[2]}
+          onChange={(ev) => onChange(ev.target.value)}
+          aria-label={t.settings.customColor}
+        />
+      </label>
     </div>
   )
 }

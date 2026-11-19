@@ -96,6 +96,30 @@ describe('TaskSettingsPage', () => {
     expect(screen.queryByLabelText(/Name.*Work/)).toBeNull()
   })
 
+  test('a group can take a ready colour, any other colour, or none', async () => {
+    api.updateGroup.mockResolvedValue(WORK)
+    renderPage()
+    await screen.findByText('Work')
+    fireEvent.click(screen.getByRole('button', { name: /Rename.*Work/ }))
+    const editForm = () => screen.getByLabelText(/Name.*Work/).closest('form')!
+    const picker = within(editForm()).getByRole('group', { name: 'Colour' })
+    // A colour of one's own, from the system picker.
+    fireEvent.change(within(picker).getByLabelText('Pick another colour'), { target: { value: '#123abc' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.updateGroup).toHaveBeenLastCalledWith('g1', 'Work', '#123abc'))
+
+    api.fetchGroups.mockResolvedValue([{ ...WORK, color: '#123abc' }, HOME])
+    fireEvent.click(await screen.findByRole('button', { name: /Rename.*Work/ }))
+    fireEvent.click(within(editForm()).getByRole('button', { name: '#ef4444' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.updateGroup).toHaveBeenLastCalledWith('g1', 'Work', '#ef4444'))
+
+    fireEvent.click(await screen.findByRole('button', { name: /Rename.*Work/ }))
+    fireEvent.click(within(editForm()).getByRole('button', { name: 'No colour' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.updateGroup).toHaveBeenLastCalledWith('g1', 'Work', null))
+  })
+
   test('an edit to a taken name is said so and stays open', async () => {
     api.updateGroup.mockRejectedValue({ response: { status: 409, data: { message: 'errors.group_exists' } } })
     renderPage()
