@@ -154,3 +154,34 @@
 @supports (-webkit-touch-callout: none) {
   .input { font-size: 16px; }
 }
+
+.hint {
+  margin: 0;
+  font-size: var(--fs-meta);
+  color: var(--fg-muted);
+}
+
+/** The categories a parent holds: tick chips. */
+.checkList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--control-sm);
+  padding: 0 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-ui);
+  color: var(--fg);
+  cursor: pointer;
+
+  input { accent-color: var(--primary); margin: 0; }
+
+  &.active { border-color: var(--primary); color: var(--fg-strong); font-weight: 600; }
+  &:focus-within { outline: 2px solid var(--primary); outline-offset: 2px; }
+}

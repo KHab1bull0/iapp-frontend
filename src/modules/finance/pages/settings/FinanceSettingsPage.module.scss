@@ -27,6 +27,12 @@
   @include card-title;
 }
 
+.headActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .btnSecondary {
   @include btn-secondary;
   @include btn-size-sm;

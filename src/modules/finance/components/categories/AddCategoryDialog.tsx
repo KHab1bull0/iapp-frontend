@@ -1,8 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { createCategory, updateCategory, type Category } from '@/modules/finance/api/categories'
+import { categoryParentsKey, fetchCategoryParents } from '@/modules/finance/api/categoryParents'
+import { refreshCategories } from './refresh'
+import { EMOJI_LIST } from './emojis'
 import { toast } from '@/core/components/ui/toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/core/components/ui/dialog'
 import { useFinanceT } from '@/modules/finance/i18n'
@@ -12,12 +15,6 @@ import { CATEGORY_SWATCHES } from '@/core/lib/chartColors'
 
 const COLOR_PALETTE: readonly string[] = CATEGORY_SWATCHES
 
-const EMOJI_LIST = [
-  '💰','💵','💳','🏦','📈','📉','🤑','👛',
-  '🛒','🏠','🚗','✈️','🍔','🎮','📚','🏥',
-  '🎓','👔','🍽️','☕','🎵','🎬','💡','📱',
-  '💻','🏋️','🏃','💊','🎁','🔖','🌿','🐾',
-]
 
 const TYPE_TABS = ['expense', 'income'] as const
 
@@ -36,20 +33,24 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
   const [name, setName] = useState('')
   const [color, setColor] = useState(COLOR_PALETTE[5])
   const [icon, setIcon] = useState('📁')
+  const [parentId, setParentId] = useState<string | null>(null)
+  const { data: parents = [] } = useQuery({ queryKey: categoryParentsKey, queryFn: fetchCategoryParents })
+  const parentChoices = parents.filter((p) => p.type === type)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   function reset() {
     if (category) {
-      setType(category.type); setName(category.name); setColor(category.color); setIcon(category.icon); setError('')
+      setType(category.type); setName(category.name); setColor(category.color); setIcon(category.icon); setParentId(category.parentId); setError('')
     } else {
-      setType('expense'); setName(''); setColor(COLOR_PALETTE[5]); setIcon('📁'); setError('')
+      setType('expense'); setName(''); setColor(COLOR_PALETTE[5]); setIcon('📁'); setParentId(null); setError('')
     }
   }
 
   // Reset the fields each time it opens (or is handed another category).
   // Done while rendering, React's pattern for state that follows props.
-  const [shown, setShown] = useState({ open, category })
+  // Starts "closed", so a dialog mounted already open (editing) fills its fields too.
+  const [shown, setShown] = useState<{ open: boolean; category?: Category }>({ open: false })
   if (shown.open !== open || shown.category !== category) {
     setShown({ open, category })
     if (open) reset()
@@ -63,12 +64,11 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
     setLoading(true); setError('')
     try {
       if (category) {
-        await updateCategory(category.id, { name: name.trim(), type, color, icon })
+        await updateCategory(category.id, { name: name.trim(), type, color, icon, parentId })
       } else {
-        await createCategory({ name: name.trim(), type, color, icon })
+        await createCategory({ name: name.trim(), type, color, icon, parentId })
       }
-      await qc.invalidateQueries({ queryKey: ['categories'] })
-      await qc.invalidateQueries({ queryKey: ['dashboard'] })
+      await refreshCategories(qc)
       toast(category ? t.categories.updated : t.categories.created, 'success')
       reset()
       onOpenChange(false)
@@ -92,7 +92,7 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
           <div className={s.tabs}>
             {TYPE_TABS.map((value) => (
               <button
-                key={value} type="button" onClick={() => setType(value)}
+                key={value} type="button" onClick={() => { setType(value); setParentId(null) }}
                 className={clsx(s.tab, type === value && s.active)}
               >
                 {t[value]}
@@ -114,6 +114,27 @@ export function AddCategoryDialog({ open, onOpenChange, category }: Props) {
               />
             </div>
           </label>
+
+          {/* Parent: only for grouping; optional */}
+          {parentChoices.length > 0 && (
+            <label className={s.field}>
+              <span className={s.fieldLabel}>{t.categories.parent}</span>
+              <div className={s.inputWrap}>
+                <select
+                  className={s.input}
+                  value={parentId ?? ''}
+                  onChange={(e) => setParentId(e.target.value || null)}
+                >
+                  <option value="">{t.categories.noParent}</option>
+                  {parentChoices.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.icon} {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </label>
+          )}
 
           {/* Colour */}
           <div className={s.field}>

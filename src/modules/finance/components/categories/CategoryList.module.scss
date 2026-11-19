@@ -78,3 +78,21 @@
   .catEdit:disabled { opacity: 0.4; cursor: not-allowed; }
   .catDel:disabled { cursor: progress; }
 }
+
+/** A parent with its categories; groups split by a hairline like rows. */
+.parentGroup + .parentGroup,
+.parentGroup + .catCard { border-top: 1px solid var(--border); }
+
+.parentRow .catName { font-weight: 600; }
+
+/** A parent's categories, indented under it. */
+.children {
+  margin-left: calc(var(--tile-md) / 2);
+  padding-left: 12px;
+  border-left: 2px solid var(--border);
+}
+
+.looseHead {
+  @include section-label;
+  padding: 12px 0 4px;
+}

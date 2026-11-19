@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { BackButton } from '@/core/components/BackButton'
 import { fetchCategories } from '@/modules/finance/api/categories'
+import { categoryParentsKey, fetchCategoryParents } from '@/modules/finance/api/categoryParents'
+import { ParentDialog } from '@/modules/finance/components/categories/ParentDialog'
 import { AddCategoryDialog } from '@/modules/finance/components/categories/AddCategoryDialog'
 import { CategoryList } from '@/modules/finance/components/categories/CategoryList'
 import { useFinanceT } from '@/modules/finance/i18n'
@@ -47,11 +49,16 @@ function CategoriesSkeleton() {
 export function FinanceSettingsPage() {
   const t = useFinanceT()
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [parentOpen, setParentOpen] = useState(false)
   const [catTab, setCatTab] = useState<CatTab>('expense')
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: fetchCategories,
+  })
+  const { data: parents = [], isLoading: parentsLoading } = useQuery({
+    queryKey: categoryParentsKey,
+    queryFn: fetchCategoryParents,
   })
 
   return (
@@ -68,9 +75,14 @@ export function FinanceSettingsPage() {
       <div className={s.card}>
         <div className={s.cardHead}>
           <h2 className={s.title}>{t.categories.title}</h2>
-          <button className={s.btnSecondary} onClick={() => setDialogOpen(true)}>
-            <Plus size={14} /> {t.categories.new}
-          </button>
+          <div className={s.headActions}>
+            <button className={s.btnSecondary} onClick={() => setParentOpen(true)}>
+              <Plus size={14} /> {t.categories.newParent}
+            </button>
+            <button className={s.btnSecondary} onClick={() => setDialogOpen(true)}>
+              <Plus size={14} /> {t.categories.new}
+            </button>
+          </div>
         </div>
         <div className={s.tabs}>
           <button
@@ -86,14 +98,15 @@ export function FinanceSettingsPage() {
             {t.income}
           </button>
         </div>
-        {isLoading ? (
+        {isLoading || parentsLoading ? (
           <CategoriesSkeleton />
         ) : (
-          <CategoryList categories={categories ?? []} type={catTab} />
+          <CategoryList categories={categories ?? []} parents={parents} type={catTab} />
         )}
       </div>
 
       <AddCategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <ParentDialog open={parentOpen} onOpenChange={setParentOpen} type={catTab} categories={categories ?? []} />
     </div>
   )
 }
