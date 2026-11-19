@@ -65,3 +65,7 @@ export type BottomNavItem =
   | { kind: 'add' }
   | { kind: 'menu' }
   | { kind: 'module'; module: ModuleManifest }
+  /** Inside a module: one of its pages. */
+  | { kind: 'page'; page: ModulePage }
+  /** Inside a module: the gear to its own settings. */
+  | { kind: 'settings'; path: string }

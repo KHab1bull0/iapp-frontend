@@ -109,6 +109,19 @@ describe('bottomNavItems', () => {
   test('has no "+" when nothing can be added', () => {
     expect(kinds(2, false)).toEqual(['home', 'm0', 'm1'])
   })
+
+  const page = (path: string) => ({ label: path, path, icon: Box })
+  const inside = (m: ModuleManifest) =>
+    bottomNavItems([m, withQuickAdd('other', 1)], m).map((i) =>
+      i.kind === 'page' ? i.page.path : i.kind === 'settings' ? `gear ${i.path}` : i.kind,
+    )
+
+  test("inside a module: Home and its pages, with its gear when a slot is left", () => {
+    const two = { ...fake('fin'), pages: [page('/fin'), page('/fin/tx')], settingsPath: '/fin/settings' }
+    expect(inside(two)).toEqual(['home', '/fin', 'add', '/fin/tx', 'gear /fin/settings'])
+    const three = { ...fake('en'), pages: [page('/en'), page('/en/review'), page('/en/words')], settingsPath: '/en/settings' }
+    expect(inside(three)).toEqual(['home', '/en', 'add', '/en/review', '/en/words'])
+  })
 })
 
 describe('quickAddActions', () => {

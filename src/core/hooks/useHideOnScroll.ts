@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 /**
- * Phones: the app's bars (module tabs, bottom nav) get out of the way while
+ * Phones: the app's bars (the bottom nav) get out of the way while
  * reading. Scrolling down past the top hides them; a little scroll up, or
  * reaching the top, brings them back. `resetKey` (the page) shows them again
  * on every new page. Desktop never hides anything.

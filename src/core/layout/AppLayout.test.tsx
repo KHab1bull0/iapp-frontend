@@ -64,12 +64,20 @@ describe('AppLayout driven by the registry', () => {
     expect(within(aside).queryByText('Overview')).toBeNull()
   })
 
-  test('bottom nav has Today, "+" and Finance; Settings is not a tab', () => {
-    renderShell('/finance')
-    const navs = screen.getAllByRole('navigation')
-    const bottom = navs[navs.length - 1]
+  test('outside a module the bottom nav has Home, "+" and Finance; Settings is not a tab', () => {
+    renderShell('/settings')
+    const bottom = screen.getByRole('navigation', { name: 'Main menu' })
     expect(linkTargets(bottom)).toEqual(['/', '/finance'])
     expect(within(bottom).getByRole('button', { name: 'Add' })).toBeTruthy()
+  })
+
+  test("inside a module the bottom nav swaps the modules for its pages and gear; no tabs on top", () => {
+    renderShell('/finance/transactions')
+    const bottom = screen.getByRole('navigation', { name: 'Finance pages' })
+    expect(linkTargets(bottom)).toEqual(['/', '/finance', '/finance/transactions', '/finance/settings'])
+    expect(within(bottom).getByRole('button', { name: 'Add' })).toBeTruthy()
+    expect(within(bottom).getByRole('link', { name: 'Transactions' }).getAttribute('aria-current')).toBe('page')
+    expect(screen.getAllByRole('navigation', { name: 'Finance pages' })).toHaveLength(1)
   })
 
   test('on a phone "+" opens the add page instead', () => {
@@ -99,12 +107,7 @@ describe('AppLayout driven by the registry', () => {
     expect(within(aside).getByRole('button', { name: /^Commands/ })).toBeTruthy()
   })
 
-  test('module tabs show inside finance and not elsewhere', () => {
-    renderShell('/finance/transactions')
-    expect(screen.getByRole('navigation', { name: 'Finance pages' })).toBeTruthy()
-  })
-
-  test("the module's tabs end with a gear to its settings, and stay on that page", () => {
+  test("the module's gear to its settings stays in the bottom nav on that page", () => {
     renderShell('/finance/settings')
     const tabs = screen.getByRole('navigation', { name: 'Finance pages' })
     const gear = within(tabs).getByRole('link', { name: 'Settings' })
@@ -140,7 +143,7 @@ describe('AppLayout driven by the registry', () => {
     expect(screen.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeTruthy()
   })
 
-  test('no module tabs on settings', () => {
+  test("no module's pages in the bottom nav on settings", () => {
     renderShell('/settings')
     expect(screen.queryByRole('navigation', { name: 'Finance pages' })).toBeNull()
   })

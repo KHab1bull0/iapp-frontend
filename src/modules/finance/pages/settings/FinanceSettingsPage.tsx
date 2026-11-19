@@ -56,7 +56,7 @@ export function FinanceSettingsPage() {
 
   return (
     <div className={s.page}>
-      {/* Back to wherever it was opened from: the tabs' gear, or Settings → Modules. */}
+      {/* Back to wherever it was opened from: the bottom nav's gear, or Settings → Modules. */}
       <BackButton fallback="/finance" className={shell.backLink} />
       <header className={shell.pageHead}>
         <div>

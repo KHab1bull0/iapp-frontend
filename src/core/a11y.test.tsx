@@ -69,7 +69,7 @@ vi.mock('@/core/notifications/api', async (orig) => ({
 }))
 
 describe('accessibility (axe)', () => {
-  test('the shell: sidebar, bottom bar, module tabs', async () => {
+  test('the shell: sidebar and the bottom bar with the module pages', async () => {
     const { container } = withProviders(
       <Routes>
         <Route path="*" element={<AppLayout modules={MODULES} />} />

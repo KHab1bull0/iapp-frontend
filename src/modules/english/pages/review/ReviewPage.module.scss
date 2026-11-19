@@ -1,7 +1,7 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
-// Review takes the whole screen: bottom bar, tabs and sidebar step aside.
+// Review takes the whole screen: bottom bar and sidebar step aside.
 .focus {
   position: fixed;
   inset: 0;

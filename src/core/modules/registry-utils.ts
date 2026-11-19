@@ -11,6 +11,7 @@ const RESERVED_IDS = new Set(['home', 'settings', 'auth', 'menu'])
  * on Today instead of taking a slot.
  */
 const MAX_BOTTOM_NAV_MODULES = 3
+const MAX_BOTTOM_NAV_ITEMS = 5
 
 /** Throws on the first registry mistake, so it surfaces at startup rather than as a broken route. */
 export function validateRegistry(modules: ModuleManifest[]): void {
@@ -32,8 +33,8 @@ export function activeModule(modules: ModuleManifest[], pathname: string): Modul
 
 /**
  * Whether pathname is one of the module's menu pages. A module can keep routes
- * out of its menu (finance's settings, reached from Settings); those show no
- * module tabs.
+ * out of its menu (finance's settings, reached from Settings); those get no
+ * desktop top bar.
  */
 export function isModulePage(module: ModuleManifest, pathname: string): boolean {
   return module.pages.some(({ path, end }) =>
@@ -49,15 +50,31 @@ export function activePage(module: ModuleManifest, pathname: string) {
     .find(({ path, end }) => (end ? pathname === path : pathname === path || pathname.startsWith(`${path}/`)))
 }
 
-export function bottomNavItems(modules: ModuleManifest[]): BottomNavItem[] {
-  const shown =
-    modules.length <= MAX_BOTTOM_NAV_MODULES ? modules : modules.slice(0, MAX_BOTTOM_NAV_MODULES - 1)
-  const items: BottomNavItem[] = [
-    { kind: 'home' },
-    ...shown.map((module): BottomNavItem => ({ kind: 'module', module })),
-    ...(shown.length < modules.length ? [{ kind: 'menu' } as const] : []),
-  ]
-  if (quickAddActions(modules).length > 0) items.splice(Math.ceil(items.length / 2), 0, { kind: 'add' })
+/**
+ * The phone's bottom bar. Outside a module: Home and the modules. Inside one
+ * (`current`): Home and that module's own pages, so its menu sits under the
+ * thumb instead of at the top; its settings gear too when a slot is left
+ * (otherwise it is reached from Settings → Modules). "+" goes in the middle.
+ */
+export function bottomNavItems(modules: ModuleManifest[], current?: ModuleManifest): BottomNavItem[] {
+  const hasAdd = quickAddActions(modules).length > 0
+  let items: BottomNavItem[]
+  if (current) {
+    const room = MAX_BOTTOM_NAV_ITEMS - 1 - (hasAdd ? 1 : 0)
+    const pages = current.pages.slice(0, room).map((page): BottomNavItem => ({ kind: 'page', page }))
+    const gear: BottomNavItem[] =
+      current.settingsPath && pages.length < room ? [{ kind: 'settings', path: current.settingsPath }] : []
+    items = [{ kind: 'home' }, ...pages, ...gear]
+  } else {
+    const shown =
+      modules.length <= MAX_BOTTOM_NAV_MODULES ? modules : modules.slice(0, MAX_BOTTOM_NAV_MODULES - 1)
+    items = [
+      { kind: 'home' },
+      ...shown.map((module): BottomNavItem => ({ kind: 'module', module })),
+      ...(shown.length < modules.length ? [{ kind: 'menu' } as const] : []),
+    ]
+  }
+  if (hasAdd) items.splice(Math.ceil(items.length / 2), 0, { kind: 'add' })
   return items
 }
 

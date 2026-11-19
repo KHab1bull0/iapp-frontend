@@ -70,6 +70,29 @@
   &.active { color: var(--primary); font-weight: 600; }
 }
 
+.iconWrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+// A page's count (tasks due today, words to review), on the icon's corner.
+.badge {
+  position: absolute;
+  top: -5px;
+  left: calc(100% - 7px);
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: $radius-pill;
+  background: var(--primary);
+  color: var(--primary-fg);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
 .addSlot {
   display: grid;
   place-items: center;
