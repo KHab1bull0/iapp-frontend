@@ -94,8 +94,8 @@
 }
 
 // The one way to add anything: a round button floating above the bar's right
-// end, under the right thumb. When the bar slides away it drops to where the
-// bar was, so it stays in reach.
+// end, under the right thumb. Scrolling down it slides off the right edge,
+// as the bar slides off the bottom.
 .add {
   display: none;
 
@@ -123,6 +123,7 @@
   }
 }
 
-.addLow {
-  transform: translateY(calc(var(--bottom-nav-h) - var(--safe-bottom)));
+.addHidden {
+  transform: translateX(calc(100% + 16px + var(--safe-right)));
+  pointer-events: none;
 }

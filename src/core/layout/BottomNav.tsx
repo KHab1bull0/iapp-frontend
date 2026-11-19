@@ -81,9 +81,10 @@ export function BottomNav({
       {canAdd && (
         <button
           type="button"
-          className={clsx(s.add, hidden && s.addLow)}
+          className={clsx(s.add, hidden && s.addHidden)}
           onClick={() => quickAdd.open()}
           aria-label={t.nav.add}
+          tabIndex={hidden ? -1 : undefined}
         >
           <Plus size={26} strokeWidth={2.5} />
         </button>
