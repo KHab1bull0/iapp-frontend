@@ -10,8 +10,6 @@ import {
   type CompleteResult,
   type Task,
 } from './api/tasks'
-import { Celebration, type CelebrationData } from './components/habit/Celebration'
-import { isDaily } from './lib/repeat'
 import { useTasksT } from './i18n'
 
 /** A short tick on phones that support it; silently nothing elsewhere. */
@@ -41,16 +39,13 @@ function useInFlight() {
  * completions being undone (by completion id), so their tick is disabled
  * meanwhile and a double tap can't complete or undo one twice.
  *
- * A habit answers differently: a short celebration of the streak instead
- * of the toast. Render `feedback` once, where the hook is used.
+ * A habit's toast also says what it stands for ("+1 vote: I am a reader").
  */
 export function useCompleteTask(today: string) {
   const m = useTasksT()
   const { lang } = useLang()
   const qc = useQueryClient()
   const { ids: pending, add, drop } = useInFlight()
-  const [celebration, setCelebration] = useState<CelebrationData | null>(null)
-  const dismiss = useCallback(() => setCelebration(null), [])
 
   const refresh = () => qc.invalidateQueries({ queryKey: tasksKeys.all })
 
@@ -65,17 +60,9 @@ export function useCompleteTask(today: string) {
   // Say so at once; the lists catch up in the background.
   function answer(result: CompleteResult, task: Task) {
     const undoAction = { label: m.undo, onClick: () => undo.mutate(result.completionId) }
-    if (!task.isHabit) return toast(m.doneToast(task.title), 'success', undoAction)
     const total = result.task.progress?.total
-    setCelebration({
-      id: Date.now(),
-      title: task.title,
-      from: task.progress?.streak ?? 0,
-      to: result.streak.current,
-      daily: isDaily(task),
-      line: task.identity ? m.habit.vote(task.identity) : total ? m.habit.total(total) : null,
-      completionId: result.completionId,
-    })
+    const line = !task.isHabit ? null : task.identity ? m.habit.vote(task.identity) : total ? m.habit.total(total) : null
+    toast(line ? `${m.doneToast(task.title)} · ${line}` : m.doneToast(task.title), 'success', undoAction)
   }
 
   const complete = useMutation({
@@ -96,7 +83,6 @@ export function useCompleteTask(today: string) {
     },
   })
 
-  const feedback = <Celebration data={celebration} onUndo={(id) => undo.mutate(id)} onDismiss={dismiss} />
 
   return {
     /** The tick. */
@@ -106,7 +92,6 @@ export function useCompleteTask(today: string) {
       if (!pending.has(completionId)) undo.mutate(completionId)
     },
     pending,
-    feedback,
   }
 }
 

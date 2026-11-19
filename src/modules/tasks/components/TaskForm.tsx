@@ -237,7 +237,7 @@ export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
         />
       </label>
 
-      {/* A one-off can't build a streak, so the switch comes with a repeat. */}
+      {/* A habit repeats, so the switch comes with a repeat. */}
       {mode !== 'none' && <HabitFields value={habit} onChange={setHabit} />}
 
       <div data-form-actions>

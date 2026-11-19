@@ -12,6 +12,15 @@
   @include card-title;
 }
 
+// Across from a card's heading, in its size: the total.
+.cardValue {
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
+  font-weight: 600;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+
 // A group inside one card (the task editor's "Activity"): its
 // parts sit close, the groups further apart, so they don't run together.
 .group {
@@ -23,6 +32,22 @@
 
 .groupLabel {
   @include section-label;
+}
+
+// The heading's row: "Activity" on the left, the days done across from it, in the same size.
+.groupHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.groupValue {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
 }
 
 // Same type as the shared EmptyState, sized to sit inside a card.

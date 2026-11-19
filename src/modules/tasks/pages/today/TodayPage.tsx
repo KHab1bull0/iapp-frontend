@@ -43,7 +43,7 @@ export function TodayPage() {
   const m = useTasksT()
   const quickAdd = useQuickAdd()
   const editor = useTaskEditor()
-  const { complete, undo, pending, feedback } = useCompleteTask(today)
+  const { complete, undo, pending } = useCompleteTask(today)
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.today(today),
@@ -151,7 +151,6 @@ export function TodayPage() {
             <section className={s.railCard} aria-label={m.stats.activity}>
               <div className={s.railHead}>
                 <h2 className={s.railTitle}>{m.stats.activity}</h2>
-                {stats.currentStreak > 0 && <span className={s.streak}>{m.stats.streakValue(stats.currentStreak)}</span>}
               </div>
               <Heatmap days={stats.daily.slice(-56)} />
             </section>
@@ -197,7 +196,6 @@ export function TodayPage() {
       )}
 
       {editor.dialog}
-      {feedback}
     </div>
   )
 }

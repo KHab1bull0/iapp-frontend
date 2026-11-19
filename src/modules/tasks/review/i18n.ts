@@ -28,7 +28,6 @@ export const reviewMessages = defineMessages(
       title: 'Odatlar',
       doneOf: (done: number, due: number) => `${done}/${due}`,
       doneOfLabel: (done: number, due: number) => `${due} tadan ${done} tasi bajarildi`,
-      streak: (n: number) => `Seriya: ${n}`,
       none: "Hali odat yo'q",
     },
     questions: {
@@ -83,7 +82,6 @@ export const reviewMessages = defineMessages(
       title: 'Habits',
       doneOf: (done: number, due: number) => `${done}/${due}`,
       doneOfLabel: (done: number, due: number) => `${done} of ${due} done`,
-      streak: (n: number) => `Streak: ${n}`,
       none: 'No habits yet',
     },
     questions: {

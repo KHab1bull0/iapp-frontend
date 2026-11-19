@@ -1,4 +1,4 @@
-import { Flame, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { ProgressBar, ProgressRing } from '@/core/components/ui/Progress'
 import { useQuickAdd } from '@/core/quickAdd/context'
@@ -79,13 +79,6 @@ function HabitsCard({ habits }: { habits: WeekReview['habits'] }) {
                   {/* Short on screen, spelled out for screen readers. */}
                   <span aria-hidden>{t.doneOf(h.done, h.due)}</span>
                   <span className="sr-only">{t.doneOfLabel(h.done, h.due)}</span>
-                  {h.streak > 0 && (
-                    <span className={s.streak}>
-                      <Flame size={14} aria-hidden />
-                      <span aria-hidden>{h.streak}</span>
-                      <span className="sr-only">{t.streak(h.streak)}</span>
-                    </span>
-                  )}
                 </span>
               </div>
               <ProgressBar value={h.done} max={h.due} label={`${h.title}: ${t.doneOfLabel(h.done, h.due)}`} tone="success" />

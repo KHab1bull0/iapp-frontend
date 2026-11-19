@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Pencil } from 'lucide-react'
 import { useToday } from '@/core/hooks/useToday'
+import { formatDate } from '@/core/lib/format'
 import { fetchTask, tasksKeys } from '@/modules/tasks/api/tasks'
 import { MissedDay } from '@/modules/tasks/components/MissedDay'
 import { TaskStatsCard, TaskStatsSkeleton } from '@/modules/tasks/components/stats/TaskStatsCard'
@@ -15,8 +16,8 @@ import s from './TaskDetailPage.module.scss'
 
 /**
  * One task in full: what it is (title, note, when, how it repeats, the habit's
- * who), ticking off a past day, and its record
- * (streak, total, activity). Editing is a step away, behind the
+ * who, the day it started), ticking off a past day, and its record
+ * (its activity and days done). Editing is a step away, behind the
  * pencil; the editor itself holds only the form.
  */
 export function TaskDetailPage() {
@@ -42,6 +43,8 @@ export function TaskDetailPage() {
         [t.form.time, task.dueTime],
         [t.form.repeat, repeat || t.form.modes.none.label],
         [t.habit.identity, task.isHabit ? task.identity : null],
+        // When it was added: the day the habit (or task) started.
+        [t.detail.started, task.createdAt ? formatDate(new Date(task.createdAt)) : null],
       ].filter(([, v]) => v) as [string, string][])
     : []
 

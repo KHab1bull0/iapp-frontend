@@ -24,7 +24,7 @@ export function TasksHomeCard() {
   const today = useToday()
   const quickAdd = useQuickAdd()
   const editor = useTaskEditor()
-  const { complete, pending, feedback } = useCompleteTask(today)
+  const { complete, pending } = useCompleteTask(today)
   // Same key as the Today page, so the two share one request and stay in step.
   const { data, isError } = useQuery({
     queryKey: tasksKeys.today(today),
@@ -93,7 +93,6 @@ export function TasksHomeCard() {
         </>
       )}
       {editor.dialog}
-      {feedback}
     </HomeCard>
   )
 }

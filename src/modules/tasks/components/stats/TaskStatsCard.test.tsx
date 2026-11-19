@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { Task, TaskStats } from '@/modules/tasks/api/tasks'
-import { habit, progress } from '@/modules/tasks/test-data'
+import { habit } from '@/modules/tasks/test-data'
 import { TaskStatsCard } from './TaskStatsCard'
 
 const api = vi.hoisted(() => ({ fetchTaskStats: vi.fn() }))
@@ -30,17 +30,15 @@ function renderCard(task?: Task) {
 }
 
 describe('TaskStatsCard', () => {
-  test('shows the streak with the best one, the total and the heatmap: nothing else', async () => {
+  test('only the activity, with the days done across from it: no streak, no legend', async () => {
     api.fetchTaskStats.mockResolvedValue(STATS)
     renderCard()
-    expect(await screen.findByText('3 days')).toBeTruthy()
-    expect(screen.getByText('Best: 7 days')).toBeTruthy()
-    expect(screen.getByText('12', { selector: 'div' })).toBeTruthy()
+    expect(await screen.findByText('12 days in all')).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Activity' })).toBeTruthy()
     expect(screen.getByRole('img', { name: /active days/ })).toBeTruthy()
-    // No chart, no period toggle, no "this month", no score rule.
-    expect(screen.queryByRole('radiogroup')).toBeNull()
-    expect(screen.queryByText('This month')).toBeNull()
-    expect(screen.queryByText(/−1/)).toBeNull()
+    expect(screen.queryByText(/Best:/)).toBeNull()
+    expect(screen.queryByText('Less')).toBeNull()
+    expect(screen.queryByText('More')).toBeNull()
     expect(api.fetchTaskStats).toHaveBeenCalledWith('t1', expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/))
   })
 
@@ -53,7 +51,7 @@ describe('TaskStatsCard', () => {
 })
 
 describe('TaskStatsCard: a habit', () => {
-  const READ = habit('read', { progress: progress({ streak: 4 }) })
+  const READ = habit('read')
 
   test('the heatmap titles each day', async () => {
     api.fetchTaskStats.mockResolvedValue({
@@ -64,17 +62,11 @@ describe('TaskStatsCard: a habit', () => {
       ],
     })
     renderCard(READ)
-    expect(await screen.findByTitle(/not done$/)).toBeTruthy()
-    expect(screen.getByTitle(/done 1×$/)).toBeTruthy()
-    expect(screen.queryByText('Rest')).toBeNull()
+    // Done or not: one task is ticked at most once a day.
+    expect(await screen.findByTitle(/: not done$/)).toBeTruthy()
+    expect(screen.getByTitle(/: done$/)).toBeTruthy()
   })
 
-  test('a weekly habit counts its streak in times', async () => {
-    api.fetchTaskStats.mockResolvedValue(STATS)
-    renderCard(habit('gym', { repeatUnit: 'week', repeatWeekdays: [1] }))
-    expect(await screen.findByText('3 times')).toBeTruthy()
-    expect(screen.getByText('Best: 7 times')).toBeTruthy()
-  })
 
   test('while the numbers load: the card in outline', () => {
     api.fetchTaskStats.mockReturnValue(new Promise(() => {}))
@@ -82,6 +74,6 @@ describe('TaskStatsCard: a habit', () => {
     const card = screen.getByRole('region', { name: 'Task statistics' })
     expect(card.getAttribute('aria-busy')).toBe('true')
     expect(within(card).getByText('Loading…')).toBeTruthy()
-    expect(within(card).queryByText('Best: 7 days')).toBeNull()
+    expect(within(card).queryByText('12 days in all')).toBeNull()
   })
 })

@@ -21,7 +21,7 @@ const task = (over: Partial<Task> = {}): Task => ({
   repeatWeekdays: null,
   repeatMonthDay: null,
   completedAt: null,
-  createdAt: '',
+  createdAt: '2026-09-14T08:30:00.000Z',
   updatedAt: '',
   isHabit: true,
   identity: 'I am a reader',
@@ -53,6 +53,9 @@ describe('TaskDetailPage', () => {
     expect(screen.getByText('21:00')).toBeTruthy()
     expect(screen.getByText('Every day')).toBeTruthy()
     expect(screen.getByText('I am a reader')).toBeTruthy()
+    // The day it started.
+    expect(screen.getByText('Started')).toBeTruthy()
+    expect(screen.getByText(/2026/)).toBeTruthy()
     expect(screen.getByRole('region', { name: 'Task statistics' })).toBeTruthy()
   })
 

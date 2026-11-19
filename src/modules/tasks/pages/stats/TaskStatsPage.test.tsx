@@ -52,12 +52,11 @@ describe('TaskStatsPage', () => {
     expect(screen.getByRole('link', { name: /Weekly review/ })).toBeTruthy()
   })
 
-  test('shows the streak and the total, then the heatmap: no chart, no breakdown by type', async () => {
+  test('the activity with the total across from it: no streak, no chart, no breakdown by type', async () => {
     api.fetchOverallStats.mockResolvedValue(STATS)
     renderPage()
-    expect(await screen.findByText('40', { selector: 'div' })).toBeTruthy()
-    expect(screen.getByText('4 days')).toBeTruthy()
-    expect(screen.getByText('Best: 10 days')).toBeTruthy()
+    expect(await screen.findByText('40 times in all')).toBeTruthy()
+    expect(screen.queryByText(/Best:/)).toBeNull()
     expect(screen.getByRole('region', { name: 'Activity' })).toBeTruthy()
     expect(screen.queryByRole('region', { name: 'By type' })).toBeNull()
     expect(screen.queryByRole('region', { name: 'Progress' })).toBeNull()
@@ -74,11 +73,11 @@ describe('TaskStatsPage', () => {
     localStorage.setItem('iapp-lang', 'uz')
     api.fetchOverallStats.mockResolvedValue(STATS)
     renderPage()
-    expect(await screen.findByText('Jami bajarilgan')).toBeTruthy()
+    expect(await screen.findByText('Jami 40 marta')).toBeTruthy()
     expect(screen.getByRole('region', { name: 'Faollik' })).toBeTruthy()
   })
 
-  test('while the numbers load: the tiles and heatmap in outline, the review card already there', () => {
+  test('while the numbers load: the heatmap in outline, the review card already there', () => {
     api.fetchOverallStats.mockReturnValue(new Promise(() => {}))
     reviews.fetchWeek.mockReturnValue(new Promise(() => {}))
     renderPage()

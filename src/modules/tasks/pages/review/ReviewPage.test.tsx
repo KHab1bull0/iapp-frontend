@@ -77,7 +77,7 @@ describe('ReviewPage', () => {
     const habits = screen.getByRole('region', { name: 'Habits' })
     expect(within(habits).getByText('Read')).toBeTruthy()
     expect(within(habits).getByText('5 of 7 done')).toBeTruthy()
-    expect(within(habits).getByText('Streak: 12')).toBeTruthy()
+    expect(within(habits).queryByText(/Streak/)).toBeNull()
 
     // English and money have their own pages.
     expect(screen.queryByRole('region', { name: 'English' })).toBeNull()

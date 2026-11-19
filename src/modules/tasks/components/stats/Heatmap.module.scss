@@ -4,7 +4,9 @@
 // segmented control, the gap is below the spacing scale on purpose); 11px and
 // 2px when compact.
 .wrap {
-  --cell: 13px;
+  // --cell-min is the smallest square; Heatmap grows --cell from it to fill the width.
+  --cell-min: 13px;
+  --cell: var(--cell-min);
   --gap: 3px;
   --label-gap: 4px;
   display: flex;
@@ -12,7 +14,7 @@
   gap: 8px;
 
   &.compact {
-    --cell: 11px;
+    --cell-min: 11px;
     --gap: 2px;
   }
 }

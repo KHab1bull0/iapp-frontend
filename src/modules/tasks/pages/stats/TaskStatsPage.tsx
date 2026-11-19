@@ -1,20 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
 import { BarChart3, Plus, RefreshCw } from 'lucide-react'
 import { useToday } from '@/core/hooks/useToday'
-import { formatDate, parseApiDate } from '@/core/lib/format'
 import { fetchOverallStats, tasksKeys } from '@/modules/tasks/api/tasks'
 import { Heatmap } from '@/modules/tasks/components/stats/Heatmap'
-import { StatGrid, StatTile } from '@/core/components/ui/StatTile'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useQuickAdd } from '@/core/quickAdd/context'
-import { HeatmapSkeleton, LoadingLabel, StatTileSkeleton } from '@/modules/tasks/components/skeletons'
+import { HeatmapSkeleton, LoadingLabel } from '@/modules/tasks/components/skeletons'
 import st from '@/modules/tasks/components/stats/TaskStats.module.scss'
 import { useTasksT } from '@/modules/tasks/i18n'
 import { ReviewEntryCard } from '@/modules/tasks/review/ReviewEntryCard'
 import s from '../TasksPages.module.scss'
 
-/** Tasks → Tahlil: the way into the weekly review, the streak and the total, and the heatmap. */
+/** Tasks → Tahlil: the way into the weekly review, and the activity with the total done. */
 export function TaskStatsPage() {
   const t = useTasksT()
   const today = useToday()
@@ -38,14 +36,9 @@ export function TaskStatsPage() {
       <div className={s.page} aria-busy="true">
         <ReviewEntryCard />
         <LoadingLabel />
-        <StatGrid columns={2}>
-          <StatTileSkeleton />
-          <StatTileSkeleton />
-        </StatGrid>
         <div className={st.card}>
           <Skeleton height="var(--lh-title)" width={80} />
           <HeatmapSkeleton />
-          <Skeleton height="var(--lh-caption)" width="60%" />
         </div>
       </div>
     )
@@ -69,24 +62,12 @@ export function TaskStatsPage() {
   return (
     <div className={s.page}>
       <ReviewEntryCard />
-      <StatGrid columns={2}>
-        <StatTile
-          label={t.stats.streak}
-          value={t.stats.streakValue(data.currentStreak)}
-          sub={t.stats.bestStreak(data.bestStreak)}
-          tone={data.currentStreak > 0 ? 'warning' : 'default'}
-        />
-        <StatTile
-          label={t.stats.total}
-          value={String(data.total)}
-          sub={t.stats.totalSub(data.firstDoneOn && formatDate(parseApiDate(data.firstDoneOn)))}
-        />
-      </StatGrid>
-
       <section className={st.card} aria-label={t.stats.activity}>
-        <h2 className={st.cardTitle}>{t.stats.activity}</h2>
+        <div className={st.groupHead}>
+          <h2 className={st.cardTitle}>{t.stats.activity}</h2>
+          <span className={st.cardValue}>{t.stats.totalTimes(data.total)}</span>
+        </div>
         <Heatmap days={data.daily} />
-        <p className={st.note}>{t.stats.streakRule}</p>
       </section>
     </div>
   )

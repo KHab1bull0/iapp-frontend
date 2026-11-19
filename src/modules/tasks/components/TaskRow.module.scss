@@ -107,13 +107,11 @@
 
 .time { font-variant-numeric: tabular-nums; font-weight: 500; color: var(--fg); }
 
-
 .repeat {
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
-
 
 // A row whose request is on its way: its text dims a little until the answer.
 .busy .body { opacity: 0.7; transition: opacity $t-fast; }
@@ -121,37 +119,5 @@
 @keyframes pending {
   from { opacity: 1; }
   to { opacity: 0.55; }
-}
-
-// ── Habits ──────────────────────────────────────────────────────────────
-
-// Missed last time: today decides the streak. A tint, not an alarm.
-.atRisk { background: var(--warning-soft); }
-
-.streak {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--warning);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.streakNum {
-  display: inline-block;
-  animation: streakPop 320ms var(--ease-spring);
-}
-
-@keyframes streakPop {
-  from { transform: translateY(40%); opacity: 0; }
-  to { transform: none; opacity: 1; }
-}
-
-.risk {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--warning);
-  font-weight: 500;
 }
 

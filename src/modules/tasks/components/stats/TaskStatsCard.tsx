@@ -1,57 +1,40 @@
 import { useQuery } from '@tanstack/react-query'
 import { useToday } from '@/core/hooks/useToday'
-import { formatDate, parseApiDate } from '@/core/lib/format'
 import { fetchTaskStats, tasksKeys, type Task } from '@/modules/tasks/api/tasks'
-import { isDaily } from '@/modules/tasks/lib/repeat'
 import { useTasksT } from '@/modules/tasks/i18n'
-import { StatGrid, StatTile } from '@/core/components/ui/StatTile'
 import { Skeleton } from '@/core/components/ui/Skeleton'
-import { HeatmapSkeleton, LoadingLabel, StatTileSkeleton } from '@/modules/tasks/components/skeletons'
+import { HeatmapSkeleton, LoadingLabel } from '@/modules/tasks/components/skeletons'
 import { Heatmap } from './Heatmap'
 import s from './TaskStats.module.scss'
 
-function TilesSkeleton() {
-  return (
-    <StatGrid columns={2}>
-      <StatTileSkeleton />
-      <StatTileSkeleton />
-    </StatGrid>
-  )
-}
-
-/** The activity group in outline: its label, the heatmap and the note under it. */
+/** The activity card in outline: its head and the heatmap. */
 function ActivitySkeleton() {
   return (
     <div className={s.group}>
-      <Skeleton height="var(--lh-caption)" width={64} />
+      <Skeleton height="var(--lh-caption)" width="40%" />
       <HeatmapSkeleton />
-      <Skeleton height="var(--lh-caption)" width="70%" />
     </div>
   )
 }
 
-/** The card in outline, for the edit page while the task itself still loads (the page says "Loading"). */
+/** The card in outline, for the task page while the task itself still loads (the page says "Loading"). */
 export function TaskStatsSkeleton() {
   const t = useTasksT()
   return (
     <section className={s.card} aria-label={t.stats.region} aria-busy="true">
-      <TilesSkeleton />
       <ActivitySkeleton />
     </section>
   )
 }
 
 /**
- * At the top of the task editor: the streak (and the best one), how many
- * times it was done in all, and the heatmap. A streak that isn't daily
- * counts times instead of days.
- *
- * While the numbers load, the same card in outline.
+ * A task's record: its activity (the heatmap), with the number of days it
+ * was done across from the heading. No streak: the days themselves are the
+ * record. While the numbers load, the same card in outline.
  */
-export function TaskStatsCard({ taskId, task }: { taskId: string; task?: Task }) {
+// `task` is kept for callers; the card needs only the id.
+export function TaskStatsCard({ taskId }: { taskId: string; task?: Task }) {
   const t = useTasksT()
-  // Before habits the editor always said days; only a task known not to be daily changes that.
-  const daily = task ? isDaily(task) : true
   const today = useToday()
   const { data, isError } = useQuery({
     queryKey: tasksKeys.stats(taskId, today),
@@ -63,24 +46,6 @@ export function TaskStatsCard({ taskId, task }: { taskId: string; task?: Task })
   return (
     <section className={s.card} aria-label={t.stats.region} aria-busy={data ? undefined : true}>
       {!data && <LoadingLabel />}
-      {data ? (
-        <StatGrid columns={2}>
-          <StatTile
-            label={t.stats.streak}
-            value={daily ? t.stats.streakValue(data.currentStreak) : t.habit.streak(data.currentStreak, false)}
-            sub={daily ? t.stats.bestStreak(data.bestStreak) : t.stats.bestTimes(data.bestStreak)}
-            tone={data.currentStreak > 0 ? 'warning' : 'default'}
-          />
-          <StatTile
-            label={t.stats.total}
-            value={String(data.total)}
-            sub={t.stats.totalSub(data.firstDoneOn && formatDate(parseApiDate(data.firstDoneOn)))}
-          />
-        </StatGrid>
-      ) : (
-        <TilesSkeleton />
-      )}
-
       {!data ? (
         <ActivitySkeleton />
       ) : data.total === 0 ? (
@@ -90,9 +55,11 @@ export function TaskStatsCard({ taskId, task }: { taskId: string; task?: Task })
         </div>
       ) : (
         <div className={s.group}>
-          <h2 className={s.groupLabel}>{t.stats.activity}</h2>
-          <Heatmap days={data.daily} compact />
-          <p className={s.note}>{t.stats.streakRule}</p>
+          <div className={s.groupHead}>
+            <h2 className={s.groupLabel}>{t.stats.activity}</h2>
+            <span className={s.groupValue}>{t.stats.totalDays(data.total)}</span>
+          </div>
+          <Heatmap days={data.daily} compact single />
         </div>
       )}
     </section>

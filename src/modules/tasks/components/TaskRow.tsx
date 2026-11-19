@@ -1,8 +1,7 @@
-import { useState } from 'react'
 import clsx from 'clsx'
-import { Check, Flame, Repeat, TriangleAlert } from 'lucide-react'
+import { Check, Repeat } from 'lucide-react'
 import type { Task } from '@/modules/tasks/api/tasks'
-import { describeRepeat, dueLabel, isDaily } from '@/modules/tasks/lib/repeat'
+import { describeRepeat, dueLabel } from '@/modules/tasks/lib/repeat'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from './TaskRow.module.scss'
 
@@ -34,21 +33,17 @@ export function TaskRow({
 }: Props) {
   const t = useTasksT()
   const habit = task.isHabit ? task.progress : null
-  // A habit's line is its streak; the editor still says how it repeats.
+  // A habit's line is its chip; the editor still says how it repeats.
   const repeat = habit ? '' : describeRepeat(task, t)
   // No red "N days late": a day already passed simply isn't mentioned.
   const due = showDue ? dueLabel(task.dueDate, today, t) : ''
-  const atRisk = !done && Boolean(habit?.atRisk)
-  // Only a streak that changes while in view pops, not every row on load.
-  const [firstStreak] = useState(habit?.streak)
-  const bumped = habit !== null && habit.streak !== firstStreak
 
-  const meta = task.isHabit || task.dueTime || repeat || due || habit
+  const meta = task.isHabit || task.dueTime || repeat || due
 
   return (
     <div className={s.wrap}>
       {/* The tick is the one way to mark it done: no swipe. */}
-      <div className={clsx(s.row, done && s.done, atRisk && s.atRisk, busy && s.busy)}>
+      <div className={clsx(s.row, done && s.done, busy && s.busy)}>
         <button className={s.body} onClick={() => onOpen(task)}>
           <span className={s.title}>{task.title}</span>
           {meta && (
@@ -57,21 +52,6 @@ export function TaskRow({
               {task.isHabit && <span className={s.habitChip}>{t.habit.label}</span>}
               {task.dueTime && <span className={s.time}>{task.dueTime}</span>}
               {due && !habit && <span>{due}</span>}
-              {habit && habit.streak > 0 && (
-                <span className={s.streak}>
-                  <Flame size={12} aria-hidden />
-                  {/* Keyed on the number: each new streak pops in again. */}
-                  <span key={habit.streak} className={clsx(bumped && s.streakNum)} aria-hidden>
-                    {habit.streak}
-                  </span>
-                  <span className="sr-only">{t.habit.streakLabel(habit.streak, isDaily(task))}</span>
-                </span>
-              )}
-              {atRisk && (
-                <span className={s.risk}>
-                  <TriangleAlert size={12} aria-hidden /> {t.habit.atRisk}
-                </span>
-              )}
               {repeat && (
                 <span className={s.repeat}>
                   <Repeat size={12} aria-hidden /> {repeat}

@@ -173,8 +173,11 @@ export async function fetchTasksSummary(today: string): Promise<TasksSummary> {
   return data
 }
 
-/** Days of daily history the stats screens ask for: 17 weeks of heatmap. */
-export const STATS_DAYS = 119
+/**
+ * Days of daily history the stats screens ask for: a year (52 weeks). The
+ * heatmap shows the newest weeks that fit and scrolls back to the rest.
+ */
+export const STATS_DAYS = 364
 
 export async function fetchTaskStats(id: string, today: string, days = STATS_DAYS): Promise<TaskStats> {
   const { data } = await api.get<TaskStats>(`/tasks/items/${id}/stats`, { params: { today, days } })
