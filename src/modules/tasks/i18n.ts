@@ -102,9 +102,6 @@ export const tasksMessages = defineMessages(
       today: 'Bugun',
       tomorrow: 'Ertaga',
     },
-    swipe: {
-      done: 'Bajarildi',
-    },
     progressTitle: (done: number, all: number) => `${all} tadan ${done} tasi bajarildi`,
     progressAllDone: 'Bugun hammasi bajarildi',
     stats: {
@@ -242,9 +239,6 @@ export const tasksMessages = defineMessages(
       noDate: 'No date',
       today: 'Today',
       tomorrow: 'Tomorrow',
-    },
-    swipe: {
-      done: 'Done',
     },
     progressTitle: (done: number, all: number) => `${done} of ${all} done`,
     progressAllDone: 'All done for today',

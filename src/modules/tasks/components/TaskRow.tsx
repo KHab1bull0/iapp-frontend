@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import clsx from 'clsx'
 import { Check, Flame, Repeat, TriangleAlert } from 'lucide-react'
-import { useSwipe } from '@/core/hooks/useSwipe'
 import type { Task } from '@/modules/tasks/api/tasks'
 import { describeRepeat, dueLabel, isDaily } from '@/modules/tasks/lib/repeat'
 import { useTasksT } from '@/modules/tasks/i18n'
@@ -16,7 +15,7 @@ interface Props {
   onToggle?: (task: Task) => void
   /**
    * While a request about it is on its way (ticking, unticking): its
-   * buttons and swipes wait, so a second tap can't send it twice.
+   * buttons wait, so a second tap can't send it twice.
    */
   busy?: boolean
   onOpen: (task: Task) => void
@@ -44,23 +43,12 @@ export function TaskRow({
   const [firstStreak] = useState(habit?.streak)
   const bumped = habit !== null && habit.streak !== firstStreak
 
-  const swipe = useSwipe({
-    onRight: onToggle && !done && !busy ? () => onToggle(task) : undefined,
-  })
   const meta = task.dueTime || repeat || due || habit
 
   return (
-    <div className={clsx(s.wrap, swipe.dx !== 0 && s.swiping)}>
-      {swipe.dx > 0 && (
-        <div className={clsx(s.under, s.underDone, swipe.armed && s.armed)} aria-hidden>
-          <Check size={20} strokeWidth={3} /> {t.swipe.done}
-        </div>
-      )}
-      <div
-        className={clsx(s.row, done && s.done, atRisk && s.atRisk, busy && s.busy)}
-        style={swipe.dx ? { transform: `translateX(${swipe.dx}px)` } : undefined}
-        {...swipe.handlers}
-      >
+    <div className={s.wrap}>
+      {/* The tick is the one way to mark it done: no swipe. */}
+      <div className={clsx(s.row, done && s.done, atRisk && s.atRisk, busy && s.busy)}>
         <button className={s.body} onClick={() => onOpen(task)}>
           <span className={s.title}>{task.title}</span>
           {meta && (

@@ -12,29 +12,7 @@
   @include row;
   position: relative;
   background: var(--bg-elev);
-  touch-action: pan-y;
-  transition: transform $t-base var(--ease-house);
-
-  .swiping & { transition: none; }
 }
-
-// What a swipe right uncovers: the tick.
-.under {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 20px;
-  font-size: var(--fs-ui);
-  font-weight: 600;
-  color: #fff;
-  transition: filter $t-fast;
-
-  &.armed { filter: brightness(1.1); }
-}
-
-.underDone { justify-content: flex-start; background: var(--success-fill); }
 
 .check {
   @include touch-target(8px);
