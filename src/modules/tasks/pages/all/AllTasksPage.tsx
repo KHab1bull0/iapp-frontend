@@ -3,6 +3,8 @@ import { ListTodo, RefreshCw } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { useToday } from '@/core/hooks/useToday'
 import { fetchTasks, tasksKeys } from '@/modules/tasks/api/tasks'
+import { fetchGroups } from '@/modules/tasks/api/groups'
+import { byGroup } from '@/modules/tasks/lib/byGroup'
 import { groupByDue, pastTasks } from '@/modules/tasks/lib/repeat'
 import { PastSection } from '@/modules/tasks/components/PastSection'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
@@ -12,8 +14,9 @@ import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
 
 /**
- * Tasks → All tasks: every planned task, by when it is next due, to plan and
- * edit. Ticking happens on Today, once a task's day has come.
+ * Tasks → All tasks: every planned task, by the group it is put in (each
+ * soonest due first), to plan and edit. Until any task has a group, by when
+ * it is next due instead. Ticking happens on Today, once a task's day has come.
  */
 export function AllTasksPage() {
   const today = useToday()
@@ -25,9 +28,17 @@ export function AllTasksPage() {
     queryFn: () => fetchTasks('active', today),
   })
 
-  const groups = groupByDue(tasks, today, t)
+  const { data: taskGroups = [] } = useQuery({ queryKey: tasksKeys.groups, queryFn: fetchGroups })
+
   // Tasks whose day passed: folded away at the very end (no red overdue pile).
   const past = pastTasks(tasks, today)
+  const pastIds = new Set(past.map((task) => task.id))
+  // The server sends them soonest due first, so each group keeps that order.
+  const byUserGroup = byGroup(tasks.filter((task) => !pastIds.has(task.id)), taskGroups, t.group.none)
+  // A group's tasks fall on different days, so each row says when; a due section already does.
+  const groups = byUserGroup
+    ? byUserGroup.map((g) => ({ ...g, showDue: true }))
+    : groupByDue(tasks, today, t).map((g) => ({ ...g, showDue: g.key !== 'today' && g.key !== 'none' }))
 
   return (
     <div className={s.page}>
@@ -55,7 +66,7 @@ export function AllTasksPage() {
                   key={task.id}
                   task={task}
                   today={today}
-                  showDue={g.key !== 'today' && g.key !== 'none'}
+                  showDue={g.showDue}
                   onOpen={editor.openDetail}
                 />
               ))}

@@ -8,39 +8,18 @@ import { useToday } from '@/core/hooks/useToday'
 import { formatFullDate, parseApiDate } from '@/core/lib/format'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { fetchOverallStats, fetchToday, tasksKeys, type Task } from '@/modules/tasks/api/tasks'
-import { fetchGroups, type TaskGroup } from '@/modules/tasks/api/groups'
+import { fetchGroups } from '@/modules/tasks/api/groups'
 import { Heatmap } from '@/modules/tasks/components/stats/Heatmap'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { HeatmapSkeleton, LoadingLabel, SectionSkeleton } from '@/modules/tasks/components/skeletons'
 import { byTime } from '@/modules/tasks/lib/repeat'
+import { byGroup } from '@/modules/tasks/lib/byGroup'
 import { PastSection } from '@/modules/tasks/components/PastSection'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
 import { useCompleteTask } from '@/modules/tasks/useCompleteTask'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
-
-interface GroupPart {
-  key: string
-  label: string
-  tasks: Task[]
-}
-
-/**
- * Today's tasks by group: the groups in their own order, then the rest
- * ("No group"), each keeping the list's time order. Null when none of them
- * is in a known group, so the list stays one plain list.
- */
-function byGroup(tasks: Task[], groups: TaskGroup[], noGroup: string): GroupPart[] | null {
-  const known = new Set(groups.map((g) => g.id))
-  const parts: GroupPart[] = groups
-    .map((g) => ({ key: g.id, label: g.name, tasks: tasks.filter((t) => t.groupId === g.id) }))
-    .filter((p) => p.tasks.length > 0)
-  if (parts.length === 0) return null
-  const rest = tasks.filter((t) => !t.groupId || !known.has(t.groupId))
-  if (rest.length > 0) parts.push({ key: 'none', label: noGroup, tasks: rest })
-  return parts
-}
 
 /** The desktop rail's activity card while it loads (CSS hides the rail card on phones). */
 function RailSkeleton() {
