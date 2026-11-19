@@ -16,8 +16,8 @@ import s from '../TasksPages.module.scss'
 /**
  * Tasks → All tasks: every planned task, by the group it is put in (each
  * soonest due first, days passed included), to plan and edit. Every group
- * shows, even one with no tasks yet; with no groups at all, by when each is
- * next due instead. Ticking happens on Today, once a task's day has come.
+ * shows, the ones with no tasks yet at the very end; with no groups at all,
+ * by when each is next due instead. Ticking happens on Today, once a task's day has come.
  */
 export function AllTasksPage() {
   const today = useToday()

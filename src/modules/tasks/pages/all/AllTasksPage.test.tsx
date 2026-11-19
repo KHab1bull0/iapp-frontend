@@ -84,12 +84,13 @@ describe('AllTasksPage', () => {
     expect(screen.queryByText('Not done')).toBeNull()
   })
 
-  test('a group with no tasks yet still shows, empty', async () => {
+  test('a group with no tasks yet still shows, at the very end of the list', async () => {
     groupsApi.fetchGroups.mockResolvedValueOnce([
       { id: 'g1', name: 'Ish', createdAt: '' },
       { id: 'g2', name: 'Uy', createdAt: '' },
+      { id: 'g3', name: 'Sport', createdAt: '' },
     ])
-    api.fetchTasks.mockResolvedValue([t('a', todayYmd())])
+    api.fetchTasks.mockResolvedValue([t('a', todayYmd()), t('b', todayYmd(), 'g2')])
     render(
       <QueryClientProvider client={new QueryClient()}>
         <MemoryRouter>
@@ -99,6 +100,6 @@ describe('AllTasksPage', () => {
     )
     expect(await screen.findByRole('heading', { name: 'Ish' })).toBeTruthy()
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
-    expect(headings).toEqual(['Ish', 'Uy', 'No group'])
+    expect(headings).toEqual(['Uy', 'No group', 'Ish', 'Sport'])
   })
 })
