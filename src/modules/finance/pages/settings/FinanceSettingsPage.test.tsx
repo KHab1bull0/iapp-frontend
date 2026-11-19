@@ -12,7 +12,7 @@ vi.mock('@/modules/finance/api/categories', async (orig) => ({
   deleteCategory: vi.fn(),
 }))
 
-const TAXI: Category = { id: 'c1', name: 'Taxi', type: 'expense', icon: '🚕', color: '#336699' }
+const TAXI: Category = { id: 'c1', name: 'Taxi', type: 'expense', icon: '🚕', color: '#336699', parentId: null }
 
 /** A request that answers only when the test says so. */
 function deferred<T>() {

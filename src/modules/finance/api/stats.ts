@@ -6,7 +6,7 @@ export interface MonthPoint {
   expense: number
 }
 
-export interface CategoryBreakdown {
+export interface CategoryShare {
   categoryId: string
   name: string
   color: string
@@ -14,6 +14,12 @@ export interface CategoryBreakdown {
   type: string
   total: number
   percentage: number
+}
+
+/** A parent (its categories summed, listed in `children`) or an unassigned category. */
+export interface CategoryBreakdown extends CategoryShare {
+  kind: 'parent' | 'category'
+  children?: CategoryShare[]
 }
 
 export interface RecentTransaction {

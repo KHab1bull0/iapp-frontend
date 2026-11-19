@@ -6,6 +6,8 @@ export interface Category {
   type: 'income' | 'expense'
   color: string
   icon: string
+  /** The parent it is grouped under, if any. */
+  parentId: string | null
 }
 
 export interface CreateCategoryDto {
@@ -13,6 +15,7 @@ export interface CreateCategoryDto {
   type: 'income' | 'expense'
   color?: string
   icon?: string
+  parentId?: string | null
 }
 
 export const fetchCategories = async (): Promise<Category[]> => {

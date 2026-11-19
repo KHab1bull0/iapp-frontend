@@ -25,7 +25,7 @@ function tx(id: string, note: string, amount: number): Transaction {
     date: new Date().toISOString(),
     time: '12:00',
     createdAt: new Date().toISOString(),
-    category: { id: 'c1', name: 'Transport', icon: '🚗', color: '#336699' },
+    category: { id: 'c1', name: 'Transport', icon: '🚗', color: '#336699', parentId: null },
   }
 }
 

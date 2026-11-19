@@ -9,7 +9,7 @@ export interface Transaction {
   date: string
   time?: string
   createdAt: string
-  category: Pick<Category, 'id' | 'name' | 'icon' | 'color'>
+  category: Pick<Category, 'id' | 'name' | 'icon' | 'color' | 'parentId'>
 }
 
 export interface PaginatedTransactions {
@@ -24,6 +24,8 @@ export interface TransactionFilters {
   endDate?: string
   type?: 'income' | 'expense'
   categoryId?: string
+  /** All the categories under this parent. */
+  parentId?: string
   search?: string
 }
 
