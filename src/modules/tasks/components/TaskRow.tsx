@@ -1,3 +1,4 @@
+import type React from 'react'
 import clsx from 'clsx'
 import { Check, Repeat } from 'lucide-react'
 import type { Task } from '@/modules/tasks/api/tasks'
@@ -20,6 +21,8 @@ interface Props {
   onOpen: (task: Task) => void
   /** Show "Tomorrow", a weekday… (All tasks); Today's own sections say it already. */
   showDue?: boolean
+  /** The group's brand colour: drawn as a 3 px left accent stripe. */
+  groupColor?: string | null
 }
 
 /** Longest name a row shows; the rest is cut with "…". */
@@ -33,6 +36,7 @@ export function TaskRow({
   busy = false,
   onOpen,
   showDue = false,
+  groupColor,
 }: Props) {
   const t = useTasksT()
   const repeat = describeRepeat(task, t)
@@ -45,7 +49,10 @@ export function TaskRow({
   const meta = task.dueTime || repeat || due
 
   return (
-    <div className={s.wrap}>
+    <div
+      className={s.wrap}
+      style={groupColor ? ({ '--accent': groupColor } as React.CSSProperties) : undefined}
+    >
       {/* The tick is the one way to mark it done: no swipe. */}
       <div className={clsx(s.row, done && s.done, busy && s.busy)}>
         <button className={s.body} onClick={() => onOpen(task)}>

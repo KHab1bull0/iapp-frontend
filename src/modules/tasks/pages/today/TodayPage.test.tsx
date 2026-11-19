@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { ToastHost } from '@/core/components/ui/toast'
@@ -167,10 +167,10 @@ describe('TodayPage', () => {
     expect(api.undoCompletion).toHaveBeenCalledTimes(1)
   })
 
-  test("today's list splits by group, in the groups' order, each by time, the rest under No group", async () => {
+  test('tasks with a group colour carry the accent stripe; order stays by time', async () => {
     groupsApi.fetchGroups.mockResolvedValue([
-      { id: 'g1', name: 'Work', createdAt: '' },
-      { id: 'g2', name: 'Home', createdAt: '' },
+      { id: 'g1', name: 'Work', color: '#93c5fd', createdAt: '' },
+      { id: 'g2', name: 'Home', color: '#86efac', createdAt: '' },
     ])
     api.fetchToday.mockResolvedValue({
       overdue: [],
@@ -178,45 +178,22 @@ describe('TodayPage', () => {
         t('u'),
         t('b', { dueTime: '09:30', groupId: 'g2' }),
         t('e', { dueTime: '07:00', groupId: 'g1' }),
-        t('x', { dueTime: '08:00', groupId: 'g2' }),
-        // A group the list doesn't know (deleted meanwhile) counts as none.
-        t('z', { groupId: 'gone' }),
       ],
-      doneToday: [{ completionId: 'c0', task: t('c', { groupId: 'g1' }) }],
-    })
-    renderPage()
-    const parts = await screen.findAllByRole('group')
-    // Each part is named by its label.
-    expect(parts.map((p) => document.getElementById(p.getAttribute('aria-labelledby')!)?.textContent)).toEqual([
-      'Work',
-      'Home',
-      'No group',
-    ])
-    const titles = (part: HTMLElement) =>
-      within(part).getAllByRole('button', { name: /^Complete / }).map((b) => b.getAttribute('aria-label'))
-    expect(titles(parts[0])).toEqual(['Complete E'])
-    expect(titles(parts[1])).toEqual(['Complete X', 'Complete B'])
-    expect(titles(parts[2])).toEqual(['Complete U', 'Complete Z'])
-    // Still the one section and its one count; Done isn't split.
-    expect(screen.getAllByRole('heading', { name: 'Today' })).toHaveLength(1)
-    expect(screen.getByText('5')).toBeTruthy()
-    expect(within(screen.getByRole('heading', { name: 'Done' }).closest('section')!).queryByRole('group')).toBeNull()
-  })
-
-  test('with groups set up but none of today\'s tasks in one, the list is as before', async () => {
-    groupsApi.fetchGroups.mockResolvedValue([{ id: 'g1', name: 'Work', createdAt: '' }])
-    api.fetchToday.mockResolvedValue({
-      overdue: [],
-      today: [t('u'), t('b', { dueTime: '09:30' })],
       doneToday: [],
     })
     renderPage()
-    await screen.findByText('U')
-    // Let the groups arrive too, so this is the list with them known.
-    await act(async () => {})
-    expect(screen.queryByRole('group')).toBeNull()
+    // All tasks render as one flat list in time order (E → B → U).
+    const btns = await screen.findAllByRole('button', { name: /^Complete / })
+    expect(btns.map((b) => b.getAttribute('aria-label'))).toEqual(['Complete E', 'Complete B', 'Complete U'])
+    // No group-label sub-sections.
+    expect(screen.queryByText('Work')).toBeNull()
     expect(screen.queryByText('No group')).toBeNull()
-    const titles = screen.getAllByRole('button', { name: /^Complete / }).map((b) => b.getAttribute('aria-label'))
-    expect(titles).toEqual(['Complete B', 'Complete U'])
+    // The rows with a colour have --accent set on their wrapper.
+    const eWrap = btns[0].closest('[style]')
+    const bWrap = btns[1].closest('[style]')
+    expect(eWrap?.getAttribute('style')).toContain('--accent: #93c5fd')
+    expect(bWrap?.getAttribute('style')).toContain('--accent: #86efac')
+    // A task with no group has no style attribute.
+    expect(btns[2].closest('[style]')).toBeNull()
   })
 })

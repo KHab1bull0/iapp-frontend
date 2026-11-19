@@ -1,4 +1,3 @@
-import { useId } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { CircleCheckBig, Plus, RefreshCw } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
@@ -14,7 +13,6 @@ import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { HeatmapSkeleton, LoadingLabel, SectionSkeleton } from '@/modules/tasks/components/skeletons'
 import { byTime } from '@/modules/tasks/lib/repeat'
-import { byGroup } from '@/modules/tasks/lib/byGroup'
 import { PastSection } from '@/modules/tasks/components/PastSection'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
 import { useCompleteTask } from '@/modules/tasks/useCompleteTask'
@@ -47,7 +45,6 @@ export function TodayPage() {
   const quickAdd = useQuickAdd()
   const editor = useTaskEditor()
   const { complete, undo, pending } = useCompleteTask(today)
-  const partId = useId()
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.today(today),
@@ -70,9 +67,11 @@ export function TodayPage() {
 
   // One list, habits and tasks together; anything with a time goes first, by the clock.
   const dueToday = byTime(allDue)
-  // Split by group only once one of them has one: otherwise exactly the plain list.
-  const parts = byGroup(dueToday, groups, m.group.none)
   const done = allDone
+
+  // Build a groupId → colour lookup so each row can carry its accent stripe.
+  const groupColorMap = new Map(groups.map((g) => [g.id, g.color]))
+  const groupColor = (task: Task) => (task.groupId ? (groupColorMap.get(task.groupId) ?? null) : null)
 
   const row = (t: Task) => (
     <TaskRow
@@ -80,6 +79,7 @@ export function TodayPage() {
       task={t}
       today={today}
       busy={pending.has(t.id)}
+      groupColor={groupColor(t)}
       onToggle={complete}
       onOpen={editor.openDetail}
     />
@@ -93,6 +93,7 @@ export function TodayPage() {
       today={today}
       showDue
       busy={pending.has(t.id)}
+      groupColor={groupColor(t)}
       onToggle={complete}
       onOpen={editor.openDetail}
     />
@@ -105,6 +106,7 @@ export function TodayPage() {
       today={today}
       done
       busy={pending.has(completionId)}
+      groupColor={groupColor(task)}
       onToggle={() => undo(completionId)}
       onOpen={editor.openDetail}
     />
@@ -176,16 +178,7 @@ export function TodayPage() {
               {/* The parts stay in the one card, each under a quiet label, so it
                   reads as sorted rather than as more sections. */}
               <div className={s.list}>
-                {parts
-                  ? parts.map((part) => (
-                      <div key={part.key} className={s.groupPart} role="group" aria-labelledby={`${partId}-${part.key}`}>
-                        <div id={`${partId}-${part.key}`} className={s.groupLabel}>
-                          {part.label}
-                        </div>
-                        {part.tasks.map(row)}
-                      </div>
-                    ))
-                  : dueToday.map(row)}
+                {dueToday.map(row)}
               </div>
             </section>
           )}

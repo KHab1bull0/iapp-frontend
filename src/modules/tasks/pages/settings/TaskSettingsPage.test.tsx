@@ -9,13 +9,13 @@ import { TaskSettingsPage } from './TaskSettingsPage'
 const api = vi.hoisted(() => ({
   fetchGroups: vi.fn(),
   createGroup: vi.fn(),
-  renameGroup: vi.fn(),
+  updateGroup: vi.fn(),
   deleteGroup: vi.fn(),
 }))
 vi.mock('@/modules/tasks/api/groups', async (orig) => ({ ...(await orig<object>()), ...api }))
 
-const WORK: TaskGroup = { id: 'g1', name: 'Work', createdAt: '' }
-const HOME: TaskGroup = { id: 'g2', name: 'Home', createdAt: '' }
+const WORK: TaskGroup = { id: 'g1', name: 'Work', color: '#93c5fd', createdAt: '' }
+const HOME: TaskGroup = { id: 'g2', name: 'Home', color: null, createdAt: '' }
 
 function renderPage() {
   return render(
@@ -50,16 +50,16 @@ describe('TaskSettingsPage', () => {
   })
 
   test('adds a group by name, trimmed, and empties the field', async () => {
-    api.createGroup.mockResolvedValue({ id: 'g3', name: 'Health', createdAt: '' })
+    api.createGroup.mockResolvedValue({ id: 'g3', name: 'Health', color: null, createdAt: '' })
     renderPage()
     await screen.findByText('Work')
     const add = screen.getByRole('button', { name: 'Add' }) as HTMLButtonElement
     expect(add.disabled).toBe(true)
     const field = screen.getByLabelText('Group name') as HTMLInputElement
     fireEvent.change(field, { target: { value: '  Health ' } })
-    api.fetchGroups.mockResolvedValue([WORK, HOME, { id: 'g3', name: 'Health', createdAt: '' }])
+    api.fetchGroups.mockResolvedValue([WORK, HOME, { id: 'g3', name: 'Health', color: null, createdAt: '' }])
     fireEvent.click(add)
-    await waitFor(() => expect(api.createGroup).toHaveBeenCalledWith('Health'))
+    await waitFor(() => expect(api.createGroup).toHaveBeenCalledWith('Health', expect.anything()))
     expect(await screen.findByText('Health')).toBeTruthy()
     expect(field.value).toBe('')
   })
@@ -75,44 +75,47 @@ describe('TaskSettingsPage', () => {
     expect(field.value).toBe('work')
   })
 
-  test('renames a group in place; Cancel leaves it as it was', async () => {
-    api.renameGroup.mockResolvedValue({ ...WORK, name: 'Office' })
+  test('edits a group name and colour; Cancel leaves it as it was', async () => {
+    api.updateGroup.mockResolvedValue({ ...WORK, name: 'Office' })
     renderPage()
-    fireEvent.click(await screen.findByRole('button', { name: 'Rename “Work”' }))
-    const field = screen.getByLabelText('Name of “Work”') as HTMLInputElement
+    await screen.findByText('Work') // wait for groups to load
+    fireEvent.click(await screen.findByRole('button', { name: /Rename.*Work/ }))
+    const field = screen.getByLabelText(/Name.*Work/) as HTMLInputElement
     expect(field.value).toBe('Work')
     fireEvent.change(field, { target: { value: 'Desk' } })
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(screen.getByText('Work')).toBeTruthy()
-    expect(api.renameGroup).not.toHaveBeenCalled()
+    expect(api.updateGroup).not.toHaveBeenCalled()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Rename “Work”' }))
-    fireEvent.change(screen.getByLabelText('Name of “Work”'), { target: { value: 'Office ' } })
+    fireEvent.click(await screen.findByRole('button', { name: /Rename.*Work/ }))
+    fireEvent.change(screen.getByLabelText(/Name.*Work/), { target: { value: 'Office ' } })
     api.fetchGroups.mockResolvedValue([{ ...WORK, name: 'Office' }, HOME])
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    await waitFor(() => expect(api.renameGroup).toHaveBeenCalledWith('g1', 'Office'))
+    await waitFor(() => expect(api.updateGroup).toHaveBeenCalledWith('g1', 'Office', WORK.color))
     expect(await screen.findByText('Office')).toBeTruthy()
-    expect(screen.queryByLabelText('Name of “Work”')).toBeNull()
+    expect(screen.queryByLabelText(/Name.*Work/)).toBeNull()
   })
 
-  test('a rename to a taken name is said so and stays open', async () => {
-    api.renameGroup.mockRejectedValue({ response: { status: 409, data: { message: 'errors.group_exists' } } })
+  test('an edit to a taken name is said so and stays open', async () => {
+    api.updateGroup.mockRejectedValue({ response: { status: 409, data: { message: 'errors.group_exists' } } })
     renderPage()
-    fireEvent.click(await screen.findByRole('button', { name: 'Rename “Work”' }))
-    fireEvent.change(screen.getByLabelText('Name of “Work”'), { target: { value: 'Home' } })
+    await screen.findByText('Work')
+    fireEvent.click(await screen.findByRole('button', { name: /Rename.*Work/ }))
+    fireEvent.change(screen.getByLabelText(/Name.*Work/), { target: { value: 'Home' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     expect(await screen.findByText('A group with this name exists')).toBeTruthy()
-    expect(screen.getByLabelText('Name of “Work”')).toBeTruthy()
+    expect(screen.getByLabelText(/Name.*Work/)).toBeTruthy()
   })
 
   test('deletes a group only after confirming', async () => {
     api.deleteGroup.mockResolvedValue(undefined)
     renderPage()
-    fireEvent.click(await screen.findByRole('button', { name: 'Delete “Home”' }))
+    await screen.findByText('Home')
+    fireEvent.click(await screen.findByRole('button', { name: /Delete.*Home/ }))
     const dialog = await screen.findByRole('alertdialog')
-    expect(within(dialog).getByText('Delete the group “Home”?')).toBeTruthy()
+    expect(within(dialog).getByText(/Delete.*group.*Home/)).toBeTruthy()
     expect(within(dialog).getByText('Its tasks stay, just without a group.')).toBeTruthy()
-    expect(api.deleteGroup).not.toHaveBeenCalled()
+    expect(api.deleteGroup).toHaveBeenCalledTimes(0)
     api.fetchGroups.mockResolvedValue([WORK])
     fireEvent.click(within(dialog).getByRole('button', { name: 'Delete' }))
     await waitFor(() => expect(api.deleteGroup).toHaveBeenCalledWith('g2'))

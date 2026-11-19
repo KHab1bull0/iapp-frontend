@@ -6,6 +6,18 @@
   overflow: hidden;
 
   & + & { border-top: 1px solid var(--border); }
+
+  // Group colour accent: a 3 px stripe at the left edge, only when --accent is set.
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent, transparent);
+    pointer-events: none;
+  }
 }
 
 .row {

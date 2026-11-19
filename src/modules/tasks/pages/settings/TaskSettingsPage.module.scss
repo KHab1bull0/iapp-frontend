@@ -91,3 +91,81 @@ form.row {
 
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
+
+// ── Colour picker ─────────────────────────────────────────────────────────────
+
+/** Add / edit form wrapper — colour row on top, then name + buttons. */
+.editForm,
+.addForm {
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+
+  & + & { border-top: 1px solid var(--border); }
+}
+
+.addForm { background: var(--row-hover); }
+
+/** Name input + action buttons, side by side (wrap on narrow screens). */
+.editRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/** Row of colour swatches. */
+.colorPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 100ms ease, border-color 100ms ease;
+
+  &:hover { transform: scale(1.18); }
+  &:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+}
+
+.swatchSelected {
+  border-color: var(--fg-strong) !important;
+  transform: scale(1.1);
+}
+
+/** "No colour" swatch: outlined circle with a diagonal slash. */
+.swatchNone {
+  background: var(--bg-elev);
+  border-color: var(--border-strong);
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    background: linear-gradient(
+      135deg,
+      transparent 42%,
+      var(--border-strong) 42%,
+      var(--border-strong) 58%,
+      transparent 58%
+    );
+  }
+}
+
+/** Coloured dot shown next to the group name in read mode. */
+.colorDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

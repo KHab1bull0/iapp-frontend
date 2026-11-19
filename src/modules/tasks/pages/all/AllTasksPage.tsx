@@ -41,6 +41,10 @@ export function AllTasksPage() {
     ? byUserGroup.map((g) => ({ ...g, showDue: true }))
     : groupByDue(tasks, today, t).map((g) => ({ ...g, showDue: g.key !== 'today' && g.key !== 'none' }))
 
+  // groupId → colour, for the left accent stripe on each row.
+  const groupColorMap = new Map(taskGroups.map((g) => [g.id, g.color]))
+  const groupColorOf = (groupId: string | null) => (groupId ? (groupColorMap.get(groupId) ?? null) : null)
+
   return (
     <div className={s.page}>
       {isError ? (
@@ -68,6 +72,7 @@ export function AllTasksPage() {
                   task={task}
                   today={today}
                   showDue={g.showDue}
+                  groupColor={groupColorOf(task.groupId)}
                   onOpen={editor.openDetail}
                 />
               ))}
@@ -83,6 +88,7 @@ export function AllTasksPage() {
               task={task}
               today={today}
               showDue
+              groupColor={groupColorOf(task.groupId)}
               onOpen={editor.openDetail}
             />
           ))}
