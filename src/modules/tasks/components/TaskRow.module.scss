@@ -4,13 +4,17 @@
 .wrap {
   position: relative;
   overflow: hidden;
+  // Its own stacking context, so the stripe's z-index stays inside the row.
+  isolation: isolate;
 
   & + & { border-top: 1px solid var(--border); }
 
   // Group colour accent: a 3 px stripe at the left edge, only when --accent is set.
+  // Above .row, which is positioned and opaque and would otherwise paint over it.
   &::before {
     content: '';
     position: absolute;
+    z-index: 1;
     left: 0;
     top: 0;
     bottom: 0;
