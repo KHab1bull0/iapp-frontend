@@ -90,11 +90,11 @@ describe('accessibility (axe)', () => {
     expect(await violations(container)).toEqual([])
   })
 
-  test('Tasks → Today with habits: streak, at risk', async () => {
+  test('Tasks → Today with habits', async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
     qc.setQueryData(tasksKeys.today(todayYmd()), {
       overdue: [],
-      today: [habit('read', { progress: progress({ atRisk: true }) }), task('Gym')],
+      today: [habit('read', { progress: progress({ total: 3 }) }), task('Gym')],
       doneToday: [{ completionId: 'c', task: habit('walk') }],
     })
     const { container } = withProviders(<TodayPage />, qc)
@@ -116,7 +116,7 @@ describe('accessibility (axe)', () => {
       weekStart: week,
       weekEnd: week,
       tasks: { done: 3, due: 4, rate: 75, missed: 1 },
-      habits: [{ taskId: 't', title: 'Read', done: 3, due: 4, streak: 5 }],
+      habits: [{ taskId: 't', title: 'Read', done: 3, due: 4 }],
       answers: { wentWell: 'Gym', wentBadly: null, change: null },
     })
     qc.setQueryData(reviewKeys.list(today), [{ weekStart: '2026-01-05', rate: 50, answered: true }])

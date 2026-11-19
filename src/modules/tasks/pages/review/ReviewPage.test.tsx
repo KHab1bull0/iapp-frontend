@@ -19,7 +19,7 @@ const week = (weekStart: string, over: Partial<WeekReview> = {}): WeekReview => 
   weekStart,
   weekEnd: addDaysYmd(weekStart, 6),
   tasks: { done: 9, due: 12, rate: 75, missed: 2 },
-  habits: [{ taskId: 't1', title: 'Read', done: 5, due: 7, streak: 12 }],
+  habits: [{ taskId: 't1', title: 'Read', done: 5, due: 7 }],
   answers: null,
   ...over,
 })

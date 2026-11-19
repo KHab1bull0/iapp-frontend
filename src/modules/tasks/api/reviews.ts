@@ -12,7 +12,6 @@ export interface ReviewHabit {
   title: string
   done: number
   due: number
-  streak: number
 }
 
 /** One week (Monday to Sunday): what happened in it, and what the user made of it. */

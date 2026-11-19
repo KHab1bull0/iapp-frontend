@@ -25,9 +25,6 @@ export const task = (id: string, over: Partial<Task> = {}): Task => ({
 })
 
 export const progress = (over: Partial<HabitProgress> = {}): HabitProgress => ({
-  streak: 4,
-  best: 9,
-  atRisk: false,
   total: 21,
   ...over,
 })

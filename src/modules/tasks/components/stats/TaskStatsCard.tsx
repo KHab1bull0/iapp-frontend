@@ -29,8 +29,8 @@ export function TaskStatsSkeleton() {
 
 /**
  * A task's record: its activity (the heatmap), with the number of days it
- * was done across from the heading. No streak: the days themselves are the
- * record. While the numbers load, the same card in outline.
+ * was done across from the heading. While the numbers load, the same card
+ * in outline.
  */
 // `task` is kept for callers; the card needs only the id.
 export function TaskStatsCard({ taskId }: { taskId: string; task?: Task }) {

@@ -10,8 +10,6 @@ vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()
 
 const STATS: TaskStats = {
   total: 12,
-  currentStreak: 3,
-  bestStreak: 7,
   firstDoneOn: '2026-09-01',
   lastDoneOn: '2026-11-06',
   daily: [
@@ -43,7 +41,7 @@ describe('TaskStatsCard', () => {
   })
 
   test('says so when the task was never done', async () => {
-    api.fetchTaskStats.mockResolvedValue({ ...STATS, total: 0, currentStreak: 0, bestStreak: 0, firstDoneOn: null })
+    api.fetchTaskStats.mockResolvedValue({ ...STATS, total: 0, firstDoneOn: null })
     renderCard()
     expect(await screen.findByText('Each day you do it is marked here.')).toBeTruthy()
     expect(screen.queryByRole('img', { name: /active days/ })).toBeNull()

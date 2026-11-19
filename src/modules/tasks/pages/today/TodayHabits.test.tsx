@@ -18,9 +18,8 @@ vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()
 
 const READ = habit('read')
 const result = (over: Partial<CompleteResult> = {}): CompleteResult => ({
-  task: { ...READ, progress: progress({ streak: 5, total: 22 }) },
+  task: { ...READ, progress: progress({ total: 22 }) },
   completionId: 'c1',
-  streak: { current: 5, best: 9 },
   ...over,
 })
 
@@ -43,7 +42,7 @@ describe('TodayPage: habits', () => {
     today([task('chore'), READ])
     api.completeTask.mockResolvedValue(result())
     api.undoCompletion.mockResolvedValue(READ)
-    api.fetchOverallStats.mockResolvedValue({ total: 0, daily: [], currentStreak: 0 })
+    api.fetchOverallStats.mockResolvedValue({ total: 0, daily: [] })
   })
 
   test('habits sit in the Today list with the other tasks, marked with a chip; no streak', async () => {
@@ -94,7 +93,7 @@ describe('TodayPage: habits', () => {
 
   test('done habits go to Done with the other tasks, ticked', async () => {
     today([], [
-      { completionId: 'c7', task: habit('read', { progress: progress({ streak: 5 }) }) },
+      { completionId: 'c7', task: habit('read', { progress: progress() }) },
       { completionId: 'c8', task: habit('nap') },
     ])
     renderPage()

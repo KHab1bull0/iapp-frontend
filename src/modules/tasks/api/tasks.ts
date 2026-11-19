@@ -10,10 +10,6 @@ export const DEFAULT_REMIND = 15
 
 /** A habit's standing on the day asked for (the `today` param). */
 export interface HabitProgress {
-  streak: number
-  best: number
-  /** The last due occurrence was missed: missing today too ends the streak. */
-  atRisk: boolean
   /** Every done completion (full + min): the "votes" for who you are becoming. */
   total: number
 }
@@ -66,7 +62,6 @@ export interface TaskInput {
 export interface CompleteResult {
   task: Task
   completionId: string
-  streak: { current: number; best: number }
 }
 
 export interface TodayTasks {
@@ -83,9 +78,6 @@ export interface TasksSummary {
 
 export interface StatsTotals {
   total: number
-  /** Days in a row with a completion, ending today (or yesterday, before today is done). */
-  currentStreak: number
-  bestStreak: number
   firstDoneOn: string | null
   lastDoneOn: string | null
 }

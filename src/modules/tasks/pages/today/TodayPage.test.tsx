@@ -55,7 +55,7 @@ describe('TodayPage', () => {
     })
     api.completeTask.mockResolvedValue({ task: t('b'), completionId: 'c1' })
     api.undoCompletion.mockResolvedValue(t('b'))
-    api.fetchOverallStats.mockResolvedValue({ total: 0, daily: [], currentStreak: 0 })
+    api.fetchOverallStats.mockResolvedValue({ total: 0, daily: [] })
   })
 
   test("shows today and what's done; earlier days folded away at the end, without red", async () => {

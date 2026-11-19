@@ -14,8 +14,6 @@ vi.mock('@/modules/tasks/api/reviews', async (orig) => ({ ...(await orig<object>
 
 const STATS: OverallTaskStats = {
   total: 40,
-  currentStreak: 4,
-  bestStreak: 10,
   firstDoneOn: '2026-08-01',
   lastDoneOn: '2026-11-06',
   daily: [{ day: '2026-11-06', count: 3 }],
