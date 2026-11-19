@@ -94,6 +94,18 @@
   &.chipOn { color: var(--fg-strong); font-weight: 600; }
 }
 
+/** A parent: opens to its categories; a chevron says it does. */
+.parentChip {
+  gap: 6px;
+  svg { color: var(--fg-muted); flex-shrink: 0; }
+}
+
+/** The category chosen inside a closed parent. */
+.parentPick {
+  color: var(--fg-muted);
+  font-weight: 500;
+}
+
 .formGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;

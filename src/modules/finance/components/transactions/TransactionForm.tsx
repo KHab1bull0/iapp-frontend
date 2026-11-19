@@ -3,15 +3,18 @@ import clsx from 'clsx'
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchCategories } from '@/modules/finance/api/categories'
+import { categoryParentsKey, fetchCategoryParents } from '@/modules/finance/api/categoryParents'
+import { categoryTree } from '@/modules/finance/lib/categoryTree'
+import { CategoryPicker } from './CategoryPicker'
 import { createTransaction, updateTransaction, type Transaction } from '@/modules/finance/api/transactions'
-import { byRecent, rememberCategory } from '@/modules/finance/lib/recentCategories'
+import { rememberCategory } from '@/modules/finance/lib/recentCategories'
 import { CURRENCY, todayYmd } from '@/core/lib/format'
 import { DateField } from '@/core/components/ui/DateField'
 import { SegmentedControl } from '@/core/components/ui/SegmentedControl'
 import { Skeleton } from '@/core/components/ui/Skeleton'
 import { toast } from '@/core/components/ui/toast'
 import { LoadingBlock, Spinner, TextSkeleton } from '@/modules/finance/components/loading/Loading'
-import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
+import { useFinanceT } from '@/modules/finance/i18n'
 import s from './TransactionForm.module.scss'
 
 /**
@@ -44,7 +47,6 @@ const MAX_DIGITS = 12
 
 export function TransactionForm({ transaction, onSaved, onCancel, className }: Props) {
   const t = useFinanceT()
-  const catName = useCategoryName()
   const qc = useQueryClient()
   const isEdit = !!transaction
 
@@ -62,7 +64,11 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
     queryKey: ['categories'],
     queryFn: fetchCategories,
   })
-  const options = byRecent(categories.filter((c) => c.type === type))
+  const { data: parents = [], isLoading: parentsLoading } = useQuery({
+    queryKey: categoryParentsKey,
+    queryFn: fetchCategoryParents,
+  })
+  const options = categoryTree(categories, parents, type)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -127,7 +133,7 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
 
       <div className={s.field}>
         <span className={s.fieldLabel}>{t.category}</span>
-        {categoriesLoading ? (
+        {categoriesLoading || parentsLoading ? (
           // Not "no categories" while they are still on their way.
           <LoadingBlock label={t.categories.loading} className={s.chips}>
             <CategoryChipsSkeleton />
@@ -135,25 +141,15 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
         ) : options.length === 0 ? (
           <p className={s.hint}>{t.tx.noCategories}</p>
         ) : (
-          <div className={s.chips} role="radiogroup" aria-label={t.category}>
-            {options.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                role="radio"
-                aria-checked={categoryId === c.id}
-                className={clsx(s.chip, categoryId === c.id && s.chipOn)}
-                style={categoryId === c.id ? { borderColor: c.color, background: `${c.color}1f` } : undefined}
-                onClick={() => {
-                  setCategoryId(c.id)
-                  setError('')
-                }}
-              >
-                <span aria-hidden>{c.icon}</span>
-                {catName(c.name)}
-              </button>
-            ))}
-          </div>
+          <CategoryPicker
+            key={type}
+            nodes={options}
+            value={categoryId}
+            onChange={(id) => {
+              setCategoryId(id)
+              setError('')
+            }}
+          />
         )}
       </div>
 
