@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom'
 import type { ModuleManifest } from '@/core/modules/types'
 import { TasksHomeCard } from './TasksHomeCard'
 import { useDueCount } from './useDueCount'
-import { AllTasksPage, ReviewPage, TaskDetailPage, TaskFormPage, TaskStatsPage, TodayPage } from './pages/lazy'
+import { AllTasksPage, ReviewPage, TaskDetailPage, TaskFormPage, TaskSettingsPage, TaskStatsPage, TodayPage } from './pages/lazy'
 import { TaskDialog } from './components/TaskDialog'
 
 export const tasks: ModuleManifest = {
@@ -25,6 +25,8 @@ export const tasks: ModuleManifest = {
     { path: 'all', element: <AllTasksPage /> },
     // Opened from Stats' entry card and the Sunday notification; not a tab of its own.
     { path: 'review', element: <ReviewPage /> },
+    // The gear in the bottom nav and Settings → Modules: the groups, for now.
+    { path: 'settings', element: <TaskSettingsPage /> },
   ],
   // Phones add/edit on these pages; desktop opens the panel instead.
   fullscreenRoutes: [
@@ -34,5 +36,6 @@ export const tasks: ModuleManifest = {
     { path: ':id', element: <TaskDetailPage /> },
   ],
   homeCard: TasksHomeCard,
+  settingsPath: '/tasks/settings',
   quickAdd: [{ id: 'tasks.task', label: { uz: 'Vazifa', en: 'Task' }, icon: CircleCheck, to: '/tasks/new', Editor: TaskDialog }],
 }

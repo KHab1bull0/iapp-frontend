@@ -1,0 +1,93 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+// Tasks → Settings rows, drawn as English → Settings draws its tags: one
+// height whether read or being edited (inputs are --control-md).
+.row,
+.addRow {
+  @include row;
+
+  & + & { border-top: 1px solid var(--border); }
+}
+
+.addRow { background: var(--row-hover); }
+
+// Add / rename: on a phone the buttons drop under the field rather than
+// squeezing it to nothing.
+.addRow,
+form.row {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 500;
+  color: var(--fg-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hint {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
+.input {
+  @include field-focus;
+  flex: 1 1 120px;
+  height: var(--control-md);
+  min-width: 0;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elev);
+  color: var(--fg-strong);
+  font-family: inherit;
+  font-size: var(--fs-ui);
+
+  &::placeholder { color: var(--fg-muted); }
+
+  // iOS zooms the page into any field under 16px when it takes focus.
+  @supports (-webkit-touch-callout: none) { font-size: 16px; }
+}
+
+.iconBtn {
+  @include touch-target(4px);
+  flex-shrink: 0;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: var(--fg-muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+
+  &:hover { background: var(--icon-btn-hover); color: var(--fg-strong); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  &:disabled:hover { background: transparent; color: var(--fg-muted); }
+}
+
+// Same height as the field beside them.
+.btnPrimary {
+  @include btn-primary;
+  @include btn-size-md;
+  flex-shrink: 0;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.btnGhost {
+  @include btn-secondary;
+  @include btn-size-md;
+  flex-shrink: 0;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}

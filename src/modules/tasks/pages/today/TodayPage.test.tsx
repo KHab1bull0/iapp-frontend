@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { ToastHost } from '@/core/components/ui/toast'
@@ -15,6 +15,9 @@ const api = vi.hoisted(() => ({
   fetchOverallStats: vi.fn(),
 }))
 vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()), ...api }))
+// The user's task groups: none, unless a test gives some.
+const groupsApi = vi.hoisted(() => ({ fetchGroups: vi.fn().mockResolvedValue([]) }))
+vi.mock('@/modules/tasks/api/groups', async (orig) => ({ ...(await orig<object>()), ...groupsApi }))
 
 const t = (id: string, over: Partial<Task> = {}): Task => ({
   id,
@@ -31,7 +34,7 @@ const t = (id: string, over: Partial<Task> = {}): Task => ({
   completedAt: null,
   createdAt: '',
   updatedAt: '',
-  isHabit: false, identity: null, cue: null, progress: null,
+  isHabit: false, identity: null, cue: null, progress: null, groupId: null,
   ...over,
 })
 
@@ -56,6 +59,7 @@ describe('TodayPage', () => {
     api.completeTask.mockResolvedValue({ task: t('b'), completionId: 'c1' })
     api.undoCompletion.mockResolvedValue(t('b'))
     api.fetchOverallStats.mockResolvedValue({ total: 0, daily: [] })
+    groupsApi.fetchGroups.mockResolvedValue([])
   })
 
   test("shows today and what's done; earlier days folded away at the end, without red", async () => {
@@ -163,4 +167,56 @@ describe('TodayPage', () => {
     expect(api.undoCompletion).toHaveBeenCalledTimes(1)
   })
 
+  test("today's list splits by group, in the groups' order, each by time, the rest under No group", async () => {
+    groupsApi.fetchGroups.mockResolvedValue([
+      { id: 'g1', name: 'Work', createdAt: '' },
+      { id: 'g2', name: 'Home', createdAt: '' },
+    ])
+    api.fetchToday.mockResolvedValue({
+      overdue: [],
+      today: [
+        t('u'),
+        t('b', { dueTime: '09:30', groupId: 'g2' }),
+        t('e', { dueTime: '07:00', groupId: 'g1' }),
+        t('x', { dueTime: '08:00', groupId: 'g2' }),
+        // A group the list doesn't know (deleted meanwhile) counts as none.
+        t('z', { groupId: 'gone' }),
+      ],
+      doneToday: [{ completionId: 'c0', task: t('c', { groupId: 'g1' }) }],
+    })
+    renderPage()
+    const parts = await screen.findAllByRole('group')
+    // Each part is named by its label.
+    expect(parts.map((p) => document.getElementById(p.getAttribute('aria-labelledby')!)?.textContent)).toEqual([
+      'Work',
+      'Home',
+      'No group',
+    ])
+    const titles = (part: HTMLElement) =>
+      within(part).getAllByRole('button', { name: /^Complete / }).map((b) => b.getAttribute('aria-label'))
+    expect(titles(parts[0])).toEqual(['Complete E'])
+    expect(titles(parts[1])).toEqual(['Complete X', 'Complete B'])
+    expect(titles(parts[2])).toEqual(['Complete U', 'Complete Z'])
+    // Still the one section and its one count; Done isn't split.
+    expect(screen.getAllByRole('heading', { name: 'Today' })).toHaveLength(1)
+    expect(screen.getByText('5')).toBeTruthy()
+    expect(within(screen.getByRole('heading', { name: 'Done' }).closest('section')!).queryByRole('group')).toBeNull()
+  })
+
+  test('with groups set up but none of today\'s tasks in one, the list is as before', async () => {
+    groupsApi.fetchGroups.mockResolvedValue([{ id: 'g1', name: 'Work', createdAt: '' }])
+    api.fetchToday.mockResolvedValue({
+      overdue: [],
+      today: [t('u'), t('b', { dueTime: '09:30' })],
+      doneToday: [],
+    })
+    renderPage()
+    await screen.findByText('U')
+    // Let the groups arrive too, so this is the list with them known.
+    await act(async () => {})
+    expect(screen.queryByRole('group')).toBeNull()
+    expect(screen.queryByText('No group')).toBeNull()
+    const titles = screen.getAllByRole('button', { name: /^Complete / }).map((b) => b.getAttribute('aria-label'))
+    expect(titles).toEqual(['Complete B', 'Complete U'])
+  })
 })

@@ -34,7 +34,7 @@ async function violations(container: HTMLElement) {
 const task = (id: string): Task => ({
   id, title: id, note: null, dueDate: todayYmd(), dueTime: '09:00', remindBefore: 15, repeatMode: 'none', repeatUnit: null,
   repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null, createdAt: '', updatedAt: '',
-  isHabit: false, identity: null, cue: null, progress: null,
+  isHabit: false, identity: null, cue: null, progress: null, groupId: null,
 })
 
 function withProviders(ui: React.ReactNode, qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })) {
@@ -53,6 +53,15 @@ vi.mock('@/modules/finance/api/categories', async (orig) => ({
   ...(await orig<object>()),
   fetchCategories: vi.fn().mockResolvedValue([
     { id: 'c1', name: 'Food & Dining', type: 'expense', icon: '🍔', color: '#ef4444' },
+  ]),
+}))
+
+// Two groups, so the task form draws its group chips.
+vi.mock('@/modules/tasks/api/groups', async (orig) => ({
+  ...(await orig<object>()),
+  fetchGroups: vi.fn().mockResolvedValue([
+    { id: 'g1', name: 'Work', createdAt: '' },
+    { id: 'g2', name: 'Home', createdAt: '' },
   ]),
 }))
 
@@ -105,6 +114,19 @@ describe('accessibility (axe)', () => {
   test('the task form with the habit part open', async () => {
     const { container } = withProviders(<TaskForm task={habit('read')} onSaved={() => {}} onCancel={() => {}} />)
     await screen.findByLabelText('Who are you becoming?')
+    await screen.findByRole('button', { name: 'Work' })
+    expect(await violations(container)).toEqual([])
+  })
+
+  test('Tasks → Today split by group', async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
+    qc.setQueryData(tasksKeys.today(todayYmd()), {
+      overdue: [],
+      today: [{ ...task('Gym'), groupId: 'g2' }, task('Read')],
+      doneToday: [],
+    })
+    const { container } = withProviders(<TodayPage />, qc)
+    await screen.findByRole('group', { name: 'Home' })
     expect(await violations(container)).toEqual([])
   })
 

@@ -35,6 +35,21 @@
   overflow: hidden;
 }
 
+// Today's list split by group: one card, each part under a small muted
+// label (caption, not the uppercase section heading), parted by a hairline.
+.groupPart + .groupPart { border-top: 1px solid var(--border); }
+
+.groupLabel {
+  padding: 8px 16px 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 500;
+  color: var(--fg-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 // A page's loading outline: its blocks spaced as the page spaces them.
 .skeletons {
   display: flex;

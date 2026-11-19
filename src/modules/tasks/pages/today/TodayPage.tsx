@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { CircleCheckBig, Plus, RefreshCw } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
@@ -7,6 +8,7 @@ import { useToday } from '@/core/hooks/useToday'
 import { formatFullDate, parseApiDate } from '@/core/lib/format'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { fetchOverallStats, fetchToday, tasksKeys, type Task } from '@/modules/tasks/api/tasks'
+import { fetchGroups, type TaskGroup } from '@/modules/tasks/api/groups'
 import { Heatmap } from '@/modules/tasks/components/stats/Heatmap'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
@@ -17,6 +19,28 @@ import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
 import { useCompleteTask } from '@/modules/tasks/useCompleteTask'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
+
+interface GroupPart {
+  key: string
+  label: string
+  tasks: Task[]
+}
+
+/**
+ * Today's tasks by group: the groups in their own order, then the rest
+ * ("No group"), each keeping the list's time order. Null when none of them
+ * is in a known group, so the list stays one plain list.
+ */
+function byGroup(tasks: Task[], groups: TaskGroup[], noGroup: string): GroupPart[] | null {
+  const known = new Set(groups.map((g) => g.id))
+  const parts: GroupPart[] = groups
+    .map((g) => ({ key: g.id, label: g.name, tasks: tasks.filter((t) => t.groupId === g.id) }))
+    .filter((p) => p.tasks.length > 0)
+  if (parts.length === 0) return null
+  const rest = tasks.filter((t) => !t.groupId || !known.has(t.groupId))
+  if (rest.length > 0) parts.push({ key: 'none', label: noGroup, tasks: rest })
+  return parts
+}
 
 /** The desktop rail's activity card while it loads (CSS hides the rail card on phones). */
 function RailSkeleton() {
@@ -44,6 +68,7 @@ export function TodayPage() {
   const quickAdd = useQuickAdd()
   const editor = useTaskEditor()
   const { complete, undo, pending } = useCompleteTask(today)
+  const partId = useId()
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: tasksKeys.today(today),
@@ -56,6 +81,7 @@ export function TodayPage() {
     queryFn: () => fetchOverallStats(today),
     enabled: !isMobile,
   })
+  const { data: groups = [] } = useQuery({ queryKey: tasksKeys.groups, queryFn: fetchGroups })
 
   const allDue = data?.today ?? []
   // Days that passed stay passed: folded away at the end, without red.
@@ -65,6 +91,8 @@ export function TodayPage() {
 
   // One list, habits and tasks together; anything with a time goes first, by the clock.
   const dueToday = byTime(allDue)
+  // Split by group only once one of them has one: otherwise exactly the plain list.
+  const parts = byGroup(dueToday, groups, m.group.none)
   const done = allDone
 
   const row = (t: Task) => (
@@ -166,7 +194,20 @@ export function TodayPage() {
                 <h2 className={s.sectionTitle}>{m.today}</h2>
                 <span className={s.count}>{dueToday.length}</span>
               </div>
-              <div className={s.list}>{dueToday.map(row)}</div>
+              {/* The parts stay in the one card, each under a quiet label, so it
+                  reads as sorted rather than as more sections. */}
+              <div className={s.list}>
+                {parts
+                  ? parts.map((part) => (
+                      <div key={part.key} className={s.groupPart} role="group" aria-labelledby={`${partId}-${part.key}`}>
+                        <div id={`${partId}-${part.key}`} className={s.groupLabel}>
+                          {part.label}
+                        </div>
+                        {part.tasks.map(row)}
+                      </div>
+                    ))
+                  : dueToday.map(row)}
+              </div>
             </section>
           )}
 

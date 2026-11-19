@@ -2,10 +2,13 @@ import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
 import { GrowingInput } from '@/core/components/ui/GrowingInput'
 import { useAutosize } from '@/core/hooks/useAutosize'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { todayYmd } from '@/core/lib/format'
 import { DateField } from '@/core/components/ui/DateField'
 import { toast } from '@/core/components/ui/toast'
+import { useLang } from '@/core/i18n'
+import { apiErrorText } from '@/core/i18n/errors'
 import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
 import {
   createTask,
@@ -19,6 +22,7 @@ import {
   type Task,
   type TaskInput,
 } from '@/modules/tasks/api/tasks'
+import { fetchGroups } from '@/modules/tasks/api/groups'
 import { useTasksT } from '@/modules/tasks/i18n'
 import { habitDraft, habitInput } from '@/modules/tasks/lib/habit'
 import { HabitFields } from './HabitFields'
@@ -30,6 +34,8 @@ interface Props {
   onCancel: () => void
   /** After a delete; defaults to onSaved. The task's own page can't be gone back to then. */
   onDeleted?: () => void
+  /** Following a link out of the form (to add a group); a panel closes, a page just goes. */
+  onLeave?: () => void
 }
 
 const MODES: RepeatMode[] = ['none', 'schedule', 'after_done']
@@ -37,8 +43,9 @@ const MODES: RepeatMode[] = ['none', 'schedule', 'after_done']
 // Monday first, as people plan their week.
 const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0]
 
-export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
+export function TaskForm({ task, onSaved, onCancel, onDeleted, onLeave }: Props) {
   const t = useTasksT()
+  const { lang } = useLang()
   const qc = useQueryClient()
   const [title, setTitle] = useState(task?.title ?? '')
   const [note, setNote] = useState(task?.note ?? '')
@@ -51,6 +58,8 @@ export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
   const [every, setEvery] = useState(String(task?.repeatEvery ?? 1))
   const [weekdays, setWeekdays] = useState<number[]>(task?.repeatWeekdays ?? [])
   const [habit, setHabit] = useState(() => habitDraft(task))
+  const [groupId, setGroupId] = useState<string | null>(task?.groupId ?? null)
+  const { data: groups } = useQuery({ queryKey: tasksKeys.groups, queryFn: fetchGroups })
 
   const weekly = mode === 'schedule' && unit === 'week'
   const everyN = Number(every)
@@ -73,6 +82,9 @@ export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
         repeatEvery: mode === 'none' ? null : everyN,
         repeatWeekdays: weekly ? [...weekdays].sort((a, b) => a - b) : null,
         ...habitInput(habit, mode !== 'none'),
+        // A group deleted meanwhile is sent as none rather than refused (400);
+        // before the list arrives the task's own group is kept as it is.
+        groupId: groups && groupId && !groups.some((g) => g.id === groupId) ? null : groupId,
       }
       return task ? updateTask(task.id, input) : createTask(input)
     },
@@ -81,7 +93,8 @@ export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
       toast(task ? t.form.updated : t.form.added, 'success')
       onSaved()
     },
-    onError: () => toast(t.form.saveFailed, 'error'),
+    // The server's own reason when it gives one (a group gone meanwhile: errors.bad_group).
+    onError: (err) => toast(apiErrorText(err, lang, t.form.saveFailed), 'error'),
   })
 
   const remove = useMutation({
@@ -260,6 +273,32 @@ export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
           aria-label={t.form.note}
         />
       </label>
+
+      {/* Optional, none by default: tap a chip to choose it, tap it again to clear. */}
+      {groups && groups.length > 0 ? (
+        <div className={s.field}>
+          <span className={s.label}>{t.group.label}</span>
+          <div className={s.chips} role="group" aria-label={t.group.choose}>
+            {groups.map((g) => (
+              <button
+                key={g.id}
+                type="button"
+                aria-pressed={groupId === g.id}
+                className={clsx(s.chip, groupId === g.id && s.chipOn)}
+                onClick={() => setGroupId((cur) => (cur === g.id ? null : g.id))}
+              >
+                {g.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        groups && (
+          <Link to="/tasks/settings" className={s.addGroup} onClick={onLeave}>
+            {t.group.add}
+          </Link>
+        )
+      )}
 
       {/* A habit repeats, so the switch comes with a repeat. */}
       {mode !== 'none' && <HabitFields value={habit} onChange={setHabit} />}

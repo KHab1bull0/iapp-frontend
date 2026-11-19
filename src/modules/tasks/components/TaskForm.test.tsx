@@ -1,18 +1,31 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
 import { todayYmd } from '@/core/lib/format'
 import { habit } from '@/modules/tasks/test-data'
 import { TaskForm } from './TaskForm'
 
 const api = vi.hoisted(() => ({ createTask: vi.fn(), updateTask: vi.fn(), deleteTask: vi.fn() }))
 vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()), ...api }))
+const groupsApi = vi.hoisted(() => ({ fetchGroups: vi.fn() }))
+vi.mock('@/modules/tasks/api/groups', async (orig) => ({ ...(await orig<object>()), ...groupsApi }))
+
+const WORK = { id: 'g1', name: 'Work', createdAt: '' }
+const HOME = { id: 'g2', name: 'Home', createdAt: '' }
+
+// No groups unless a test gives some.
+beforeEach(() => {
+  groupsApi.fetchGroups.mockResolvedValue([])
+})
 
 function renderForm() {
   const onSaved = vi.fn()
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <TaskForm task={null} onSaved={onSaved} onCancel={() => {}} />
+      <MemoryRouter>
+        <TaskForm task={null} onSaved={onSaved} onCancel={() => {}} />
+      </MemoryRouter>
     </QueryClientProvider>,
   )
   return { onSaved }
@@ -100,7 +113,9 @@ describe('TaskForm', () => {
     api.updateTask.mockResolvedValue({ id: 'h' })
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <TaskForm task={habit('h', { dueTime: '07:00', remindBefore: 60 })} onSaved={() => {}} onCancel={() => {}} />
+        <MemoryRouter>
+          <TaskForm task={habit('h', { dueTime: '07:00', remindBefore: 60 })} onSaved={() => {}} onCancel={() => {}} />
+        </MemoryRouter>
       </QueryClientProvider>,
     )
     const remind = screen.getByLabelText('Reminder') as HTMLSelectElement
@@ -172,21 +187,74 @@ describe('TaskForm', () => {
     )
   })
 
+  test('without groups: no chips, a quiet link to add one, and saved with no group', async () => {
+    renderForm()
+    const link = await screen.findByRole('link', { name: 'Add a group' })
+    expect(link.getAttribute('href')).toBe('/tasks/settings')
+    expect(screen.queryByRole('group', { name: 'Task group' })).toBeNull()
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Call mum' } })
+    fireEvent.click(save())
+    await waitFor(() => expect(api.createTask).toHaveBeenCalledWith(expect.objectContaining({ groupId: null })))
+  })
+
+  test('a chip per group, none chosen at first: a tap chooses, another clears, and the choice is saved', async () => {
+    groupsApi.fetchGroups.mockResolvedValue([WORK, HOME])
+    renderForm()
+    const chips = await screen.findByRole('group', { name: 'Task group' })
+    const work = within(chips).getByRole('button', { name: 'Work' })
+    const home = within(chips).getByRole('button', { name: 'Home' })
+    expect(work.getAttribute('aria-pressed')).toBe('false')
+    expect(home.getAttribute('aria-pressed')).toBe('false')
+    expect(screen.queryByRole('link', { name: 'Add a group' })).toBeNull()
+
+    fireEvent.click(work)
+    expect(work.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(home)
+    expect(work.getAttribute('aria-pressed')).toBe('false')
+    expect(home.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(home)
+    expect(home.getAttribute('aria-pressed')).toBe('false')
+
+    fireEvent.click(work)
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Report' } })
+    fireEvent.click(save())
+    await waitFor(() => expect(api.createTask).toHaveBeenCalledWith(expect.objectContaining({ groupId: 'g1' })))
+  })
+
+  test("an existing task opens with its group chosen; clearing it sends null", async () => {
+    groupsApi.fetchGroups.mockResolvedValue([WORK, HOME])
+    api.updateTask.mockResolvedValue({ id: 'h' })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <TaskForm task={habit('h', { groupId: 'g2' })} onSaved={() => {}} onCancel={() => {}} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    const home = await screen.findByRole('button', { name: 'Home' })
+    expect(home.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(home)
+    fireEvent.click(save())
+    await waitFor(() => expect(api.updateTask).toHaveBeenCalledWith('h', expect.objectContaining({ groupId: null })))
+  })
+
   test('an existing task can be deleted after confirming', async () => {
     api.deleteTask.mockResolvedValue(undefined)
     const onSaved = vi.fn()
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <TaskForm
-          task={{
-            id: 't1', title: 'Old', note: null, dueDate: null, dueTime: null, remindBefore: 15, repeatMode: 'none',
-            repeatUnit: null, repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null,
-            createdAt: '', updatedAt: '',
-  isHabit: false, identity: null, cue: null, progress: null,
-          }}
-          onSaved={onSaved}
-          onCancel={() => {}}
-        />
+        <MemoryRouter>
+          <TaskForm
+            task={{
+              id: 't1', title: 'Old', note: null, dueDate: null, dueTime: null, remindBefore: 15, repeatMode: 'none',
+              repeatUnit: null, repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null,
+              createdAt: '', updatedAt: '',
+              isHabit: false, identity: null, cue: null, progress: null, groupId: null,
+            }}
+            onSaved={onSaved}
+            onCancel={() => {}}
+          />
+        </MemoryRouter>
       </QueryClientProvider>,
     )
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
@@ -246,7 +314,9 @@ describe('TaskForm: habits', () => {
   test('back to a one-off, it is no longer a habit', async () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <TaskForm task={habit('h')} onSaved={() => {}} onCancel={() => {}} />
+        <MemoryRouter>
+          <TaskForm task={habit('h')} onSaved={() => {}} onCancel={() => {}} />
+        </MemoryRouter>
       </QueryClientProvider>,
     )
     // An existing habit opens with its own who.

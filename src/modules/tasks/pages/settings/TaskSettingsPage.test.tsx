@@ -1,0 +1,121 @@
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
+import { ToastHost } from '@/core/components/ui/toast'
+import type { TaskGroup } from '@/modules/tasks/api/groups'
+import { TaskSettingsPage } from './TaskSettingsPage'
+
+const api = vi.hoisted(() => ({
+  fetchGroups: vi.fn(),
+  createGroup: vi.fn(),
+  renameGroup: vi.fn(),
+  deleteGroup: vi.fn(),
+}))
+vi.mock('@/modules/tasks/api/groups', async (orig) => ({ ...(await orig<object>()), ...api }))
+
+const WORK: TaskGroup = { id: 'g1', name: 'Work', createdAt: '' }
+const HOME: TaskGroup = { id: 'g2', name: 'Home', createdAt: '' }
+
+function renderPage() {
+  return render(
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <MemoryRouter>
+        <TaskSettingsPage />
+        <ToastHost />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+}
+
+describe('TaskSettingsPage', () => {
+  beforeEach(() => {
+    for (const fn of Object.values(api)) fn.mockReset()
+    api.fetchGroups.mockResolvedValue([WORK, HOME])
+  })
+
+  test('the page and its groups, in the order they come', async () => {
+    renderPage()
+    expect(screen.getByRole('heading', { name: 'Task settings' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /Back/ })).toBeTruthy()
+    const section = screen.getByRole('region', { name: 'Groups' })
+    await within(section).findByText('Work')
+    expect(within(section).getAllByText(/^(Work|Home)$/).map((n) => n.textContent)).toEqual(['Work', 'Home'])
+  })
+
+  test('with no groups, a hint says what they are for', async () => {
+    api.fetchGroups.mockResolvedValue([])
+    renderPage()
+    expect(await screen.findByText(/No groups yet/)).toBeTruthy()
+  })
+
+  test('adds a group by name, trimmed, and empties the field', async () => {
+    api.createGroup.mockResolvedValue({ id: 'g3', name: 'Health', createdAt: '' })
+    renderPage()
+    await screen.findByText('Work')
+    const add = screen.getByRole('button', { name: 'Add' }) as HTMLButtonElement
+    expect(add.disabled).toBe(true)
+    const field = screen.getByLabelText('Group name') as HTMLInputElement
+    fireEvent.change(field, { target: { value: '  Health ' } })
+    api.fetchGroups.mockResolvedValue([WORK, HOME, { id: 'g3', name: 'Health', createdAt: '' }])
+    fireEvent.click(add)
+    await waitFor(() => expect(api.createGroup).toHaveBeenCalledWith('Health'))
+    expect(await screen.findByText('Health')).toBeTruthy()
+    expect(field.value).toBe('')
+  })
+
+  test('a name taken already is said so, and the field keeps it', async () => {
+    api.createGroup.mockRejectedValue({ response: { status: 409, data: { message: 'errors.group_exists' } } })
+    renderPage()
+    await screen.findByText('Work')
+    const field = screen.getByLabelText('Group name') as HTMLInputElement
+    fireEvent.change(field, { target: { value: 'work' } })
+    fireEvent.submit(field.closest('form')!)
+    expect(await screen.findByText('A group with this name exists')).toBeTruthy()
+    expect(field.value).toBe('work')
+  })
+
+  test('renames a group in place; Cancel leaves it as it was', async () => {
+    api.renameGroup.mockResolvedValue({ ...WORK, name: 'Office' })
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Rename “Work”' }))
+    const field = screen.getByLabelText('Name of “Work”') as HTMLInputElement
+    expect(field.value).toBe('Work')
+    fireEvent.change(field, { target: { value: 'Desk' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(screen.getByText('Work')).toBeTruthy()
+    expect(api.renameGroup).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rename “Work”' }))
+    fireEvent.change(screen.getByLabelText('Name of “Work”'), { target: { value: 'Office ' } })
+    api.fetchGroups.mockResolvedValue([{ ...WORK, name: 'Office' }, HOME])
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.renameGroup).toHaveBeenCalledWith('g1', 'Office'))
+    expect(await screen.findByText('Office')).toBeTruthy()
+    expect(screen.queryByLabelText('Name of “Work”')).toBeNull()
+  })
+
+  test('a rename to a taken name is said so and stays open', async () => {
+    api.renameGroup.mockRejectedValue({ response: { status: 409, data: { message: 'errors.group_exists' } } })
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Rename “Work”' }))
+    fireEvent.change(screen.getByLabelText('Name of “Work”'), { target: { value: 'Home' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByText('A group with this name exists')).toBeTruthy()
+    expect(screen.getByLabelText('Name of “Work”')).toBeTruthy()
+  })
+
+  test('deletes a group only after confirming', async () => {
+    api.deleteGroup.mockResolvedValue(undefined)
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete “Home”' }))
+    const dialog = await screen.findByRole('alertdialog')
+    expect(within(dialog).getByText('Delete the group “Home”?')).toBeTruthy()
+    expect(within(dialog).getByText('Its tasks stay, just without a group.')).toBeTruthy()
+    expect(api.deleteGroup).not.toHaveBeenCalled()
+    api.fetchGroups.mockResolvedValue([WORK])
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete' }))
+    await waitFor(() => expect(api.deleteGroup).toHaveBeenCalledWith('g2'))
+    await waitFor(() => expect(screen.queryByText('Home')).toBeNull())
+  })
+})

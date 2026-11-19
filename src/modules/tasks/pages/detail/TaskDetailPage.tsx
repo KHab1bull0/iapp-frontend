@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Pencil } from 'lucide-react'
 import { useToday } from '@/core/hooks/useToday'
 import { formatDate } from '@/core/lib/format'
+import { fetchGroups } from '@/modules/tasks/api/groups'
 import { fetchTask, tasksKeys } from '@/modules/tasks/api/tasks'
 import { DoneDays } from '@/modules/tasks/components/DoneDays'
 import { TaskStatsCard, TaskStatsSkeleton } from '@/modules/tasks/components/stats/TaskStatsCard'
@@ -37,6 +38,9 @@ export function TaskDetailPage() {
     queryFn: () => fetchTask(id, today),
   })
 
+  const { data: groups } = useQuery({ queryKey: tasksKeys.groups, queryFn: fetchGroups })
+  const group = task?.groupId ? groups?.find((g) => g.id === task.groupId) : undefined
+
   const repeat = task ? describeRepeat(task, t) : ''
   const facts = task
     ? ([
@@ -45,6 +49,7 @@ export function TaskDetailPage() {
         // Only a timed task is reminded on its own; the rest come in the hourly push.
         [t.form.remind, task.dueTime ? t.form.remindLabel(task.remindBefore) : null],
         [t.form.repeat, repeat || t.form.modes.none.label],
+        [t.group.label, group?.name ?? null],
         [t.habit.identity, task.isHabit ? task.identity : null],
         // When it was added: the day the habit (or task) started.
         [t.detail.started, task.createdAt ? formatDate(new Date(task.createdAt)) : null],

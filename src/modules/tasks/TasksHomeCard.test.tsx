@@ -12,7 +12,7 @@ vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()
 const t = (id: string, title: string): Task => ({
   id, title, note: null, dueDate: todayYmd(), dueTime: null, remindBefore: 15, repeatMode: 'none', repeatUnit: null,
   repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null, createdAt: '', updatedAt: '',
-  isHabit: false, identity: null, cue: null, progress: null,
+  isHabit: false, identity: null, cue: null, progress: null, groupId: null,
 })
 
 describe('TasksHomeCard', () => {

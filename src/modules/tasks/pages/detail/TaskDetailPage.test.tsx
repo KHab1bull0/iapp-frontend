@@ -1,5 +1,5 @@
-import { describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { addDaysYmd, todayYmd } from '@/core/lib/format'
@@ -8,6 +8,9 @@ import { TaskDetailPage } from './TaskDetailPage'
 
 const api = vi.hoisted(() => ({ fetchTask: vi.fn(), fetchTaskStats: vi.fn() }))
 vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()), ...api }))
+// The user's task groups: none, unless a test gives some.
+const groupsApi = vi.hoisted(() => ({ fetchGroups: vi.fn().mockResolvedValue([]) }))
+vi.mock('@/modules/tasks/api/groups', async (orig) => ({ ...(await orig<object>()), ...groupsApi }))
 
 const task = (over: Partial<Task> = {}): Task => ({
   id: 'a',
@@ -28,6 +31,7 @@ const task = (over: Partial<Task> = {}): Task => ({
   identity: 'I am a reader',
   cue: null,
   progress: null,
+  groupId: null,
   ...over,
 })
 
@@ -45,6 +49,10 @@ function renderPage() {
 }
 
 describe('TaskDetailPage', () => {
+  beforeEach(() => {
+    groupsApi.fetchGroups.mockResolvedValue([])
+  })
+
   test('shows the task in full and its record', async () => {
     api.fetchTask.mockResolvedValue(task())
     api.fetchTaskStats.mockReturnValue(new Promise(() => {}))
@@ -91,6 +99,20 @@ describe('TaskDetailPage', () => {
     // On a wide screen (the test's default) the editor is the side panel, with the form only.
     expect(await screen.findByText('Edit task')).toBeTruthy()
     expect(((await screen.findByLabelText('Title')) as HTMLTextAreaElement).value).toBe('Read')
+  })
+
+  test('a task in a group says which; one without has no group row', async () => {
+    groupsApi.fetchGroups.mockResolvedValue([{ id: 'g1', name: 'Home', createdAt: '' }])
+    api.fetchTask.mockResolvedValue(task({ groupId: 'g1' }))
+    api.fetchTaskStats.mockReturnValue(new Promise(() => {}))
+    renderPage()
+    expect((await screen.findByText('Group')).nextElementSibling?.textContent).toBe('Home')
+    cleanup()
+
+    api.fetchTask.mockResolvedValue(task())
+    renderPage()
+    expect(await screen.findByRole('heading', { name: 'Read' })).toBeTruthy()
+    expect(screen.queryByText('Group')).toBeNull()
   })
 
   test('says so when the task is gone', async () => {

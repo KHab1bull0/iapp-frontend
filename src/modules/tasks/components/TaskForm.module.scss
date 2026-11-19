@@ -99,6 +99,50 @@
   }
 }
 
+// The group choice: the date picker's quick chips, one per group.
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  height: var(--control-sm);
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: $radius-pill;
+  background: var(--bg-elev);
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-meta);
+  font-weight: 500;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.chipOn {
+    background: var(--primary-soft);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+}
+
+// No groups yet: a quiet way to make one, not a field.
+.addGroup {
+  align-self: flex-start;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--fg-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover { color: var(--fg-strong); }
+}
+
 // The action row's layout (bottom of the screen, one row) is the global
 // [data-form-actions] rule; the buttons share a size and differ by colour.
 .btnDanger { @include btn-action-danger; }

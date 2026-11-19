@@ -41,6 +41,8 @@ export interface Task {
   cue: string | null
   /** Habits only; null for every other task. */
   progress: HabitProgress | null
+  /** One of the user's groups (Tasks → Settings); null = none. */
+  groupId: string | null
 }
 
 export interface TaskInput {
@@ -57,6 +59,8 @@ export interface TaskInput {
   isHabit?: boolean
   identity?: string | null
   cue?: string | null
+  /** Left out on create, none. */
+  groupId?: string | null
 }
 
 export interface CompleteResult {
@@ -113,6 +117,8 @@ export const tasksKeys = {
   summary: (day: string) => ['tasks', 'summary', day] as const,
   stats: (id: string, day: string) => ['tasks', 'stats', id, day] as const,
   overallStats: (day: string) => ['tasks', 'stats', 'all', day] as const,
+  /** Under 'tasks' too: deleting a group ungroups its tasks, so both refresh. */
+  groups: ['tasks', 'groups'] as const,
 }
 
 export async function fetchToday(today: string): Promise<TodayTasks> {

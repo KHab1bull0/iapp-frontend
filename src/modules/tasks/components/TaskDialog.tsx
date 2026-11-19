@@ -24,6 +24,7 @@ export function TaskDialog({
         task={task ?? null}
         onSaved={() => onOpenChange(false)}
         onCancel={() => onOpenChange(false)}
+        onLeave={() => onOpenChange(false)}
         onDeleted={
           onDeleted &&
           (() => {

@@ -21,6 +21,7 @@ export const task = (id: string, over: Partial<Task> = {}): Task => ({
   identity: null,
   cue: null,
   progress: null,
+  groupId: null,
   ...over,
 })
 

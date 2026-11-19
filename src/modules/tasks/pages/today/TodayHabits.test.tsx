@@ -15,6 +15,9 @@ const api = vi.hoisted(() => ({
   fetchOverallStats: vi.fn(),
 }))
 vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()), ...api }))
+// The user's task groups: none, unless a test gives some.
+const groupsApi = vi.hoisted(() => ({ fetchGroups: vi.fn().mockResolvedValue([]) }))
+vi.mock('@/modules/tasks/api/groups', async (orig) => ({ ...(await orig<object>()), ...groupsApi }))
 
 const READ = habit('read')
 const result = (over: Partial<CompleteResult> = {}): CompleteResult => ({

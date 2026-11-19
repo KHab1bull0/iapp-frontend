@@ -8,6 +8,9 @@ import { TaskFormPage } from './TaskFormPage'
 
 const api = vi.hoisted(() => ({ fetchTask: vi.fn(), fetchTaskStats: vi.fn(), deleteTask: vi.fn() }))
 vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()), ...api }))
+// The user's task groups: none, unless a test gives some.
+const groupsApi = vi.hoisted(() => ({ fetchGroups: vi.fn().mockResolvedValue([]) }))
+vi.mock('@/modules/tasks/api/groups', async (orig) => ({ ...(await orig<object>()), ...groupsApi }))
 
 const task = (dueDate: string): Task => ({
   id: 'a',
@@ -24,7 +27,7 @@ const task = (dueDate: string): Task => ({
   completedAt: null,
   createdAt: '',
   updatedAt: '',
-  isHabit: false, identity: null, cue: null, progress: null,
+  isHabit: false, identity: null, cue: null, progress: null, groupId: null,
 })
 
 function renderPage() {
