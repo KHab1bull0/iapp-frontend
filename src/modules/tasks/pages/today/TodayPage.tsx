@@ -18,12 +18,6 @@ import { useCompleteTask } from '@/modules/tasks/useCompleteTask'
 import { useTasksT } from '@/modules/tasks/i18n'
 import s from '../TasksPages.module.scss'
 
-/** At risk first (today decides their streak), then by the clock. */
-const habitOrder = (tasks: Task[]) => {
-  const timed = byTime(tasks)
-  return [...timed.filter((t) => t.progress?.atRisk), ...timed.filter((t) => !t.progress?.atRisk)]
-}
-
 /** The desktop rail's activity card while it loads (CSS hides the rail card on phones). */
 function RailSkeleton() {
   const m = useTasksT()
@@ -39,11 +33,10 @@ function RailSkeleton() {
 }
 
 /**
- * Tasks → Today: how far through the day you are, the habits on top (done
- * ones stay there, ticked, with their streak), what else is due, and what's
- * done. No red overdue list: a task whose day passed is due today (a one-off
- * just drops out). Swipe right to tick; a task is
- * either done or not, never put off. "+" adds.
+ * Tasks → Today: how far through the day you are, what's due today (habits
+ * among the rest, told apart by their chip) and what's done. Days that
+ * passed fold away at the end, without red. The tick is the one action: a
+ * task is either done or not, never put off. "+" adds.
  */
 export function TodayPage() {
   const today = useToday()
@@ -70,11 +63,9 @@ export function TodayPage() {
   const allDone = data?.doneToday ?? []
   const all = allDue.length + allDone.length
 
-  const habits = habitOrder(allDue.filter((t) => t.isHabit))
-  const habitsDone = allDone.filter((d) => d.task.isHabit)
-  // Anything with a time goes first, by the clock.
-  const dueToday = byTime(allDue.filter((t) => !t.isHabit))
-  const done = allDone.filter((d) => !d.task.isHabit)
+  // One list, habits and tasks together; anything with a time goes first, by the clock.
+  const dueToday = byTime(allDue)
+  const done = allDone
 
   const row = (t: Task) => (
     <TaskRow
@@ -121,7 +112,7 @@ export function TodayPage() {
         />
       ) : isLoading ? (
         // The page's own layout, in outline: the day's progress (and on wide
-        // screens the activity rail), then the habits and today's tasks.
+        // screens the activity rail), then today's tasks.
         <div className={s.layout} aria-busy="true">
           <LoadingLabel />
           <aside className={s.rail}>
@@ -169,26 +160,6 @@ export function TodayPage() {
 
           <div className={s.main}>
 
-          {habits.length + habitsDone.length > 0 && (
-            <section className={s.section}>
-              <div className={s.sectionHead}>
-                <h2 className={s.sectionTitle}>{m.habit.section}</h2>
-                <span className={s.count}>
-                  {habitsDone.length}/{habits.length + habitsDone.length}
-                </span>
-              </div>
-              {/* One list keyed by task: a habit ticked off stays the same row, so its streak can pop.
-                  (Done once and due again today, e.g. a past day ticked: its own key.) */}
-              <div className={s.list}>
-                {[
-                  ...habits.map(row),
-                  ...habitsDone.map((d) =>
-                    doneRow(d, habits.some((h) => h.id === d.task.id) ? d.completionId : d.task.id),
-                  ),
-                ]}
-              </div>
-            </section>
-          )}
 
           {dueToday.length > 0 && (
             <section className={s.section}>
@@ -200,7 +171,7 @@ export function TodayPage() {
             </section>
           )}
 
-          {dueToday.length === 0 && habits.length === 0 && (
+          {dueToday.length === 0 && (
             <EmptyState
               icon={CircleCheckBig}
               title={allDone.length > 0 ? m.home.allDone : m.nothingToday}

@@ -90,6 +90,21 @@
   color: var(--fg-muted);
 }
 
+// "Habit": a small tinted pill at the start of the line under the title.
+.habitChip {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: $radius-pill;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  align-self: center;
+}
+
 .time { font-variant-numeric: tabular-nums; font-weight: 500; color: var(--fg); }
 
 

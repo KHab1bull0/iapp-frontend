@@ -46,28 +46,24 @@ describe('TodayPage: habits', () => {
     api.fetchOverallStats.mockResolvedValue({ total: 0, daily: [], currentStreak: 0 })
   })
 
-  test('habits get their own section on top, with the streak', async () => {
+  test('habits sit in the Today list with the other tasks, marked with a chip and their streak', async () => {
     renderPage()
-    const habits = await screen.findByRole('heading', { name: 'Habits' })
-    const todayHead = screen.getByRole('heading', { name: 'Today' })
-    expect(habits.compareDocumentPosition(todayHead) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-
-    const section = habits.closest('section')!
+    const todayHead = await screen.findByRole('heading', { name: 'Today' })
+    expect(screen.queryByRole('heading', { name: 'Habits' })).toBeNull()
+    const section = todayHead.closest('section')!
     expect(within(section).getByText('READ')).toBeTruthy()
-    expect(within(section).queryByText('CHORE')).toBeNull()
+    expect(within(section).getByText('CHORE')).toBeTruthy()
+    // Only the habit has the chip.
+    expect(within(section).getAllByText('Habit')).toHaveLength(1)
     expect(within(section).getByText('Streak: 4 days')).toBeTruthy()
-    // Just the streak: no count towards anything further.
-    expect(within(section).queryByText('4/10')).toBeNull()
     // Not at risk: no warning.
     expect(screen.queryByText('Get back to it today')).toBeNull()
   })
 
-  test('an at-risk habit says to get back to it today, and goes first', async () => {
+  test('an at-risk habit says to get back to it today', async () => {
     today([habit('walk'), habit('run', { progress: progress({ atRisk: true }) })])
     renderPage()
     expect(await screen.findByText('Get back to it today')).toBeTruthy()
-    const ticks = screen.getAllByRole('button', { name: /^Complete / }).map((b) => b.getAttribute('aria-label'))
-    expect(ticks).toEqual(['Complete RUN', 'Complete WALK'])
   })
 
   test('the tick is one tap in full, then the streak ticks up with the vote, and Undo still works', async () => {
@@ -109,18 +105,15 @@ describe('TodayPage: habits', () => {
     }
   })
 
-  test('done habits stay in their section, ticked', async () => {
+  test('done habits go to Done with the other tasks, ticked', async () => {
     today([], [
       { completionId: 'c7', task: habit('read', { progress: progress({ streak: 5 }) }) },
       { completionId: 'c8', task: habit('nap') },
     ])
     renderPage()
-    const section = (await screen.findByRole('heading', { name: 'Habits' })).closest('section')!
-    expect(within(section).getByText('2/2')).toBeTruthy()
+    const section = (await screen.findByRole('heading', { name: /^Done/ })).closest('section')!
     expect(within(section).getByRole('button', { name: 'Undo READ' })).toBeTruthy()
     expect(within(section).getByRole('button', { name: 'Undo NAP' })).toBeTruthy()
-    // Done habits don't also fill the Done group.
-    expect(screen.queryByRole('heading', { name: /^Done/ })).toBeNull()
     expect(screen.getByText('Everything for today is done')).toBeTruthy()
   })
 
@@ -134,7 +127,7 @@ describe('TodayPage: habits', () => {
       renderPage()
       expect(await screen.findByText('Ketma-ket: 4 kun')).toBeTruthy()
       expect(screen.getByText('Ketma-ket: 6 marta')).toBeTruthy()
-      expect(screen.getByRole('heading', { name: 'Odatlar' })).toBeTruthy()
+      expect(screen.getAllByText('Odat')).toHaveLength(2)
     })
 
     test('in English, every second day is not daily', async () => {

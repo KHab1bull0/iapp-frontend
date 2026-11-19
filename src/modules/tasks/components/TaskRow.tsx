@@ -43,7 +43,7 @@ export function TaskRow({
   const [firstStreak] = useState(habit?.streak)
   const bumped = habit !== null && habit.streak !== firstStreak
 
-  const meta = task.dueTime || repeat || due || habit
+  const meta = task.isHabit || task.dueTime || repeat || due || habit
 
   return (
     <div className={s.wrap}>
@@ -53,6 +53,8 @@ export function TaskRow({
           <span className={s.title}>{task.title}</span>
           {meta && (
             <span className={s.meta}>
+              {/* Habits sit among the other tasks, told apart by this chip. */}
+              {task.isHabit && <span className={s.habitChip}>{t.habit.label}</span>}
               {task.dueTime && <span className={s.time}>{task.dueTime}</span>}
               {due && !habit && <span>{due}</span>}
               {habit && habit.streak > 0 && (
