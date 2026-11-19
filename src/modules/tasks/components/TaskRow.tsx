@@ -23,7 +23,7 @@ interface Props {
 }
 
 /** Longest name a row shows; the rest is cut with "…". */
-const MAX_TITLE = 15
+const MAX_TITLE = 20
 
 export function TaskRow({
   task,
