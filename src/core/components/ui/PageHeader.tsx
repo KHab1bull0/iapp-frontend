@@ -14,13 +14,15 @@ interface Props {
    * module pages, where the pinned page switcher already says where you are.
    */
   compactBar?: boolean
+  /** A modest title, a step above the subtitle (Home's greeting), not the large page title. */
+  small?: boolean
 }
 
 /**
  * A page's large title. Once it scrolls away, a compact bar with the same
  * title stays at the top (on phones), so you always know where you are.
  */
-export function PageHeader({ title, subtitle, actions, children, compactBar = false }: Props) {
+export function PageHeader({ title, subtitle, actions, children, compactBar = false, small = false }: Props) {
   const titleRef = useRef<HTMLHeadingElement>(null)
   const [compact, setCompact] = useState(false)
 
@@ -42,7 +44,7 @@ export function PageHeader({ title, subtitle, actions, children, compactBar = fa
       <header className={s.header}>
         <div className={s.titleRow}>
           <div className={s.titles}>
-            <h1 ref={titleRef} className={s.title}>
+            <h1 ref={titleRef} className={clsx(s.title, small && s.small)}>
               {title}
             </h1>
             {subtitle && <div className={s.subtitle}>{subtitle}</div>}

@@ -37,6 +37,7 @@ export function HomePage() {
     <div className={s.page}>
       <PageHeader
         compactBar
+        small
         title={`${t.greeting[greetingKey(now.getHours())]}${firstName ? `, ${firstName}` : ''}`}
         subtitle={formatFullDate(now)}
         actions={
