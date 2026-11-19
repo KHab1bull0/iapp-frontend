@@ -12,9 +12,10 @@ export const tasks: ModuleManifest = {
   icon: ListChecks,
   basePath: '/tasks',
   pages: [
-    // Today first and opened by default: the module is used mostly to tick things off.
-    { label: { uz: 'Bugun', en: 'Today' }, path: '/tasks', icon: CalendarCheck, end: true, useBadge: useDueCount },
+    // Today in the middle of the phone's bottom bar (Home · Stats · Today · Tasks · gear),
+    // and still the page the module opens on (its index route).
     { label: { uz: 'Tahlil', en: 'Stats' }, path: '/tasks/stats', icon: BarChart3 },
+    { label: { uz: 'Bugun', en: 'Today' }, path: '/tasks', icon: CalendarCheck, end: true, useBadge: useDueCount },
     { label: { uz: 'Vazifalar', en: 'Tasks' }, path: '/tasks/all', icon: ListTodo },
   ],
   routes: [
