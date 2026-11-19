@@ -91,23 +91,18 @@ describe('activePage', () => {
 })
 
 describe('bottomNavItems', () => {
-  const kinds = (n: number, add = true) =>
-    bottomNavItems(Array.from({ length: n }, (_, i) => (add ? withQuickAdd(`m${i}`, 1) : fake(`m${i}`)))).map((i) =>
+  const kinds = (n: number) =>
+    bottomNavItems(Array.from({ length: n }, (_, i) => withQuickAdd(`m${i}`, 1))).map((i) =>
       i.kind === 'module' ? i.module.id : i.kind,
     )
 
-  test('puts "+" in the middle and shows every module when there are at most 3', () => {
-    expect(kinds(1)).toEqual(['home', 'add', 'm0'])
-    expect(kinds(2)).toEqual(['home', 'm0', 'add', 'm1'])
-    expect(kinds(3)).toEqual(['home', 'm0', 'add', 'm1', 'm2'])
+  test('shows Home and every module when there are at most 4 ("+" floats apart)', () => {
+    expect(kinds(1)).toEqual(['home', 'm0'])
+    expect(kinds(4)).toEqual(['home', 'm0', 'm1', 'm2', 'm3'])
   })
 
-  test('shows the first 2 and "More" when there are more than 3', () => {
-    expect(kinds(4)).toEqual(['home', 'm0', 'add', 'm1', 'menu'])
-  })
-
-  test('has no "+" when nothing can be added', () => {
-    expect(kinds(2, false)).toEqual(['home', 'm0', 'm1'])
+  test('shows the first 3 and "More" when there are more than 4', () => {
+    expect(kinds(5)).toEqual(['home', 'm0', 'm1', 'm2', 'menu'])
   })
 
   const page = (path: string) => ({ label: path, path, icon: Box })
@@ -116,11 +111,11 @@ describe('bottomNavItems', () => {
       i.kind === 'page' ? i.page.path : i.kind === 'settings' ? `gear ${i.path}` : i.kind,
     )
 
-  test("inside a module: Home and its pages, with its gear when a slot is left", () => {
-    const two = { ...fake('fin'), pages: [page('/fin'), page('/fin/tx')], settingsPath: '/fin/settings' }
-    expect(inside(two)).toEqual(['home', '/fin', 'add', '/fin/tx', 'gear /fin/settings'])
+  test('inside a module: Home and its pages, with its gear when a slot is left', () => {
     const three = { ...fake('en'), pages: [page('/en'), page('/en/review'), page('/en/words')], settingsPath: '/en/settings' }
-    expect(inside(three)).toEqual(['home', '/en', 'add', '/en/review', '/en/words'])
+    expect(inside(three)).toEqual(['home', '/en', '/en/review', '/en/words', 'gear /en/settings'])
+    const four = { ...three, pages: [...three.pages, page('/en/x')] }
+    expect(inside(four)).toEqual(['home', '/en', '/en/review', '/en/words', '/en/x'])
   })
 })
 

@@ -6,11 +6,11 @@ const ID_PATTERN = /^[a-z][a-z0-9-]*$/
 const RESERVED_IDS = new Set(['home', 'settings', 'auth', 'menu'])
 
 /**
- * Bottom nav has five slots (Material's and iOS's upper limit): Today, the
- * "+" in the middle, and three for modules. Settings sits behind the avatar
- * on Today instead of taking a slot.
+ * Bottom nav has five slots (Material's and iOS's upper limit): Home and
+ * four for modules ("+" floats above the bar's right end instead). Settings
+ * sits behind the avatar on Home instead of taking a slot.
  */
-const MAX_BOTTOM_NAV_MODULES = 3
+const MAX_BOTTOM_NAV_MODULES = 4
 const MAX_BOTTOM_NAV_ITEMS = 5
 
 /** Throws on the first registry mistake, so it surfaces at startup rather than as a broken route. */
@@ -54,28 +54,23 @@ export function activePage(module: ModuleManifest, pathname: string) {
  * The phone's bottom bar. Outside a module: Home and the modules. Inside one
  * (`current`): Home and that module's own pages, so its menu sits under the
  * thumb instead of at the top; its settings gear too when a slot is left
- * (otherwise it is reached from Settings → Modules). "+" goes in the middle.
+ * (otherwise it is reached from Settings → Modules).
  */
 export function bottomNavItems(modules: ModuleManifest[], current?: ModuleManifest): BottomNavItem[] {
-  const hasAdd = quickAddActions(modules).length > 0
-  let items: BottomNavItem[]
   if (current) {
-    const room = MAX_BOTTOM_NAV_ITEMS - 1 - (hasAdd ? 1 : 0)
+    const room = MAX_BOTTOM_NAV_ITEMS - 1
     const pages = current.pages.slice(0, room).map((page): BottomNavItem => ({ kind: 'page', page }))
     const gear: BottomNavItem[] =
       current.settingsPath && pages.length < room ? [{ kind: 'settings', path: current.settingsPath }] : []
-    items = [{ kind: 'home' }, ...pages, ...gear]
-  } else {
-    const shown =
-      modules.length <= MAX_BOTTOM_NAV_MODULES ? modules : modules.slice(0, MAX_BOTTOM_NAV_MODULES - 1)
-    items = [
-      { kind: 'home' },
-      ...shown.map((module): BottomNavItem => ({ kind: 'module', module })),
-      ...(shown.length < modules.length ? [{ kind: 'menu' } as const] : []),
-    ]
+    return [{ kind: 'home' }, ...pages, ...gear]
   }
-  if (hasAdd) items.splice(Math.ceil(items.length / 2), 0, { kind: 'add' })
-  return items
+  const shown =
+    modules.length <= MAX_BOTTOM_NAV_MODULES ? modules : modules.slice(0, MAX_BOTTOM_NAV_MODULES - 1)
+  return [
+    { kind: 'home' },
+    ...shown.map((module): BottomNavItem => ({ kind: 'module', module })),
+    ...(shown.length < modules.length ? [{ kind: 'menu' } as const] : []),
+  ]
 }
 
 /**

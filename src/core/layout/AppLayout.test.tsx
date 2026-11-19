@@ -68,14 +68,14 @@ describe('AppLayout driven by the registry', () => {
     renderShell('/settings')
     const bottom = screen.getByRole('navigation', { name: 'Main menu' })
     expect(linkTargets(bottom)).toEqual(['/', '/finance'])
-    expect(within(bottom).getByRole('button', { name: 'Add' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Add' })).toBeTruthy()
   })
 
   test("inside a module the bottom nav swaps the modules for its pages and gear; no tabs on top", () => {
     renderShell('/finance/transactions')
     const bottom = screen.getByRole('navigation', { name: 'Finance pages' })
     expect(linkTargets(bottom)).toEqual(['/', '/finance', '/finance/transactions', '/finance/settings'])
-    expect(within(bottom).getByRole('button', { name: 'Add' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Add' })).toBeTruthy()
     expect(within(bottom).getByRole('link', { name: 'Transactions' }).getAttribute('aria-current')).toBe('page')
     expect(screen.getAllByRole('navigation', { name: 'Finance pages' })).toHaveLength(1)
   })
@@ -85,8 +85,7 @@ describe('AppLayout driven by the registry', () => {
     window.matchMedia = ((q: string) => ({ ...desktop(q), matches: true })) as typeof window.matchMedia
     try {
       renderShell('/finance')
-      const navs = screen.getAllByRole('navigation')
-      fireEvent.click(within(navs[navs.length - 1]).getByRole('button', { name: 'Add' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Add' }))
       expect(screen.getByRole('heading', { name: 'Add page' })).toBeTruthy()
     } finally {
       window.matchMedia = desktop
@@ -95,8 +94,7 @@ describe('AppLayout driven by the registry', () => {
 
   test('on desktop "+" opens the add panel straight away when there is only one thing to add', () => {
     renderShell('/finance')
-    const navs = screen.getAllByRole('navigation')
-    fireEvent.click(within(navs[navs.length - 1]).getByRole('button', { name: 'Add' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
     expect(screen.getByRole('dialog', { name: 'Add transaction' })).toBeTruthy()
   })
 

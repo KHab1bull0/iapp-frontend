@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { NavLink } from 'react-router-dom'
 import { House, Menu, Plus, Settings, type LucideIcon } from 'lucide-react'
 import type { BottomNavItem, ModuleManifest } from '@/core/modules/types'
-import { bottomNavItems } from '@/core/modules/registry-utils'
+import { bottomNavItems, quickAddActions } from '@/core/modules/registry-utils'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { useText } from '@/core/i18n'
 import { useCoreT } from '@/core/i18n/useCoreT'
@@ -24,8 +24,8 @@ function Badge({ useBadge }: { useBadge: () => number | null }) {
 }
 
 /**
- * Phones and tablets: Home, the modules, and "+" in the middle where the
- * thumb rests. Inside a module (`current`) the modules give way to that
+ * Phones and tablets: Home and the modules, with "+" floating above the
+ * bar's right end, under the right thumb. Inside a module (`current`) the modules give way to that
  * module's own pages, so its menu is down here rather than at the top.
  */
 export function BottomNav({
@@ -41,7 +41,7 @@ export function BottomNav({
   const text = useText()
   const quickAdd = useQuickAdd()
 
-  const toLink = (item: Exclude<BottomNavItem, { kind: 'add' }>): Link => {
+  const toLink = (item: BottomNavItem): Link => {
     switch (item.kind) {
       case 'home': return { to: '/', icon: House, label: t.nav.overview, end: true }
       case 'menu': return { to: '/menu', icon: Menu, label: t.nav.more, end: true }
@@ -56,34 +56,38 @@ export function BottomNav({
   }
 
   const items = bottomNavItems(modules, current)
+  const canAdd = quickAddActions(modules).length > 0
 
   return (
-    <nav
-      className={clsx(s.bottomnav, hidden && s.hidden)}
-      aria-label={current ? t.nav.pagesOf(text(current.name)) : t.nav.main}
-      style={{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }}
-    >
-      {items.map((item) => {
-        if (item.kind === 'add') {
+    <>
+      <nav
+        className={clsx(s.bottomnav, hidden && s.hidden)}
+        aria-label={current ? t.nav.pagesOf(text(current.name)) : t.nav.main}
+        style={{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }}
+      >
+        {items.map((item) => {
+          const { to, icon: Icon, label, end, useBadge } = toLink(item)
           return (
-            <div key="add" className={s.addSlot}>
-              <button type="button" className={s.add} onClick={() => quickAdd.open()} aria-label={t.nav.add}>
-                <Plus size={26} strokeWidth={2.5} />
-              </button>
-            </div>
+            <NavLink key={to} to={to} end={end} viewTransition className={({ isActive }) => clsx(s.bnavItem, isActive && s.active)}>
+              <span className={s.iconWrap}>
+                <Icon size={22} aria-hidden />
+                {useBadge && <Badge useBadge={useBadge} />}
+              </span>
+              <span>{label}</span>
+            </NavLink>
           )
-        }
-        const { to, icon: Icon, label, end, useBadge } = toLink(item)
-        return (
-          <NavLink key={to} to={to} end={end} viewTransition className={({ isActive }) => clsx(s.bnavItem, isActive && s.active)}>
-            <span className={s.iconWrap}>
-              <Icon size={22} aria-hidden />
-              {useBadge && <Badge useBadge={useBadge} />}
-            </span>
-            <span>{label}</span>
-          </NavLink>
-        )
-      })}
-    </nav>
+        })}
+      </nav>
+      {canAdd && (
+        <button
+          type="button"
+          className={clsx(s.add, hidden && s.addLow)}
+          onClick={() => quickAdd.open()}
+          aria-label={t.nav.add}
+        >
+          <Plus size={26} strokeWidth={2.5} />
+        </button>
+      )}
+    </>
   )
 }

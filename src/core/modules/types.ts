@@ -62,7 +62,6 @@ export interface ModuleManifest {
 
 export type BottomNavItem =
   | { kind: 'home' }
-  | { kind: 'add' }
   | { kind: 'menu' }
   | { kind: 'module'; module: ModuleManifest }
   /** Inside a module: one of its pages. */

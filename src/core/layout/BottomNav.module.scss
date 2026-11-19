@@ -93,26 +93,36 @@
   text-align: center;
 }
 
-.addSlot {
-  display: grid;
-  place-items: center;
-  height: 56px;
+// The one way to add anything: a round button floating above the bar's right
+// end, under the right thumb. When the bar slides away it drops to where the
+// bar was, so it stays in reach.
+.add {
+  display: none;
+
+  @include bp-tablet {
+    display: grid;
+    place-items: center;
+    position: fixed;
+    right: calc(16px + var(--safe-right));
+    bottom: calc(var(--bottom-nav-h) + 16px);
+    z-index: 41;
+    width: var(--control-lg);
+    height: var(--control-lg);
+    border: none;
+    border-radius: $radius-pill;
+    background: var(--primary);
+    color: var(--primary-fg);
+    box-shadow: 0 6px 18px rgba(21, 128, 61, 0.35);
+    cursor: pointer;
+    transition:
+      transform $t-slow var(--ease-house),
+      scale 120ms var(--ease-spring);
+
+    &:active { scale: 0.92; }
+    &:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+  }
 }
 
-// The one way to add anything, raised so it reads as an action, not a place.
-.add {
-  display: grid;
-  place-items: center;
-  width: var(--control-lg);
-  height: var(--control-lg);
-  margin-top: -16px;
-  border: 4px solid var(--bg-elev);
-  border-radius: $radius-pill;
-  background: var(--primary);
-  color: var(--primary-fg);
-  box-shadow: 0 6px 18px rgba(21, 128, 61, 0.35);
-  cursor: pointer;
-  transition: transform 120ms var(--ease-spring);
-
-  &:active { transform: scale(0.92); }
+.addLow {
+  transform: translateY(calc(var(--bottom-nav-h) - var(--safe-bottom)));
 }
