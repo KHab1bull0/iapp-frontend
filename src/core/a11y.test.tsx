@@ -32,7 +32,7 @@ async function violations(container: HTMLElement) {
 }
 
 const task = (id: string): Task => ({
-  id, title: id, note: null, dueDate: todayYmd(), dueTime: '09:00', repeatMode: 'none', repeatUnit: null,
+  id, title: id, note: null, dueDate: todayYmd(), dueTime: '09:00', remindBefore: 15, repeatMode: 'none', repeatUnit: null,
   repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null, createdAt: '', updatedAt: '',
   isHabit: false, identity: null, cue: null, progress: null,
 })
@@ -60,7 +60,7 @@ vi.mock('@/core/notifications/api', async (orig) => ({
   ...(await orig<object>()),
   fetchPublicKey: vi.fn().mockResolvedValue('BDxrGylovc0doQJluj-uAqzxpEHkJfyjVfondqgBadfog-sk7pdjyiIM6SHz6wFBAmN-6The2oDbxDIQbulnM8g'),
   fetchSettings: vi.fn().mockResolvedValue({
-    tasksDigest: true, tasksDigestAt: '08:00', englishReminder: false, englishReminderAt: '20:00',
+    tasksDigest: true, tasksDigestAt: '08:00', tasksDigestUntil: '21:00', englishReminder: false, englishReminderAt: '20:00',
     habitReminders: true,
   }),
   fetchDevices: vi.fn().mockResolvedValue([
@@ -135,7 +135,7 @@ describe('accessibility (axe)', () => {
     installFakePush({ subscribed: true })
     try {
       const { container } = withProviders(<NotificationsPage />)
-      await screen.findByRole('switch', { name: 'Morning task summary' })
+      await screen.findByRole('switch', { name: 'Tasks: hourly reminder' })
       await screen.findByText('iPhone · Safari')
       expect(await violations(container)).toEqual([])
     } finally {

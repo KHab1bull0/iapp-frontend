@@ -3,6 +3,11 @@ import api from '@/core/api/axios'
 export type RepeatMode = 'none' | 'schedule' | 'after_done'
 export type RepeatUnit = 'day' | 'week' | 'month'
 
+/** The only values the server accepts, in the order the form lists them. */
+export const REMIND_OPTIONS: readonly (number | null)[] = [0, 5, 15, 30, 60, null]
+/** What a new task with a time gets (and what the server gives one left out). */
+export const DEFAULT_REMIND = 15
+
 /** A habit's standing on the day asked for (the `today` param). */
 export interface HabitProgress {
   streak: number
@@ -21,6 +26,8 @@ export interface Task {
   dueDate: string | null
   /** HH:MM */
   dueTime: string | null
+  /** Minutes before dueTime to push a reminder (0 = at the time); null = none. Only used with a time. */
+  remindBefore: number | null
   repeatMode: RepeatMode
   repeatUnit: RepeatUnit | null
   repeatEvery: number | null
@@ -45,6 +52,8 @@ export interface TaskInput {
   note?: string | null
   dueDate?: string | null
   dueTime?: string | null
+  /** Left out on create, the server uses 15. */
+  remindBefore?: number | null
   repeatMode: RepeatMode
   repeatUnit?: RepeatUnit | null
   repeatEvery?: number | null

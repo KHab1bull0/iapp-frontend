@@ -26,6 +26,7 @@ const KEY = 'BDxrGylovc0doQJluj-uAqzxpEHkJfyjVfondqgBadfog-sk7pdjyiIM6SHz6wFBAmN
 const SETTINGS = {
   tasksDigest: true,
   tasksDigestAt: '08:00',
+  tasksDigestUntil: '21:00',
   englishReminder: false,
   englishReminderAt: '20:00',
   habitReminders: true,
@@ -110,10 +111,10 @@ describe('NotificationsPage', () => {
     ])
     renderPage()
 
-    const digest = await screen.findByRole('switch', { name: 'Morning task summary' })
+    const digest = await screen.findByRole('switch', { name: 'Tasks: hourly reminder' })
     expect(digest.getAttribute('aria-checked')).toBe('true')
     // Only a reminder that is on shows its time.
-    expect((screen.getByLabelText('Morning task summary: time') as HTMLInputElement).value).toBe('08:00')
+    expect((screen.getByLabelText('Tasks: hourly reminder: from') as HTMLInputElement).value).toBe('08:00')
     expect(screen.queryByLabelText('English reminder: time')).toBeNull()
 
     fireEvent.click(screen.getByRole('switch', { name: 'English reminder' }))
@@ -152,52 +153,85 @@ describe('NotificationsPage', () => {
     expect(await screen.findByText(/didn't reach any device/)).toBeTruthy()
   })
 
-  test('on: three reminders — tasks digest, habits, English — and nothing else', async () => {
+  test('on: three reminders — hourly tasks, timed tasks, English — and nothing else', async () => {
     installFakePush({ subscribed: true })
     renderPage()
 
-    await screen.findByRole('switch', { name: 'Morning task summary' })
+    await screen.findByRole('switch', { name: 'Tasks: hourly reminder' })
     expect(screen.getAllByRole('switch').map((s) => s.getAttribute('aria-label'))).toEqual([
-      'Morning task summary',
-      'Habit reminders',
+      'Tasks: hourly reminder',
+      'Timed tasks',
       'English reminder',
     ])
     expect(screen.queryByText('Streak at risk')).toBeNull()
     expect(screen.queryByText('Weekly review')).toBeNull()
 
-    // Habit reminders fire at each habit's own time: a switch, no time row.
-    const habits = screen.getByRole('switch', { name: 'Habit reminders' })
-    expect(habits.getAttribute('aria-checked')).toBe('true')
-    expect(screen.queryByLabelText('Habit reminders: time')).toBeNull()
-    fireEvent.click(habits)
+    // Timed tasks fire at each habit's own time: a switch, no time row.
+    const timed = screen.getByRole('switch', { name: 'Timed tasks' })
+    expect(timed.getAttribute('aria-checked')).toBe('true')
+    expect(screen.queryByLabelText('Timed tasks: time')).toBeNull()
+    fireEvent.click(timed)
     await waitFor(() => expect(api.updateSettings).toHaveBeenCalledWith({ habitReminders: false }))
   })
 
   test('on: a reminder time is saved once, after typing stops', async () => {
     installFakePush({ subscribed: true })
     renderPage()
-    const time = (await screen.findByLabelText('Morning task summary: time')) as HTMLInputElement
+    const time = (await screen.findByLabelText('Tasks: hourly reminder: from')) as HTMLInputElement
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     try {
-      fireEvent.change(time, { target: { value: '21:0' } })
-      fireEvent.change(time, { target: { value: '21:30' } })
+      fireEvent.change(time, { target: { value: '09:3' } })
+      fireEvent.change(time, { target: { value: '09:30' } })
       await act(() => vi.advanceTimersByTimeAsync(799))
       expect(api.updateSettings).not.toHaveBeenCalled()
       await act(() => vi.advanceTimersByTimeAsync(1))
       expect(api.updateSettings).toHaveBeenCalledTimes(1)
-      expect(api.updateSettings).toHaveBeenCalledWith({ tasksDigestAt: '21:30' })
+      expect(api.updateSettings).toHaveBeenCalledWith({ tasksDigestAt: '09:30' })
     } finally {
       vi.useRealTimers()
     }
+  })
+
+  test('on: the hourly reminders run from one time until another, and the until is saved', async () => {
+    installFakePush({ subscribed: true })
+    renderPage()
+    const from = (await screen.findByLabelText('Tasks: hourly reminder: from')) as HTMLInputElement
+    const until = screen.getByLabelText('Tasks: hourly reminder: until') as HTMLInputElement
+    expect(from.value).toBe('08:00')
+    expect(until.value).toBe('21:00')
+
+    fireEvent.change(until, { target: { value: '22:00' } })
+    fireEvent.blur(until)
+    await waitFor(() => expect(api.updateSettings).toHaveBeenCalledWith({ tasksDigestUntil: '22:00' }))
+  })
+
+  test('on: an until before the from is not sent, and says why', async () => {
+    installFakePush({ subscribed: true })
+    renderPage()
+    const until = (await screen.findByLabelText('Tasks: hourly reminder: until')) as HTMLInputElement
+    fireEvent.change(until, { target: { value: '07:00' } })
+    fireEvent.blur(until)
+    expect(await screen.findByText("The last hour can't be before the first")).toBeTruthy()
+    expect(api.updateSettings).not.toHaveBeenCalled()
+    expect(until.value).toBe('21:00')
+  })
+
+  test('off: the hourly reminders hide both their times', async () => {
+    installFakePush({ subscribed: true })
+    api.fetchSettings.mockResolvedValue({ ...SETTINGS, tasksDigest: false })
+    renderPage()
+    await screen.findByRole('switch', { name: 'Tasks: hourly reminder' })
+    expect(screen.queryByLabelText('Tasks: hourly reminder: from')).toBeNull()
+    expect(screen.queryByLabelText('Tasks: hourly reminder: until')).toBeNull()
   })
 
   test('a failed save puts the switch back', async () => {
     installFakePush({ subscribed: true })
     api.updateSettings.mockRejectedValue(new Error('offline'))
     renderPage()
-    const digest = await screen.findByRole('switch', { name: 'Morning task summary' })
+    const digest = await screen.findByRole('switch', { name: 'Tasks: hourly reminder' })
     fireEvent.click(digest)
     expect(await screen.findByText("Couldn't save the setting")).toBeTruthy()
-    expect(screen.getByRole('switch', { name: 'Morning task summary' }).getAttribute('aria-checked')).toBe('true')
+    expect(screen.getByRole('switch', { name: 'Tasks: hourly reminder' }).getAttribute('aria-checked')).toBe('true')
   })
 })

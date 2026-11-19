@@ -15,6 +15,7 @@ const task = (dueDate: string): Task => ({
   note: null,
   dueDate,
   dueTime: null,
+  remindBefore: 15,
   repeatMode: 'schedule',
   repeatUnit: 'day',
   repeatEvery: 1,

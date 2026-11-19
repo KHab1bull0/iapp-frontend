@@ -16,12 +16,18 @@ export interface PushDevice {
 }
 
 export interface NotificationSettings {
+  /** Hourly pushes of today's tasks that have no time. */
   tasksDigest: boolean
-  /** "HH:MM", the user's local time. */
+  /** "HH:MM", the user's local time: the first hourly push… */
   tasksDigestAt: string
+  /** …and the last, both included. Never before tasksDigestAt. */
+  tasksDigestUntil: string
   englishReminder: boolean
   englishReminderAt: string
-  /** At each habit's own due time (the task's dueTime), so it has no time of its own here. */
+  /**
+   * Timed tasks: each one is pushed its own remindBefore minutes ahead of its
+   * dueTime, so there is no time here. The name is from when only habits did this.
+   */
   habitReminders: boolean
 }
 

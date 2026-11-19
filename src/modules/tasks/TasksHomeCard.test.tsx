@@ -10,7 +10,7 @@ const api = vi.hoisted(() => ({ fetchToday: vi.fn() }))
 vi.mock('@/modules/tasks/api/tasks', async (orig) => ({ ...(await orig<object>()), ...api }))
 
 const t = (id: string, title: string): Task => ({
-  id, title, note: null, dueDate: todayYmd(), dueTime: null, repeatMode: 'none', repeatUnit: null,
+  id, title, note: null, dueDate: todayYmd(), dueTime: null, remindBefore: 15, repeatMode: 'none', repeatUnit: null,
   repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null, createdAt: '', updatedAt: '',
   isHabit: false, identity: null, cue: null, progress: null,
 })

@@ -42,6 +42,8 @@ export function TaskDetailPage() {
     ? ([
         [t.form.date, dueLabel(task.dueDate, today, t)],
         [t.form.time, task.dueTime],
+        // Only a timed task is reminded on its own; the rest come in the hourly push.
+        [t.form.remind, task.dueTime ? t.form.remindLabel(task.remindBefore) : null],
         [t.form.repeat, repeat || t.form.modes.none.label],
         [t.habit.identity, task.isHabit ? task.identity : null],
         // When it was added: the day the habit (or task) started.

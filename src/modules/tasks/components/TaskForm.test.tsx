@@ -71,6 +71,47 @@ describe('TaskForm', () => {
     expect(screen.getByLabelText('Every').parentElement).toBe(kind.parentElement)
   })
 
+  test('the reminder comes with a time only, and a new timed task is reminded 15 minutes before', async () => {
+    renderForm()
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Call mum' } })
+    expect(screen.queryByLabelText('Reminder')).toBeNull()
+    fireEvent.change(screen.getByLabelText('Time'), { target: { value: '18:30' } })
+    const remind = screen.getByLabelText('Reminder') as HTMLSelectElement
+    expect(remind.tagName).toBe('SELECT')
+    expect([...remind.options].map((o) => o.text)).toEqual([
+      'At the time',
+      '5 minutes before',
+      '15 minutes before',
+      '30 minutes before',
+      '1 hour before',
+      'No reminder',
+    ])
+    expect(remind.selectedOptions[0].text).toBe('15 minutes before')
+    fireEvent.click(save())
+    await waitFor(() =>
+      expect(api.createTask).toHaveBeenCalledWith(expect.objectContaining({ dueTime: '18:30', remindBefore: 15 })),
+    )
+    // Without the time, the field goes again.
+    fireEvent.change(screen.getByLabelText('Time'), { target: { value: '' } })
+    expect(screen.queryByLabelText('Reminder')).toBeNull()
+  })
+
+  test('an existing task opens with its own reminder, and "No reminder" is sent as null', async () => {
+    api.updateTask.mockResolvedValue({ id: 'h' })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <TaskForm task={habit('h', { dueTime: '07:00', remindBefore: 60 })} onSaved={() => {}} onCancel={() => {}} />
+      </QueryClientProvider>,
+    )
+    const remind = screen.getByLabelText('Reminder') as HTMLSelectElement
+    expect(remind.selectedOptions[0].text).toBe('1 hour before')
+    fireEvent.change(remind, { target: { value: 'none' } })
+    fireEvent.click(save())
+    await waitFor(() =>
+      expect(api.updateTask).toHaveBeenCalledWith('h', expect.objectContaining({ dueTime: '07:00', remindBefore: null })),
+    )
+  })
+
   test('saving says so and goes out once, however often Save is pressed', async () => {
     api.createTask.mockReturnValue(new Promise(() => {}))
     renderForm()
@@ -138,7 +179,7 @@ describe('TaskForm', () => {
       <QueryClientProvider client={new QueryClient()}>
         <TaskForm
           task={{
-            id: 't1', title: 'Old', note: null, dueDate: null, dueTime: null, repeatMode: 'none',
+            id: 't1', title: 'Old', note: null, dueDate: null, dueTime: null, remindBefore: 15, repeatMode: 'none',
             repeatUnit: null, repeatEvery: null, repeatWeekdays: null, repeatMonthDay: null, completedAt: null,
             createdAt: '', updatedAt: '',
   isHabit: false, identity: null, cue: null, progress: null,

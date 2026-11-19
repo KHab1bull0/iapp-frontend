@@ -55,6 +55,9 @@ export const tasksMessages = defineMessages(
       date: 'Sana',
       nextDate: 'Keyingi sana',
       time: 'Vaqt',
+      remind: 'Eslatma',
+      remindLabel: (n: number | null) =>
+        n === null ? 'Eslatmasin' : n === 0 ? 'Vaqtida' : n % 60 === 0 ? `${n / 60} soat oldin` : `${n} daqiqa oldin`,
       noDateHint: "Sanasiz vazifa “Barcha vazifalar”da qoladi va “Bugun”da chiqmaydi.",
       repeat: 'Takrorlash',
       modes: {
@@ -181,6 +184,13 @@ export const tasksMessages = defineMessages(
       date: 'Date',
       nextDate: 'Next date',
       time: 'Time',
+      remind: 'Reminder',
+      remindLabel: (n: number | null) => {
+        if (n === null) return 'No reminder'
+        if (n === 0) return 'At the time'
+        const [count, unit] = n % 60 === 0 ? [n / 60, 'hour'] : [n, 'minute']
+        return `${count} ${unit}${count === 1 ? '' : 's'} before`
+      },
       noDateHint: "Without a date it stays in All tasks and won't come up in Today.",
       repeat: 'Repeat',
       modes: {

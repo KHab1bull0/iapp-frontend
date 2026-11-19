@@ -22,6 +22,7 @@ const t = (id: string, over: Partial<Task> = {}): Task => ({
   note: null,
   dueDate: todayYmd(),
   dueTime: null,
+  remindBefore: 15,
   repeatMode: 'none',
   repeatUnit: null,
   repeatEvery: null,

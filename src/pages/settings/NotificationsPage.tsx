@@ -129,10 +129,10 @@ function TimeInput({ value, label, onCommit }: { value: string; label: string; o
 
 type Keys<V> = { [K in keyof NotificationSettings]: NotificationSettings[K] extends V ? K : never }[keyof NotificationSettings]
 
-/** A reminder's switch and, if it fires at a time the user picks, that time. */
+/** A reminder's switch and, if it fires at times the user picks, those times (each its own row). */
 interface Reminder {
   on: Keys<boolean>
-  at?: Keys<string>
+  times?: { key: Keys<string>; label: string }[]
   icon: LucideIcon
   title: string
   hint: string
@@ -173,15 +173,38 @@ function Reminders() {
 
   const data = settings.data
   const reminders: Reminder[] = [
-    { on: 'tasksDigest', at: 'tasksDigestAt', icon: ListChecks, title: t.tasksDigest, hint: t.tasksDigestHint },
-    // Each habit reminds at its own due time, so this one has no time row.
+    {
+      on: 'tasksDigest',
+      // The first and the last hourly push.
+      times: [
+        { key: 'tasksDigestAt', label: t.from },
+        { key: 'tasksDigestUntil', label: t.until },
+      ],
+      icon: ListChecks,
+      title: t.tasksDigest,
+      hint: t.tasksDigestHint,
+    },
+    // Each task reminds by its own time and its own "remind before", so this one has no time row.
     { on: 'habitReminders', icon: Repeat, title: t.habitReminders, hint: t.habitRemindersHint },
-    { on: 'englishReminder', at: 'englishReminderAt', icon: BookOpen, title: t.englishReminder, hint: t.englishReminderHint },
+    {
+      on: 'englishReminder',
+      times: [{ key: 'englishReminderAt', label: t.time }],
+      icon: BookOpen,
+      title: t.englishReminder,
+      hint: t.englishReminderHint,
+    },
   ]
+
+  // The server refuses an hourly window that ends before it starts; say why here instead.
+  function saveTime(key: Keys<string>, value: string) {
+    const next = { ...data, [key]: value }
+    if (next.tasksDigestUntil < next.tasksDigestAt) toast(t.rangeInvalid, 'error')
+    else save.mutate({ [key]: value })
+  }
 
   return (
     <ListGroup title={t.reminders} footer={t.remindersFooter}>
-      {reminders.flatMap(({ on, at, icon, title, hint }) => [
+      {reminders.flatMap(({ on, times = [], icon, title, hint }) => [
         <ListRow
           key={on}
           icon={icon}
@@ -189,15 +212,17 @@ function Reminders() {
           subtitle={hint}
           trailing={<Switch checked={data[on]} label={title} onChange={(next) => save.mutate({ [on]: next })} />}
         />,
-        // The time only matters while the reminder is on (iOS Settings does the same).
-        at && data[on] && (
-          <ListRow
-            key={at}
-            icon={Clock}
-            title={t.time}
-            trailing={<TimeInput value={data[at]} label={t.timeOf(title)} onCommit={(v) => save.mutate({ [at]: v })} />}
-          />
-        ),
+        // The times only matter while the reminder is on (iOS Settings does the same).
+        ...(data[on]
+          ? times.map(({ key, label }) => (
+              <ListRow
+                key={key}
+                icon={Clock}
+                title={label}
+                trailing={<TimeInput value={data[key]} label={t.timeOf(title, label)} onCommit={(v) => saveTime(key, v)} />}
+              />
+            ))
+          : []),
       ])}
     </ListGroup>
   )

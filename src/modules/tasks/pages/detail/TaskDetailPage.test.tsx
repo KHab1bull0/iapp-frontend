@@ -15,6 +15,7 @@ const task = (over: Partial<Task> = {}): Task => ({
   note: 'Before bed',
   dueDate: todayYmd(),
   dueTime: '21:00',
+  remindBefore: 15,
   repeatMode: 'schedule',
   repeatUnit: 'day',
   repeatEvery: 1,
@@ -56,6 +57,22 @@ describe('TaskDetailPage', () => {
     // The day it started.
     expect(screen.getByText('Started').nextElementSibling?.textContent).toMatch(/2026/)
     expect(screen.getByRole('region', { name: 'Task statistics' })).toBeTruthy()
+    expect(screen.getByText('Reminder').nextElementSibling?.textContent).toBe('15 minutes before')
+  })
+
+  test('"No reminder" is shown as such', async () => {
+    api.fetchTask.mockResolvedValue(task({ remindBefore: null }))
+    api.fetchTaskStats.mockReturnValue(new Promise(() => {}))
+    renderPage()
+    expect((await screen.findByText('Reminder')).nextElementSibling?.textContent).toBe('No reminder')
+  })
+
+  test('a task without a time has no reminder row', async () => {
+    api.fetchTask.mockResolvedValue(task({ dueTime: null, remindBefore: 60 }))
+    api.fetchTaskStats.mockReturnValue(new Promise(() => {}))
+    renderPage()
+    expect(await screen.findByRole('heading', { name: 'Read' })).toBeTruthy()
+    expect(screen.queryByText('Reminder')).toBeNull()
   })
 
   test('the calendar of days done is always there, whether the task is behind or not', async () => {

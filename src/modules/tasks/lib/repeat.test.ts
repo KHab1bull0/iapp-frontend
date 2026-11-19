@@ -14,6 +14,7 @@ const task = (over: Partial<Task>): Task => ({
   note: null,
   dueDate: null,
   dueTime: null,
+  remindBefore: 15,
   repeatMode: 'none',
   repeatUnit: null,
   repeatEvery: null,

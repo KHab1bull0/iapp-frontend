@@ -9,7 +9,9 @@ import { toast } from '@/core/components/ui/toast'
 import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
 import {
   createTask,
+  DEFAULT_REMIND,
   deleteTask,
+  REMIND_OPTIONS,
   tasksKeys,
   updateTask,
   type RepeatMode,
@@ -43,6 +45,7 @@ export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
   const noteRef = useAutosize(note)
   const [dueDate, setDueDate] = useState(task ? (task.dueDate ?? '') : todayYmd())
   const [dueTime, setDueTime] = useState(task?.dueTime ?? '')
+  const [remindBefore, setRemindBefore] = useState<number | null>(task ? task.remindBefore : DEFAULT_REMIND)
   const [mode, setMode] = useState<RepeatMode>(task?.repeatMode ?? 'none')
   const [unit, setUnit] = useState<RepeatUnit>(task?.repeatUnit ?? 'day')
   const [every, setEvery] = useState(String(task?.repeatEvery ?? 1))
@@ -63,6 +66,8 @@ export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
         note: note.trim() || null,
         dueDate: dueDate || null,
         dueTime: dueTime || null,
+        // Kept even without a time: it applies again once a time is set.
+        remindBefore,
         repeatMode: mode,
         repeatUnit: mode === 'none' ? null : unit,
         repeatEvery: mode === 'none' ? null : everyN,
@@ -157,6 +162,25 @@ export function TaskForm({ task, onSaved, onCancel, onDeleted }: Props) {
 
       {!dueDate && (
         <span className={s.hint}>{t.form.noDateHint}</span>
+      )}
+
+      {/* A reminder needs a time to count back from; a task without one comes in the hourly push. */}
+      {dueTime && (
+        <label className={s.field}>
+          <span className={s.label}>{t.form.remind}</span>
+          <select
+            className={s.input}
+            value={remindBefore ?? 'none'}
+            onChange={(e) => setRemindBefore(e.target.value === 'none' ? null : Number(e.target.value))}
+            aria-label={t.form.remind}
+          >
+            {REMIND_OPTIONS.map((n) => (
+              <option key={n ?? 'none'} value={n ?? 'none'}>
+                {t.form.remindLabel(n)}
+              </option>
+            ))}
+          </select>
+        </label>
       )}
 
       {/* Repeat in one row: the kind, then (if it repeats) every N and the unit. */}
