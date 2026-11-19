@@ -34,3 +34,14 @@ export function byGroup(
   if (rest.length > 0) parts.push({ key: 'none', label: noGroup, tasks: rest })
   return [...parts, ...empty]
 }
+
+/**
+ * The same items, a group's ones side by side: groups in their own order, the
+ * rest last, each keeping the list's order. No labels, so on the page the
+ * colour stripes alone mark where one group ends and the next begins.
+ */
+export function clusterByGroup<T>(items: T[], groups: TaskGroup[], taskOf: (item: T) => Task): T[] {
+  const rank = new Map(groups.map((g, i) => [g.id, i]))
+  const rankOf = (item: T) => rank.get(taskOf(item).groupId ?? '') ?? groups.length
+  return [...items].sort((a, b) => rankOf(a) - rankOf(b))
+}

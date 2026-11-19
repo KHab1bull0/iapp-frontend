@@ -167,7 +167,7 @@ describe('TodayPage', () => {
     expect(api.undoCompletion).toHaveBeenCalledTimes(1)
   })
 
-  test('tasks with a group colour carry the accent stripe; order stays by time', async () => {
+  test("a group's tasks sit together, marked by its colour; by time within a group", async () => {
     groupsApi.fetchGroups.mockResolvedValue([
       { id: 'g1', name: 'Work', color: '#93c5fd', createdAt: '' },
       { id: 'g2', name: 'Home', color: '#86efac', createdAt: '' },
@@ -176,15 +176,20 @@ describe('TodayPage', () => {
       overdue: [],
       today: [
         t('u'),
-        t('b', { dueTime: '09:30', groupId: 'g2' }),
-        t('e', { dueTime: '07:00', groupId: 'g1' }),
+        t('x', { dueTime: '12:00', groupId: 'g2' }),
+        t('b', { dueTime: '07:00', groupId: 'g2' }),
+        t('e', { dueTime: '09:30', groupId: 'g1' }),
       ],
       doneToday: [],
     })
     renderPage()
-    // All tasks render as one flat list in time order (E → B → U).
-    const btns = await screen.findAllByRole('button', { name: /^Complete / })
-    expect(btns.map((b) => b.getAttribute('aria-label'))).toEqual(['Complete E', 'Complete B', 'Complete U'])
+    // Groups in their own order, the ungrouped last: E | B, X | U.
+    await waitFor(() =>
+      expect(
+        screen.getAllByRole('button', { name: /^Complete / }).map((b) => b.getAttribute('aria-label')),
+      ).toEqual(['Complete E', 'Complete B', 'Complete X', 'Complete U']),
+    )
+    const btns = screen.getAllByRole('button', { name: /^Complete / })
     // No group-label sub-sections.
     expect(screen.queryByText('Work')).toBeNull()
     expect(screen.queryByText('No group')).toBeNull()
@@ -194,6 +199,6 @@ describe('TodayPage', () => {
     expect(eWrap?.getAttribute('style')).toContain('--accent: #93c5fd')
     expect(bWrap?.getAttribute('style')).toContain('--accent: #86efac')
     // A task with no group has no style attribute.
-    expect(btns[2].closest('[style]')).toBeNull()
+    expect(btns[3].closest('[style]')).toBeNull()
   })
 })

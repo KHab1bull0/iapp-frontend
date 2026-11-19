@@ -13,6 +13,7 @@ import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { HeatmapSkeleton, LoadingLabel, SectionSkeleton } from '@/modules/tasks/components/skeletons'
 import { byTime } from '@/modules/tasks/lib/repeat'
+import { clusterByGroup } from '@/modules/tasks/lib/byGroup'
 import { PastSection } from '@/modules/tasks/components/PastSection'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
 import { useCompleteTask } from '@/modules/tasks/useCompleteTask'
@@ -60,14 +61,16 @@ export function TodayPage() {
   const { data: groups = [] } = useQuery({ queryKey: tasksKeys.groups, queryFn: fetchGroups })
 
   const allDue = data?.today ?? []
-  // Days that passed stay passed: folded away at the end, without red.
-  const past = data?.overdue ?? []
   const allDone = data?.doneToday ?? []
   const all = allDue.length + allDone.length
 
-  // One list, habits and tasks together; anything with a time goes first, by the clock.
-  const dueToday = byTime(allDue)
-  const done = allDone
+  // In each section a group's tasks sit together, told apart by colour only;
+  // within a group, anything with a time goes first, by the clock.
+  const self = (t: Task) => t
+  const dueToday = clusterByGroup(byTime(allDue), groups, self)
+  const done = clusterByGroup(allDone, groups, (d) => d.task)
+  // Days that passed stay passed: folded away at the end, without red.
+  const past = clusterByGroup(data?.overdue ?? [], groups, self)
 
   // Build a groupId → colour lookup so each row can carry its accent stripe.
   const groupColorMap = new Map(groups.map((g) => [g.id, g.color]))
@@ -175,8 +178,6 @@ export function TodayPage() {
                 <h2 className={s.sectionTitle}>{m.today}</h2>
                 <span className={s.count}>{dueToday.length}</span>
               </div>
-              {/* The parts stay in the one card, each under a quiet label, so it
-                  reads as sorted rather than as more sections. */}
               <div className={s.list}>
                 {dueToday.map(row)}
               </div>
