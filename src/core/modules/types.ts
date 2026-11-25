@@ -16,6 +16,8 @@ export interface ModulePage {
    * waiting there), or null for none. Called on every render of the sidebar.
    */
   useBadge?: () => number | null
+  /** "+" shows on this page (and its sub-pages), adding the module's first quick-add thing. */
+  adds?: boolean
 }
 
 /**

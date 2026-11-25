@@ -64,10 +64,13 @@ describe('AppLayout driven by the registry', () => {
     expect(within(aside).queryByText('Overview')).toBeNull()
   })
 
-  test('outside a module the bottom nav has Home, "+" and Finance; Settings is not a tab', () => {
-    renderShell('/settings')
+  test('outside a module the bottom nav has Home and Finance; Settings is not a tab; "+" only on Home', () => {
+    const settings = renderShell('/settings')
     const bottom = screen.getByRole('navigation', { name: 'Main menu' })
     expect(linkTargets(bottom)).toEqual(['/', '/finance'])
+    expect(screen.queryByRole('button', { name: 'Add' })).toBeNull()
+    settings.unmount()
+    renderShell('/')
     expect(screen.getByRole('button', { name: 'Add' })).toBeTruthy()
   })
 
@@ -84,7 +87,7 @@ describe('AppLayout driven by the registry', () => {
     const desktop = window.matchMedia
     window.matchMedia = ((q: string) => ({ ...desktop(q), matches: true })) as typeof window.matchMedia
     try {
-      renderShell('/finance')
+      renderShell('/finance/transactions')
       fireEvent.click(screen.getByRole('button', { name: 'Add' }))
       expect(screen.getByRole('heading', { name: 'Add page' })).toBeTruthy()
     } finally {
@@ -93,13 +96,13 @@ describe('AppLayout driven by the registry', () => {
   })
 
   test('on desktop "+" opens the add panel straight away when there is only one thing to add', () => {
-    renderShell('/finance')
+    renderShell('/finance/transactions')
     fireEvent.click(screen.getByRole('button', { name: 'Add' }))
     expect(screen.getByRole('dialog', { name: 'Add transaction' })).toBeTruthy()
   })
 
-  test('the sidebar has an Add button and a command search', () => {
-    const { container } = renderShell('/finance')
+  test('the sidebar has an Add button on Home, and a command search everywhere', () => {
+    const { container } = renderShell('/')
     const aside = container.querySelector('aside')!
     expect(within(aside).getByRole('button', { name: /Add/ })).toBeTruthy()
     expect(within(aside).getByRole('button', { name: /^Commands/ })).toBeTruthy()
@@ -149,5 +152,34 @@ describe('AppLayout driven by the registry', () => {
   test('pages draw no add button of their own: "+" in the shell is the one way', () => {
     renderShell('/finance/transactions')
     expect(screen.queryByRole('button', { name: 'Add transaction' })).toBeNull()
+  })
+
+  test('the global add is on Home only: not in the sidebar or the bottom bar elsewhere', () => {
+    const home = renderShell('/')
+    expect(within(home.container.querySelector('aside')!).getByRole('button', { name: /Add/ })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Add' })).toBeTruthy() // the bottom bar's
+    home.unmount()
+    for (const path of ['/settings', '/finance', '/finance/settings']) {
+      const { container, unmount } = renderShell(path)
+      expect(within(container.querySelector('aside')!).queryByRole('button', { name: /Add/ })).toBeNull()
+      expect(screen.queryByRole('button', { name: 'Add' })).toBeNull()
+      unmount()
+    }
+  })
+
+  test('inside a module, "+" shows only on the page that adds, in the sidebar never', () => {
+    const { container } = renderShell('/finance/transactions')
+    expect(within(container.querySelector('aside')!).queryByRole('button', { name: /Add/ })).toBeNull()
+    expect(screen.getAllByRole('button', { name: /Add|Transaction/ }).length).toBeGreaterThan(0)
+  })
+
+  test('"N" adds only where "+" is', () => {
+    const away = renderShell('/finance')
+    fireEvent.keyDown(document.body, { key: 'n' })
+    expect(screen.queryByRole('dialog', { name: 'Add transaction' })).toBeNull()
+    away.unmount()
+    renderShell('/finance/transactions')
+    fireEvent.keyDown(document.body, { key: 'n' })
+    expect(screen.getByRole('dialog', { name: 'Add transaction' })).toBeTruthy()
   })
 })

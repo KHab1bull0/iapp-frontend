@@ -4,7 +4,7 @@ import { Sheet } from '@/core/components/ui/Sheet'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { useText } from '@/core/i18n'
 import { useCoreT } from '@/core/i18n/useCoreT'
-import { activeModule, quickAddActions } from '@/core/modules/registry-utils'
+import { activeModule, addHere, quickAddActions } from '@/core/modules/registry-utils'
 import type { ModuleManifest } from '@/core/modules/types'
 import { QuickAddContext } from './context'
 import { isDialogOpen, isTyping } from '@/core/lib/dom'
@@ -54,12 +54,15 @@ export function QuickAddProvider({ modules, children }: { modules: ModuleManifes
     const onKey = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() !== 'n' || e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return
       if (isDialogOpen()) return
+      // As "+": everything on Home, the page's own thing in a module, else nothing.
+      const here = addHere(modules, pathname)
+      if (!here.global && !here.action) return
       e.preventDefault()
-      open()
+      open(here.global ? undefined : here.action?.id)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+  }, [open, modules, pathname])
 
   const value = useMemo(() => ({ open }), [open])
 

@@ -1,5 +1,6 @@
 import clsx from 'clsx'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
+import { addHere } from '@/core/modules/registry-utils'
 import { ChevronRight, House, LayoutGrid, PanelLeftClose, PanelLeftOpen, Plus, Search, type LucideIcon } from 'lucide-react'
 import { useAuth } from '@/core/contexts/AuthContext'
 import { useProfile } from '@/core/hooks/useProfile'
@@ -51,6 +52,7 @@ function NavItem({ to, icon: Icon, label, end, collapsed, useBadge }: NavItemPro
 
 export function Sidebar({ modules, collapsed, onToggle, onSearch }: SidebarProps) {
   const quickAdd = useQuickAdd()
+  const canAdd = addHere(modules, useLocation().pathname).global
   const { user } = useAuth()
   const { displayName } = useProfile()
   const t = useCoreT()
@@ -74,19 +76,21 @@ export function Sidebar({ modules, collapsed, onToggle, onSearch }: SidebarProps
         </button>
       </div>
 
-      {/* Desktop's "+": the same chooser as the phone's bottom bar. */}
+      {/* Desktop's "+": the same chooser as the phone's bottom bar, on Home only. */}
       <div className={s.actions}>
-        <button className={s.addBtn} onClick={() => quickAdd.open()} title={collapsed ? `${t.nav.add} (N)` : undefined}>
-          <Plus size={collapsed ? 20 : 18} strokeWidth={2.5} aria-hidden />
-          {collapsed ? (
-            <span className="sr-only">{t.nav.add}</span>
-          ) : (
-            <>
-              <span>{t.nav.add}</span>
-              <kbd className={s.kbd}>N</kbd>
-            </>
-          )}
-        </button>
+        {canAdd && (
+          <button className={s.addBtn} onClick={() => quickAdd.open()} title={collapsed ? `${t.nav.add} (N)` : undefined}>
+            <Plus size={collapsed ? 20 : 18} strokeWidth={2.5} aria-hidden />
+            {collapsed ? (
+              <span className="sr-only">{t.nav.add}</span>
+            ) : (
+              <>
+                <span>{t.nav.add}</span>
+                <kbd className={s.kbd}>N</kbd>
+              </>
+            )}
+          </button>
+        )}
         <button className={s.searchBtn} onClick={onSearch} title={`${t.palette.open} (⌘K)`}>
           <Search size={collapsed ? 20 : 16} aria-hidden />
           <span className="sr-only">{t.palette.open}</span>

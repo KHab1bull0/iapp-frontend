@@ -6,6 +6,7 @@ import {
   bottomNavItems,
   quickAddActions,
   activePage,
+  addHere,
   isModulePage,
   legacyRedirect,
   validateRegistry,
@@ -139,5 +140,31 @@ describe('legacyRedirect', () => {
 
   test('returns null for anything else', () => {
     expect(legacyRedirect('/finance/transactions', '')).toBeNull()
+  })
+})
+
+describe('addHere', () => {
+  const page = (path: string, adds?: boolean) => ({ label: path, path, icon: Box, adds })
+  const m: ModuleManifest = {
+    ...withQuickAdd('tasks', 2),
+    pages: [page('/tasks', false), page('/tasks/all', true)],
+  }
+
+  test('the global add is on Home only', () => {
+    expect(addHere([m], '/')).toEqual({ global: true })
+    expect(addHere([m], '/menu')).toEqual({ global: false })
+    expect(addHere([m], '/tasks')).toEqual({ global: false })
+  })
+
+  test("a module's own add shows only on the pages that say so, adding its first thing", () => {
+    expect(addHere([m], '/tasks/all')).toEqual({ global: false, action: m.quickAdd![0] })
+    expect(addHere([m], '/tasks/all/anything')).toEqual({ global: false, action: m.quickAdd![0] })
+    expect(addHere([m], '/tasks')).toEqual({ global: false })
+    expect(addHere([m], '/tasks/stats')).toEqual({ global: false })
+  })
+
+  test('a flagged page of a module with nothing to add shows no add', () => {
+    const bare: ModuleManifest = { ...fake('bare'), pages: [page('/bare', true)] }
+    expect(addHere([bare], '/bare')).toEqual({ global: false })
   })
 })

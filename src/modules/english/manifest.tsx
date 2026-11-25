@@ -26,7 +26,7 @@ export const english: ModuleManifest = {
     // Statistics first: opening English shows where the vocabulary stands.
     { label: { uz: 'Tahlil', en: 'Stats' }, path: '/english', icon: BarChart3, end: true },
     { label: { uz: 'Yodlash', en: 'Memorise' }, path: '/english/review', icon: Layers, useBadge: useReviewCount },
-    { label: { uz: "Lug'at", en: 'Vocabulary' }, path: '/english/vocabulary', icon: BookOpen },
+    { label: { uz: "Lug'at", en: 'Vocabulary' }, path: '/english/vocabulary', icon: BookOpen, adds: true },
   ],
   routes: [
     { index: true, element: <StatsPage /> },

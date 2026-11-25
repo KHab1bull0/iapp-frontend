@@ -16,7 +16,7 @@ export const finance: ModuleManifest = {
   basePath: '/finance',
   pages: [
     { label: { uz: 'Tahlil', en: 'Stats' }, path: '/finance', icon: ChartColumn, end: true },
-    { label: { uz: 'Tranzaksiyalar', en: 'Transactions' }, path: '/finance/transactions', icon: ArrowLeftRight },
+    { label: { uz: 'Tranzaksiyalar', en: 'Transactions' }, path: '/finance/transactions', icon: ArrowLeftRight, adds: true },
   ],
   routes: [
     { index: true, element: <DashboardPage /> },

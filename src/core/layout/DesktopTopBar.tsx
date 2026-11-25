@@ -24,7 +24,7 @@ export function DesktopTopBar({
   const text = useText()
   const quickAdd = useQuickAdd()
   const page = activePage(module, pathname)
-  const add = module.quickAdd?.[0]
+  const add = page?.adds ? module.quickAdd?.[0] : undefined
   const ModuleIcon = module.icon
 
   return (

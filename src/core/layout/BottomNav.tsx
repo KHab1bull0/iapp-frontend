@@ -1,8 +1,8 @@
 import clsx from 'clsx'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { House, Menu, Plus, Settings, type LucideIcon } from 'lucide-react'
 import type { BottomNavItem, ModuleManifest } from '@/core/modules/types'
-import { bottomNavItems, quickAddActions } from '@/core/modules/registry-utils'
+import { addHere, bottomNavItems, quickAddActions } from '@/core/modules/registry-utils'
 import { useQuickAdd } from '@/core/quickAdd/context'
 import { useText } from '@/core/i18n'
 import { useCoreT } from '@/core/i18n/useCoreT'
@@ -56,7 +56,9 @@ export function BottomNav({
   }
 
   const items = bottomNavItems(modules, current)
-  const canAdd = quickAddActions(modules).length > 0
+  // Home adds anything (the chooser); a module's own page adds that module's thing.
+  const { global, action } = addHere(modules, useLocation().pathname)
+  const canAdd = global ? quickAddActions(modules).length > 0 : Boolean(action)
 
   return (
     <>
@@ -82,7 +84,7 @@ export function BottomNav({
         <button
           type="button"
           className={clsx(s.add, hidden && s.addHidden)}
-          onClick={() => quickAdd.open()}
+          onClick={() => quickAdd.open(global ? undefined : action?.id)}
           aria-label={t.nav.add}
           tabIndex={hidden ? -1 : undefined}
         >

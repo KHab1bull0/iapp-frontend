@@ -16,7 +16,7 @@ export const tasks: ModuleManifest = {
     // and still the page the module opens on (its index route).
     { label: { uz: 'Tahlil', en: 'Stats' }, path: '/tasks/stats', icon: BarChart3 },
     { label: { uz: 'Bugun', en: 'Today' }, path: '/tasks', icon: CalendarCheck, end: true, useBadge: useDueCount },
-    { label: { uz: 'Vazifalar', en: 'Tasks' }, path: '/tasks/all', icon: ListTodo },
+    { label: { uz: 'Vazifalar', en: 'Tasks' }, path: '/tasks/all', icon: ListTodo, adds: true },
   ],
   routes: [
     { index: true, element: <TodayPage /> },

@@ -77,6 +77,21 @@ export function bottomNavItems(modules: ModuleManifest[], current?: ModuleManife
  * Every module's quick-add actions, those of `current` (the module on screen)
  * first: on the Finance page "+" offers a transaction before a task.
  */
+/**
+ * Where "+" shows: the all-modules add on Home only; inside a module, only on
+ * its pages marked `adds`, where it adds that module's first thing.
+ */
+export function addHere(
+  modules: ModuleManifest[],
+  pathname: string,
+): { global: boolean; action?: QuickAddAction } {
+  if (pathname === '/') return { global: true }
+  const module = activeModule(modules, pathname)
+  const action = module?.quickAdd?.[0]
+  if (!module || !action || !activePage(module, pathname)?.adds) return { global: false }
+  return { global: false, action }
+}
+
 export function quickAddActions(modules: ModuleManifest[], current?: ModuleManifest): QuickAddAction[] {
   const ordered = current ? [current, ...modules.filter((m) => m !== current)] : modules
   return ordered.flatMap((m) => m.quickAdd ?? [])
