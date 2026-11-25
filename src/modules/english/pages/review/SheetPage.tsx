@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { RefreshCw, ScrollText, Volume2 } from 'lucide-react'
-import { BackButton } from '@/core/components/BackButton'
+import { ArrowLeft, RefreshCw, ScrollText, Volume2 } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { useToday } from '@/core/hooks/useToday'
+import { useCoreT } from '@/core/i18n/useCoreT'
 import { englishKeys, fetchLevels, fetchReview, fetchTags } from '@/modules/english/api/english'
 import { useEnglishT, useLevelName } from '@/modules/english/i18n'
 import { useExtraNew } from '@/modules/english/lib/extraNew'
@@ -22,7 +22,10 @@ import s from './SheetPage.module.scss'
 export function SheetPage() {
   const t = useEnglishT()
   const today = useToday()
+  const core = useCoreT()
   const navigate = useNavigate()
+  // Back to the page before; opened straight from a link, to the chooser.
+  const back = () => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/english/review'))
   const levelLabel = useLevelName()
   const [extraNew] = useExtraNew(today)
   const { data, isLoading, isError, refetch } = useQuery({
@@ -53,8 +56,11 @@ export function SheetPage() {
     <div className={shell.page}>
       {/* Sticks to the top, as the task and transaction pages' header does. */}
       <header className={shell.head}>
-        <BackButton fallback="/english/review" className={shell.backBtn} />
-        <h1 className={shell.h1}>{isLoading || failed ? t.review.sheetCard : t.sheet.title(words.length)}</h1>
+        <button type="button" className={shell.backBtn} onClick={back} aria-label={core.common.back}>
+          <ArrowLeft size={20} />
+        </button>
+        <h1 className={shell.h1}>{t.review.sheetCard}</h1>
+        {!isLoading && !failed && <span className={s.count}>{t.review.sheetCount(words.length)}</span>}
       </header>
       <div className={s.page}>
       {failed ? (

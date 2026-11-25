@@ -48,7 +48,8 @@ describe('SheetPage', () => {
     const apple = await screen.findByRole('article', { name: 'apple' })
     const all = screen.getAllByRole('article')
     expect(all.map((a) => a.getAttribute('aria-label'))).toEqual(['apple', 'river'])
-    expect(screen.getByRole('heading', { name: 'Today · 2 words' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Preview' })).toBeTruthy()
+    expect(screen.getByText('2 words')).toBeTruthy()
     for (const text of ['olma', 'a fruit', '“I ate an apple.”', 'Note', 'sanaladi', 'family', 'Three days']) {
       expect(within(apple).getByText(text)).toBeTruthy()
     }
@@ -75,7 +76,7 @@ describe('SheetPage', () => {
     await screen.findByRole('article', { name: 'apple' })
     expect(screen.queryAllByRole('link')).toEqual([])
     for (const a of screen.getAllByRole('article')) expect(within(a).queryByRole('link')).toBeNull()
-    expect(screen.getByRole('button', { name: /Back/ })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Back' }).querySelector('svg')).toBeTruthy()
   })
 
   test('a failed load offers retry, not "nothing today"', async () => {

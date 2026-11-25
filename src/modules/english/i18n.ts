@@ -30,7 +30,6 @@ export const englishMessages = defineMessages(
       addWord: "So'z qo'shish",
     },
     sheet: {
-      title: (n: number) => `Bugun · ${n} so'z`,
       note: 'Eslatma',
       empty: "Bugun takrorlanadigan so'z yo'q",
       loadFailed: "So'zlarni yuklab bo'lmadi",
@@ -341,7 +340,6 @@ export const englishMessages = defineMessages(
       addWord: 'Add a word',
     },
     sheet: {
-      title: (n: number) => (n === 1 ? 'Today · 1 word' : `Today · ${n} words`),
       note: 'Note',
       empty: 'Nothing to review today',
       loadFailed: "Couldn't load the words",

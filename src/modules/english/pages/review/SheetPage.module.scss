@@ -84,3 +84,10 @@
 }
 
 .noteLabel { font-weight: 600; }
+
+/** The number of words, at the right end of the header. */
+.count {
+  margin-left: auto;
+  font-size: var(--fs-ui);
+  color: var(--fg-muted);
+}
