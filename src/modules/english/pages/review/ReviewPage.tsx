@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import clsx from 'clsx'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Flame, Layers, Play, Plus, RefreshCw, ScrollText, Sparkles, Tag as TagIcon, Volume2, X } from 'lucide-react'
+import { ChevronRight, Flame, Layers, Plus, RefreshCw, ScrollText, Sparkles, Tag as TagIcon, Volume2, X } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { Skeleton } from '@/core/components/ui/Skeleton'
 import { ProgressBar } from '@/core/components/ui/Progress'
@@ -496,22 +496,29 @@ function TagChooser({ tags }: { tags: Tag[] }) {
     )
   }
 
-  const mode = (key: number, name: string, count: string, to: string, Icon: typeof Layers, on: boolean, primary = false) => {
+  const mode = (step: number, name: string, sub: string, to: string, Icon: typeof Layers, on: boolean) => {
     const body = (
       <>
-        <Icon size={18} aria-hidden />
-        <span className={r.actionName}>{name}</span>
-        <span className={r.actionCount}>{count}</span>
+        <span className={r.stepNo} aria-hidden>
+          {step}
+        </span>
+        <span className={r.stepIcon} aria-hidden>
+          <Icon size={20} />
+        </span>
+        <span className={r.stepText}>
+          <span className={r.stepName}>{name}</span>
+          <span className={r.stepSub}>{sub}</span>
+        </span>
+        <ChevronRight size={18} className={r.stepChev} aria-hidden />
       </>
     )
-    const cls = clsx(r.action, primary && r.actionPrimary, !on && r.actionOff)
-    const label = primary ? `${name}: ${t.review.dueToday(Number(count))}` : `${name}: ${t.review.sheetCount(Number(count))}`
+    const label = `${name}: ${sub}`
     return on ? (
-      <Link key={key} to={to} className={cls} aria-label={label}>
+      <Link key={step} to={to} className={r.step} aria-label={label}>
         {body}
       </Link>
     ) : (
-      <div key={key} className={cls} aria-label={label} aria-disabled>
+      <div key={step} className={clsx(r.step, r.stepOff)} aria-label={label} aria-disabled>
         {body}
       </div>
     )
@@ -530,9 +537,9 @@ function TagChooser({ tags }: { tags: Tag[] }) {
       {head}
       {/* Not tags: today's words in two steps, read then recall, as one list
           that looks nothing like the tag cards below. */}
-      <section className={r.actions} aria-label={t.review.todaySteps}>
-        {mode(1, t.review.sheetCard, String(all.length), '/english/review/sheet', ScrollText, all.length > 0)}
-        {mode(2, t.review.allTags, String(all.length), '/english/review?tag=all', Play, all.length > 0, true)}
+      <section className={r.today} aria-label={t.review.todaySteps}>
+        {mode(1, t.review.sheetCard, t.review.sheetCount(all.length), '/english/review/sheet', ScrollText, all.length > 0)}
+        {mode(2, t.review.allTags, t.review.dueToday(all.length), '/english/review?tag=all', Layers, all.length > 0)}
       </section>
       {waiting > 0 && <MoreNewWords queued={waiting} perDay={settings?.newPerDay || 20} onAdd={addExtraNew} />}
       {tags.some((tg) => tg.count > 0) && (

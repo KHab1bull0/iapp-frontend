@@ -560,54 +560,75 @@
   color: var(--fg-muted);
 }
 
-// Today's words: two wide buttons, read first, then the cards. Buttons,
-// not tiles, so they never read as tags.
-.actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--stack-gap);
+// Today's words in two steps (read, then recall): one list panel with
+// numbered rows, unlike the grid of tag tiles below it.
+.today {
+  @include surface;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
 }
 
-.action {
+.step {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 52px;
-  padding: 0 16px;
-  border: 1.5px solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  color: var(--fg-strong);
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 16px;
+  color: inherit;
   text-decoration: none;
-  font-size: var(--fs-ui);
-  font-weight: 600;
-  transition: border-color $t-fast, transform 80ms, filter $t-fast;
+  transition: background $t-fast;
 
-  &:hover { border-color: var(--primary); }
-  &:active { transform: scale(0.98); }
+  & + & { border-top: 1px solid var(--border); }
+  &:hover { background: var(--bg-hover, var(--bg)); }
 }
 
-.actionPrimary {
-  border-color: var(--primary);
-  background: var(--primary);
-  color: var(--primary-fg);
-
-  &:hover { filter: brightness(1.06); }
-}
-
-.actionOff {
-  opacity: 0.5;
+.stepOff {
+  opacity: 0.55;
   cursor: default;
 
-  &:hover { border-color: var(--border-strong); filter: none; }
-  &:active { transform: none; }
+  &:hover { background: transparent; }
 }
 
-.actionName { flex: 1; }
-
-.actionCount {
+.stepNo {
+  flex-shrink: 0;
+  width: 20px;
   font-size: var(--fs-meta);
   font-weight: 700;
-  opacity: 0.75;
+  color: var(--fg-muted);
+  text-align: center;
+}
+
+.stepIcon {
+  @include icon-tile(var(--tile-md));
+  flex-shrink: 0;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.stepText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.stepName {
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 600;
+  color: var(--fg-strong);
+}
+
+.stepSub {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
+.stepChev {
+  flex-shrink: 0;
+  color: var(--fg-muted);
 }
 
 /** Between the actions and the tag cards: a hairline with its label. */
