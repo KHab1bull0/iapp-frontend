@@ -29,6 +29,14 @@ export const englishMessages = defineMessages(
       allDone: "Bugungi so'zlar takrorlandi",
       addWord: "So'z qo'shish",
     },
+    sheet: {
+      title: (n: number) => `Bugun · ${n} so'z`,
+      back: 'Yodlashga qaytish',
+      note: 'Eslatma',
+      empty: "Bugun takrorlanadigan so'z yo'q",
+      loadFailed: "So'zlarni yuklab bo'lmadi",
+      listen: (word: string) => `${word}: eshitish`,
+    },
     review: {
       failed: "Ro'yxatni yuklab bo'lmadi",
       emptySub: "So'zlar o'z kunida ro'yxatga qo'shiladi.",
@@ -332,6 +340,14 @@ export const englishMessages = defineMessages(
       reviewedToday: (n: number) => `${n} answered today`,
       allDone: "Today's words are done",
       addWord: 'Add a word',
+    },
+    sheet: {
+      title: (n: number) => (n === 1 ? 'Today · 1 word' : `Today · ${n} words`),
+      back: 'Back to Memorise',
+      note: 'Note',
+      empty: 'Nothing to review today',
+      loadFailed: "Couldn't load the words",
+      listen: (word: string) => `Hear ${word}`,
     },
     review: {
       failed: 'Failed to load the stack',

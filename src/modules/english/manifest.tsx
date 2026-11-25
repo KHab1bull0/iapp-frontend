@@ -10,6 +10,7 @@ import {
   ImportPage,
   LevelsPage,
   ReviewPage,
+  SheetPage,
   StatsPage,
   TagsPage,
   VocabularyPage,
@@ -30,6 +31,7 @@ export const english: ModuleManifest = {
   routes: [
     { index: true, element: <StatsPage /> },
     { path: 'review', element: <ReviewPage /> },
+    { path: 'review/sheet', element: <SheetPage /> },
     { path: 'vocabulary', element: <VocabularyPage /> },
     // Opened from Vocabulary: many words at once from an Excel file.
     { path: 'import', element: <ImportPage /> },

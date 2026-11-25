@@ -27,6 +27,7 @@ import {
 import { useEnglishT, useGroupName, useLevelName } from '@/modules/english/i18n'
 import { shelve } from '@/modules/english/lib/tags'
 import { useExtraNew } from '@/modules/english/lib/extraNew'
+import { canSpeak, speak } from '@/modules/english/lib/speak'
 import { frontSide, loadDirection, saveDirection, type Direction } from '@/modules/english/lib/direction'
 import { Loading, SkeletonText, Spinner } from '@/modules/english/components/Loading'
 import s from '../EnglishPages.module.scss'
@@ -37,15 +38,6 @@ type Result = 'remembered' | 'forgot'
 /** Every answer in flight shares this key, so the last one to settle can refresh the lot. */
 const ANSWER_KEY = ['english', 'answer'] as const
 
-const canSpeak = () => typeof window !== 'undefined' && 'speechSynthesis' in window
-
-function speak(word: string) {
-  if (!canSpeak()) return
-  window.speechSynthesis.cancel()
-  const u = new SpeechSynthesisUtterance(word)
-  u.lang = 'en-US'
-  window.speechSynthesis.speak(u)
-}
 
 /**
  * English → Review, as a focus mode: the rest of the app steps aside, one

@@ -5,6 +5,7 @@ export const VocabularyPage = lazy(() =>
 )
 export const StatsPage = lazy(() => import('./stats').then((m) => ({ default: m.StatsPage })))
 export const ReviewPage = lazy(() => import('./review').then((m) => ({ default: m.ReviewPage })))
+export const SheetPage = lazy(() => import('./review').then((m) => ({ default: m.SheetPage })))
 export const EnglishSettingsLayout = lazy(() =>
   import('./settings').then((m) => ({ default: m.EnglishSettingsLayout })),
 )
