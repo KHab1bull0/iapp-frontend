@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import clsx from 'clsx'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Flame, Layers, Plus, RefreshCw, Sparkles, Tag as TagIcon, Volume2, X } from 'lucide-react'
+import { Flame, Layers, Plus, RefreshCw, ScrollText, Sparkles, Tag as TagIcon, Volume2, X } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { Skeleton } from '@/core/components/ui/Skeleton'
 import { ProgressBar } from '@/core/components/ui/Progress'
@@ -68,11 +68,18 @@ export function ReviewPage() {
   // the levels for its card and chips, and finds them on their way.
   useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
 
+  // The chooser also needs to know whether today has words at all (the stack
+  // is the same one the session and the chooser's cards read).
+  const { data: stack, isLoading: stackLoading } = useQuery({
+    queryKey: englishKeys.review(today, undefined, extraNew),
+    queryFn: () => fetchReview(today, undefined, extraNew),
+    enabled: !tag,
+  })
   // A tag in the address means a session; else most likely the tag cards.
-  if (isLoading) return tag ? <SessionSkeleton /> : <ChooserSkeleton />
-  // The tag cards come first once a tag has words; until then, straight in.
+  if (isLoading || (!tag && stackLoading)) return tag ? <SessionSkeleton /> : <ChooserSkeleton />
+  // The cards come first once a tag has words or today has any; until then, straight in.
   const worn = (tags ?? []).some((tg) => tg.count > 0)
-  if (!tag && worn) return <TagChooser tags={tags ?? []} />
+  if (!tag && (worn || (stack?.length ?? 0) > 0)) return <TagChooser tags={tags ?? []} />
   const tagId = tag && tag !== 'all' ? tag : undefined
   return <ReviewSession key={tag ?? 'all'} tagId={tagId} tagName={tags?.find((tg) => tg.id === tagId)?.name} />
 }
@@ -465,7 +472,15 @@ function TagChooser({ tags }: { tags: Tag[] }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [navigate])
 
-  const card = (key: string, name: string, due: number, total: number | null, to: string, icon = TagIcon) => {
+  const card = (
+    key: string,
+    name: string,
+    due: number,
+    total: number | null,
+    to: string,
+    icon = TagIcon,
+    sub?: string,
+  ) => {
     const Icon = icon
     const body = (
       <>
@@ -473,11 +488,11 @@ function TagChooser({ tags }: { tags: Tag[] }) {
           <Icon size={18} />
         </span>
         <span className={r.tagCardName}>{name}</span>
-        <span className={clsx(r.tagCardDue, due > 0 && r.tagCardDueOn)}>{t.review.dueToday(due)}</span>
+        <span className={clsx(r.tagCardDue, due > 0 && r.tagCardDueOn)}>{sub ?? t.review.dueToday(due)}</span>
         {total !== null && <span className={r.tagCardTotal}>{t.review.ofTotal(total)}</span>}
       </>
     )
-    const label = total === null ? `${name}: ${t.review.dueToday(due)}` : t.review.tagCard(name, due, total)
+    const label = total === null ? `${name}: ${sub ?? t.review.dueToday(due)}` : t.review.tagCard(name, due, total)
     return due > 0 ? (
       <Link key={key} to={to} className={r.tagCard} aria-label={label}>
         {body}
@@ -501,7 +516,10 @@ function TagChooser({ tags }: { tags: Tag[] }) {
     <div className={s.page}>
       {head}
       {waiting > 0 && <MoreNewWords queued={waiting} perDay={settings?.newPerDay || 20} onAdd={addExtraNew} />}
-      <div className={r.tagGrid}>{card('all', t.review.allTags, all.length, null, '/english/review?tag=all', Layers)}</div>
+      <div className={r.tagGrid}>
+        {card('all', t.review.allTags, all.length, null, '/english/review?tag=all', Layers)}
+        {card('sheet', t.review.sheetCard, all.length, null, '/english/review/sheet', ScrollText, t.review.sheetCount(all.length))}
+      </div>
       {shelve(
         tags.filter((tg) => tg.count > 0),
         groups,

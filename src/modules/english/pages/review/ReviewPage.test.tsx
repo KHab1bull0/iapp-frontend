@@ -19,7 +19,7 @@ const api = vi.hoisted(() => ({
 }))
 vi.mock('@/modules/english/api/english', async (orig) => ({ ...(await orig<object>()), ...api }))
 
-function renderPage(path = '/english/review') {
+function renderPage(path = '/english/review?tag=all') {
   render(
     <QueryClientProvider client={new QueryClient()}>
       <MemoryRouter initialEntries={[path]}>
@@ -53,7 +53,7 @@ describe('ReviewPage', () => {
     })
 
     test('All, then each worn tag by group with due today and in all; nothing due cannot be opened', async () => {
-      renderPage()
+      renderPage('/english/review')
       expect(await screen.findByRole('heading', { name: 'What shall we review?' })).toBeTruthy()
       const all = await screen.findByRole('link', { name: 'All: 2 today' })
       expect(all.getAttribute('href')).toBe('/english/review?tag=all')
@@ -68,7 +68,7 @@ describe('ReviewPage', () => {
 
     test('words still waiting can be brought into today from the tag cards (+10 / +20 / +50)', async () => {
       api.fetchSummary.mockResolvedValue({ due: 0, queued: 900, newLeft: 0 })
-      renderPage()
+      renderPage('/english/review')
       const more = await screen.findByRole('region', { name: "Add more new words to today's review" })
       expect(within(more).getByText('900 words not learned yet')).toBeTruthy()
       fireEvent.click(within(more).getByRole('button', { name: '20 more new words' }))
@@ -236,7 +236,7 @@ describe('ReviewPage', () => {
     test('with tags, the chooser keeps its heading and draws the cards until groups and counts arrive', async () => {
       api.fetchTags.mockResolvedValue([tag('t1', 'family', { count: 10, due: 3 })])
       api.fetchGroups.mockReturnValue(pending())
-      renderPage()
+      renderPage('/english/review')
       expect(await screen.findByRole('heading', { name: 'What shall we review?' })).toBeTruthy()
       expect(loadingRegion()).toBeTruthy()
       expect(screen.queryByRole('link', { name: /family/ })).toBeNull()
@@ -294,6 +294,27 @@ describe('ReviewPage', () => {
       await waitFor(() => expect(api.answerWord).toHaveBeenCalled())
       expect(await screen.findByText('apple')).toBeTruthy()
       expect(screen.getByText('2 to go')).toBeTruthy()
+    })
+  })
+
+  describe('the Preview card', () => {
+    test("without tags, today's words still open on the chooser, with All and Preview", async () => {
+      renderPage('/english/review')
+      const all = await screen.findByRole('link', { name: /All/ })
+      expect(all.getAttribute('href')).toBe('/english/review?tag=all')
+      const sheet = screen.getByRole('link', { name: /Preview/ })
+      expect(sheet.getAttribute('href')).toBe('/english/review/sheet')
+      expect(sheet.textContent).toContain('2 words')
+      expect(screen.queryByRole('button', { name: 'Show' })).toBeNull()
+    })
+
+    test('with nothing today, Preview cannot be opened', async () => {
+      api.fetchReview.mockResolvedValue([])
+      api.fetchTags.mockResolvedValue([tag('t1', 'family', { count: 10, due: 0 })])
+      renderPage('/english/review')
+      const card = (await screen.findByText('Preview')).closest('[aria-disabled]')
+      expect(card).toBeTruthy()
+      expect(screen.queryByRole('link', { name: /Preview/ })).toBeNull()
     })
   })
 })
