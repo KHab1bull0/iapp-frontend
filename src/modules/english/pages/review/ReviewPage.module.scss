@@ -559,3 +559,69 @@
   margin-right: 6px;
   color: var(--fg-muted);
 }
+
+// Today's words: two wide buttons, read first, then the cards. Buttons,
+// not tiles, so they never read as tags.
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--stack-gap);
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 52px;
+  padding: 0 16px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--fg-strong);
+  text-decoration: none;
+  font-size: var(--fs-ui);
+  font-weight: 600;
+  transition: border-color $t-fast, transform 80ms, filter $t-fast;
+
+  &:hover { border-color: var(--primary); }
+  &:active { transform: scale(0.98); }
+}
+
+.actionPrimary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-fg);
+
+  &:hover { filter: brightness(1.06); }
+}
+
+.actionOff {
+  opacity: 0.5;
+  cursor: default;
+
+  &:hover { border-color: var(--border-strong); filter: none; }
+  &:active { transform: none; }
+}
+
+.actionName { flex: 1; }
+
+.actionCount {
+  font-size: var(--fs-meta);
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+/** Between the actions and the tag cards: a hairline with its label. */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  @include section-label;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+}

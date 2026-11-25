@@ -52,10 +52,10 @@ describe('ReviewPage', () => {
       api.fetchGroups.mockResolvedValue([group('g1', 'Parts of speech')])
     })
 
-    test('All, then each worn tag by group with due today and in all; nothing due cannot be opened', async () => {
+    test('Preview and Memorise, then each worn tag by group with due today and in all; nothing due cannot be opened', async () => {
       renderPage('/english/review')
       expect(await screen.findByRole('heading', { name: 'What shall we review?' })).toBeTruthy()
-      const all = await screen.findByRole('link', { name: 'All: 2 today' })
+      const all = await screen.findByRole('link', { name: 'Memorise: 2 today' })
       expect(all.getAttribute('href')).toBe('/english/review?tag=all')
       const family = screen.getByRole('link', { name: 'family: 3 due today, 10 in all' })
       expect(family.getAttribute('href')).toBe('/english/review?tag=t1')
@@ -298,13 +298,15 @@ describe('ReviewPage', () => {
   })
 
   describe('the Preview card', () => {
-    test("without tags, today's words still open on the chooser, with All and Preview", async () => {
+    test("without tags, today's words still open on the chooser, with Preview first, then Memorise", async () => {
       renderPage('/english/review')
-      const all = await screen.findByRole('link', { name: /All/ })
+      const all = await screen.findByRole('link', { name: /Memorise/ })
       expect(all.getAttribute('href')).toBe('/english/review?tag=all')
       const sheet = screen.getByRole('link', { name: /Preview/ })
+      // Preview first: read the words, then go to the cards.
+      expect(sheet.compareDocumentPosition(all) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
       expect(sheet.getAttribute('href')).toBe('/english/review/sheet')
-      expect(sheet.textContent).toContain('2 words')
+      expect(sheet.getAttribute('aria-label')).toBe('Preview: 2 words')
       expect(screen.queryByRole('button', { name: 'Show' })).toBeNull()
     })
 
