@@ -5,30 +5,6 @@
   @include page;
 }
 
-.back {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border: none;
-  background: transparent;
-  padding: 0;
-  font: inherit;
-  font-size: var(--fs-ui);
-  color: var(--fg-muted);
-  cursor: pointer;
-
-  &:hover { color: var(--fg-strong); }
-}
-
-.title {
-  margin: 0;
-  font-size: var(--fs-h1);
-  line-height: var(--lh-h1);
-  font-weight: 700;
-  color: var(--fg-strong);
-}
-
 .list {
   display: flex;
   flex-direction: column;

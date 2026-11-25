@@ -11,6 +11,7 @@ import { useExtraNew } from '@/modules/english/lib/extraNew'
 import { canSpeak, speak } from '@/modules/english/lib/speak'
 import { Skeleton } from '@/core/components/ui/Skeleton'
 import { Loading } from '@/modules/english/components/Loading'
+import shell from '@/modules/tasks/pages/form/TaskFormPage.module.scss'
 import s from './SheetPage.module.scss'
 
 /**
@@ -49,9 +50,13 @@ export function SheetPage() {
   }
 
   return (
-    <div className={s.page}>
-      <BackButton fallback="/english/review" className={s.back} label={t.sheet.back} />
-      <h1 className={s.title}>{isLoading || failed ? t.review.sheetCard : t.sheet.title(words.length)}</h1>
+    <div className={shell.page}>
+      {/* Sticks to the top, as the task and transaction pages' header does. */}
+      <header className={shell.head}>
+        <BackButton fallback="/english/review" className={shell.backBtn} />
+        <h1 className={shell.h1}>{isLoading || failed ? t.review.sheetCard : t.sheet.title(words.length)}</h1>
+      </header>
+      <div className={s.page}>
       {failed ? (
         <EmptyState
           title={t.sheet.loadFailed}
@@ -99,6 +104,7 @@ export function SheetPage() {
           })}
         </div>
       )}
+      </div>
     </div>
   )
 }
