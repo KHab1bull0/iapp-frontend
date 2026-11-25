@@ -24,10 +24,13 @@ export function SheetPage() {
   const navigate = useNavigate()
   const levelLabel = useLevelName()
   const [extraNew] = useExtraNew(today)
-  const { data: words = [], isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: englishKeys.review(today, undefined, extraNew),
     queryFn: () => fetchReview(today, undefined, extraNew),
   })
+  // A failed refresh keeps what is already on the page; only a first load can fail it.
+  const words = data ?? []
+  const failed = isError && !data
   const { data: levels = [] } = useQuery({ queryKey: englishKeys.levels, queryFn: fetchLevels })
   const { data: tags = [] } = useQuery({
     queryKey: englishKeys.tags(today, extraNew),
@@ -48,8 +51,8 @@ export function SheetPage() {
   return (
     <div className={s.page}>
       <BackButton fallback="/english/review" className={s.back} label={t.sheet.back} />
-      <h1 className={s.title}>{isLoading || isError ? t.review.sheetCard : t.sheet.title(words.length)}</h1>
-      {isError ? (
+      <h1 className={s.title}>{isLoading || failed ? t.review.sheetCard : t.sheet.title(words.length)}</h1>
+      {failed ? (
         <EmptyState
           title={t.sheet.loadFailed}
           action={{ label: t.retry, icon: RefreshCw, onClick: () => void refetch() }}

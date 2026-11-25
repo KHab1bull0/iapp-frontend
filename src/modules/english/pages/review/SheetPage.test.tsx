@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { todayYmd } from '@/core/lib/format'
@@ -14,13 +14,15 @@ const api = vi.hoisted(() => ({
 vi.mock('@/modules/english/api/english', async (orig) => ({ ...(await orig<object>()), ...api }))
 
 function renderPage() {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+    <QueryClientProvider client={qc}>
       <MemoryRouter initialEntries={['/english/review/sheet']}>
         <SheetPage />
       </MemoryRouter>
     </QueryClientProvider>,
   )
+  return qc
 }
 
 describe('SheetPage', () => {
@@ -90,5 +92,19 @@ describe('SheetPage', () => {
     renderPage()
     expect(await screen.findByText('Nothing to review today')).toBeTruthy()
     expect(screen.queryAllByRole('link')).toEqual([])
+  })
+
+  test('a failed refresh keeps the words already on the page', async () => {
+    const qc = renderPage()
+    await screen.findByRole('article', { name: 'apple' })
+    api.fetchReview.mockRejectedValueOnce(new Error('offline'))
+    await act(async () => {
+      await qc.refetchQueries()
+    })
+    expect(api.fetchReview).toHaveBeenCalledTimes(2)
+    await waitFor(() => expect(qc.getQueryCache().getAll().some((q) => q.state.status === 'error')).toBe(true))
+    await act(async () => {})
+    expect(screen.getByRole('article', { name: 'apple' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull()
   })
 })
