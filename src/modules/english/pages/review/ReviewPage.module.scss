@@ -631,18 +631,11 @@
   color: var(--fg-muted);
 }
 
-/** Between the actions and the tag cards: a hairline with its label. */
+/** Between the actions and the tag cards: a hairline. */
 .divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  @include section-label;
-
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+  width: 100%;
+  height: 1px;
+  margin: 0;
+  border: none;
+  background: var(--border);
 }

@@ -543,9 +543,7 @@ function TagChooser({ tags }: { tags: Tag[] }) {
       </section>
       {waiting > 0 && <MoreNewWords queued={waiting} perDay={settings?.newPerDay || 20} onAdd={addExtraNew} />}
       {tags.some((tg) => tg.count > 0) && (
-        <div className={r.divider} role="separator">
-          <span>{t.review.byTag}</span>
-        </div>
+        <hr className={r.divider} />
       )}
       {shelve(
         tags.filter((tg) => tg.count > 0),
