@@ -1,0 +1,116 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 84px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--fg-strong);
+  font: inherit;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  resize: vertical;
+
+  &:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+}
+
+.kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kind {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-meta);
+  cursor: pointer;
+}
+
+.kindOn {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+
+  & + & { border-top: 1px solid var(--border); }
+}
+
+/** The user's words exactly as written: their line breaks and spaces. */
+.text {
+  margin: 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  color: var(--fg-strong);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kindLabel {
+  margin-right: auto;
+  font-size: var(--fs-caption);
+  color: var(--fg-muted);
+}
+
+.iconBtn {
+  @include touch-target(6px);
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+
+  & + & { margin-left: 0; }
+  &:hover { color: var(--fg-strong); }
+}
+
+.kindLabel + .iconBtn { margin-left: 0; }
+
+.hint {
+  margin: 0;
+  color: var(--fg-muted);
+}

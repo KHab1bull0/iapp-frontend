@@ -9,6 +9,7 @@ import { HomePage } from '@/pages/home'
 import {
   AboutPage,
   NotificationsPage,
+  InspirationsPage,
   PreferencesPage,
   ProfilePage,
   SecurityPage,
@@ -49,6 +50,7 @@ export function buildRoutes(modules: ModuleManifest[]): RouteObject[] {
                 { path: 'profile', element: <ProfilePage /> },
                 { path: 'security', element: <SecurityPage /> },
                 { path: 'preferences', element: <PreferencesPage /> },
+                { path: 'inspirations', element: <InspirationsPage /> },
                 { path: 'notifications', element: <NotificationsPage /> },
                 { path: 'about', element: <AboutPage /> },
               ],

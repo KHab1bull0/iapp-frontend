@@ -14,7 +14,12 @@ describe('settingsNav', () => {
       { title: 'Account', items: ['Profile /settings/profile', 'Security /settings/security'] },
       {
         title: 'App',
-        items: ['Preferences /settings/preferences', 'Notifications /settings/notifications', 'About /settings/about'],
+        items: [
+          'Preferences /settings/preferences',
+          'Inspiration /settings/inspirations',
+          'Notifications /settings/notifications',
+          'About /settings/about',
+        ],
       },
     ])
   })
