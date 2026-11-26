@@ -1,5 +1,7 @@
+import clsx from 'clsx'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { CircleCheckBig, Plus, RefreshCw } from 'lucide-react'
+import { ChevronDown, CircleCheckBig, Plus, RefreshCw } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { ProgressRing } from '@/core/components/ui/Progress'
 import { Skeleton } from '@/core/components/ui/Skeleton'
@@ -13,7 +15,8 @@ import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { TaskRow } from '@/modules/tasks/components/TaskRow'
 import { HeatmapSkeleton, LoadingLabel, SectionSkeleton } from '@/modules/tasks/components/skeletons'
 import { byTime } from '@/modules/tasks/lib/repeat'
-import { clusterByGroup } from '@/modules/tasks/lib/byGroup'
+import { byGroup, clusterByGroup } from '@/modules/tasks/lib/byGroup'
+import { loadCollapsed, saveCollapsed } from '@/modules/tasks/lib/collapsedGroups'
 import { PastSection } from '@/modules/tasks/components/PastSection'
 import { useTaskEditor } from '@/modules/tasks/useTaskEditor'
 import { useCompleteTask } from '@/modules/tasks/useCompleteTask'
@@ -68,6 +71,14 @@ export function TodayPage() {
   // within a group, anything with a time goes first, by the clock.
   const self = (t: Task) => t
   const dueToday = clusterByGroup(byTime(allDue), groups, self)
+  // Today's tasks by group, each part foldable; null when none is in a group.
+  const parts = byGroup(byTime(allDue), groups, m.group.none)
+  const [collapsed, setCollapsed] = useState(loadCollapsed)
+  const toggle = (key: string) => {
+    const next = collapsed.includes(key) ? collapsed.filter((k) => k !== key) : [...collapsed, key]
+    setCollapsed(next)
+    saveCollapsed(next)
+  }
   const done = clusterByGroup(allDone, groups, (d) => d.task)
   // Days that passed stay passed: folded away at the end, without red.
   const past = clusterByGroup(data?.overdue ?? [], groups, self)
@@ -179,7 +190,32 @@ export function TodayPage() {
                 <span className={s.count}>{dueToday.length}</span>
               </div>
               <div className={s.list}>
-                {dueToday.map(row)}
+                {parts
+                  ? parts.map((part) => {
+                      const open = !collapsed.includes(part.key)
+                      const color = part.key === 'none' ? null : groupColorMap.get(part.key)
+                      return (
+                        <div key={part.key} className={s.groupPart}>
+                          <button
+                            type="button"
+                            className={s.groupHead}
+                            aria-expanded={open}
+                            onClick={() => toggle(part.key)}
+                          >
+                            <span
+                              className={s.groupDot}
+                              style={color ? { background: color } : undefined}
+                              aria-hidden
+                            />
+                            <span className={s.groupName}>{part.label}</span>
+                            <span className={s.groupCount}>{part.tasks.length}</span>
+                            <ChevronDown size={16} className={clsx(s.groupChev, !open && s.groupChevClosed)} aria-hidden />
+                          </button>
+                          {open && part.tasks.map(row)}
+                        </div>
+                      )
+                    })
+                  : dueToday.map(row)}
               </div>
             </section>
           )}

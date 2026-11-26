@@ -190,9 +190,6 @@ describe('TodayPage', () => {
       ).toEqual(['Complete E', 'Complete B', 'Complete X', 'Complete U']),
     )
     const btns = screen.getAllByRole('button', { name: /^Complete / })
-    // No group-label sub-sections.
-    expect(screen.queryByText('Work')).toBeNull()
-    expect(screen.queryByText('No group')).toBeNull()
     // The rows with a colour have --accent set on their wrapper.
     const eWrap = btns[0].closest('[style]')
     const bWrap = btns[1].closest('[style]')
@@ -200,5 +197,59 @@ describe('TodayPage', () => {
     expect(bWrap?.getAttribute('style')).toContain('--accent: #86efac')
     // A task with no group has no style attribute.
     expect(btns[3].closest('[style]')).toBeNull()
+  })
+
+  describe('collapsing a group', () => {
+    const KEY = 'iapp-today-collapsed'
+    beforeEach(() => {
+      localStorage.removeItem(KEY)
+      groupsApi.fetchGroups.mockResolvedValue([
+        { id: 'g1', name: 'Work', color: '#93c5fd', createdAt: '' },
+        { id: 'g2', name: 'Home', color: '#86efac', createdAt: '' },
+      ])
+      api.fetchToday.mockResolvedValue({
+        overdue: [],
+        today: [t('e', { groupId: 'g1' }), t('b', { groupId: 'g2' }), t('u')],
+        doneToday: [],
+      })
+    })
+
+    test('each group has a header that folds its tasks away and back', async () => {
+      renderPage()
+      const work = await screen.findByRole('button', { name: /Work/ })
+      expect(work.getAttribute('aria-expanded')).toBe('true')
+      expect(screen.getByRole('button', { name: /No group/ })).toBeTruthy()
+      fireEvent.click(work)
+      expect(work.getAttribute('aria-expanded')).toBe('false')
+      expect(screen.queryByRole('button', { name: 'Complete E' })).toBeNull()
+      expect(screen.getByRole('button', { name: 'Complete B' })).toBeTruthy()
+      fireEvent.click(work)
+      expect(screen.getByRole('button', { name: 'Complete E' })).toBeTruthy()
+    })
+
+    test('a folded group stays folded the next time the page opens', async () => {
+      const first = renderPage()
+      fireEvent.click(await screen.findByRole('button', { name: /Home/ }))
+      expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual(['g2'])
+      first.unmount()
+      renderPage()
+      const home = await screen.findByRole('button', { name: /Home/ })
+      expect(home.getAttribute('aria-expanded')).toBe('false')
+      expect(screen.queryByRole('button', { name: 'Complete B' })).toBeNull()
+      expect(screen.getByRole('button', { name: 'Complete E' })).toBeTruthy()
+    })
+
+    test('with no task in a group, the list stays plain', async () => {
+      api.fetchToday.mockResolvedValue({ overdue: [], today: [t('u'), t('v')], doneToday: [] })
+      renderPage()
+      await screen.findByRole('button', { name: 'Complete U' })
+      expect(screen.queryByRole('button', { name: /No group/ })).toBeNull()
+    })
+
+    test('a broken saved value is ignored', async () => {
+      localStorage.setItem(KEY, '{nope')
+      renderPage()
+      expect((await screen.findByRole('button', { name: /Work/ })).getAttribute('aria-expanded')).toBe('true')
+    })
   })
 })
