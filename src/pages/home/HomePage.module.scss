@@ -32,20 +32,21 @@
   @include bp-desktop { display: none; }
 }
 
-/** The user's own words for the day, under the greeting. */
+/** The user's own words for the day, under the greeting: icon beside the text, as a card's corners. */
 .inspiration {
-  position: relative;
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  column-gap: 12px;
   margin: 0;
   min-height: 56px;
-  padding: 14px 16px 14px 44px;
-  border-radius: var(--radius-lg, 16px);
+  padding: var(--card-pad);
+  border-radius: var(--radius-lg);
   background: var(--primary-soft);
 }
 
 .inspirationIcon {
-  position: absolute;
-  top: 16px;
-  left: 16px;
+  // Centred on the first line of text.
+  margin-top: calc((var(--lh-ui) - 16px) / 2);
   color: var(--primary);
 }
 
@@ -61,6 +62,7 @@
 }
 
 .inspirationKind {
+  grid-column: 2;
   margin-top: 4px;
   font-size: var(--fs-caption);
   color: var(--fg-muted);
