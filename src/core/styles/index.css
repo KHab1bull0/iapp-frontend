@@ -124,7 +124,7 @@
   --glass-bg: color-mix(in srgb, var(--bg-elev) 38%, transparent);
   --glass-filter: blur(20px) saturate(200%);
   /* Room left under the content so its last row clears the bottom bar and the "+" above it. */
-  --fab-clearance: calc(var(--bottom-nav-h) + var(--control-lg) + 32px);
+  --fab-clearance: calc(var(--bottom-nav-h) + 56px + 32px);
 }
 
 @media (min-width: 768px) {
