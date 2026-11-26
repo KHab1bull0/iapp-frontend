@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useState } from 'react'
+import type React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, CircleCheckBig, Plus, RefreshCw } from 'lucide-react'
 import { EmptyState } from '@/core/components/ui/EmptyState'
@@ -202,12 +203,8 @@ export function TodayPage() {
                             className={s.groupHead}
                             aria-expanded={open}
                             onClick={() => toggle(part.key)}
+                            style={color ? ({ '--accent': color } as React.CSSProperties) : undefined}
                           >
-                            <span
-                              className={s.groupDot}
-                              style={color ? { background: color } : undefined}
-                              aria-hidden
-                            />
                             <span className={s.groupName}>{part.label}</span>
                             <span className={s.groupCount}>{part.tasks.length}</span>
                             <ChevronDown size={16} className={clsx(s.groupChev, !open && s.groupChevClosed)} aria-hidden />

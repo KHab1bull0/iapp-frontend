@@ -169,6 +169,7 @@
 
 // Today's group header: dot, name, count and a chevron; tap to fold the group.
 .groupHead {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -186,14 +187,17 @@
 
   &:hover { color: var(--fg-strong); }
   &:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
-}
 
-.groupDot {
-  flex-shrink: 0;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-pill);
-  background: var(--border-strong);
+  // The group's colour as the same 3 px stripe its rows carry, so it runs on unbroken.
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent, transparent);
+  }
 }
 
 .groupName {
