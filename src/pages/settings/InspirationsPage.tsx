@@ -124,7 +124,7 @@ function Entry({ entry }: { entry: Inspiration }) {
   )
 }
 
-/** Settings → Ilhom: the user's own words, shown on Home and in reminders. */
+/** Settings → Eslatmalar: the user's own words, shown on Home and in reminders. */
 export function InspirationsPage() {
   const core = useCoreT()
   const t = core.settings.inspiration
