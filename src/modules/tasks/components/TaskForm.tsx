@@ -143,8 +143,9 @@ export function TaskForm({ task, onSaved, onCancel, onDeleted, onLeave }: Props)
     <form className={s.form} onSubmit={submit}>
       <label className={s.field}>
         <span className={s.label}>{t.form.title}</span>
-        {/* Wraps instead of hiding a long title; still one line of text, Enter saves. */}
+        {/* Keeps the user's line breaks: Enter adds a line, Ctrl/Cmd+Enter saves. */}
         <GrowingInput
+          multiline
           className={clsx(s.input, s.textarea)}
           value={title}
           onChange={setTitle}

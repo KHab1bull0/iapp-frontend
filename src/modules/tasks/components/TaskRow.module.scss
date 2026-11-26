@@ -96,7 +96,9 @@
   color: var(--fg-strong);
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  // The title's own line breaks, as typed.
+  white-space: pre-line;
+  overflow-wrap: anywhere;
   transition: color $t-base;
 
   .done & {

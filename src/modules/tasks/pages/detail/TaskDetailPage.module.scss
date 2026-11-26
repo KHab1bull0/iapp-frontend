@@ -42,6 +42,8 @@
   line-height: var(--lh-title);
   font-weight: 600;
   color: var(--fg-strong);
+  // The title's own line breaks, as typed.
+  white-space: pre-line;
   overflow-wrap: anywhere;
 }
 

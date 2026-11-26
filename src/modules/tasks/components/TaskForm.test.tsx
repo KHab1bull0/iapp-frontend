@@ -52,7 +52,7 @@ describe('TaskForm', () => {
     await waitFor(() => expect(onSaved).toHaveBeenCalled())
   })
 
-  test('title and note are one-row textareas; the title keeps to one line and Enter saves', async () => {
+  test('the title keeps its line breaks: Enter is a new line, Ctrl/Cmd+Enter saves', async () => {
     renderForm()
     const title = screen.getByLabelText('Title') as HTMLTextAreaElement
     const note = screen.getByLabelText('Note') as HTMLTextAreaElement
@@ -60,14 +60,18 @@ describe('TaskForm', () => {
     expect(title.rows).toBe(1)
     expect(note.tagName).toBe('TEXTAREA')
     expect(note.rows).toBe(1)
-    // Pasted line breaks become spaces.
-    fireEvent.change(title, { target: { value: 'Call\nmum' } })
-    expect(title.value).toBe('Call mum')
-    // Enter saves instead of adding a line; Shift+Enter is left alone.
+    fireEvent.change(title, { target: { value: 'Hisobot\nyozish' } })
+    expect(title.value).toBe('Hisobot\nyozish')
+    // Enter adds a line (the browser's own), it does not save.
     fireEvent.keyDown(title, { key: 'Enter' })
+    expect(api.createTask).not.toHaveBeenCalled()
+    fireEvent.keyDown(title, { key: 'Enter', ctrlKey: true })
     await waitFor(() =>
-      expect(api.createTask).toHaveBeenCalledWith(expect.objectContaining({ title: 'Call mum' })),
+      expect(api.createTask).toHaveBeenCalledWith(expect.objectContaining({ title: 'Hisobot\nyozish' })),
     )
+    api.createTask.mockClear()
+    fireEvent.keyDown(title, { key: 'Enter', metaKey: true })
+    await waitFor(() => expect(api.createTask).toHaveBeenCalled())
   })
 
   test('repeat is one row of dropdowns: every N and the unit only when it repeats', () => {
