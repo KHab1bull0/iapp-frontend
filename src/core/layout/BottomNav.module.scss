@@ -1,6 +1,8 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
+// iOS "Liquid Glass": a capsule floating clear of the edges, frosted glass
+// over the page (blur + saturation), a thin light rim and a soft shadow.
 .bottomnav {
   view-transition-name: bottom-nav;
   display: none;
@@ -8,33 +10,26 @@
   @include bp-tablet {
     display: grid;
     // Column count is set inline from the number of items.
+    align-items: center;
 
-    // THE fix for the dead band underneath this bar.
-    //
-    // It used to be the last child of a column locked to 100dvh, so it only
-    // landed on the bottom edge if that height was exactly the visible
-    // viewport. On mobile it is not, and the leftover showed as a strip of
-    // page background below the nav with the layout pushed off the top.
-    //
-    // position:fixed hands the job to the browser: it anchors the element to
-    // the bottom of the visible viewport itself, so no gap can open under it
-    // no matter what any viewport unit reports.
+    // position:fixed anchors it to the visible viewport, so no band can open
+    // under it whatever the viewport units report.
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: calc(12px + var(--safe-left));
+    right: calc(12px + var(--safe-right));
+    bottom: var(--bottom-nav-gap);
     z-index: 40;
 
-    height: var(--bottom-nav-h);
-    background: color-mix(in srgb, var(--bg-elev) 92%, transparent);
-    backdrop-filter: saturate(180%) blur(16px);
-    -webkit-backdrop-filter: saturate(180%) blur(16px);
-    border-top: 1px solid var(--border);
-    // The inset is inside the height above, so the bar reads as 56px of
-    // controls sitting clear of the home indicator.
-    padding-bottom: var(--safe-bottom);
-    padding-left: var(--safe-left);
-    padding-right: var(--safe-right);
+    height: 62px;
+    padding: 4px;
+    border-radius: $radius-pill;
+    background: color-mix(in srgb, var(--bg-elev) 58%, transparent);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
+    border: 1px solid color-mix(in srgb, var(--fg-strong) 12%, transparent);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 10px 30px rgba(0, 0, 0, 0.28);
   }
 }
 
@@ -44,7 +39,7 @@
 }
 
 .hidden {
-  transform: translateY(100%);
+  transform: translateY(calc(100% + var(--bottom-nav-gap) + 8px));
 }
 
 .bnavItem {
@@ -52,22 +47,36 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  height: 56px;
+  gap: 3px;
+  height: 52px;
+  border-radius: $radius-pill;
   background: transparent;
   border: none;
   color: var(--fg-muted);
   font-family: inherit;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
-  // Inherited from body as a computed 22px, so an 11px label reserved a 22px
-  // line box — 11px of dead space per item, which made the bar read as though
-  // it had been shoved upwards.
+  // Inherited from body as a computed 22px otherwise: dead space under labels.
   line-height: 1;
   width: 100%;
+  min-width: 0;
   text-decoration: none;
+  transition: background $t-fast, color $t-fast;
 
-  &.active { color: var(--primary); font-weight: 600; }
+  > span:last-child {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // The current page sits in a lens of brighter glass.
+  &.active {
+    color: var(--primary);
+    font-weight: 600;
+    background: color-mix(in srgb, var(--fg-strong) 9%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
 }
 
 .iconWrap {
@@ -103,16 +112,21 @@
     display: grid;
     place-items: center;
     position: fixed;
-    right: calc(16px + var(--safe-right));
-    bottom: calc(var(--bottom-nav-h) + 16px);
+    right: calc(14px + var(--safe-right));
+    bottom: calc(var(--bottom-nav-h) + 12px);
     z-index: 41;
     width: var(--control-lg);
     height: var(--control-lg);
-    border: none;
+    // A drop of the same glass, tinted green: rim light and a soft shadow.
+    border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: $radius-pill;
-    background: var(--primary);
+    background: color-mix(in srgb, var(--primary) 88%, transparent);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     color: var(--primary-fg);
-    box-shadow: 0 6px 18px rgba(21, 128, 61, 0.35);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 8px 22px rgba(21, 128, 61, 0.35);
     cursor: pointer;
     transition:
       transform $t-slow var(--ease-house),
@@ -124,6 +138,6 @@
 }
 
 .addHidden {
-  transform: translateX(calc(100% + 16px + var(--safe-right)));
+  transform: translateX(calc(100% + 14px + var(--safe-right)));
   pointer-events: none;
 }

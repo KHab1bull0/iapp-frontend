@@ -114,8 +114,10 @@
   --safe-left:   env(safe-area-inset-left, 0px);
   --safe-right:  env(safe-area-inset-right, 0px);
 
-  /* Bottom nav: 56px of content plus the device's safe zone. */
-  --bottom-nav-h: calc(56px + var(--safe-bottom));
+  /* Bottom nav: a floating 62px glass capsule above the home indicator (at
+     least 12px off the bottom edge). This is the room it takes from the bottom. */
+  --bottom-nav-gap: max(var(--safe-bottom), 12px);
+  --bottom-nav-h: calc(62px + var(--bottom-nav-gap));
   /* Mobile header: 56px of content plus the status-bar zone. */
   --mobile-header-h: calc(56px + var(--safe-top));
   /* Room left under the content so its last row clears the bottom bar and the "+" above it. */
