@@ -8,6 +8,7 @@ import { formatFullDate } from '@/core/lib/format'
 import { MODULES } from '@/modules/registry'
 import { useText } from '@/core/i18n'
 import { useCoreT } from '@/core/i18n/useCoreT'
+import { TodayInspiration } from './TodayInspiration'
 import s from './HomePage.module.scss'
 
 // The report's own order: money first, then the day's tasks, then the rest
@@ -47,6 +48,7 @@ export function HomePage() {
           </Link>
         }
       />
+      <TodayInspiration />
       <div className={s.grid}>
         {HOME_MODULES.map(({ id, name, homeCard: Card }) =>
           Card ? (

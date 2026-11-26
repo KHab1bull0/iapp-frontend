@@ -31,3 +31,47 @@
   // Desktop has Settings in the sidebar.
   @include bp-desktop { display: none; }
 }
+
+/** The user's own words for the day, under the greeting. */
+.inspiration {
+  position: relative;
+  margin: 0;
+  min-height: 56px;
+  padding: 14px 16px 14px 44px;
+  border-radius: var(--radius-lg, 16px);
+  background: var(--primary-soft);
+}
+
+.inspirationIcon {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  color: var(--primary);
+}
+
+/** As written: the user's own line breaks and spaces. */
+.inspirationText {
+  margin: 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 600;
+  color: var(--fg-strong);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.inspirationKind {
+  margin-top: 4px;
+  font-size: var(--fs-caption);
+  color: var(--fg-muted);
+}
+
+.inspirationEmpty {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  font-size: var(--fs-meta);
+  color: var(--primary);
+  text-decoration: none;
+}
