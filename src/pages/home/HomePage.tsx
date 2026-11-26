@@ -36,18 +36,20 @@ export function HomePage() {
 
   return (
     <div className={s.page}>
-      <PageHeader
-        compactBar
-        small
-        title={`${t.greeting[greetingKey(now.getHours())]}${firstName ? `, ${firstName}` : ''}`}
-        subtitle={formatFullDate(now)}
-        actions={
-          // Settings lives behind the avatar rather than taking a bottom-bar slot.
-          <Link to="/settings" className={s.avatar} aria-label={t.nav.settings}>
-            {(displayName[0] ?? 'U').toUpperCase()}
-          </Link>
-        }
-      />
+      {/* A floating glass capsule that stays at the top as the page scrolls under it. */}
+      <div className={s.glassHead}>
+        <PageHeader
+          small
+          title={`${t.greeting[greetingKey(now.getHours())]}${firstName ? `, ${firstName}` : ''}`}
+          subtitle={formatFullDate(now)}
+          actions={
+            // Settings lives behind the avatar rather than taking a bottom-bar slot.
+            <Link to="/settings" className={s.avatar} aria-label={t.nav.settings}>
+              {(displayName[0] ?? 'U').toUpperCase()}
+            </Link>
+          }
+        />
+      </div>
       <TodayInspiration />
       <div className={s.grid}>
         {HOME_MODULES.map(({ id, name, homeCard: Card }) =>

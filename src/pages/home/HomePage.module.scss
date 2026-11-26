@@ -77,3 +77,25 @@
   color: var(--primary);
   text-decoration: none;
 }
+
+// iOS "Liquid Glass", as the bottom bar: the greeting floats in a frosted
+// capsule that sticks to the top while the cards scroll under it.
+.glassHead {
+  position: sticky;
+  top: calc(var(--safe-top) + 8px);
+  z-index: 30;
+  padding: 10px 10px 10px 20px;
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--bg-elev) 58%, transparent);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid color-mix(in srgb, var(--fg-strong) 12%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 10px 30px rgba(0, 0, 0, 0.22);
+
+  // The title row centred in the capsule (the header lines it up at the bottom elsewhere).
+  header > div { align-items: center; }
+
+  @include bp-desktop { top: 12px; }
+}
