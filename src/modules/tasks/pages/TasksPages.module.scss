@@ -160,6 +160,13 @@
 }
 
 
+// Today's groups: one card each, stacked like the sections.
+.groupCards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 // Today's group header: dot, name, count and a chevron; tap to fold the group.
 .groupHead {
   display: flex;

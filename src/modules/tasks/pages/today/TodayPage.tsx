@@ -189,13 +189,14 @@ export function TodayPage() {
                 <h2 className={s.sectionTitle}>{m.today}</h2>
                 <span className={s.count}>{dueToday.length}</span>
               </div>
-              <div className={s.list}>
-                {parts
-                  ? parts.map((part) => {
+              {/* With groups, each is its own card (like Done below); without, one plain card. */}
+              {parts ? (
+                <div className={s.groupCards}>
+                  {parts.map((part) => {
                       const open = !collapsed.includes(part.key)
                       const color = part.key === 'none' ? null : groupColorMap.get(part.key)
                       return (
-                        <div key={part.key} className={s.groupPart}>
+                        <div key={part.key} className={s.list}>
                           <button
                             type="button"
                             className={s.groupHead}
@@ -214,9 +215,11 @@ export function TodayPage() {
                           {open && part.tasks.map(row)}
                         </div>
                       )
-                    })
-                  : dueToday.map(row)}
-              </div>
+                    })}
+                </div>
+              ) : (
+                <div className={s.list}>{dueToday.map(row)}</div>
+              )}
             </section>
           )}
 
