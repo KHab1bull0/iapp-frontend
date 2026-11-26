@@ -195,10 +195,13 @@
     left: 0;
     top: 0;
     bottom: 0;
-    width: 3px;
+    width: var(--stripe-w, 3px);
     background: var(--accent, transparent);
   }
 }
+
+// Today's group colours a little bolder than elsewhere.
+.todayStripes { --stripe-w: 5px; }
 
 .groupName {
   font-weight: 600;

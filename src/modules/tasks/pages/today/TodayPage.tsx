@@ -155,7 +155,7 @@ export function TodayPage() {
           </div>
         </div>
       ) : (
-        <div className={s.layout}>
+        <div className={clsx(s.layout, s.todayStripes)}>
           <aside className={s.rail}>
           {all > 0 && (
             <section className={s.summary}>

@@ -18,7 +18,8 @@
     left: 0;
     top: 0;
     bottom: 0;
-    width: 3px;
+    // 3 px; a page can set --stripe-w (Today does).
+    width: var(--stripe-w, 3px);
     background: var(--accent, transparent);
     pointer-events: none;
   }
