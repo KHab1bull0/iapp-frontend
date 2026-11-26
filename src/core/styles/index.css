@@ -120,6 +120,9 @@
   --bottom-nav-h: calc(62px + var(--bottom-nav-gap));
   /* Mobile header: 56px of content plus the status-bar zone. */
   --mobile-header-h: calc(56px + var(--safe-top));
+  /* "Liquid Glass" (bottom bar, Home header): how much of the page shows through, and how frosted. */
+  --glass-bg: color-mix(in srgb, var(--bg-elev) 38%, transparent);
+  --glass-filter: blur(20px) saturate(200%);
   /* Room left under the content so its last row clears the bottom bar and the "+" above it. */
   --fab-clearance: calc(var(--bottom-nav-h) + var(--control-lg) + 32px);
 }
