@@ -1,0 +1,193 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+@use '@/modules/finance/styles/segmented' as *;
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// What it will look like: a big tile, the name under it, the type.
+.preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0 4px;
+  text-align: center;
+}
+
+.previewTile {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  font-size: 36px;
+  line-height: 1;
+  transition: background $t-fast, color $t-fast;
+}
+
+.previewName {
+  max-width: 100%;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
+  font-weight: 700;
+  color: var(--fg-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewEmpty { color: var(--fg-subtle); font-weight: 600; }
+
+.previewType {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
+.tabs {
+  @include segmented;
+  @include segmented-stretch;
+}
+
+.tab { @include segment; }
+
+.field { @include field-base; }
+
+.fieldLabel {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.inputWrap { @include input-wrap-base; }
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: calc(var(--control-md) - 2px);
+  padding: 0 12px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--fs-ui);
+  color: var(--fg-strong);
+
+  &::placeholder { color: var(--fg-muted); }
+}
+
+// Parents as chips: one tap, all in view.
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--control-sm);
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: $radius-pill;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-ui);
+  cursor: pointer;
+  transition: background $t-fast, border-color $t-fast, color $t-fast;
+}
+
+.chipOn {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+  gap: 10px;
+  justify-items: center;
+}
+
+.swatch {
+  @include touch-target(6px);
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-pill;
+  border: 3px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: transform $t-fast, box-shadow $t-fast;
+
+  &.active {
+    // A ring outside the dot, so the colour itself stays whole.
+    box-shadow: 0 0 0 2px var(--bg-elev), 0 0 0 4px var(--fg-strong);
+  }
+}
+
+.emojiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 6px;
+}
+
+// In a dialog the grid scrolls in its own box.
+.emojiGridCompact {
+  max-height: 156px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.emoji {
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  line-height: 1;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+  cursor: pointer;
+  transition: background $t-fast, border-color $t-fast;
+
+  &:hover { background: var(--row-hover); }
+}
+
+.formError {
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--danger);
+  padding: 8px 12px;
+  background: var(--danger-soft);
+  border-radius: var(--radius-sm);
+}
+
+// In the dialog: pinned to its bottom, which scrolls with 24px padding.
+.formActionsCompact {
+  position: sticky;
+  bottom: -24px;
+  margin: auto -24px -24px;
+  padding: 12px 24px 24px;
+}
+
+.btnDanger { @include btn-action-danger; }
+.btnSecondary { @include btn-action-secondary; }
+.btnPrimary {
+  @include btn-action-primary;
+
+  &[aria-busy='true'] { cursor: progress; }
+}
+
+// iOS zooms the page into any field under 16px when it takes focus.
+@supports (-webkit-touch-callout: none) {
+  .input { font-size: 16px; }
+}

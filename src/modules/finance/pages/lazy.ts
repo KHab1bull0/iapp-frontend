@@ -18,4 +18,7 @@ export const FinanceSettingsIndex = lazy(() =>
   import('./settings').then((m) => ({ default: m.FinanceSettingsIndex })),
 )
 export const CategoriesPage = lazy(() => import('./settings').then((m) => ({ default: m.CategoriesPage })))
+export const CategoryFormPage = lazy(() =>
+  import('./settings').then((m) => ({ default: m.CategoryFormPage })),
+)
 export const RatePage = lazy(() => import('./settings').then((m) => ({ default: m.RatePage })))

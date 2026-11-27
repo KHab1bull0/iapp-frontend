@@ -195,7 +195,7 @@ describe('FinanceSettingsPage: parent categories', () => {
     const dialog = await screen.findByRole('dialog')
     // Opens with the category's own values, not a blank form.
     expect((within(dialog).getByPlaceholderText(/e.g./) as HTMLInputElement).value).toBe('Taxi')
-    fireEvent.change(within(dialog).getByLabelText('Parent category'), { target: { value: 'p1' } })
+    fireEvent.click(within(dialog).getByRole('radio', { name: /Home bills/ }))
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(updateCategory).toHaveBeenCalledWith('c1', expect.objectContaining({ parentId: 'p1' })))
   })
@@ -206,7 +206,7 @@ describe('FinanceSettingsPage: parent categories', () => {
     const home = await screen.findByRole('group', { name: 'Home bills' })
     fireEvent.click(within(home).getByRole('button', { name: 'Edit' }))
     const dialog = await screen.findByRole('dialog')
-    expect((within(dialog).getByLabelText('Parent category') as HTMLSelectElement).value).toBe('p1')
+    expect(within(dialog).getByRole('radio', { name: /Home bills/ }).getAttribute('aria-checked')).toBe('true')
     fireEvent.click(within(dialog).getByRole('button', { name: 'Expense' }))
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(updateCategory).toHaveBeenCalledWith('c2', expect.objectContaining({ parentId: 'p1' })))

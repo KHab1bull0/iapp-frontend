@@ -4,6 +4,7 @@ import { FinanceHomeCard } from './FinanceHomeCard'
 import { AddTransactionDialog } from './components/transactions/AddTransactionDialog'
 import {
   CategoriesPage,
+  CategoryFormPage,
   DashboardPage,
   FinanceSettingsIndex,
   FinanceSettingsLayout,
@@ -40,6 +41,8 @@ export const finance: ModuleManifest = {
   fullscreenRoutes: [
     { path: 'transactions/new', element: <TransactionFormPage /> },
     { path: 'transactions/:id/edit', element: <TransactionFormPage /> },
+    { path: 'settings/categories/new', element: <CategoryFormPage /> },
+    { path: 'settings/categories/:id/edit', element: <CategoryFormPage /> },
   ],
   homeCard: FinanceHomeCard,
   quickAdd: [

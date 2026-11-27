@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import clsx from 'clsx'
 import { useQuery } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
@@ -48,6 +50,11 @@ export function CategoriesPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [parentOpen, setParentOpen] = useState(false)
   const [catTab, setCatTab] = useState<CatTab>('expense')
+  const navigate = useNavigate()
+  const isMobile = useIsMobile()
+  // Phones: a page of its own, starting on the tab in view; desktop: the dialog.
+  const addCategory = () =>
+    isMobile ? navigate(`/finance/settings/categories/new?type=${catTab}`) : setDialogOpen(true)
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ['categories'],
@@ -67,7 +74,7 @@ export function CategoriesPage() {
             <button className={s.btnSecondary} onClick={() => setParentOpen(true)}>
               <Plus size={14} /> {t.categories.newParent}
             </button>
-            <button className={s.btnSecondary} onClick={() => setDialogOpen(true)}>
+            <button className={s.btnSecondary} onClick={addCategory}>
               <Plus size={14} /> {t.categories.new}
             </button>
           </div>
@@ -93,7 +100,7 @@ export function CategoriesPage() {
         )}
       </div>
 
-      <AddCategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <AddCategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} type={catTab} />
       <ParentDialog open={parentOpen} onOpenChange={setParentOpen} type={catTab} categories={categories ?? []} />
     </FinanceSettingsSubpage>
   )

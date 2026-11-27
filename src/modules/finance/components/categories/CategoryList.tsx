@@ -10,6 +10,8 @@ import { toast } from '@/core/components/ui/toast'
 import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
 import { AddCategoryDialog } from './AddCategoryDialog'
 import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
+import { useNavigate } from 'react-router-dom'
+import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { Spinner } from '@/modules/finance/components/loading/Loading'
 import s from './CategoryList.module.scss'
 import { EmptyState } from '@/core/components/ui/EmptyState'
@@ -136,7 +138,11 @@ export function CategoryList({ categories, parents, type }: Props) {
   const [editingParent, setEditingParent] = useState<CategoryParent | null>(null)
   const [parentOpen, setParentOpen] = useState(false)
 
+  const navigate = useNavigate()
+  const isMobile = useIsMobile()
+  // Phones: the category's own page; desktop: the dialog over the list.
   function handleEdit(cat: Category) {
+    if (isMobile) return navigate(`/finance/settings/categories/${cat.id}/edit`)
     setEditing(cat)
     setEditOpen(true)
   }
