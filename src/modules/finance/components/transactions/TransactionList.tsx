@@ -1,15 +1,12 @@
 import { useState } from 'react'
 import clsx from 'clsx'
-import { Plus, Trash2, Wallet } from 'lucide-react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Plus, Wallet } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { categoryParentsKey, fetchCategoryParents } from '@/modules/finance/api/categoryParents'
-import { deleteTransaction, type Transaction } from '@/modules/finance/api/transactions'
+import type { Transaction } from '@/modules/finance/api/transactions'
 import { formatDay, formatAmount, formatSignedMoney, parseApiDate, CURRENCY } from '@/core/lib/format'
-import { toast } from '@/core/components/ui/toast'
 import { EmptyState } from '@/core/components/ui/EmptyState'
-import { useSwipe } from '@/core/hooks/useSwipe'
 import { useQuickAdd } from '@/core/quickAdd/context'
-import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
 import { useNavigate } from 'react-router-dom'
 import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import { Skeleton } from '@/core/components/ui/Skeleton'
@@ -43,45 +40,15 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
   const { data: parents = [] } = useQuery({ queryKey: categoryParentsKey, queryFn: fetchCategoryParents })
   const parent = tx.category.parentId ? parents.find((p) => p.id === tx.category.parentId) : undefined
   const categoryLabel = parent ? `${catName(tx.category.name)} · ${parent.name}` : catName(tx.category.name)
-  const [deleting, setDeleting] = useState(false)
-  const [confirming, setConfirming] = useState(false)
-  const qc = useQueryClient()
-  // Swipe left asks to delete; the bin button is the same without a gesture.
-  const swipe = useSwipe({ onLeft: () => { if (!deleting) setConfirming(true) } })
-
-  async function handleDelete() {
-    if (deleting) return
-    setDeleting(true)
-    try {
-      await deleteTransaction(tx.id)
-      await qc.invalidateQueries({ queryKey: ['transactions'] })
-      await qc.invalidateQueries({ queryKey: ['dashboard'] })
-      toast(t.tx.deleted, 'success')
-    } catch {
-      toast(t.tx.deleteFailed, 'error')
-    } finally {
-      setDeleting(false)
-    }
-  }
-
   const usd = tx.currency === 'USD'
   const signed = formatSignedMoney(tx.amount, tx.type, tx.currency)
   const amount = usd ? signed : `${signed} ${CURRENCY}`
   const time = tx.time ?? tx.createdAt?.slice(11, 16) ?? ''
 
   return (
-    <div className={clsx(s.swipeWrap, swipe.dx !== 0 && s.swiping, deleting && s.deleting)} aria-busy={deleting || undefined}>
-      {swipe.dx < 0 && (
-        <div className={clsx(s.under, swipe.armed && s.armed)} aria-hidden>
-          <Trash2 size={20} />
-        </div>
-      )}
-      <div
-        className={s.txRow}
-        style={swipe.dx ? { transform: `translateX(${swipe.dx}px)` } : undefined}
-        {...swipe.handlers}
-      >
-        <button className={s.txMain} onClick={() => onEdit(tx)} disabled={deleting} aria-label={`${t.edit}: ${tx.note ?? catName(tx.category.name)}, ${amount}`}>
+    <div className={s.swipeWrap}>
+      <div className={s.txRow}>
+        <button className={s.txMain} onClick={() => onEdit(tx)} aria-label={`${t.edit}: ${tx.note ?? catName(tx.category.name)}, ${amount}`}>
           <span className={s.txCat} style={{ background: `${tx.category.color}22`, color: tx.category.color }} aria-hidden>
             {tx.category.icon}
           </span>
@@ -107,20 +74,6 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
             {usd && <span className={s.txBase}>≈ {formatAmount(tx.baseAmount)}</span>}
           </span>
         </button>
-        <ConfirmDialog
-          open={confirming}
-          onOpenChange={setConfirming}
-          trigger={
-            <button className={s.txDel} disabled={deleting} aria-label={deleting ? t.deleting : t.delete}>
-              {deleting ? <Spinner /> : <Trash2 size={16} />}
-            </button>
-          }
-          title={t.tx.deleteTitle}
-          description={<>{t.tx.deleteWhat(amount)} {t.tx.deleteDesc}</>}
-          confirmLabel={t.delete}
-          cancelLabel={t.cancel}
-          onConfirm={handleDelete}
-        />
       </div>
     </div>
   )
@@ -259,8 +212,6 @@ export function TransactionListSkeleton() {
                       </span>
                     </span>
                   </div>
-                  {/* Where each row's bin button sits. */}
-                  <span className={s.skeletonDel} />
                 </div>
               </div>
             ))}

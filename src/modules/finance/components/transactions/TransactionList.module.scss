@@ -58,33 +58,12 @@
   & + & { border-top: 1px solid var(--border); }
 }
 
-// Uncovered by a left swipe.
-.under {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 24px;
-  background: var(--red-600);
-  color: #fff;
-
-  &.armed { filter: brightness(1.1); }
-}
-
 .txRow {
   position: relative;
   display: flex;
   align-items: center;
   gap: 4px;
-  padding-right: 8px;
   background: var(--bg-elev);
-  touch-action: pan-y;
-  transition: transform $t-base var(--ease-house);
-
-  .swiping & { transition: none; }
-
-  &:hover .txDel { opacity: 1; }
 }
 
 // The whole row opens it for editing.
@@ -94,7 +73,6 @@
   min-width: 0;
   display: grid;
   grid-template-columns: var(--tile-md) minmax(0, 1fr) auto;
-  padding-right: 8px;
   border: none;
   background: transparent;
   color: inherit;
@@ -163,7 +141,7 @@
   white-space: nowrap;
 
   &.amtIn  { color: var(--success); }
-  &.amtOut { color: var(--fg-strong); }
+  &.amtOut { color: var(--danger); }
 }
 
 .txCur {
@@ -182,29 +160,6 @@
   text-align: right;
 }
 
-.txDel {
-  @include touch-target(6px);
-  flex-shrink: 0;
-  width: var(--control-sm);
-  height: var(--control-sm);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  border: none;
-  color: var(--fg-muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity $t-fast, background $t-fast;
-
-  &:hover { background: var(--danger-soft); color: var(--danger); }
-  &:focus-visible { opacity: 1; }
-
-  // No hover on touch: always visible there (swipe is the quicker way).
-  @media (hover: none) { opacity: 0.8; }
-}
-
 .btnSecondary {
   @include btn-secondary;
   @include btn-size-md;
@@ -212,24 +167,11 @@
   &:disabled { opacity: 0.6; cursor: progress; }
 }
 
-// Being deleted: dimmed and out of reach until the request settles.
-.deleting {
-  opacity: 0.55;
-
-  .txDel { opacity: 1; }
-}
-
 // ── Loading: the real row, without the interaction ──────────────────────
 .skeletonRow {
   pointer-events: none;
 
   .txMain { cursor: default; }
-}
-
-.skeletonDel {
-  flex-shrink: 0;
-  width: var(--control-sm);
-  height: var(--control-sm);
 }
 
 // ── Desktop: one aligned table ───────────────────────────────────────────
@@ -248,7 +190,6 @@
   .txSub,
   .txTime { display: none; }
 
-  .txRow { padding-right: 8px; }
 
   .colCategory {
     display: inline-flex;

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { fetchCategories, type Category } from '@/modules/finance/api/categories'
-import { createTransaction, updateTransaction, type Transaction } from '@/modules/finance/api/transactions'
+import { createTransaction, deleteTransaction, updateTransaction, type Transaction } from '@/modules/finance/api/transactions'
 import { fetchUsdRate } from '@/modules/finance/api/rates'
 import { todayYmd } from '@/core/lib/format'
 import { TransactionForm } from './TransactionForm'
@@ -12,6 +12,7 @@ vi.mock('@/modules/finance/api/transactions', async (orig) => ({
   ...(await orig<object>()),
   createTransaction: vi.fn(),
   updateTransaction: vi.fn(),
+  deleteTransaction: vi.fn(),
 }))
 vi.mock('@/modules/finance/api/categories', async (orig) => ({
   ...(await orig<object>()),
@@ -28,11 +29,11 @@ vi.mock('@/modules/finance/api/rates', async (orig) => ({
 
 const BOOKS: Category = { id: 'c1', name: 'Books', type: 'expense', icon: '📚', color: '#336699', parentId: null }
 
-function renderForm(transaction?: Transaction) {
+function renderForm(transaction?: Transaction, onDeleted?: () => void) {
   return render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <MemoryRouter>
-        <TransactionForm transaction={transaction} onSaved={() => {}} onCancel={() => {}} />
+        <TransactionForm transaction={transaction} onSaved={() => {}} onCancel={() => {}} onDeleted={onDeleted} />
       </MemoryRouter>
     </QueryClientProvider>,
   )
@@ -149,5 +150,33 @@ describe('TransactionForm in dollars', () => {
     const sent = vi.mocked(createTransaction).mock.calls[0][0]
     expect(sent).toMatchObject({ amount: 12, currency: 'UZS' })
     expect(sent.rate).toBeUndefined()
+  })
+
+  test('deleting from the edit form: asks, waits, then leaves', async () => {
+    let resolve!: () => void
+    vi.mocked(deleteTransaction).mockReset().mockReturnValue(new Promise<void>((r) => (resolve = r)))
+    const onDeleted = vi.fn()
+    renderForm(
+      {
+        id: 't9', amount: 30_000, currency: 'UZS', rate: null, baseAmount: 30_000, type: 'expense',
+        note: 'Taxi', date: '2026-11-02', time: '09:00', createdAt: '2026-11-02T09:00:00Z', category: BOOKS,
+      },
+      onDeleted,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    const dialog = await screen.findByRole('alertdialog')
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete' }))
+    const pending = await screen.findByRole('button', { name: 'Deleting…' })
+    expect(pending.hasAttribute('disabled')).toBe(true)
+    expect(deleteTransaction).toHaveBeenCalledWith('t9')
+    expect(onDeleted).not.toHaveBeenCalled()
+    resolve()
+    await waitFor(() => expect(onDeleted).toHaveBeenCalled())
+  })
+
+  test('a new one has no delete', async () => {
+    renderForm()
+    await screen.findByRole('radio', { name: /Books/ })
+    expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull()
   })
 })

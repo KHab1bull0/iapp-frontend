@@ -245,26 +245,11 @@ describe('TransactionsPage while loading', () => {
     expect(screen.getByText('Groceries').closest('[aria-busy="true"]')).toBeNull()
   })
 
-  test('deleting a row disables its buttons and says so until the request settles', async () => {
+  test('a row has no delete of its own: deleting is on its edit page', async () => {
     vi.mocked(fetchTransactions).mockResolvedValue(page([tx('a', 'Taxi', 30000)]))
-    const del = deferred<void>()
-    vi.mocked(deleteTransaction).mockReturnValue(del.promise)
     renderPage()
     await screen.findByText('Taxi')
-
-    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
-    const dialog = await screen.findByRole('alertdialog')
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete' }))
-
-    const pending = await screen.findByRole('button', { name: 'Deleting…' })
-    expect(pending.hasAttribute('disabled')).toBe(true)
-    expect(screen.getByRole('button', { name: /^Edit: Taxi/ }).hasAttribute('disabled')).toBe(true)
-    expect(pending.closest('[aria-busy="true"]')).toBeTruthy()
-    expect(deleteTransaction).toHaveBeenCalledOnce()
-
-    vi.mocked(fetchTransactions).mockResolvedValue(page([]))
-    await act(async () => del.resolve())
-    await waitFor(() => expect(screen.queryByRole('button', { name: 'Deleting…' })).toBeNull())
+    expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull()
   })
 })
 

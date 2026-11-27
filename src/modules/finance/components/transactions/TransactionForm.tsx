@@ -6,11 +6,12 @@ import { fetchCategories } from '@/modules/finance/api/categories'
 import { categoryParentsKey, fetchCategoryParents } from '@/modules/finance/api/categoryParents'
 import { categoryTree } from '@/modules/finance/lib/categoryTree'
 import { CategoryPicker } from './CategoryPicker'
-import { createTransaction, updateTransaction, type Transaction } from '@/modules/finance/api/transactions'
+import { createTransaction, deleteTransaction, updateTransaction, type Transaction } from '@/modules/finance/api/transactions'
 import { rememberCategory } from '@/modules/finance/lib/recentCategories'
 import { formatShortDay, todayYmd } from '@/core/lib/format'
 import { cleanNumber, grouped } from '@/modules/finance/lib/numberInput'
 import { fetchUsdRate, ratesKeys, type Currency } from '@/modules/finance/api/rates'
+import { ConfirmDialog } from '@/core/components/ui/ConfirmDialog'
 import { DateField } from '@/core/components/ui/DateField'
 import { SegmentedControl } from '@/core/components/ui/SegmentedControl'
 import { Skeleton } from '@/core/components/ui/Skeleton'
@@ -31,6 +32,8 @@ interface Props {
   onSaved: () => void
   /** Called when the user backs out. */
   onCancel: () => void
+  /** After a delete; defaults to onSaved. */
+  onDeleted?: () => void
   className?: string
 }
 
@@ -53,7 +56,7 @@ function rateText(n: number): string {
   return Number.isInteger(n) ? String(n) : n.toFixed(2)
 }
 
-export function TransactionForm({ transaction, onSaved, onCancel, className }: Props) {
+export function TransactionForm({ transaction, onSaved, onCancel, onDeleted, className }: Props) {
   const t = useFinanceT()
   const qc = useQueryClient()
   const isEdit = !!transaction
@@ -71,6 +74,8 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
   const [time, setTime] = useState(transaction?.time ?? transaction?.createdAt?.slice(11, 16) ?? now())
   const [note, setNote] = useState(transaction?.note ?? '')
   const [loading, setLoading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const busy = loading || deleting
   const [error, setError] = useState('')
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
@@ -91,9 +96,26 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
   const rate = typedRate ?? (suggested?.rate ? rateText(suggested.rate) : '')
   const inSom = usd && Number(amount) && Number(rate) ? Math.round(Number(amount) * Number(rate)) : null
 
+  async function handleDelete() {
+    if (busy || !transaction) return
+    setDeleting(true)
+    try {
+      await deleteTransaction(transaction.id)
+      // Its own query first, or refreshing it would 404.
+      qc.removeQueries({ queryKey: ['transaction', transaction.id] })
+      await qc.invalidateQueries({ queryKey: ['transactions'] })
+      await qc.invalidateQueries({ queryKey: ['dashboard'] })
+      toast(t.tx.deleted, 'success')
+      ;(onDeleted ?? onSaved)()
+    } catch {
+      toast(t.tx.deleteFailed, 'error')
+      setDeleting(false)
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (loading) return
+    if (busy) return
     const num = Number(amount)
     if (!num || num <= 0) return setError(t.tx.invalidAmount)
     if (!categoryId) return setError(t.tx.pickCategory)
@@ -264,10 +286,25 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
       )}
 
       <div data-form-actions>
+        {isEdit && (
+          <ConfirmDialog
+            trigger={
+              <button type="button" className={s.btnDanger} disabled={busy} aria-busy={deleting || undefined}>
+                {deleting && <Spinner />}
+                {deleting ? t.deleting : t.delete}
+              </button>
+            }
+            title={t.tx.deleteTitle}
+            description={t.tx.deleteDesc}
+            confirmLabel={t.delete}
+            cancelLabel={t.cancel}
+            onConfirm={handleDelete}
+          />
+        )}
         <button type="button" className={s.btnSecondary} onClick={onCancel}>
           {t.cancel}
         </button>
-        <button type="submit" className={s.btnPrimary} disabled={loading} aria-busy={loading || undefined}>
+        <button type="submit" className={s.btnPrimary} disabled={busy} aria-busy={loading || undefined}>
           {loading && <Spinner />}
           {loading ? t.saving : isEdit ? t.tx.saveChanges : t.save}
         </button>
