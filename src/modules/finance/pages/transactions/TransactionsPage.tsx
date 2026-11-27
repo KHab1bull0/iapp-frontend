@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { RefreshCw } from 'lucide-react'
-import { fetchTransactionCounts, fetchTransactions, type PaginatedTransactions } from '@/modules/finance/api/transactions'
+import { fetchTransactionTotals, fetchTransactions, type PaginatedTransactions } from '@/modules/finance/api/transactions'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
 import { FilterDrawer } from '@/modules/finance/components/transactions/FilterDrawer'
@@ -29,11 +29,11 @@ export function TransactionsPage() {
   // Search waits for typing to pause; the other filters apply at once.
   const search = useDebouncedValue(filters.search, 300)
   const query = toQuery({ ...filters, search })
-  // The counts on Income and Expense: the same filters, whatever type is picked.
-  const countQuery = toQuery({ ...filters, search, type: undefined })
-  const { data: counts } = useQuery({
-    queryKey: ['transactions', 'counts', countQuery],
-    queryFn: () => fetchTransactionCounts(countQuery),
+  // Income and Expense's counts and totals: the same filters, whatever type is picked.
+  const totalsQuery = toQuery({ ...filters, search, type: undefined })
+  const { data: totals } = useQuery({
+    queryKey: ['transactions', 'totals', totalsQuery],
+    queryFn: () => fetchTransactionTotals(totalsQuery),
     placeholderData: keepPreviousData,
   })
 
@@ -69,7 +69,7 @@ export function TransactionsPage() {
         filters={filters}
         onChange={setFilters}
         categories={categories}
-        counts={counts}
+        totals={totals}
         onOpenFilters={() => setDrawerOpen(true)}
       />
 

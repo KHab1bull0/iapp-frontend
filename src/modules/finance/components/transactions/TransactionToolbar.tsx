@@ -1,6 +1,8 @@
 import clsx from 'clsx'
 import { ArrowDownLeft, ArrowUpRight, ChevronDown, SlidersHorizontal } from 'lucide-react'
 import type { Category } from '@/modules/finance/api/categories'
+import type { TransactionTotals } from '@/modules/finance/api/transactions'
+import { CURRENCY, formatAmount } from '@/core/lib/format'
 import { advancedFilterCount } from './filterCount'
 import type { TransactionFilterState } from './period'
 import { useFinanceT } from '@/modules/finance/i18n'
@@ -12,8 +14,8 @@ interface Props {
   filters: TransactionFilterState
   onChange: (f: TransactionFilterState) => void
   categories: Category[]
-  /** How many incomes and expenses the other filters find; unknown while loading. */
-  counts?: { income: number; expense: number }
+  /** How many incomes and expenses the other filters find, and their sums; unknown while loading. */
+  totals?: TransactionTotals
   onOpenFilters: () => void
 }
 
@@ -22,24 +24,30 @@ interface Props {
  * show only that type, tap again for both), the category, and the Filters
  * button for the search and the period.
  */
-export function TransactionToolbar({ filters, onChange, categories, counts, onOpenFilters }: Props) {
+export function TransactionToolbar({ filters, onChange, categories, totals, onOpenFilters }: Props) {
   const t = useFinanceT()
   const more = advancedFilterCount(filters)
+  // The name and count on top, the period's total under it.
   const typeButton = (type: 'income' | 'expense') => {
     const on = filters.type === type
-    const n = counts?.[type]
+    const sum = totals?.[type]
     const Icon = type === 'income' ? ArrowDownLeft : ArrowUpRight
     return (
       <button
         type="button"
         className={clsx(s.typeBtn, s[type], on && s.on)}
         aria-pressed={on}
-        aria-label={n === undefined ? t[type] : `${t[type]}: ${n}`}
+        aria-label={sum ? `${t[type]}: ${sum.count}, ${formatAmount(sum.total)} ${CURRENCY}` : t[type]}
         onClick={() => onChange({ ...filters, type: on ? undefined : type })}
       >
-        <Icon size={16} aria-hidden />
-        <span className={s.typeName}>{t[type]}</span>
-        <span className={s.typeCount}>{n ?? '–'}</span>
+        <span className={s.typeHead}>
+          <Icon size={16} aria-hidden />
+          <span className={s.typeName}>{t[type]}</span>
+          <span className={s.typeCount}>{sum?.count ?? '–'}</span>
+        </span>
+        <span className={s.typeTotal}>
+          {sum ? formatAmount(sum.total) : '–'} <span className={s.typeCur}>{CURRENCY}</span>
+        </span>
       </button>
     )
   }

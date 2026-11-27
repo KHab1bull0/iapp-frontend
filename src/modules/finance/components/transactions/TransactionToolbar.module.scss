@@ -17,13 +17,16 @@
 
 .typeBtn {
   @include btn-base;
-  justify-content: flex-start;
-  gap: 8px;
-  height: var(--control-md);
-  padding: 0 12px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-height: 68px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   background: var(--bg-elev);
   color: var(--fg);
+  text-align: left;
 
   &.income svg { color: var(--success); }
   &.expense svg { color: var(--danger); }
@@ -39,9 +42,14 @@
   }
 }
 
+.typeHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .typeName {
   flex: 1;
-  text-align: left;
   font-weight: 600;
 }
 
@@ -50,9 +58,30 @@
   padding: 1px 8px;
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--fg-strong) 8%, transparent);
-  font-size: var(--fs-meta);
+  font-size: var(--fs-caption);
   font-weight: 700;
   text-align: center;
+}
+
+// The period's total, the button's main figure.
+.typeTotal {
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
+  font-weight: 700;
+  color: var(--fg-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+
+  .income & { color: var(--success); }
+  .expense & { color: var(--danger); }
+}
+
+.typeCur {
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  color: var(--fg-muted);
 }
 
 .row {

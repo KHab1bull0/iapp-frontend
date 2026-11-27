@@ -52,13 +52,17 @@ export const fetchTransactions = async (
 }
 
 /** Used by the edit page, which may be opened from a URL with no row in hand. */
-/** How many incomes and expenses the filters find (the type is left out). */
-export const fetchTransactionCounts = async (
-  filters: TransactionFilters,
-): Promise<{ income: number; expense: number }> => {
+export interface TypeTotal {
+  count: number
+  total: number
+}
+export type TransactionTotals = Record<'income' | 'expense', TypeTotal>
+
+/** How many incomes and expenses the filters find, and their sums (the type is left out). */
+export const fetchTransactionTotals = async (filters: TransactionFilters): Promise<TransactionTotals> => {
   const { type: _type, ...rest } = filters
   void _type
-  const { data } = await api.get<{ income: number; expense: number }>('/finance/transactions/counts', { params: rest })
+  const { data } = await api.get<TransactionTotals>('/finance/transactions/totals', { params: rest })
   return data
 }
 

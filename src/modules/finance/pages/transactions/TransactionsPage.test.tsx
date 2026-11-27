@@ -2,13 +2,14 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import {
   deleteTransaction,
-  fetchTransactionCounts,
+  fetchTransactionTotals,
   fetchTransactions,
   type PaginatedTransactions,
   type Transaction,
 } from '@/modules/finance/api/transactions'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { fetchCategoryParents } from '@/modules/finance/api/categoryParents'
+import { formatAmount } from '@/core/lib/format'
 import { periodRange } from '@/modules/finance/components/transactions/period'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
@@ -17,7 +18,7 @@ import { TransactionsPage } from './TransactionsPage'
 vi.mock('@/modules/finance/api/transactions', async (orig) => ({
   ...(await orig<object>()),
   fetchTransactions: vi.fn(),
-  fetchTransactionCounts: vi.fn(),
+  fetchTransactionTotals: vi.fn(),
   deleteTransaction: vi.fn(),
 }))
 vi.mock('@/modules/finance/api/categories', async (orig) => ({
@@ -53,11 +54,13 @@ function deferred<T>() {
   return { promise, resolve }
 }
 
+const amount = (n: number) => formatAmount(n)
+
 // Saved filters must not leak from one test into the next.
 beforeEach(() => {
   sessionStorage.clear()
-  vi.mocked(fetchTransactionCounts).mockReset()
-  vi.mocked(fetchTransactionCounts).mockResolvedValue({ income: 2, expense: 5 })
+  vi.mocked(fetchTransactionTotals).mockReset()
+  vi.mocked(fetchTransactionTotals).mockResolvedValue({ income: { count: 2, total: 13500000 }, expense: { count: 5, total: 125000 } })
 })
 
 const openDrawer = () => {
@@ -88,8 +91,15 @@ describe('TransactionsPage', () => {
 
   test('the top has Income and Expense with their counts, the category, and Filters; no search or period outside', async () => {
     renderPage()
-    expect((await screen.findByRole('button', { name: 'Income: 2' })).getAttribute('aria-pressed')).toBe('false')
-    expect(screen.getByRole('button', { name: 'Expense: 5' }).getAttribute('aria-pressed')).toBe('false')
+    const income = await screen.findByRole('button', { name: /^Income/ })
+    const expense = screen.getByRole('button', { name: /^Expense/ })
+    expect(income.getAttribute('aria-pressed')).toBe('false')
+    expect(expense.getAttribute('aria-pressed')).toBe('false')
+    // The name on top with its count, the period's total under it.
+    await waitFor(() => expect(income.getAttribute('aria-label')).toBe(`Income: 2, ${amount(13500000)} UZS`))
+    expect(income.textContent).toContain(amount(13500000))
+    expect(expense.textContent).toContain(amount(125000))
+    expect(expense.getAttribute('aria-label')).toBe(`Expense: 5, ${amount(125000)} UZS`)
     expect(screen.getByRole('combobox', { name: 'Category' })).toBeTruthy()
     // Search and period live only in the (closed) Filters sheet.
     const drawer = screen.getByRole('dialog', { name: 'Filters', hidden: true })
@@ -97,18 +107,18 @@ describe('TransactionsPage', () => {
     expect(outside(screen.queryAllByRole('searchbox', { hidden: true }))).toEqual([])
     expect(outside(screen.queryAllByRole('radiogroup', { name: 'Period', hidden: true }))).toEqual([])
     // The counts follow the filters, never the type picked.
-    await waitFor(() => expect(fetchTransactionCounts).toHaveBeenCalledWith(expect.objectContaining(periodRange('month', {}))))
+    await waitFor(() => expect(fetchTransactionTotals).toHaveBeenCalledWith(expect.objectContaining(periodRange('month', {}))))
   })
 
   test('Income filters to incomes; tapping it again shows everything', async () => {
     renderPage()
-    const income = await screen.findByRole('button', { name: 'Income: 2' })
+    const income = await screen.findByRole('button', { name: /^Income/ })
     fireEvent.click(income)
     expect(income.getAttribute('aria-pressed')).toBe('true')
     await waitFor(() =>
       expect(fetchTransactions).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'income' }), 1, 20),
     )
-    expect(vi.mocked(fetchTransactionCounts).mock.lastCall![0].type).toBeUndefined()
+    expect(vi.mocked(fetchTransactionTotals).mock.lastCall![0].type).toBeUndefined()
     fireEvent.click(income)
     expect(income.getAttribute('aria-pressed')).toBe('false')
     await waitFor(() => expect(vi.mocked(fetchTransactions).mock.lastCall![0].type).toBeUndefined())
@@ -116,9 +126,9 @@ describe('TransactionsPage', () => {
 
   test('picking Expense after Income switches to expenses', async () => {
     renderPage()
-    fireEvent.click(await screen.findByRole('button', { name: 'Income: 2' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Expense: 5' }))
-    expect(screen.getByRole('button', { name: 'Income: 2' }).getAttribute('aria-pressed')).toBe('false')
+    fireEvent.click(await screen.findByRole('button', { name: /^Income/ }))
+    fireEvent.click(screen.getByRole('button', { name: /^Expense/ }))
+    expect(screen.getByRole('button', { name: /^Income/ }).getAttribute('aria-pressed')).toBe('false')
     await waitFor(() =>
       expect(fetchTransactions).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'expense' }), 1, 20),
     )
@@ -290,7 +300,7 @@ describe('TransactionsPage: filters kept', () => {
 
   test('back from a transaction, the filters are as they were left', async () => {
     const first = renderPage()
-    fireEvent.click(await screen.findByRole('button', { name: 'Expense: 5' }))
+    fireEvent.click(await screen.findByRole('button', { name: /^Expense/ }))
     const drawer = openDrawer()
     fireEvent.change(within(drawer).getByRole('searchbox', { name: 'Search transactions' }), { target: { value: 'coffee' } })
     fireEvent.click(within(drawer).getByRole('radio', { name: 'Week' }))
@@ -302,7 +312,7 @@ describe('TransactionsPage: filters kept', () => {
 
     vi.mocked(fetchTransactions).mockClear()
     renderPage()
-    expect((await screen.findByRole('button', { name: 'Expense: 5' })).getAttribute('aria-pressed')).toBe('true')
+    expect((await screen.findByRole('button', { name: /^Expense/ })).getAttribute('aria-pressed')).toBe('true')
     await waitFor(() =>
       expect(fetchTransactions).toHaveBeenCalledWith(
         expect.objectContaining({ search: 'coffee', type: 'expense', ...periodRange('week', {}) }),
