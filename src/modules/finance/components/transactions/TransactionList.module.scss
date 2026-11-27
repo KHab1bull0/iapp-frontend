@@ -168,6 +168,8 @@
 
 .txCur {
   margin-left: 4px;
+  // "uzs": quieter beside the number.
+  text-transform: lowercase;
 }
 
 // Under a dollar amount: what it came to in so'm.
