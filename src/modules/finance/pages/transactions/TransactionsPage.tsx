@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { RefreshCw } from 'lucide-react'
-import { fetchTransactions, type PaginatedTransactions } from '@/modules/finance/api/transactions'
+import { fetchTransactionCounts, fetchTransactions, type PaginatedTransactions } from '@/modules/finance/api/transactions'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
-import { TransactionFilters as FiltersBar } from '@/modules/finance/components/transactions/TransactionFilters'
 import { FilterDrawer } from '@/modules/finance/components/transactions/FilterDrawer'
 import { TransactionToolbar } from '@/modules/finance/components/transactions/TransactionToolbar'
 import {
@@ -30,6 +29,13 @@ export function TransactionsPage() {
   // Search waits for typing to pause; the other filters apply at once.
   const search = useDebouncedValue(filters.search, 300)
   const query = toQuery({ ...filters, search })
+  // The counts on Income and Expense: the same filters, whatever type is picked.
+  const countQuery = toQuery({ ...filters, search, type: undefined })
+  const { data: counts } = useQuery({
+    queryKey: ['transactions', 'counts', countQuery],
+    queryFn: () => fetchTransactionCounts(countQuery),
+    placeholderData: keepPreviousData,
+  })
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -59,14 +65,11 @@ export function TransactionsPage() {
 
   return (
     <div className={s.page}>
-      <div className={s.desktopOnly}>
-        <FiltersBar filters={filters} onChange={setFilters} categories={categories} />
-      </div>
-
       <TransactionToolbar
         filters={filters}
         onChange={setFilters}
         categories={categories}
+        counts={counts}
         onOpenFilters={() => setDrawerOpen(true)}
       />
 
@@ -75,7 +78,6 @@ export function TransactionsPage() {
         onClose={() => setDrawerOpen(false)}
         filters={filters}
         onApply={setFilters}
-        categories={categories}
       />
 
       {isError ? (

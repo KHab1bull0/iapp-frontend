@@ -1,26 +1,20 @@
 import { useEffect, useState } from 'react'
 import clsx from 'clsx'
 import { createPortal } from 'react-dom'
-import { X, Search, ChevronDown } from 'lucide-react'
-import type { Category } from '@/modules/finance/api/categories'
+import { X, Search } from 'lucide-react'
 import { PeriodFilter } from './PeriodFilter'
 import { DEFAULT_FILTERS, type TransactionFilterState } from './period'
 import { useFinanceT } from '@/modules/finance/i18n'
 import s from './FilterDrawer.module.scss'
-import { CategoryOptions } from './CategoryOptions'
-import { categoryFilterValue, withCategoryFilter } from '@/modules/finance/lib/categoryFilter'
 
 interface Props {
   open: boolean
   onClose: () => void
   filters: TransactionFilterState
   onApply: (f: TransactionFilterState) => void
-  categories: Category[]
 }
 
-const TYPE_OPTIONS = [{ value: '' as const }, { value: 'income' as const }, { value: 'expense' as const }]
-
-export function FilterDrawer({ open, onClose, filters, onApply, categories }: Props) {
+export function FilterDrawer({ open, onClose, filters, onApply }: Props) {
   const t = useFinanceT()
   const [draft, setDraft] = useState<TransactionFilterState>(filters)
 
@@ -49,8 +43,9 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
     onClose()
   }
 
+  // Only what the sheet holds; the type and category on the page stay.
   function handleReset() {
-    setDraft(DEFAULT_FILTERS)
+    setDraft((d) => ({ ...d, search: undefined, period: DEFAULT_FILTERS.period, startDate: undefined, endDate: undefined }))
   }
 
   return createPortal(
@@ -76,34 +71,17 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
           </button>
         </div>
 
+        {/* The search first, then the period; type and category are on the page itself. */}
         <div className={s.drawerBody}>
-          <div className={s.field}>
-            <span className={s.fieldLabel}>{t.filters.type}</span>
-            <div className={s.tabs}>
-              {TYPE_OPTIONS.map(({ value }) => (
-                <button
-                  key={value}
-                  className={clsx(s.tab, (draft.type ?? '') === value && s.active)}
-                  onClick={() => setDraft((d) => ({ ...d, type: value || undefined }))}
-                >
-                  {value ? t[value] : t.all}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className={s.field}>
-            <span className={s.fieldLabel}>{t.filters.period}</span>
-            <PeriodFilter filters={draft} onChange={setDraft} />
-          </div>
-
           <div className={s.field}>
             <span className={s.fieldLabel}>{t.filters.search}</span>
             <div className={s.filterSearch}>
               <Search size={15} />
               <input
+                type="search"
                 className={s.filterInput}
                 placeholder={t.filters.searchPlaceholder}
+                aria-label={t.filters.searchLabel}
                 value={draft.search ?? ''}
                 onChange={(e) => setDraft((d) => ({ ...d, search: e.target.value || undefined }))}
               />
@@ -111,22 +89,8 @@ export function FilterDrawer({ open, onClose, filters, onApply, categories }: Pr
           </div>
 
           <div className={s.field}>
-            <span className={s.fieldLabel}>{t.category}</span>
-            <div className={s.inputWrap} style={{ position: 'relative' }}>
-              <select
-                className={clsx(s.input, s.select)}
-                value={categoryFilterValue(draft)}
-                onChange={(e) => {
-                  const value = e.target.value
-                  setDraft((d) => withCategoryFilter(d, value))
-                }}
-              >
-                <CategoryOptions categories={categories} />
-              </select>
-              <span className={s.selectChev}>
-                <ChevronDown size={15} />
-              </span>
-            </div>
+            <span className={s.fieldLabel}>{t.filters.period}</span>
+            <PeriodFilter filters={draft} onChange={setDraft} />
           </div>
         </div>
 

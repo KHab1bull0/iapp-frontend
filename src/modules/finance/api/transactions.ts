@@ -52,6 +52,16 @@ export const fetchTransactions = async (
 }
 
 /** Used by the edit page, which may be opened from a URL with no row in hand. */
+/** How many incomes and expenses the filters find (the type is left out). */
+export const fetchTransactionCounts = async (
+  filters: TransactionFilters,
+): Promise<{ income: number; expense: number }> => {
+  const { type: _type, ...rest } = filters
+  void _type
+  const { data } = await api.get<{ income: number; expense: number }>('/finance/transactions/counts', { params: rest })
+  return data
+}
+
 export const fetchTransaction = async (id: string): Promise<Transaction> => {
   const { data } = await api.get<Transaction>(`/finance/transactions/${id}`)
   return data

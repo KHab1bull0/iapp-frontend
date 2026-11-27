@@ -1,38 +1,58 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
-// Phones only; desktop has the full filter bar.
+// The top of Transactions on every screen size.
 .toolbar {
-  display: none;
-
-  @include bp-tablet {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.search {
-  @include input-wrap-base;
+// Income and Expense: two toggles, each with its count.
+.types {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.typeBtn {
+  @include btn-base;
+  justify-content: flex-start;
   gap: 8px;
   height: var(--control-md);
   padding: 0 12px;
-  color: var(--fg-muted);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--fg);
+
+  &.income svg { color: var(--success); }
+  &.expense svg { color: var(--danger); }
+
+  &.on.income {
+    border-color: var(--success);
+    background: color-mix(in srgb, var(--success) 14%, var(--bg-elev));
+  }
+
+  &.on.expense {
+    border-color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 14%, var(--bg-elev));
+  }
 }
 
-.searchInput {
+.typeName {
   flex: 1;
-  min-width: 0;
-  height: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: var(--fg-strong);
-  font-family: inherit;
-  font-size: var(--fs-ui);
+  text-align: left;
+  font-weight: 600;
+}
 
-  &::placeholder { color: var(--fg-muted); }
-  &::-webkit-search-cancel-button { cursor: pointer; }
+.typeCount {
+  min-width: 24px;
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--fg-strong) 8%, transparent);
+  font-size: var(--fs-meta);
+  font-weight: 700;
+  text-align: center;
 }
 
 .row {
