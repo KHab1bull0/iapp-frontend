@@ -8,14 +8,14 @@ export interface TransactionFilterState extends TransactionFilters {
   period: Period
 }
 
-/** Transactions opens on the last week. */
-export const DEFAULT_FILTERS: TransactionFilterState = { period: 'week' }
+/** Transactions opens on this month. */
+export const DEFAULT_FILTERS: TransactionFilterState = { period: 'month' }
 
 function daysBefore(today: Date, n: number): Date {
   return new Date(today.getFullYear(), today.getMonth(), today.getDate() - n)
 }
 
-/** The date bounds a period stands for. Week and Month are rolling and include today. */
+/** The date bounds a period stands for. Week is the last 7 days; Month is the calendar month today is in. */
 export function periodRange(
   period: Period,
   chosen: Pick<TransactionFilters, 'startDate' | 'endDate'>,
@@ -23,7 +23,10 @@ export function periodRange(
 ): Pick<TransactionFilters, 'startDate' | 'endDate'> {
   switch (period) {
     case 'week':  return { startDate: ymd(daysBefore(today, 6)), endDate: ymd(today) }
-    case 'month': return { startDate: ymd(daysBefore(today, 29)), endDate: ymd(today) }
+    case 'month': return {
+      startDate: ymd(new Date(today.getFullYear(), today.getMonth(), 1)),
+      endDate: ymd(new Date(today.getFullYear(), today.getMonth() + 1, 0)),
+    }
     case 'all':   return {}
     case 'range': return { startDate: chosen.startDate, endDate: chosen.endDate }
   }

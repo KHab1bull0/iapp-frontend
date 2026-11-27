@@ -8,19 +8,24 @@ import { TransactionFilters as FiltersBar } from '@/modules/finance/components/t
 import { FilterDrawer } from '@/modules/finance/components/transactions/FilterDrawer'
 import { TransactionToolbar } from '@/modules/finance/components/transactions/TransactionToolbar'
 import {
-  DEFAULT_FILTERS,
   toQuery,
   type TransactionFilterState,
 } from '@/modules/finance/components/transactions/period'
 import { TransactionList, TransactionListSkeleton } from '@/modules/finance/components/transactions/TransactionList'
 import { staleClass } from '@/modules/finance/components/loading/stale'
 import { useFinanceT } from '@/modules/finance/i18n'
+import { loadFilters, saveFilters } from '@/modules/finance/lib/storedFilters'
 import s from './TransactionsPage.module.scss'
 
 export function TransactionsPage() {
   const t = useFinanceT()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [filters, setFilters] = useState<TransactionFilterState>(DEFAULT_FILTERS)
+  // Kept for the session, so coming back from a transaction finds them as left.
+  const [filters, setFiltersState] = useState<TransactionFilterState>(loadFilters)
+  const setFilters = (next: TransactionFilterState) => {
+    setFiltersState(next)
+    saveFilters(next)
+  }
 
   // Search waits for typing to pause; the other filters apply at once.
   const search = useDebouncedValue(filters.search, 300)

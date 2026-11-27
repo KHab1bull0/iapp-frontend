@@ -92,11 +92,14 @@ describe('TransactionsPage', () => {
     )
   })
 
-  test('opens on the last 7 days', async () => {
+  test('opens on this month; the periods read All, Month, Week, Range', async () => {
     renderPage()
+    const [toolbarPeriod] = screen.getAllByRole('radiogroup', { name: 'Period' })
+    expect(within(toolbarPeriod).getAllByRole('radio').map((r) => r.textContent)).toEqual(['All', 'Month', 'Week', 'Range'])
+    expect(within(toolbarPeriod).getByRole('radio', { name: 'Month' }).getAttribute('aria-checked')).toBe('true')
     await waitFor(() =>
       expect(fetchTransactions).toHaveBeenCalledWith(
-        expect.objectContaining(periodRange('week', {})),
+        expect.objectContaining(periodRange('month', {})),
         1,
         20,
       ),
@@ -235,5 +238,43 @@ describe('TransactionsPage: parent categories', () => {
     vi.mocked(fetchTransactions).mockResolvedValue(page([{ ...tx('a', 'Bill', 90000), category: GAS }]))
     renderPage()
     expect((await screen.findAllByText(/Gas · Home bills/)).length).toBeGreaterThan(0)
+  })
+})
+
+describe('TransactionsPage: filters kept', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+    vi.mocked(fetchTransactions).mockReset()
+    vi.mocked(fetchTransactions).mockResolvedValue(page([]))
+  })
+
+  test('back from a transaction, the filters are as they were left', async () => {
+    const first = renderPage()
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search transactions' }), { target: { value: 'coffee' } })
+    const [toolbarPeriod] = screen.getAllByRole('radiogroup', { name: 'Period' })
+    fireEvent.click(within(toolbarPeriod).getByRole('radio', { name: 'Month' }))
+    await waitFor(() =>
+      expect(fetchTransactions).toHaveBeenLastCalledWith(expect.objectContaining({ search: 'coffee' }), 1, 20),
+    )
+    first.unmount()
+
+    vi.mocked(fetchTransactions).mockClear()
+    renderPage()
+    expect((screen.getByRole('searchbox', { name: 'Search transactions' }) as HTMLInputElement).value).toBe('coffee')
+    await waitFor(() =>
+      expect(fetchTransactions).toHaveBeenCalledWith(
+        expect.objectContaining({ search: 'coffee', ...periodRange('month', {}) }),
+        1,
+        20,
+      ),
+    )
+  })
+
+  test('a broken saved value falls back to the defaults', async () => {
+    sessionStorage.setItem('iapp-finance-tx-filters', '{nope')
+    renderPage()
+    await waitFor(() =>
+      expect(fetchTransactions).toHaveBeenCalledWith(expect.objectContaining(periodRange('month', {})), 1, 20),
+    )
   })
 })

@@ -8,8 +8,9 @@ describe('periodRange', () => {
     expect(periodRange('week', {}, today)).toEqual({ startDate: '2026-10-23', endDate: '2026-10-29' })
   })
 
-  test('month is the last 30 days including today', () => {
-    expect(periodRange('month', {}, today)).toEqual({ startDate: '2026-09-30', endDate: '2026-10-29' })
+  test('month is the calendar month today is in, first to last day', () => {
+    expect(periodRange('month', {}, today)).toEqual({ startDate: '2026-10-01', endDate: '2026-10-31' })
+    expect(periodRange('month', {}, new Date(2026, 1, 3))).toEqual({ startDate: '2026-02-01', endDate: '2026-02-28' })
   })
 
   test('all has no bounds', () => {

@@ -4,7 +4,7 @@ import type { Period, TransactionFilterState } from './period'
 import { useFinanceT } from '@/modules/finance/i18n'
 import s from './PeriodFilter.module.scss'
 
-const OPTIONS: Period[] = ['week', 'month', 'range', 'all']
+const OPTIONS: Period[] = ['all', 'month', 'week', 'range']
 
 interface Props {
   filters: TransactionFilterState
