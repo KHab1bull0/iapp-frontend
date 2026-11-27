@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ListGroup, ListRow } from '@/core/components/ui/List'
 import type { RecentTransaction } from '@/modules/finance/api/stats'
-import { formatSigned, formatShortDay } from '@/core/lib/format'
+import { formatShortDay, formatSignedMoney } from '@/core/lib/format'
 import { useCategoryName, useFinanceT } from '@/modules/finance/i18n'
 import { Skeleton } from '@/core/components/ui/Skeleton'
 import { TextSkeleton } from '@/modules/finance/components/loading/Loading'
@@ -28,7 +28,7 @@ export function RecentTransactions({ transactions }: { transactions: RecentTrans
             title={tx.note ?? catName(tx.category.name)}
             subtitle={`${catName(tx.category.name)} · ${formatShortDay(tx.date)}`}
             value={
-              <span className={tx.type === 'income' ? s.amtIn : undefined}>{formatSigned(tx.amount, tx.type)}</span>
+              <span className={tx.type === 'income' ? s.amtIn : undefined}>{formatSignedMoney(tx.amount, tx.type, tx.currency)}</span>
             }
             leading={
               <span className={s.emoji} style={{ background: `${tx.category.color}22` }} aria-hidden>

@@ -8,7 +8,8 @@ import { categoryTree } from '@/modules/finance/lib/categoryTree'
 import { CategoryPicker } from './CategoryPicker'
 import { createTransaction, updateTransaction, type Transaction } from '@/modules/finance/api/transactions'
 import { rememberCategory } from '@/modules/finance/lib/recentCategories'
-import { CURRENCY, todayYmd } from '@/core/lib/format'
+import { formatShortDay, todayYmd } from '@/core/lib/format'
+import { fetchUsdRate, ratesKeys, type Currency } from '@/modules/finance/api/rates'
 import { DateField } from '@/core/components/ui/DateField'
 import { SegmentedControl } from '@/core/components/ui/SegmentedControl'
 import { Skeleton } from '@/core/components/ui/Skeleton'
@@ -38,12 +39,36 @@ function now() {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-/** "1234567" → "1 234 567". So'm has no sub-unit, so amounts are whole. */
+/** "1234567.5" → "1 234 567.5": the whole part grouped, cents as typed. */
 function grouped(raw: string): string {
-  return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  const [whole, cents] = raw.split('.')
+  const g = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  return cents === undefined ? g : `${g}.${cents}`
 }
 
 const MAX_DIGITS = 12
+
+/**
+ * What was typed, cleaned: digits, and with `cents` one "." (a "," counts)
+ * and at most two digits after it. So'm has no sub-unit, so it stays whole.
+ */
+function cleanNumber(typed: string, cents: boolean): string {
+  const s = typed.replace(',', '.')
+  const [whole = '', ...rest] = s.split('.')
+  const w = whole.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, MAX_DIGITS)
+  if (!cents || !rest.length) return w === '0' && !cents ? '' : w
+  return `${w || '0'}.${rest.join('').replace(/\D/g, '').slice(0, 2)}`
+}
+
+/** A saved number as the field shows it: dollars with their cents ("24.50"), so'm whole. */
+function asTyped(n: number, cents: boolean): string {
+  return cents && !Number.isInteger(n) ? n.toFixed(2) : String(Math.round(n))
+}
+
+/** A rate as the field shows it: "12002.1" → "12002.10". */
+function rateText(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(2)
+}
 
 export function TransactionForm({ transaction, onSaved, onCancel, className }: Props) {
   const t = useFinanceT()
@@ -51,7 +76,12 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
   const isEdit = !!transaction
 
   const [type, setType] = useState<'income' | 'expense'>(transaction?.type ?? 'expense')
-  const [amount, setAmount] = useState(transaction ? String(Math.round(transaction.amount)) : '')
+  const [currency, setCurrency] = useState<Currency>(transaction?.currency ?? 'UZS')
+  const usd = currency === 'USD'
+  const [amount, setAmount] = useState(transaction ? asTyped(transaction.amount, transaction.currency === 'USD') : '')
+  // A dollar one's rate: the one it was saved with; a new one follows the
+  // bank's (or the user's own) for the day until it is typed over.
+  const [typedRate, setTypedRate] = useState<string | null>(transaction?.rate ? rateText(transaction.rate) : null)
   const [categoryId, setCategoryId] = useState(transaction?.category.id ?? '')
   // Local calendar day: toISOString() is UTC, a day behind before 5am here.
   const [date, setDate] = useState(transaction ? transaction.date.slice(0, 10) : todayYmd())
@@ -70,6 +100,13 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
     queryFn: fetchCategoryParents,
   })
   const options = categoryTree(categories, parents, type)
+  const { data: suggested } = useQuery({
+    queryKey: ratesKeys.usd(date),
+    queryFn: () => fetchUsdRate(date),
+    enabled: usd && typedRate === null,
+  })
+  const rate = typedRate ?? (suggested?.rate ? rateText(suggested.rate) : '')
+  const inSom = usd && Number(amount) && Number(rate) ? Math.round(Number(amount) * Number(rate)) : null
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -77,11 +114,21 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
     const num = Number(amount)
     if (!num || num <= 0) return setError(t.tx.invalidAmount)
     if (!categoryId) return setError(t.tx.pickCategory)
+    if (usd && !(Number(rate) > 0)) return setError(t.tx.rateMissing)
 
     setLoading(true)
     setError('')
     try {
-      const payload = { amount: num, type, categoryId, date, time: time || undefined, note: note || undefined }
+      const payload = {
+        amount: num,
+        currency,
+        ...(usd && { rate: Number(rate) }),
+        type,
+        categoryId,
+        date,
+        time: time || undefined,
+        note: note || undefined,
+      }
       if (isEdit && transaction) await updateTransaction(transaction.id, payload)
       else await createTransaction(payload)
       rememberCategory(categoryId)
@@ -124,13 +171,59 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
           value={grouped(amount)}
           placeholder="0"
           onChange={(e) => {
-            const digits = e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, MAX_DIGITS)
-            setAmount(digits)
+            setAmount(cleanNumber(e.target.value, usd))
             setError('')
           }}
         />
-        <span className={s.amountSfx}>{CURRENCY}</span>
       </div>
+
+      <div className={s.currencies} role="group" aria-label={t.tx.currency}>
+        {(['UZS', 'USD'] as const).map((c) => (
+          <button
+            key={c}
+            type="button"
+            className={clsx(s.currency, currency === c && s.currencyOn)}
+            aria-pressed={currency === c}
+            onClick={() => {
+              setCurrency(c)
+              // So'm is whole: the cents go.
+              if (c === 'UZS') setAmount((a) => a.split('.')[0])
+              setError('')
+            }}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+
+      {usd && (
+        <div className={s.field}>
+          <span className={s.fieldLabel}>{t.tx.rate}</span>
+          <div className={s.rateRow}>
+            <span className={s.rateUnit}>1 USD =</span>
+            <div className={clsx(s.inputWrap, s.rateWrap)}>
+              <input
+                className={s.input}
+                inputMode="decimal"
+                aria-label={t.tx.rateLabel}
+                value={grouped(rate)}
+                placeholder="0"
+                onChange={(e) => {
+                  setTypedRate(cleanNumber(e.target.value, true))
+                  setError('')
+                }}
+              />
+            </div>
+            <span className={s.rateUnit}>so'm</span>
+          </div>
+          <p className={s.hint}>
+            {typedRate === null && suggested?.source === 'cbu' && t.tx.rateFromBank(formatShortDay(suggested.date))}
+            {typedRate === null && suggested?.source === 'manual' && t.tx.rateOwn}
+            {typedRate === null && suggested && suggested.rate === null && t.tx.rateUnknown}
+            {inSom !== null && <span className={s.inSom}>{t.tx.inSom(grouped(String(inSom)))}</span>}
+          </p>
+        </div>
+      )}
 
       <div className={s.field}>
         <span className={s.fieldLabel}>{t.category}</span>

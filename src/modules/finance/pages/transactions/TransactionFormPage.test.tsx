@@ -68,6 +68,9 @@ describe('TransactionFormPage while loading', () => {
       one.resolve({
         id: 't1',
         amount: 45000,
+        currency: 'UZS',
+        rate: null,
+        baseAmount: 45000,
         type: 'expense',
         note: 'Airport',
         date: '2026-11-02',
@@ -160,7 +163,7 @@ describe('TransactionFormPage: parent categories', () => {
 
   test("editing a parent's category opens that parent with it chosen", async () => {
     vi.mocked(fetchTransaction).mockResolvedValue({
-      id: 't1', amount: 90000, type: 'expense', note: null, date: '2026-11-02', time: '09:30',
+      id: 't1', amount: 90000, currency: 'UZS', rate: null, baseAmount: 90000, type: 'expense', note: null, date: '2026-11-02', time: '09:30',
       createdAt: '2026-11-02T09:30:00Z', category: GAS,
     })
     renderAt('/finance/transactions/t1/edit')

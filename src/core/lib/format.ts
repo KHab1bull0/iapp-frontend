@@ -55,6 +55,20 @@ export function formatSigned(value: number, type: 'income' | 'expense'): string 
   return `${type === 'income' ? '+' : '−'}${amountFmt.format(Math.abs(value))}`
 }
 
+const usdFmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+const usdCentsFmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+/** An amount in its own currency: so'm as formatAmount, dollars as "$9.99" / "$300". */
+export function formatMoney(value: number, currency: 'UZS' | 'USD' = 'UZS'): string {
+  if (currency === 'UZS') return amountFmt.format(value)
+  return `$${(Number.isInteger(value) ? usdFmt : usdCentsFmt).format(value)}`
+}
+
+/** formatMoney with the transaction's direction in front: "+$300", "−9 990". */
+export function formatSignedMoney(value: number, type: 'income' | 'expense', currency: 'UZS' | 'USD' = 'UZS'): string {
+  return `${type === 'income' ? '+' : '−'}${formatMoney(Math.abs(value), currency)}`
+}
+
 /** "1,2 mln" — keeps large so'm values inside a narrow Y axis. */
 export function formatAxis(value: number): string {
   return axisFmt.format(value)

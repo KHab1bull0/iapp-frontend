@@ -15,6 +15,7 @@ import { RecentTransactions, RecentTransactionsSkeleton } from '@/modules/financ
 import { LoadingBlock } from '@/modules/finance/components/loading/Loading'
 import { staleClass } from '@/modules/finance/components/loading/stale'
 import { useFinanceT } from '@/modules/finance/i18n'
+import { RateBadge } from '@/modules/finance/components/rates/RateBadge'
 import s from './DashboardPage.module.scss'
 
 /**
@@ -77,6 +78,7 @@ export function DashboardPage() {
   return (
     <div className={s.page} aria-busy={isPlaceholderData || undefined}>
       {isPlaceholderData && <span className="sr-only">{t.stats.loading}</span>}
+      <RateBadge className={s.rate} />
       {/* With figures to show, the month switcher sits in the balance card. */}
       {empty && <div className={s.toolbar}>{stepper}</div>}
 

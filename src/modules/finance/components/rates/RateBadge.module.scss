@@ -1,0 +1,32 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+// Holds its height while the rate loads, so the page doesn't jump.
+.slot {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 28px;
+}
+
+.badge {
+  @include touch-target(8px);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 8px 0 10px;
+  border: 1px solid var(--border);
+  border-radius: $radius-pill;
+  background: var(--bg-elev);
+  color: var(--fg-muted);
+  font-size: var(--fs-meta);
+  line-height: 1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  transition: color $t-fast, border-color $t-fast;
+
+  &:hover { color: var(--fg); border-color: var(--border-strong); }
+}
+
+.chev { opacity: 0.6; }

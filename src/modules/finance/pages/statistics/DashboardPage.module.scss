@@ -25,3 +25,6 @@
 
   @include bp-tablet { grid-template-columns: 1fr; }
 }
+
+// The dollar rate, small at the top: nearer the next block than the page gap.
+.rate { margin-bottom: calc(8px - var(--section-gap, 16px)); }

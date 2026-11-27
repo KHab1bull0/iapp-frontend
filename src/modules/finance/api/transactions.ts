@@ -1,9 +1,16 @@
 import api from '@/core/api/axios'
 import type { Category } from './categories'
+import type { Currency } from './rates'
 
 export interface Transaction {
   id: string
+  /** As typed, in `currency`. */
   amount: number
+  currency: Currency
+  /** So'm per one unit, saved with it; null for so'm. */
+  rate: number | null
+  /** In so'm: what totals add up. */
+  baseAmount: number
   type: 'income' | 'expense'
   note: string | null
   date: string
@@ -31,6 +38,9 @@ export interface TransactionFilters {
 
 export interface CreateTransactionDto {
   amount: number
+  currency?: Currency
+  /** So'm per dollar, for a dollar one. */
+  rate?: number
   type: 'income' | 'expense'
   categoryId: string
   date: string

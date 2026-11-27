@@ -6,6 +6,7 @@ import { fetchCategories } from '@/modules/finance/api/categories'
 import { useDebouncedValue } from '@/core/hooks/useDebouncedValue'
 import { FilterDrawer } from '@/modules/finance/components/transactions/FilterDrawer'
 import { TransactionToolbar } from '@/modules/finance/components/transactions/TransactionToolbar'
+import { RateBadge } from '@/modules/finance/components/rates/RateBadge'
 import {
   toQuery,
   type TransactionFilterState,
@@ -65,6 +66,7 @@ export function TransactionsPage() {
 
   return (
     <div className={s.page}>
+      <RateBadge className={s.rate} />
       <TransactionToolbar
         filters={filters}
         onChange={setFilters}

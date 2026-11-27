@@ -4,7 +4,7 @@ import { Plus, Trash2, Wallet } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { categoryParentsKey, fetchCategoryParents } from '@/modules/finance/api/categoryParents'
 import { deleteTransaction, type Transaction } from '@/modules/finance/api/transactions'
-import { formatSigned, formatDay, formatAmount, parseApiDate, CURRENCY } from '@/core/lib/format'
+import { formatDay, formatAmount, formatSignedMoney, parseApiDate, CURRENCY } from '@/core/lib/format'
 import { toast } from '@/core/components/ui/toast'
 import { EmptyState } from '@/core/components/ui/EmptyState'
 import { useSwipe } from '@/core/hooks/useSwipe'
@@ -64,7 +64,9 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
     }
   }
 
-  const amount = `${formatSigned(tx.amount, tx.type)} ${CURRENCY}`
+  const usd = tx.currency === 'USD'
+  const signed = formatSignedMoney(tx.amount, tx.type, tx.currency)
+  const amount = usd ? signed : `${signed} ${CURRENCY}`
   const time = tx.time ?? tx.createdAt?.slice(11, 16) ?? ''
 
   return (
@@ -96,7 +98,11 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
             {categoryLabel}
           </span>
           <span className={s.colTime}>{time}</span>
-          <span className={clsx(s.txAmt, tx.type === 'income' ? s.amtIn : s.amtOut)}>{formatSigned(tx.amount, tx.type)}</span>
+          <span className={clsx(s.txAmt, tx.type === 'income' ? s.amtIn : s.amtOut)}>
+            {signed}
+            {/* A dollar one's so'm value, at the rate it was saved with. */}
+            {usd && <span className={s.txBase}>≈ {formatAmount(tx.baseAmount)}</span>}
+          </span>
         </button>
         <ConfirmDialog
           open={confirming}
@@ -155,7 +161,11 @@ export function TransactionList({
     <>
     <div className={s.groups}>
       {groups.map(([date, txs]) => {
-        const dayTotal = txs.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0)
+        // In so'm: each one's so'm value, dollars at their saved rate.
+        const dayTotal = txs.reduce((sum, t) => {
+          const v = t.baseAmount ?? t.amount
+          return sum + (t.type === 'income' ? v : -v)
+        }, 0)
         return (
           <div key={date} className={s.dayGroup}>
             <div className={s.dayHead}>

@@ -9,6 +9,7 @@ import {
 } from '@/modules/finance/api/transactions'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { fetchCategoryParents } from '@/modules/finance/api/categoryParents'
+import { fetchUsdRate } from '@/modules/finance/api/rates'
 import { formatAmount } from '@/core/lib/format'
 import { periodRange } from '@/modules/finance/components/transactions/period'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -20,6 +21,10 @@ vi.mock('@/modules/finance/api/transactions', async (orig) => ({
   fetchTransactions: vi.fn(),
   fetchTransactionTotals: vi.fn(),
   deleteTransaction: vi.fn(),
+}))
+vi.mock('@/modules/finance/api/rates', async (orig) => ({
+  ...(await orig<object>()),
+  fetchUsdRate: vi.fn(),
 }))
 vi.mock('@/modules/finance/api/categories', async (orig) => ({
   ...(await orig<object>()),
@@ -34,6 +39,9 @@ function tx(id: string, note: string, amount: number): Transaction {
   return {
     id,
     amount,
+    currency: 'UZS',
+    rate: null,
+    baseAmount: amount,
     type: 'expense',
     note,
     date: new Date().toISOString(),
@@ -61,6 +69,8 @@ beforeEach(() => {
   sessionStorage.clear()
   vi.mocked(fetchTransactionTotals).mockReset()
   vi.mocked(fetchTransactionTotals).mockResolvedValue({ income: { count: 2, total: 13500000 }, expense: { count: 5, total: 125000 } })
+  vi.mocked(fetchUsdRate).mockReset()
+  vi.mocked(fetchUsdRate).mockResolvedValue({ rate: 12_002.1, date: '2026-11-27', source: 'cbu' })
 })
 
 const openDrawer = () => {
@@ -288,6 +298,28 @@ describe('TransactionsPage: parent categories', () => {
     vi.mocked(fetchTransactions).mockResolvedValue(page([{ ...tx('a', 'Bill', 90000), category: GAS }]))
     renderPage()
     expect((await screen.findAllByText(/Gas · Home bills/)).length).toBeGreaterThan(0)
+  })
+
+  test("a dollar one shows dollars, with its so'm beside; the day's total is in so'm", async () => {
+    vi.mocked(fetchTransactions).mockResolvedValue(
+      page([
+        { ...tx('a', 'Netflix', 9.99), currency: 'USD', rate: 12_000, baseAmount: 119_880 },
+        tx('b', 'Taxi', 20_000),
+      ]),
+    )
+    renderPage()
+    expect((await screen.findAllByText('−$9.99')).length).toBeGreaterThan(0)
+    // The page's text, spaces as the matcher sees them.
+    const plain = (t: string) => t.replace(/\s/g, ' ')
+    expect(screen.getByText(plain(`≈ ${amount(119_880)}`))).toBeTruthy()
+    expect(screen.getByText(plain(`−${amount(139_880)}`))).toBeTruthy()
+  })
+
+  test("today's dollar rate sits on the page and opens its settings", async () => {
+    vi.mocked(fetchTransactions).mockResolvedValue(page([]))
+    renderPage()
+    const badge = await screen.findByRole('link', { name: /1 USD = 12/ })
+    expect(badge.getAttribute('href')).toBe('/finance/settings#rate')
   })
 })
 

@@ -148,6 +148,16 @@
   &.amtOut { color: var(--fg-strong); }
 }
 
+// Under a dollar amount: what it came to in so'm.
+.txBase {
+  display: block;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  font-weight: 500;
+  color: var(--fg-muted);
+  text-align: right;
+}
+
 .txDel {
   @include touch-target(6px);
   flex-shrink: 0;

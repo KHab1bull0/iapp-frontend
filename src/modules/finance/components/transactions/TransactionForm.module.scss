@@ -50,6 +50,58 @@
   color: var(--fg-muted);
 }
 
+// So'm or dollars: two small pills under the amount.
+.currencies {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: -12px;
+}
+
+.currency {
+  @include touch-target(6px);
+  min-width: 56px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: $radius-pill;
+  background: transparent;
+  color: var(--fg-muted);
+  font: inherit;
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background $t-fast, color $t-fast, border-color $t-fast;
+}
+
+.currencyOn {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+}
+
+.rateRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rateWrap { flex: 1; min-width: 0; }
+
+.rateUnit {
+  flex-shrink: 0;
+  font-size: var(--fs-ui);
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.inSom {
+  float: right;
+  font-weight: 600;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+
 .field {
   @include field-base;
 }

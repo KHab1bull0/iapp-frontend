@@ -24,7 +24,9 @@ export interface CategoryBreakdown extends CategoryShare {
 
 export interface RecentTransaction {
   id: string
+  /** As typed, in `currency`. */
   amount: number
+  currency?: 'UZS' | 'USD'
   type: 'income' | 'expense'
   note: string | null
   date: string
