@@ -3,17 +3,6 @@
 
 .card {
   @include card;
-  // Opened from the rate badge: clear of the sticky header when scrolled to.
-  scroll-margin-top: 72px;
-}
-
-.title { @include card-title; }
-
-.sub {
-  margin: 4px 0 0;
-  font-size: var(--fs-meta);
-  line-height: var(--lh-meta);
-  color: var(--fg-muted);
 }
 
 // The bank and its date, the rate under it.

@@ -11,6 +11,11 @@ export const TransactionsPage = lazy(() =>
 export const TransactionFormPage = lazy(() =>
   import('./transactions').then((m) => ({ default: m.TransactionFormPage })),
 )
-export const FinanceSettingsPage = lazy(() =>
-  import('./settings').then((m) => ({ default: m.FinanceSettingsPage })),
+export const FinanceSettingsLayout = lazy(() =>
+  import('./settings').then((m) => ({ default: m.FinanceSettingsLayout })),
 )
+export const FinanceSettingsIndex = lazy(() =>
+  import('./settings').then((m) => ({ default: m.FinanceSettingsIndex })),
+)
+export const CategoriesPage = lazy(() => import('./settings').then((m) => ({ default: m.CategoriesPage })))
+export const RatePage = lazy(() => import('./settings').then((m) => ({ default: m.RatePage })))

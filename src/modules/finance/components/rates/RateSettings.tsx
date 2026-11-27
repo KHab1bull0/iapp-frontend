@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useState, type FormEvent } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { formatAmount, formatShortDay, todayYmd } from '@/core/lib/format'
 import { toast } from '@/core/components/ui/toast'
@@ -23,8 +22,6 @@ export function RateSettings() {
   const t = useFinanceT()
   const qc = useQueryClient()
   const today = todayYmd()
-  const { hash } = useLocation()
-  const ref = useRef<HTMLElement>(null)
 
   const { data: bank, isLoading: bankLoading } = useQuery({
     queryKey: ratesKeys.bankUsd(today),
@@ -36,11 +33,6 @@ export function RateSettings() {
   const [typed, setTyped] = useState<string | null>(null)
   const value = typed ?? (saved ? String(saved) : '')
   const [busy, setBusy] = useState(false)
-
-  // Opened from the rate badge: bring this section into view.
-  useEffect(() => {
-    if (hash === '#rate') ref.current?.scrollIntoView({ block: 'start', behavior: 'smooth' })
-  }, [hash])
 
   async function save(usdRate: number | null) {
     if (busy) return
@@ -66,13 +58,7 @@ export function RateSettings() {
   }
 
   return (
-    <section id="rate" ref={ref} className={s.card} aria-labelledby="rate-title">
-      <div>
-        <h2 id="rate-title" className={s.title}>
-          {t.rate.title}
-        </h2>
-        <p className={s.sub}>{t.rate.sub}</p>
-      </div>
+    <section className={s.card} aria-label={t.rate.title}>
 
       <div className={s.row}>
         <span className={s.label}>

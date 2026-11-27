@@ -3,8 +3,11 @@ import type { ModuleManifest } from '@/core/modules/types'
 import { FinanceHomeCard } from './FinanceHomeCard'
 import { AddTransactionDialog } from './components/transactions/AddTransactionDialog'
 import {
+  CategoriesPage,
   DashboardPage,
-  FinanceSettingsPage,
+  FinanceSettingsIndex,
+  FinanceSettingsLayout,
+  RatePage,
   TransactionFormPage,
   TransactionsPage,
 } from './pages/lazy'
@@ -21,8 +24,17 @@ export const finance: ModuleManifest = {
   routes: [
     { index: true, element: <DashboardPage /> },
     { path: 'transactions', element: <TransactionsPage /> },
-    // Not in the menu: opened from Settings → Modules → Finance.
-    { path: 'settings', element: <FinanceSettingsPage /> },
+    // Not in the menu: opened from Settings → Modules → Finance. Nested like
+    // English and the app's Settings: a section list, then one page each.
+    {
+      path: 'settings',
+      element: <FinanceSettingsLayout />,
+      children: [
+        { index: true, element: <FinanceSettingsIndex /> },
+        { path: 'categories', element: <CategoriesPage /> },
+        { path: 'rate', element: <RatePage /> },
+      ],
+    },
   ],
   // Touch-only full-screen add/edit; desktop opens the dialog instead.
   fullscreenRoutes: [

@@ -7,7 +7,7 @@ import { fetchUsdRate, ratesKeys } from '@/modules/finance/api/rates'
 import { useFinanceT } from '@/modules/finance/i18n'
 import s from './RateBadge.module.scss'
 
-/** Today's dollar rate, small; it opens the rate in Finance settings. An empty slot while none is known. */
+/** Today's dollar rate, small; it opens the rate page in Finance settings. An empty slot while none is known. */
 export function RateBadge({ className }: { className?: string }) {
   const t = useFinanceT()
   const today = todayYmd()
@@ -16,7 +16,7 @@ export function RateBadge({ className }: { className?: string }) {
   const rate = formatAmount(Math.round(data.rate))
   return (
     <div className={clsx(s.slot, className)}>
-      <Link to="/finance/settings#rate" className={s.badge} aria-label={t.rate.badgeLabel(rate)}>
+      <Link to="/finance/settings/rate" className={s.badge} aria-label={t.rate.badgeLabel(rate)}>
         <DollarSign size={13} aria-hidden />
         <span>{t.rate.badge(rate)}</span>
         <ChevronRight size={13} aria-hidden className={s.chev} />

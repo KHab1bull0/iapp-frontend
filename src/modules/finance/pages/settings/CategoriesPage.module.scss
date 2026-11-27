@@ -1,15 +1,7 @@
 @use '@/core/styles/mixins' as *;
 @use '@/modules/finance/styles/segmented' as *;
 
-// Finance → Settings. The back link and page heading still come from the
-// app's settings styles so this page reads like its siblings; the column and
-// the card follow the spec's building blocks.
-
-.page {
-  @include page;
-  // The settings pages' single, narrower column.
-  max-width: 720px;
-}
+// Finance settings → categories: the card and its rows.
 
 .card {
   @include card;

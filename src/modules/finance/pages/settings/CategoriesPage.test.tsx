@@ -10,7 +10,7 @@ import {
   updateCategoryParent,
   type CategoryParent,
 } from '@/modules/finance/api/categoryParents'
-import { FinanceSettingsPage } from './FinanceSettingsPage'
+import { CategoriesPage } from './CategoriesPage'
 
 vi.mock('@/modules/finance/api/categories', async (orig) => ({
   ...(await orig<object>()),
@@ -22,11 +22,6 @@ vi.mock('@/modules/finance/api/categories', async (orig) => ({
 
 const TAXI: Category = { id: 'c1', name: 'Taxi', type: 'expense', icon: '🚕', color: '#336699', parentId: null }
 
-vi.mock('@/modules/finance/api/rates', async (orig) => ({
-  ...(await orig<object>()),
-  fetchBankUsdRate: vi.fn().mockResolvedValue({ rate: null }),
-  fetchFinanceSettings: vi.fn().mockResolvedValue({ usdRate: null }),
-}))
 vi.mock('@/modules/finance/api/categoryParents', async (orig) => ({
   ...(await orig<object>()),
   fetchCategoryParents: vi.fn(),
@@ -46,13 +41,13 @@ function renderPage() {
   return render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <MemoryRouter>
-        <FinanceSettingsPage />
+        <CategoriesPage />
       </MemoryRouter>
     </QueryClientProvider>,
   )
 }
 
-describe('FinanceSettingsPage', () => {
+describe('CategoriesPage', () => {
   beforeEach(() => {
     vi.mocked(fetchCategories).mockReset()
     vi.mocked(createCategory).mockReset()

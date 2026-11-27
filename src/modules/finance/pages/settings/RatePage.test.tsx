@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { fetchBankUsdRate, fetchFinanceSettings, updateFinanceSettings } from '@/modules/finance/api/rates'
 import { todayYmd } from '@/core/lib/format'
-import { FinanceSettingsPage } from './FinanceSettingsPage'
+import { RatePage } from './RatePage'
 
 vi.mock('@/modules/finance/api/categories', async (orig) => ({
   ...(await orig<object>()),
@@ -21,11 +21,11 @@ vi.mock('@/modules/finance/api/rates', async (orig) => ({
   updateFinanceSettings: vi.fn(),
 }))
 
-function renderPage(path = '/finance/settings') {
+function renderPage(path = '/finance/settings/rate') {
   return render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <MemoryRouter initialEntries={[path]}>
-        <FinanceSettingsPage />
+        <RatePage />
       </MemoryRouter>
     </QueryClientProvider>,
   )
@@ -34,7 +34,7 @@ function renderPage(path = '/finance/settings') {
 const own = () => screen.getByRole('textbox', { name: 'My own rate' }) as HTMLInputElement
 const plain = (t: string) => t.replace(/\s/g, ' ')
 
-describe('FinanceSettingsPage: the dollar rate', () => {
+describe('RatePage', () => {
   beforeEach(() => {
     vi.mocked(fetchBankUsdRate).mockReset().mockResolvedValue({ rate: 12_002.1, date: todayYmd(), source: 'cbu' })
     vi.mocked(fetchFinanceSettings).mockReset().mockResolvedValue({ usdRate: null })
@@ -44,7 +44,7 @@ describe('FinanceSettingsPage: the dollar rate', () => {
   test("the bank's rate for today, in use while there is no own one", async () => {
     renderPage()
     const section = await screen.findByRole('region', { name: 'Dollar rate' })
-    expect(section.id).toBe('rate')
+    expect(screen.getByRole('heading', { level: 1, name: 'Dollar rate' })).toBeTruthy()
     await waitFor(() => expect(plain(section.textContent ?? '')).toContain('12 002,1'))
     expect(fetchBankUsdRate).toHaveBeenCalledWith(todayYmd())
     expect(screen.getByText('In use')).toBeTruthy()
@@ -67,13 +67,5 @@ describe('FinanceSettingsPage: the dollar rate', () => {
     await waitFor(() => expect(own().value).toBe('12 300'))
     fireEvent.click(screen.getByRole('button', { name: "Use the bank's rate" }))
     await waitFor(() => expect(updateFinanceSettings).toHaveBeenCalledWith({ usdRate: null }))
-  })
-
-  test('opened from the rate badge (#rate): the section is brought into view', async () => {
-    const scroll = vi.fn()
-    Element.prototype.scrollIntoView = scroll
-    renderPage('/finance/settings#rate')
-    await screen.findByRole('region', { name: 'Dollar rate' })
-    await waitFor(() => expect(scroll).toHaveBeenCalled())
   })
 })

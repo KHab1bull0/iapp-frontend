@@ -319,7 +319,7 @@ describe('TransactionsPage: parent categories', () => {
     vi.mocked(fetchTransactions).mockResolvedValue(page([]))
     renderPage()
     const badge = await screen.findByRole('link', { name: /1 USD = 12/ })
-    expect(badge.getAttribute('href')).toBe('/finance/settings#rate')
+    expect(badge.getAttribute('href')).toBe('/finance/settings/rate')
   })
 })
 

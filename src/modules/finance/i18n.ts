@@ -108,6 +108,14 @@ export const financeMessages = defineMessages(
       rateMissing: 'Kursni kiriting',
       inSom: (amount: string) => `≈ ${amount} so'm`,
     },
+    settings: {
+      title: 'Moliya sozlamalari',
+      sections: "Moliya sozlamalari bo'limlari",
+      categories: 'Kategoriyalar',
+      categoriesDesc: 'Kirim va chiqim kategoriyalari, ularning guruhlari',
+      rate: 'Dollar kursi',
+      rateDesc: "Markaziy bank kursi yoki o'z kursingiz",
+    },
     rate: {
       badge: (rate: string) => `1 USD = ${rate} so'm`,
       badgeLabel: (rate: string) => `Dollar kursi: 1 USD = ${rate} so'm. Kurs sozlamalarini ochish`,
@@ -298,6 +306,14 @@ export const financeMessages = defineMessages(
       rateMissing: 'Enter the rate',
       inSom: (amount: string) => `≈ ${amount} so'm`,
     },
+    settings: {
+      title: 'Finance settings',
+      sections: 'Finance settings sections',
+      categories: 'Categories',
+      categoriesDesc: 'Income and expense categories, and their groups',
+      rate: 'Dollar rate',
+      rateDesc: "The Central Bank's rate or your own",
+    },
     rate: {
       badge: (rate: string) => `1 USD = ${rate} so'm`,
       badgeLabel: (rate: string) => `Dollar rate: 1 USD = ${rate} so'm. Open the rate settings`,
@@ -383,6 +399,8 @@ export const financeMessages = defineMessages(
     },
   },
 )
+
+export type FinanceMessages = (typeof financeMessages)['uz']
 
 export function useFinanceT() {
   return useMessages(financeMessages)
