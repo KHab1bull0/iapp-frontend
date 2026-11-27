@@ -18,7 +18,7 @@
   align-items: baseline;
   gap: 8px;
   // Lines up with the rows' icons below.
-  padding: 0 16px;
+  padding: 0 var(--row-pad-x);
 }
 
 .dayLabel {

@@ -9,11 +9,11 @@
 
 .groupTitle {
   @include section-label;
-  padding: 0 16px;
+  padding: 0 var(--row-pad-x);
 }
 
 .groupFooter {
-  padding: 0 16px;
+  padding: 0 var(--row-pad-x);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--fg-muted);
@@ -32,7 +32,7 @@
   gap: 12px;
   width: 100%;
   min-height: var(--row-h);
-  padding: 8px 16px;
+  padding: 8px var(--row-pad-x);
   border: none;
   background: transparent;
   color: inherit;

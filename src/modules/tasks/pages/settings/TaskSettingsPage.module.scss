@@ -97,7 +97,7 @@ form.row {
 /** Add / edit form wrapper — colour row on top, then name + buttons. */
 .editForm,
 .addForm {
-  padding: 10px 16px;
+  padding: 10px var(--row-pad-x);
   display: flex;
   flex-direction: column;
   gap: 8px;
