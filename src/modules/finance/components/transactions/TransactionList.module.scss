@@ -148,18 +148,18 @@
 }
 
 .txTime {
-  font-size: var(--fs-ui);
-  line-height: var(--lh-ui);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   font-weight: 500;
-  color: var(--fg);
+  color: var(--fg-muted);
   font-variant-numeric: tabular-nums;
 }
 
 .txAmt {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
-  font-size: var(--fs-ui);
-  line-height: var(--lh-ui);
+  font-size: 14px;
+  line-height: 18px;
   white-space: nowrap;
 
   &.amtIn  { color: var(--success); }
@@ -199,16 +199,8 @@
   &:hover { background: var(--danger-soft); color: var(--danger); }
   &:focus-visible { opacity: 1; }
 
-  // Touch: swipe left deletes; the button stays for screen readers only,
-  // so the row keeps the statement's clean right edge.
-  @media (hover: none) {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    opacity: 1;
-  }
+  // No hover on touch: always visible there (swipe is the quicker way).
+  @media (hover: none) { opacity: 0.8; }
 }
 
 .btnSecondary {
