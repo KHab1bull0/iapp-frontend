@@ -93,7 +93,7 @@
   flex: 1;
   min-width: 0;
   display: grid;
-  grid-template-columns: var(--tile-md) 1fr auto;
+  grid-template-columns: var(--tile-md) minmax(0, 1fr) auto;
   padding-right: 8px;
   border: none;
   background: transparent;
@@ -105,10 +105,11 @@
   &:hover { background: var(--row-hover); }
 }
 
-// Category emoji: a circle is fine for these (pill radius).
+// Category emoji in a rounded square with a hairline, like a bank's logo tile.
 .txCat {
   @include icon-tile(var(--tile-md));
-  border-radius: var(--radius-pill);
+  border-radius: 12px;
+  border: 1px solid var(--border);
   font-size: var(--fs-title);
 }
 
@@ -121,7 +122,7 @@
 .txTitle {
   font-size: var(--fs-ui);
   line-height: var(--lh-ui);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--fg-strong);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -137,6 +138,23 @@
   white-space: nowrap;
 }
 
+// Right: the time on top, the amount under it.
+.txEnd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 0;
+}
+
+.txTime {
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  font-weight: 500;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+
 .txAmt {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
@@ -146,6 +164,10 @@
 
   &.amtIn  { color: var(--success); }
   &.amtOut { color: var(--fg-strong); }
+}
+
+.txCur {
+  margin-left: 4px;
 }
 
 // Under a dollar amount: what it came to in so'm.
@@ -177,8 +199,16 @@
   &:hover { background: var(--danger-soft); color: var(--danger); }
   &:focus-visible { opacity: 1; }
 
-  // No hover on touch: always visible there (swipe is the quicker way).
-  @media (hover: none) { opacity: 0.8; }
+  // Touch: swipe left deletes; the button stays for screen readers only,
+  // so the row keeps the statement's clean right edge.
+  @media (hover: none) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    opacity: 1;
+  }
 }
 
 .btnSecondary {
@@ -221,7 +251,10 @@
   }
 
   // The note alone; category and time get their own columns.
-  .txSub { display: none; }
+  .txSub,
+  .txTime { display: none; }
+
+  .txRow { padding-right: 8px; }
 
   .colCategory {
     display: inline-flex;

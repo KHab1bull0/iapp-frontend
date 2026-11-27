@@ -87,10 +87,8 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
           </span>
           <span className={s.txMeta}>
             <span className={s.txTitle}>{tx.note ?? catName(tx.category.name)}</span>
-            <span className={s.txSub}>
-              {tx.note ? `${categoryLabel} · ` : parent ? `${parent.name} · ` : ''}
-              {time}
-            </span>
+            {/* Under the note, its category; under a category, its parent. */}
+            {(tx.note || parent) && <span className={s.txSub}>{tx.note ? categoryLabel : parent!.name}</span>}
           </span>
           {/* Desktop table columns; phones fold these into the line above. */}
           <span className={s.colCategory}>
@@ -98,8 +96,13 @@ function TransactionRow({ tx, onEdit }: { tx: Transaction; onEdit: (tx: Transact
             {categoryLabel}
           </span>
           <span className={s.colTime}>{time}</span>
-          <span className={clsx(s.txAmt, tx.type === 'income' ? s.amtIn : s.amtOut)}>
-            {signed}
+          {/* Right side, as a bank statement: the time, the amount under it. */}
+          <span className={s.txEnd}>
+            <span className={s.txTime}>{time}</span>
+            <span className={clsx(s.txAmt, tx.type === 'income' ? s.amtIn : s.amtOut)}>
+              {signed}
+              {!usd && <span className={s.txCur}>{CURRENCY}</span>}
+            </span>
             {/* A dollar one's so'm value, at the rate it was saved with. */}
             {usd && <span className={s.txBase}>≈ {formatAmount(tx.baseAmount)}</span>}
           </span>
@@ -232,7 +235,7 @@ export function TransactionListSkeleton() {
               <div key={i} className={s.swipeWrap}>
                 <div className={clsx(s.txRow, s.skeletonRow)}>
                   <div className={s.txMain}>
-                    <Skeleton width="var(--tile-md)" height="var(--tile-md)" radius="var(--radius-pill)" />
+                    <Skeleton width="var(--tile-md)" height="var(--tile-md)" radius="12px" />
                     <span className={s.txMeta}>
                       <span className={s.txTitle}>
                         <TextSkeleton width={`${w}%`} />
@@ -247,8 +250,13 @@ export function TransactionListSkeleton() {
                     <span className={s.colTime}>
                       <TextSkeleton width={36} />
                     </span>
-                    <span className={s.txAmt}>
-                      <TextSkeleton width={72} />
+                    <span className={s.txEnd}>
+                      <span className={s.txTime}>
+                        <TextSkeleton width={36} />
+                      </span>
+                      <span className={s.txAmt}>
+                        <TextSkeleton width={88} />
+                      </span>
                     </span>
                   </div>
                   {/* Where each row's bin button sits. */}
