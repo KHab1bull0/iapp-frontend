@@ -89,8 +89,8 @@
   --section-gap: 20px;  /* between blocks of a page (24px on desktop) */
   /* Inside is tighter than the page edge, so content inside a card isn't
      squeezed in from both sides by the same amount twice. */
-  --card-pad:    12px;  /* inside a card (20px on desktop) */
-  --row-pad-x:   12px;  /* a row's sides inside a card (16px on desktop) */
+  --card-pad:    10px;  /* inside a card, on every screen */
+  --row-pad-x:   10px;  /* a row's sides inside a card, on every screen */
   --stack-gap:   12px;  /* between items inside a card */
 
   --ease-house: cubic-bezier(0.2, 0, 0, 1);
@@ -139,8 +139,6 @@
   :root {
     --page-pad: 32px;
     --section-gap: 24px;
-    --card-pad: 20px;
-    --row-pad-x: 16px;
   }
 }
 
