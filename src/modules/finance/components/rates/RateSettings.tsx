@@ -11,21 +11,8 @@ import {
 } from '@/modules/finance/api/rates'
 import { Spinner, TextSkeleton } from '@/modules/finance/components/loading/Loading'
 import { useFinanceT } from '@/modules/finance/i18n'
+import { cleanNumber, grouped } from '@/modules/finance/lib/numberInput'
 import s from './RateSettings.module.scss'
-
-/** "12300.5" → "12 300.5". */
-function grouped(raw: string): string {
-  const [whole, cents] = raw.split('.')
-  const g = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-  return cents === undefined ? g : `${g}.${cents}`
-}
-
-/** Digits and at most one "." (a "," counts) with two after it. */
-function clean(typed: string): string {
-  const [whole = '', ...rest] = typed.replace(',', '.').split('.')
-  const w = whole.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 9)
-  return rest.length ? `${w || '0'}.${rest.join('').replace(/\D/g, '').slice(0, 2)}` : w
-}
 
 /**
  * Finance settings → the dollar rate: the Central Bank's for today, and the
@@ -59,9 +46,9 @@ export function RateSettings() {
     if (busy) return
     setBusy(true)
     try {
-      await updateFinanceSettings({ usdRate })
+      // The answer goes straight into the cache, so the old value never flashes back.
+      qc.setQueryData(ratesKeys.settings, await updateFinanceSettings({ usdRate }))
       setTyped(null)
-      await qc.invalidateQueries({ queryKey: ratesKeys.settings })
       // Every prefill and the badge follow the new choice.
       await qc.invalidateQueries({ queryKey: ['finance', 'rate'] })
       toast(usdRate ? t.rate.saved : t.rate.cleared, 'success')
@@ -111,7 +98,7 @@ export function RateSettings() {
               inputMode="decimal"
               value={grouped(value)}
               placeholder={bank?.rate ? grouped(String(bank.rate)) : '0'}
-              onChange={(e) => setTyped(clean(e.target.value))}
+              onChange={(e) => setTyped(cleanNumber(e.target.value, true, 7))}
             />
           </div>
           <span className={s.unit}>so'm</span>
@@ -126,7 +113,8 @@ export function RateSettings() {
           <button
             type="submit"
             className={s.btnPrimary}
-            disabled={busy || typed === null}
+            // Nothing new to save: untouched, or emptied with no own rate set.
+            disabled={busy || typed === null || (!Number(typed) && !saved)}
             aria-busy={busy || undefined}
             aria-label={t.rate.saveLabel}
           >

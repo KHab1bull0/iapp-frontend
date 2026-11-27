@@ -64,7 +64,7 @@ describe('TransactionForm in dollars', () => {
     expect(fetchUsdRate).toHaveBeenCalledWith(todayYmd())
     expect(screen.getByText(/Central Bank/)).toBeTruthy()
 
-    fireEvent.change(amount(), { target: { value: '12,505' } })
+    fireEvent.change(amount(), { target: { value: '12.505' } })
     expect(amount().value).toBe('12.50')
     expect(screen.getByText(/150 026/)).toBeTruthy()
 

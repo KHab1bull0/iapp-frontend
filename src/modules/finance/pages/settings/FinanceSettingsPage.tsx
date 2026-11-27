@@ -73,6 +73,9 @@ export function FinanceSettingsPage() {
         </div>
       </header>
 
+      {/* First: small, and opened from the rate badge (#rate); nothing above it grows after the scroll. */}
+      <RateSettings />
+
       <div className={s.card}>
         <div className={s.cardHead}>
           <h2 className={s.title}>{t.categories.title}</h2>
@@ -105,8 +108,6 @@ export function FinanceSettingsPage() {
           <CategoryList categories={categories ?? []} parents={parents} type={catTab} />
         )}
       </div>
-
-      <RateSettings />
 
       <AddCategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
       <ParentDialog open={parentOpen} onOpenChange={setParentOpen} type={catTab} categories={categories ?? []} />

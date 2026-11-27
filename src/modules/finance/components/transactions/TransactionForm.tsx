@@ -9,6 +9,7 @@ import { CategoryPicker } from './CategoryPicker'
 import { createTransaction, updateTransaction, type Transaction } from '@/modules/finance/api/transactions'
 import { rememberCategory } from '@/modules/finance/lib/recentCategories'
 import { formatShortDay, todayYmd } from '@/core/lib/format'
+import { cleanNumber, grouped } from '@/modules/finance/lib/numberInput'
 import { fetchUsdRate, ratesKeys, type Currency } from '@/modules/finance/api/rates'
 import { DateField } from '@/core/components/ui/DateField'
 import { SegmentedControl } from '@/core/components/ui/SegmentedControl'
@@ -39,26 +40,8 @@ function now() {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-/** "1234567.5" → "1 234 567.5": the whole part grouped, cents as typed. */
-function grouped(raw: string): string {
-  const [whole, cents] = raw.split('.')
-  const g = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-  return cents === undefined ? g : `${g}.${cents}`
-}
-
-const MAX_DIGITS = 12
-
-/**
- * What was typed, cleaned: digits, and with `cents` one "." (a "," counts)
- * and at most two digits after it. So'm has no sub-unit, so it stays whole.
- */
-function cleanNumber(typed: string, cents: boolean): string {
-  const s = typed.replace(',', '.')
-  const [whole = '', ...rest] = s.split('.')
-  const w = whole.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, MAX_DIGITS)
-  if (!cents || !rest.length) return w === '0' && !cents ? '' : w
-  return `${w || '0'}.${rest.join('').replace(/\D/g, '').slice(0, 2)}`
-}
+/** The amount column holds ten whole digits (numeric(12,2)). */
+const MAX_DIGITS = 10
 
 /** A saved number as the field shows it: dollars with their cents ("24.50"), so'm whole. */
 function asTyped(n: number, cents: boolean): string {
@@ -165,13 +148,14 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
       <div className={clsx(s.amount, type === 'income' ? s.amtIn : s.amtOut)}>
         <input
           className={s.amountInput}
-          inputMode="numeric"
+          // Dollars have cents: the keypad with a point.
+          inputMode={usd ? 'decimal' : 'numeric'}
           enterKeyHint="next"
           aria-label={t.tx.amount}
           value={grouped(amount)}
           placeholder="0"
           onChange={(e) => {
-            setAmount(cleanNumber(e.target.value, usd))
+            setAmount(cleanNumber(e.target.value, usd, MAX_DIGITS))
             setError('')
           }}
         />
@@ -209,7 +193,7 @@ export function TransactionForm({ transaction, onSaved, onCancel, className }: P
                 value={grouped(rate)}
                 placeholder="0"
                 onChange={(e) => {
-                  setTypedRate(cleanNumber(e.target.value, true))
+                  setTypedRate(cleanNumber(e.target.value, true, 7))
                   setError('')
                 }}
               />
