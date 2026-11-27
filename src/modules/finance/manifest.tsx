@@ -8,6 +8,7 @@ import {
   DashboardPage,
   FinanceSettingsIndex,
   FinanceSettingsLayout,
+  ParentFormPage,
   RatePage,
   TransactionFormPage,
   TransactionsPage,
@@ -43,6 +44,8 @@ export const finance: ModuleManifest = {
     { path: 'transactions/:id/edit', element: <TransactionFormPage /> },
     { path: 'settings/categories/new', element: <CategoryFormPage /> },
     { path: 'settings/categories/:id/edit', element: <CategoryFormPage /> },
+    { path: 'settings/parents/new', element: <ParentFormPage /> },
+    { path: 'settings/parents/:id/edit', element: <ParentFormPage /> },
   ],
   homeCard: FinanceHomeCard,
   quickAdd: [

@@ -23,8 +23,6 @@ interface Props {
   onCancel: () => void
   /** After a delete; defaults to onSaved. */
   onDeleted?: () => void
-  /** Inside a dialog: the icon grid scrolls in a box rather than the page. */
-  compact?: boolean
 }
 
 /**
@@ -32,7 +30,7 @@ interface Props {
  * tile and name, as the list will show them. Then type, name, parent (chips),
  * colour and icon.
  */
-export function CategoryForm({ category, initialType = 'expense', onSaved, onCancel, onDeleted, compact }: Props) {
+export function CategoryForm({ category, initialType = 'expense', onSaved, onCancel, onDeleted }: Props) {
   const t = useFinanceT()
   const catName = useCategoryName()
   const qc = useQueryClient()
@@ -175,7 +173,7 @@ export function CategoryForm({ category, initialType = 'expense', onSaved, onCan
 
       <div className={s.field}>
         <span className={s.fieldLabel}>{t.categories.icon}</span>
-        <div className={clsx(s.emojiGrid, compact && s.emojiGridCompact)}>
+        <div className={s.emojiGrid}>
           {EMOJI_LIST.map((e) => (
             <button
               key={e}
@@ -198,7 +196,7 @@ export function CategoryForm({ category, initialType = 'expense', onSaved, onCan
         </div>
       )}
 
-      <div className={clsx(compact && s.formActionsCompact)} data-form-actions>
+      <div data-form-actions>
         {category && (
           <ConfirmDialog
             trigger={

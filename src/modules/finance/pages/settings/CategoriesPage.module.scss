@@ -1,40 +1,41 @@
+@use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 @use '@/modules/finance/styles/segmented' as *;
 
-// Finance settings → categories: the card and its rows.
-
-.card {
-  @include card;
-}
-
-.cardHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.title {
-  @include card-title;
-}
-
-.headActions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.btnSecondary {
-  @include btn-secondary;
-  @include btn-size-sm;
-}
+// Finance settings → categories: type tabs, the two add buttons, the list.
 
 .tabs {
   @include segmented;
-  align-self: flex-start;
+  @include segmented-stretch;
 }
 
-.tab {
-  @include segment;
+.tab { @include segment; }
+
+// Two equal buttons side by side: a category, a parent.
+.adds {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--control-md);
+  padding: 0 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--fg-strong);
+  font-size: var(--fs-ui);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background $t-fast, border-color $t-fast;
+
+  &:hover { background: var(--row-hover); border-color: var(--primary); }
+}
+
+.skeletonRow {
+  @include row;
 }

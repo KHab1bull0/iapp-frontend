@@ -1,65 +1,47 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useIsMobile } from '@/core/hooks/useMediaQuery'
 import clsx from 'clsx'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Plus } from 'lucide-react'
+import { FolderPlus, Plus } from 'lucide-react'
 import { fetchCategories } from '@/modules/finance/api/categories'
 import { categoryParentsKey, fetchCategoryParents } from '@/modules/finance/api/categoryParents'
-import { ParentDialog } from '@/modules/finance/components/categories/ParentDialog'
-import { AddCategoryDialog } from '@/modules/finance/components/categories/AddCategoryDialog'
 import { CategoryList } from '@/modules/finance/components/categories/CategoryList'
+import { LoadingBlock, TextSkeleton } from '@/modules/finance/components/loading/Loading'
+import { Skeleton } from '@/core/components/ui/Skeleton'
 import { useFinanceT } from '@/modules/finance/i18n'
-import rows from '@/modules/finance/components/categories/CategoryList.module.scss'
+import list from '@/modules/finance/components/categories/CategoryList.module.scss'
 import { FinanceSettingsSubpage } from './FinanceSettingsSubpage'
 import s from './CategoriesPage.module.scss'
-import { Skeleton } from '@/core/components/ui/Skeleton'
-import { LoadingBlock, TextSkeleton } from '@/modules/finance/components/loading/Loading'
-
-type CatTab = 'expense' | 'income'
 
 const SKELETON_NAMES = [96, 72, 112, 84]
 
-/** The category rows before they arrive: the real row's four columns at its height. */
+/** The list before it arrives: one card of rows at their real height. */
 function CategoriesSkeleton() {
   const t = useFinanceT()
   return (
-    <LoadingBlock label={t.categories.loading} className={rows.catGrid}>
-      {SKELETON_NAMES.map((w) => (
-        <div key={w} className={rows.catCard} aria-hidden>
-          <Skeleton width="var(--tile-md)" height="var(--tile-md)" radius="var(--radius-sm)" />
-          <div className={rows.catMeta}>
-            <div className={rows.catName}>
-              <TextSkeleton width={w} />
-            </div>
-            <div className={rows.catType}>
-              <TextSkeleton width={48} />
-            </div>
+    <LoadingBlock label={t.categories.loading} className={list.groups}>
+      <div className={list.card} aria-hidden>
+        {SKELETON_NAMES.map((w) => (
+          <div key={w} className={s.skeletonRow}>
+            <Skeleton width="var(--tile-md)" height="var(--tile-md)" radius="10px" />
+            <TextSkeleton width={w} />
           </div>
-          <Skeleton width="var(--control-sm)" height="var(--control-sm)" radius="var(--radius-sm)" />
-          <Skeleton width="var(--control-sm)" height="var(--control-sm)" radius="var(--radius-sm)" />
-        </div>
-      ))}
+        ))}
+      </div>
     </LoadingBlock>
   )
 }
 
-/** Finance settings → categories: income and expense, and the parents that group them. */
+/**
+ * Finance settings → categories. Expense or income on top (kept in the URL,
+ * so coming back from a category lands on the same tab); adding a category
+ * or a parent; then the list, each row opening its own page.
+ */
 export function CategoriesPage() {
   const t = useFinanceT()
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [parentOpen, setParentOpen] = useState(false)
-  const [catTab, setCatTab] = useState<CatTab>('expense')
-  const navigate = useNavigate()
-  const isMobile = useIsMobile()
-  // Phones: a page of its own, starting on the tab in view; desktop: the dialog.
-  const addCategory = () =>
-    isMobile ? navigate(`/finance/settings/categories/new?type=${catTab}`) : setDialogOpen(true)
+  const [params, setParams] = useSearchParams()
+  const type = params.get('type') === 'income' ? 'income' : 'expense'
 
-  const { data: categories, isLoading } = useQuery({
-    queryKey: ['categories'],
-    queryFn: fetchCategories,
-  })
+  const { data: categories, isLoading } = useQuery({ queryKey: ['categories'], queryFn: fetchCategories })
   const { data: parents = [], isLoading: parentsLoading } = useQuery({
     queryKey: categoryParentsKey,
     queryFn: fetchCategoryParents,
@@ -67,41 +49,34 @@ export function CategoriesPage() {
 
   return (
     <FinanceSettingsSubpage title={t.settings.categories} description={t.categories.settingsSub}>
-      <div className={s.card}>
-        <div className={s.cardHead}>
-          <h2 className={s.title}>{t.categories.title}</h2>
-          <div className={s.headActions}>
-            <button className={s.btnSecondary} onClick={() => setParentOpen(true)}>
-              <Plus size={14} /> {t.categories.newParent}
-            </button>
-            <button className={s.btnSecondary} onClick={addCategory}>
-              <Plus size={14} /> {t.categories.new}
-            </button>
-          </div>
-        </div>
-        <div className={s.tabs}>
+      <div className={s.tabs} role="group" aria-label={t.tx.type}>
+        {(['expense', 'income'] as const).map((v) => (
           <button
-            className={clsx(s.tab, catTab === 'expense' && s.active)}
-            onClick={() => setCatTab('expense')}
+            key={v}
+            type="button"
+            aria-pressed={type === v}
+            className={clsx(s.tab, type === v && s.active)}
+            onClick={() => setParams(v === 'income' ? { type: v } : {}, { replace: true })}
           >
-            {t.expenses}
+            {t[v === 'expense' ? 'expenses' : 'income']}
           </button>
-          <button
-            className={clsx(s.tab, catTab === 'income' && s.active)}
-            onClick={() => setCatTab('income')}
-          >
-            {t.income}
-          </button>
-        </div>
-        {isLoading || parentsLoading ? (
-          <CategoriesSkeleton />
-        ) : (
-          <CategoryList categories={categories ?? []} parents={parents} type={catTab} />
-        )}
+        ))}
       </div>
 
-      <AddCategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} type={catTab} />
-      <ParentDialog open={parentOpen} onOpenChange={setParentOpen} type={catTab} categories={categories ?? []} />
+      <div className={s.adds}>
+        <Link to={`/finance/settings/categories/new?type=${type}`} className={s.add} aria-label={t.categories.new}>
+          <Plus size={16} aria-hidden /> {t.categories.addShort}
+        </Link>
+        <Link to={`/finance/settings/parents/new?type=${type}`} className={s.add} aria-label={t.categories.newParent}>
+          <FolderPlus size={16} aria-hidden /> {t.categories.addParentShort}
+        </Link>
+      </div>
+
+      {isLoading || parentsLoading ? (
+        <CategoriesSkeleton />
+      ) : (
+        <CategoryList categories={categories ?? []} parents={parents} type={type} />
+      )}
     </FinanceSettingsSubpage>
   )
 }

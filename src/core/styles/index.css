@@ -386,7 +386,7 @@
    --form-actions-space free at its foot so nothing hides behind it. Its
    buttons share one width and height (the btn-action-* mixins) and differ
    only in colour. Inside a sheet, side panel or dialog the row sticks to the
-   bottom of that box instead (Sheet.module.scss, AddCategoryDialog).
+   bottom of that box instead (Sheet.module.scss).
    --form-gutter is the page's side padding; the buttons line up with the
    form's 640px column. */
 :root {

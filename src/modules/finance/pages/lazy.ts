@@ -21,4 +21,7 @@ export const CategoriesPage = lazy(() => import('./settings').then((m) => ({ def
 export const CategoryFormPage = lazy(() =>
   import('./settings').then((m) => ({ default: m.CategoryFormPage })),
 )
+export const ParentFormPage = lazy(() =>
+  import('./settings').then((m) => ({ default: m.ParentFormPage })),
+)
 export const RatePage = lazy(() => import('./settings').then((m) => ({ default: m.RatePage })))

@@ -1,98 +1,43 @@
 @use '@/core/styles/variables' as *;
 @use '@/core/styles/mixins' as *;
 
-.catGrid {
-  // A plain list inside the settings card: rows split by hairlines rather
-  // than a grid of bordered cards, which drew a card inside a card.
+// Each parent its own card, the unassigned ones in one more.
+.groups {
   display: flex;
   flex-direction: column;
-}
-
-.catCard {
-  display: grid;
-  grid-template-columns: var(--tile-md) 1fr var(--control-sm) var(--control-sm);
   gap: 12px;
-  align-items: center;
-  // Row rhythm; no side padding because the settings card already pads it.
-  min-height: var(--row-h);
-  padding: 8px 0;
-
-  & + & { border-top: 1px solid var(--border); }
 }
 
-.catEmoji {
+.card {
+  @include surface;
+  overflow: hidden;
+
+  > * + * { border-top: 1px solid var(--border); }
+}
+
+// The parent's row heads its card: a little bolder, a tint of its colour.
+.parent {
+  background: color-mix(in srgb, var(--fg) 3%, transparent);
+}
+
+.parentName { font-weight: 600; }
+
+// Its categories, stepped in under it.
+.child { padding-left: 16px; }
+
+.tile {
   @include icon-tile(var(--tile-md));
+  border-radius: 10px;
   font-size: var(--fs-title);
 }
 
-.catMeta { min-width: 0; }
-
-.catName {
-  font-size: var(--fs-ui);
-  line-height: var(--lh-ui);
-  font-weight: 500;
-  color: var(--fg-strong);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.catType {
-  @include section-label;
-  font-weight: 500;
-}
-
-.catEdit,
-.catDel {
-  // Grow the hit area to 44x44 without disturbing the row grid — the 12px
-  // column gap absorbs the bleed on each side.
-  @include touch-target(6px);
-  width: var(--control-sm);
-  height: var(--control-sm);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  border: none;
-  color: var(--fg-muted);
-  cursor: pointer;
+.looseGroup {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background $t-fast, color $t-fast;
-}
-
-.catEdit:hover {
-  background: var(--icon-btn-hover);
-  color: var(--fg-strong);
-}
-
-.catDel:hover {
-  background: var(--danger-soft);
-  color: var(--danger);
-}
-
-// Being deleted: dimmed, its buttons off until the request settles.
-.deleting {
-  .catEmoji,
-  .catMeta { opacity: 0.55; }
-
-  .catEdit:disabled { opacity: 0.4; cursor: not-allowed; }
-  .catDel:disabled { cursor: progress; }
-}
-
-/** A parent with its categories; groups split by a hairline like rows. */
-.parentGroup + .parentGroup,
-.parentGroup + .catCard { border-top: 1px solid var(--border); }
-
-.parentRow .catName { font-weight: 600; }
-
-/** A parent's categories, indented under it. */
-.children {
-  margin-left: calc(var(--tile-md) / 2);
-  padding-left: 12px;
-  border-left: 2px solid var(--border);
+  flex-direction: column;
+  gap: 8px;
 }
 
 .looseHead {
   @include section-label;
-  padding: 12px 0 4px;
+  padding: 0 var(--row-pad-x);
 }

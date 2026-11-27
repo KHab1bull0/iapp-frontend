@@ -140,13 +140,6 @@
   gap: 6px;
 }
 
-// In a dialog the grid scrolls in its own box.
-.emojiGridCompact {
-  max-height: 156px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
 .emoji {
   height: 44px;
   display: grid;
@@ -162,6 +155,13 @@
   &:hover { background: var(--row-hover); }
 }
 
+.hint {
+  margin: 0;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
 .formError {
   font-size: var(--fs-meta);
   line-height: var(--lh-meta);
@@ -169,14 +169,6 @@
   padding: 8px 12px;
   background: var(--danger-soft);
   border-radius: var(--radius-sm);
-}
-
-// In the dialog: pinned to its bottom, which scrolls with 24px padding.
-.formActionsCompact {
-  position: sticky;
-  bottom: -24px;
-  margin: auto -24px -24px;
-  padding: 12px 24px 24px;
 }
 
 .btnDanger { @include btn-action-danger; }
