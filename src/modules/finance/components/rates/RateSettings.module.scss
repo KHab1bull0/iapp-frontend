@@ -16,18 +16,20 @@
   color: var(--fg-muted);
 }
 
+// The bank and its date, the rate under it.
 .row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   padding: 10px 12px;
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--fg) 4%, transparent);
 }
 
 .label {
-  font-size: var(--fs-ui);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
   color: var(--fg-muted);
 }
 
