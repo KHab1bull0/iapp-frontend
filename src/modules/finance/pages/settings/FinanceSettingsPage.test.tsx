@@ -22,6 +22,11 @@ vi.mock('@/modules/finance/api/categories', async (orig) => ({
 
 const TAXI: Category = { id: 'c1', name: 'Taxi', type: 'expense', icon: '🚕', color: '#336699', parentId: null }
 
+vi.mock('@/modules/finance/api/rates', async (orig) => ({
+  ...(await orig<object>()),
+  fetchBankUsdRate: vi.fn().mockResolvedValue({ rate: null }),
+  fetchFinanceSettings: vi.fn().mockResolvedValue({ usdRate: null }),
+}))
 vi.mock('@/modules/finance/api/categoryParents', async (orig) => ({
   ...(await orig<object>()),
   fetchCategoryParents: vi.fn(),

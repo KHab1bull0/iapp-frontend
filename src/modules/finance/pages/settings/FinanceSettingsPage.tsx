@@ -8,6 +8,7 @@ import { categoryParentsKey, fetchCategoryParents } from '@/modules/finance/api/
 import { ParentDialog } from '@/modules/finance/components/categories/ParentDialog'
 import { AddCategoryDialog } from '@/modules/finance/components/categories/AddCategoryDialog'
 import { CategoryList } from '@/modules/finance/components/categories/CategoryList'
+import { RateSettings } from '@/modules/finance/components/rates/RateSettings'
 import { useFinanceT } from '@/modules/finance/i18n'
 // Shell styles (back link, page heading), so the page looks like the app's
 // other settings pages; the column, card and rows are this module's own.
@@ -104,6 +105,8 @@ export function FinanceSettingsPage() {
           <CategoryList categories={categories ?? []} parents={parents} type={catTab} />
         )}
       </div>
+
+      <RateSettings />
 
       <AddCategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
       <ParentDialog open={parentOpen} onOpenChange={setParentOpen} type={catTab} categories={categories ?? []} />

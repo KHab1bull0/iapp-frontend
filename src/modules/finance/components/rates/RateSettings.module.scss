@@ -1,0 +1,132 @@
+@use '@/core/styles/variables' as *;
+@use '@/core/styles/mixins' as *;
+
+.card {
+  @include card;
+  // Opened from the rate badge: clear of the sticky header when scrolled to.
+  scroll-margin-top: 72px;
+}
+
+.title { @include card-title; }
+
+.sub {
+  margin: 4px 0 0;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+
+.label {
+  font-size: var(--fs-ui);
+  color: var(--fg-muted);
+}
+
+.value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-strong);
+  white-space: nowrap;
+}
+
+// "In use": beside whichever rate a new dollar transaction starts with.
+.inUse {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: $radius-pill;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.own {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ownLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.ownRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unit {
+  flex-shrink: 0;
+  font-size: var(--fs-ui);
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.inputWrap {
+  @include input-wrap-base;
+  flex: 1;
+  min-width: 0;
+}
+
+.input {
+  width: 100%;
+  min-width: 0;
+  height: calc(var(--control-md) - 2px);
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  color: var(--fg-strong);
+  font: inherit;
+  font-size: var(--fs-ui);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+
+  &::placeholder { color: var(--fg-muted); }
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--fg-muted);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.btnPrimary {
+  @include btn-primary;
+  @include btn-size-sm;
+}
+
+.btnSecondary {
+  @include btn-secondary;
+  @include btn-size-sm;
+}
