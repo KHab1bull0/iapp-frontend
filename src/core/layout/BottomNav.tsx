@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { NavLink, useLocation } from 'react-router-dom'
+import { matchPath, NavLink, useLocation } from 'react-router-dom'
 import { House, Menu, Plus, Settings, type LucideIcon } from 'lucide-react'
 import type { BottomNavItem, ModuleManifest } from '@/core/modules/types'
 import { addHere, bottomNavItems, quickAddActions } from '@/core/modules/registry-utils'
@@ -56,8 +56,12 @@ export function BottomNav({
   }
 
   const items = bottomNavItems(modules, current)
+  const links = items.map(toLink)
+  const { pathname } = useLocation()
+  // Where the lens sits: the link NavLink would mark active.
+  const activeIndex = links.findIndex(({ to, end }) => matchPath({ path: to, end }, pathname))
   // Home adds anything (the chooser); a module's own page adds that module's thing.
-  const { global, action } = addHere(modules, useLocation().pathname)
+  const { global, action } = addHere(modules, pathname)
   const canAdd = global ? quickAddActions(modules).length > 0 : Boolean(action)
 
   return (
@@ -67,8 +71,19 @@ export function BottomNav({
         aria-label={current ? t.nav.pagesOf(text(current.name)) : t.nav.main}
         style={{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }}
       >
-        {items.map((item) => {
-          const { to, icon: Icon, label, end, useBadge } = toLink(item)
+        {/* One lens of brighter glass behind the current page; switching pages slides it across. */}
+        {activeIndex >= 0 && (
+          <span
+            className={s.lens}
+            aria-hidden
+            data-testid="nav-lens"
+            style={{
+              width: `calc((100% - 8px) / ${items.length})`,
+              transform: `translateX(${activeIndex * 100}%)`,
+            }}
+          />
+        )}
+        {links.map(({ to, icon: Icon, label, end, useBadge }) => {
           return (
             <NavLink key={to} to={to} end={end} viewTransition className={({ isActive }) => clsx(s.bnavItem, isActive && s.active)}>
               <span className={s.iconWrap}>

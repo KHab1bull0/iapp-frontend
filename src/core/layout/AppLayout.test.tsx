@@ -183,3 +183,18 @@ describe('AppLayout driven by the registry', () => {
     expect(screen.getByRole('dialog', { name: 'Add transaction' })).toBeTruthy()
   })
 })
+
+describe('the bottom bar lens', () => {
+  test('sits behind the current page: one lens, moved to its column', () => {
+    renderShell('/finance/transactions')
+    const lenses = screen.getAllByTestId('nav-lens')
+    expect(lenses).toHaveLength(1)
+    // Home, Stats, Transactions, Settings: the third column.
+    expect(lenses[0].style.transform).toBe('translateX(200%)')
+  })
+
+  test('Stats (/finance, end) is not current on its sub-pages', () => {
+    renderShell('/finance/settings/rate')
+    expect(screen.getByTestId('nav-lens').style.transform).toBe('translateX(300%)')
+  })
+})
