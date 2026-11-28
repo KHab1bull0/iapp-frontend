@@ -76,7 +76,7 @@
 // later (data replacing its skeleton) come in the same way. "backwards"
 // fill: nothing is left transformed after, so sticky and fixed parts behave.
 @keyframes page-in {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: none; }
 }
 
@@ -84,11 +84,11 @@
 // global rule shortens animations but would keep the delays).
 @media (prefers-reduced-motion: no-preference) {
   .pageEnter > * > * {
-    animation: page-in 260ms var(--ease-house) backwards;
+    animation: page-in 420ms var(--ease-house) backwards;
 
     @for $i from 2 through 6 {
-      &:nth-child(#{$i}) { animation-delay: #{($i - 1) * 40}ms; }
+      &:nth-child(#{$i}) { animation-delay: #{($i - 1) * 60}ms; }
     }
-    &:nth-child(n + 7) { animation-delay: 240ms; }
+    &:nth-child(n + 7) { animation-delay: 360ms; }
   }
 }
