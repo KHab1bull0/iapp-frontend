@@ -198,3 +198,11 @@ describe('the bottom bar lens', () => {
     expect(screen.getByTestId('nav-lens').style.transform).toBe('translateX(300%)')
   })
 })
+
+describe('a page coming in', () => {
+  test("the page sits in a box keyed by its path, so each page's blocks animate in afresh", () => {
+    renderShell('/finance/transactions')
+    const box = screen.getByTestId('page-enter')
+    expect(box.className).toMatch(/pageEnter/)
+  })
+})

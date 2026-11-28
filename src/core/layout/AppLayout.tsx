@@ -77,8 +77,11 @@ export function AppLayout({ modules }: AppLayoutProps) {
             {active && onModulePage && (
               <DesktopTopBar module={active} pathname={pathname} onShortcuts={() => setShortcutsOpen(true)} />
             )}
-            {/* Inside the shell, so the sidebar and bars stay put while a page loads. */}
-            <RouteSuspense />
+            {/* Inside the shell, so the sidebar and bars stay put while a page loads.
+                Keyed by the path: a new page is a new box, so its blocks come in afresh. */}
+            <div key={pathname} className={s.pageEnter} data-testid="page-enter">
+              <RouteSuspense />
+            </div>
           </div>
 
           {/* Inside a module it lists that module's pages in place of the modules. */}
